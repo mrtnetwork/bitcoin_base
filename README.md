@@ -1,9 +1,5 @@
 # Bitcoin Dart Package
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/yourusername/bitcoin-dart-package/CI?style=flat-square)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/yourusername/bitcoin-dart-package?style=flat-square)
-![GitHub](https://img.shields.io/github/license/yourusername/bitcoin-dart-package?style=flat-square)
-
 A comprehensive Bitcoin library for Dart that provides functionality to create, sign, and send Bitcoin transactions. This library supports a wide range of Bitcoin transaction types and features, making it suitable for various use cases.
 
 ## Features
