@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
@@ -5,7 +7,6 @@ import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

@@ -83,21 +83,25 @@ class Script {
   /// returns a serialized byte version of the script
   Uint8List toBytes() {
     DynamicByteTracker scriptBytes = DynamicByteTracker();
-    for (var token in script) {
-      if (OP_CODES.containsKey(token)) {
-        scriptBytes.add(OP_CODES[token]!);
-      } else if (token is int && token >= 0 && token <= 16) {
-        scriptBytes.add(OP_CODES['OP_$token']!);
-      } else {
-        if (token is int) {
-          scriptBytes.add(pushInteger(token));
+    try {
+      for (var token in script) {
+        if (OP_CODES.containsKey(token)) {
+          scriptBytes.add(OP_CODES[token]!);
+        } else if (token is int && token >= 0 && token <= 16) {
+          scriptBytes.add(OP_CODES['OP_$token']!);
         } else {
-          scriptBytes.add(opPushData(token));
+          if (token is int) {
+            scriptBytes.add(pushInteger(token));
+          } else {
+            scriptBytes.add(opPushData(token));
+          }
         }
       }
-    }
 
-    return scriptBytes.toBytes();
+      return scriptBytes.toBytes();
+    } finally {
+      scriptBytes.close();
+    }
   }
 
   /// returns a serialized version of the script in hex

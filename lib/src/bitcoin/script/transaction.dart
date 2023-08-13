@@ -153,36 +153,39 @@ class BtcTransaction {
 
     txForSign = Uint8List.fromList([...txForSign, ...packedData]);
     return doubleHash(txForSign);
-    // final txForSign =
   }
 
   /// Serializes Transaction to bytes
   Uint8List toBytes({bool segwit = false}) {
     DynamicByteTracker data = DynamicByteTracker();
-    data.add(version);
-    if (segwit) {
-      data.add([0x00, 0x01]);
-    }
-    final txInCountBytes = encodeVarint(inputs.length);
-    final txOutCountBytes = encodeVarint(outputs.length);
-
-    data.add(txInCountBytes);
-    for (final txIn in inputs) {
-      data.add(txIn.toBytes());
-    }
-    data.add(txOutCountBytes);
-    for (final txOut in outputs) {
-      data.add(txOut.toBytes());
-    }
-    if (segwit) {
-      for (final wit in witnesses) {
-        final witnessesCountBytes = Uint8List.fromList([wit.stack.length]);
-        data.add(witnessesCountBytes);
-        data.add(wit.toBytes());
+    try {
+      data.add(version);
+      if (segwit) {
+        data.add([0x00, 0x01]);
       }
+      final txInCountBytes = encodeVarint(inputs.length);
+      final txOutCountBytes = encodeVarint(outputs.length);
+
+      data.add(txInCountBytes);
+      for (final txIn in inputs) {
+        data.add(txIn.toBytes());
+      }
+      data.add(txOutCountBytes);
+      for (final txOut in outputs) {
+        data.add(txOut.toBytes());
+      }
+      if (segwit) {
+        for (final wit in witnesses) {
+          final witnessesCountBytes = Uint8List.fromList([wit.stack.length]);
+          data.add(witnessesCountBytes);
+          data.add(wit.toBytes());
+        }
+      }
+      data.add(locktime);
+      return data.toBytes();
+    } finally {
+      data.close();
     }
-    data.add(locktime);
-    return data.toBytes();
   }
 
   /// returns the transaction input's segwit digest that is to be signed according to sighash.
@@ -267,6 +270,7 @@ class BtcTransaction {
     txForSigning.add(locktime);
     Uint8List packedSighash = packInt32LE(sighash);
     txForSigning.add(packedSighash);
+    txForSigning.close();
     return doubleHash(txForSigning.toBytes());
   }
 
@@ -402,7 +406,9 @@ class BtcTransaction {
       txForSign.add(Uint16List.fromList([0]));
       txForSign.add(Uint8List.fromList([0xFF, 0xFF, 0xFF, 0xFF]));
     }
-    return taggedHash(txForSign.toBytes(), "TapSighash");
+    final bytes = txForSign.toBytes();
+    txForSign.close();
+    return taggedHash(bytes, "TapSighash");
   }
 
   /// converts result of to_bytes to hexadecimal string

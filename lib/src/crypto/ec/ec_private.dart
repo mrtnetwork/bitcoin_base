@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
 import 'package:bitcoin_base/src/bitcoin/tools/tools.dart';
 import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
@@ -6,7 +7,6 @@ import 'package:bitcoin_base/src/formating/magic_prefix.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'ec_encryption.dart' as ec;
 
 /// Represents an ECDSA private key.
@@ -40,7 +40,7 @@ class ECPrivate {
     Uint8List keyBytes = b64.sublist(0, b64.length - 4);
     final checksum = b64.sublist(b64.length - 4);
     final h = doubleHash(keyBytes);
-    final isValid = listEquals(h.sublist(0, 4), checksum);
+    final isValid = isValidCheckSum(h.sublist(0, 4), checksum);
     if (!isValid) {
       throw Exception('Checksum is wrong. Possible mistype?'); // listtEqual
     }

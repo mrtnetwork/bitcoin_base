@@ -1,5 +1,5 @@
 import 'dart:convert';
-import '../example/transactions/utxo.dart';
+import './utxo.dart';
 import 'package:http/http.dart' as http;
 
 class RPCError implements Exception {

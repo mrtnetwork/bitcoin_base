@@ -6,3 +6,7 @@
 
 * commands for methods, better understanding
 * add lints package to dependencies
+
+## 0.3.0
+
+* add examples

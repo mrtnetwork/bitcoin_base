@@ -2,6 +2,7 @@
 
 A comprehensive Bitcoin library for Dart that provides functionality to create, sign, and send Bitcoin transactions. This library supports a wide range of Bitcoin transaction types and features, making it suitable for various use cases.
 
+This package was inspired by the [python-bitcoin-utils](https://github.com/karask/python-bitcoin-utils) package and turned into Dart
 ## Features
 
 - Create and sign Bitcoin transactions
@@ -159,5 +160,5 @@ Contributions are welcome! Please follow these guidelines:
 
 ## Feature requests and bugs #
 
-Please file feature requests and bugs in the issue tracker.
+Please file feature requests and bugs in the [issue tracker](https://github.com/MohsenHaydari/bitcoin_base/issues).
 

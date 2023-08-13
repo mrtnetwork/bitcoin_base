@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:typed_data/typed_buffers.dart';
 
 class DynamicByteTracker extends ByteConversionSinkBase {
@@ -20,5 +19,7 @@ class DynamicByteTracker extends ByteConversionSinkBase {
   }
 
   @override
-  void close() {}
+  void close() {
+    // dont need
+  }
 }
