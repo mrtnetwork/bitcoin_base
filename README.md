@@ -1,9 +1,5 @@
 # Bitcoin Dart Package
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/yourusername/bitcoin-dart-package/CI?style=flat-square)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/yourusername/bitcoin-dart-package?style=flat-square)
-![GitHub](https://img.shields.io/github/license/yourusername/bitcoin-dart-package?style=flat-square)
-
 A comprehensive Bitcoin library for Dart that provides functionality to create, sign, and send Bitcoin transactions. This library supports a wide range of Bitcoin transaction types and features, making it suitable for various use cases.
 
 ## Features
@@ -14,17 +10,33 @@ A comprehensive Bitcoin library for Dart that provides functionality to create, 
   - Segwit Addresses (P2WPKH, P2SH-P2WPKH, P2WSH and P2SH-P2WSH, Taproot (segwit v1))
 - Support for different transaction types:
   - Legacy transactions (P2PKH, P2SH)
-      create transaction to spend P2PKH, P2k, P2SH UTXO
+      - Transaction with P2PKH input and outputs
+      - Create a P2PKH Transaction with different SIGHASHes
+      - Create a P2SH Address
+      - Create (spent) a P2SH Transaction
 - Segwit Transactions
-  - create transaction to spend P2WPKH, P2PWSH UTXO
--  Taproot (segwit v1) Transactions
+  - Transaction to pay to a P2WPKH
+  - Spend from a P2SH(P2WPKH) nested segwit address
+- Timelock Transactions
+  - Create a P2SH address with a relative timelock
+  - Spend from a timelocked address
+- Taproot (segwit v1) Transactions
+  - Spend from a taproot address
+  - Spend a multi input that contains both taproot and legacy UTXOs
+  - Send to taproot address that contains a single script path spend
+  - Spend taproot from key path (has single alternative script path spend)
+  - Spend taproot from script path (has single alternative script path spend)
+  - Send to taproot address that contains two scripts path spends
+  - Send to taproot address that contains three scripts path spends
 - Sign
   - sign message
   - sign transactions
   - Schnorr sign (segwit transactions)
   - support different `sighash`
+  - get public key of signature
 
 ## Example
+A large number of examples and tests have been prepared you can see them in the [test folder](https://github.com/MohsenHaydari/bitcoin/tree/main/test)
 
 - Keys and addresses
 ```
@@ -137,8 +149,6 @@ A comprehensive Bitcoin library for Dart that provides functionality to create, 
   tx.serialize(); // ready for broadcast
   
 ```
-
-A large number of examples and tests have been prepared you can see them in the test folder
 
 ## Contributing
 

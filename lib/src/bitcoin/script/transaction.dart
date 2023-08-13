@@ -107,7 +107,6 @@ class BtcTransaction {
           tx.inputs[i].sequence = Uint8List.fromList(EMPTY_TX_SEQUENCE);
         }
       }
-      // Your code here
     } else if ((sighash & 0x1f) == SIGHASH_SINGLE) {
       if (txInIndex >= tx.outputs.length) {
         throw ArgumentError(
