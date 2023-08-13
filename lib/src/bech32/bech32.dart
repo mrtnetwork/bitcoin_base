@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 
 enum Bech32Type {
   bech32(1),

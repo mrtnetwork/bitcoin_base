@@ -1,13 +1,21 @@
 import 'dart:typed_data';
-import 'package:bitcoin/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin/src/crypto/crypto.dart';
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
-import 'package:bitcoin/src/formating/bytes_tracker.dart';
+import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/crypto/crypto.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/formating/bytes_tracker.dart';
 import 'input.dart';
 import 'output.dart';
 import 'script.dart';
 import 'witness.dart';
 
+/// Represents a Bitcoin transaction
+///
+/// [inputs] A list of all the transaction inputs
+/// [outputs] A list of all the transaction outputs
+/// [locktime] The transaction's locktime parameter
+/// [version] The transaction version
+/// [hasSegwit] Specifies a tx that includes segwit inputs
+/// [witnesses] The witness structure that corresponds to the inputs
 class BtcTransaction {
   BtcTransaction(
       {required this.inputs,
@@ -26,6 +34,8 @@ class BtcTransaction {
   late final Uint8List version;
   final bool hasSegwit;
   final List<TxWitnessInput> witnesses = [];
+
+  /// creates a copy of the object (classmethod)
   static BtcTransaction copy(BtcTransaction tx) {
     return BtcTransaction(
         hasSegwit: tx.hasSegwit,
@@ -36,6 +46,7 @@ class BtcTransaction {
         v: tx.version);
   }
 
+  /// Instantiates a Transaction from serialized raw hexadacimal data (classmethod)
   static BtcTransaction fromRaw(String raw) {
     final rawtx = hexToBytes(raw);
     int cursor = 4;
@@ -91,6 +102,11 @@ class BtcTransaction {
         inputs: inputs, outputs: outputs, w: witnesses, hasSegwit: hasSegwit);
   }
 
+  /// returns the transaction input's digest that is to be signed according.
+  ///
+  /// [txInIndex] The index of the input that we wish to sign
+  /// [script] The scriptPubKey of the UTXO that we want to spend
+  /// [sighash] The type of the signature hash to be created
   Uint8List getTransactionDigest(
       {required int txInIndex,
       required Script script,
@@ -140,6 +156,7 @@ class BtcTransaction {
     // final txForSign =
   }
 
+  /// Serializes Transaction to bytes
   Uint8List toBytes({bool segwit = false}) {
     DynamicByteTracker data = DynamicByteTracker();
     data.add(version);
@@ -168,6 +185,12 @@ class BtcTransaction {
     return data.toBytes();
   }
 
+  /// returns the transaction input's segwit digest that is to be signed according to sighash.
+  ///
+  /// [txInIndex] The index of the input that we wish to sign.
+  /// [script] The scriptCode (template) that corresponds to the segwit, transaction output type that we want to spend.
+  /// [amount] The amount of the UTXO to spend is included in the signature for segwit (in satoshis).
+  /// [sighash] The type of the signature hash to be created.
   Uint8List getTransactionSegwitDigit(
       {required int txInIndex,
       required Script script,
@@ -247,6 +270,15 @@ class BtcTransaction {
     return doubleHash(txForSigning.toBytes());
   }
 
+  /// Returns the segwit v1 (taproot) transaction's digest for signing.
+  ///
+  /// [txIndex] The index of the input that we wish to sign
+  /// [scriptPubKeys] he scriptPubkeys that correspond to all the inputs/UTXOs
+  /// [amounts] The amounts that correspond to all the inputs/UTXOs
+  /// [extFlags] Extension mechanism, default is 0; 1 is for script spending (BIP342)
+  /// [script] The script that we are spending (ext_flag=1)
+  /// [leafVar] The script version, LEAF_VERSION_TAPSCRIPT for the default tapscript
+  /// [sighash] The type of the signature hash to be created
   Uint8List getTransactionTaprootDigset(
       {required int txIndex,
       required List<Script> scriptPubKeys,
@@ -373,19 +405,23 @@ class BtcTransaction {
     return taggedHash(txForSign.toBytes(), "TapSighash");
   }
 
+  /// converts result of to_bytes to hexadecimal string
   String toHex() {
     final bytes = toBytes(segwit: hasSegwit);
     return bytesToHex(bytes);
   }
 
+  /// converts result of to_bytes to hexadecimal string
   String serialize() {
     return toHex();
   }
 
+  /// Calculates the tx size
   int getSize() {
     return toBytes(segwit: hasSegwit).length;
   }
 
+  /// Calculates the tx segwit size
   int getVSize() {
     if (!hasSegwit) return getSize();
     int markerSize = 2;
@@ -401,6 +437,7 @@ class BtcTransaction {
     return vSize.ceil();
   }
 
+  /// Calculates txid and returns it
   String txId() {
     final bytes = toBytes(segwit: false);
     final h = doubleHash(bytes).reversed.toList();

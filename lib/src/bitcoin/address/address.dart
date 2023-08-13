@@ -1,15 +1,20 @@
 import 'dart:typed_data';
 
-import 'package:bitcoin/src/base58/base58.dart' as bs58;
-import 'package:bitcoin/src/bitcoin/address/core.dart';
-import 'package:bitcoin/src/bitcoin/script/script.dart';
-import 'package:bitcoin/src/bitcoin/tools/tools.dart';
-import 'package:bitcoin/src/crypto/crypto.dart';
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
-import 'package:bitcoin/src/models/network.dart';
-import 'package:bitcoin/src/crypto/ec/ec_encryption.dart' as ecc;
+import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
+import 'package:bitcoin_base/src/bitcoin/address/core.dart';
+import 'package:bitcoin_base/src/bitcoin/script/script.dart';
+import 'package:bitcoin_base/src/bitcoin/tools/tools.dart';
+import 'package:bitcoin_base/src/crypto/crypto.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/src/crypto/ec/ec_encryption.dart' as ecc;
 
 abstract class BipAddress implements BitcoinAddress {
+  /// Represents a Bitcoin address
+  ///
+  /// [hash160] the hash160 string representation of the address; hash160 represents
+  /// two consequtive hashes of the public key or the redeam script, first
+  /// a SHA-256 and then an RIPEMD-160
   BipAddress({String? address, String? hash160, Script? script}) {
     if (hash160 != null) {
       if (!isValidHash160(hash160)) {
@@ -20,34 +25,35 @@ abstract class BipAddress implements BitcoinAddress {
       if (!isValidAddress(address)) {
         throw ArgumentError("Invalid addres");
       }
-      _h160 = addressToHash160(address);
+      _h160 = _addressToHash160(address);
     } else if (script != null) {
-      _h160 = scriptToHash160(script);
+      _h160 = _scriptToHash160(script);
     } else {
       if (type == AddressType.p2pk) return;
       throw ArgumentError("Invalid parameters");
     }
   }
 
-  // late final String? address;
   late final String _h160;
+
+  /// returns the address's hash160 hex string representation
   String get getH160 {
     if (type == AddressType.p2pk) throw UnimplementedError();
     return _h160;
   }
 
-  // BTCAddressTypes get type;
-  static String addressToHash160(String address) {
+  static String _addressToHash160(String address) {
     final dec = bs58.base58.decode(address);
     return bytesToHex(dec.sublist(1, dec.length - 4));
   }
 
-  static String scriptToHash160(Script s) {
+  static String _scriptToHash160(Script s) {
     final b = s.toBytes();
     final h160 = hash160(b);
     return bytesToHex(h160);
   }
 
+  /// returns the address's string encoding
   String toAddress(NetworkInfo networkType, {Uint8List? h160}) {
     Uint8List tobytes = h160 ?? hexToBytes(_h160);
     switch (type) {
@@ -67,11 +73,13 @@ abstract class BipAddress implements BitcoinAddress {
 }
 
 class P2shAddress extends BipAddress {
+  /// Encapsulates a P2SH address.
   P2shAddress({super.address, super.hash160, super.script});
 
   @override
   AddressType get type => AddressType.p2sh;
 
+  /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override
   List<String> toScriptPubKey() {
     return ['OP_HASH160', _h160, 'OP_EQUAL'];
@@ -80,6 +88,8 @@ class P2shAddress extends BipAddress {
 
 class P2pkhAddress extends BipAddress {
   P2pkhAddress({super.address, super.hash160});
+
+  /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override
   List<String> toScriptPubKey() {
     return ['OP_DUP', 'OP_HASH160', _h160, 'OP_EQUALVERIFY', 'OP_CHECKSIG'];
@@ -98,12 +108,13 @@ class P2pkAddress extends BipAddress {
     publicHex = publicKey;
   }
   late final String publicHex;
+
+  /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override
   List<String> toScriptPubKey() {
     return [publicHex, 'OP_CHECKSIG'];
   }
 
-  /// return p2pkh address of public key.
   @override
   String toAddress(NetworkInfo networkType, {Uint8List? h160}) {
     final bytes = hexToBytes(publicHex);

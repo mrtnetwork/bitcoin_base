@@ -1,3 +1,8 @@
-## 0.0.1
+## 0.1.0
 
-* TODO: Describe initial release.
+* TODO: Release.
+
+## 0.2.0
+
+* commands for methods, better understanding
+* add lints package to dependencies

@@ -1,6 +1,6 @@
-import 'package:bitcoin/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin/src/crypto/ec/ec_public.dart';
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 import 'package:flutter/services.dart';
 
 import 'script.dart';

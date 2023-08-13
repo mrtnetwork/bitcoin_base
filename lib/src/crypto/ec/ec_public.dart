@@ -1,15 +1,16 @@
 import 'dart:typed_data';
-import 'package:bitcoin/src/bitcoin/address/address.dart';
-import 'package:bitcoin/src/bitcoin/address/segwit_address.dart';
-import 'package:bitcoin/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin/src/bitcoin/script/script.dart';
-import 'package:bitcoin/src/crypto/crypto.dart';
-import 'package:bitcoin/src/crypto/ec/ec_encryption.dart';
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
-import 'package:bitcoin/src/formating/magic_prefix.dart';
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
+import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
+import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/bitcoin/script/script.dart';
+import 'package:bitcoin_base/src/crypto/crypto.dart';
+import 'package:bitcoin_base/src/crypto/ec/ec_encryption.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/formating/magic_prefix.dart';
 import 'ec_encryption.dart' as ec;
 
 class ECPublic {
+  /// creates an object from a hex string in SEC format (classmethod)
   ECPublic.fromHex(String hex) {
     final toBytes = hexToBytes(hex);
     if (!ec.isPoint(toBytes)) {
@@ -21,6 +22,7 @@ class ECPublic {
 
   late final Uint8List _key;
 
+  /// returns the key as hex string (in SEC format - compressed by default)
   String toHex({bool compressed = true}) {
     final bytes = toBytes();
     if (compressed) {
@@ -35,11 +37,13 @@ class ECPublic {
     return hash160(bytes);
   }
 
+  /// returns the hash160 hex string of the public key
   String toHash160({bool compressed = true}) {
     final bytes = hexToBytes(toHex(compressed: compressed));
     return bytesToHex(hash160(bytes));
   }
 
+  /// returns the corresponding P2pkhAddress object
   P2pkhAddress toAddress({bool copressed = true}) {
     final h16 = _toHash160(compressed: copressed);
     final str = bytesToHex(h16);
@@ -47,6 +51,7 @@ class ECPublic {
     return P2pkhAddress(hash160: str);
   }
 
+  /// returns the corresponding P2wpkhAddress object
   P2wpkhAddress toSegwitAddress({bool copressed = true}) {
     final h16 = _toHash160(compressed: copressed);
     final str = bytesToHex(h16);
@@ -69,19 +74,28 @@ class ECPublic {
     return decodeBigInt(tweak);
   }
 
-  Uint8List toBytes({int? compressedPrefix = 0x04}) {
-    if (compressedPrefix != null) {
-      return Uint8List.fromList([compressedPrefix, ..._key]);
+  /// returns the key's raw bytes
+  Uint8List toBytes({int? prefix = 0x04}) {
+    if (prefix != null) {
+      return Uint8List.fromList([prefix, ..._key]);
     }
     return Uint8List.fromList([..._key]);
   }
 
+  /// returns the Compressed key's raw bytes
+  Uint8List toCompressedBytes() {
+    final d = reEncodedFromForm(toBytes(), true);
+    return d;
+  }
+
+  /// returns the x coordinate only as hex string after tweaking (needed for taproot)
   String toTapRotHex({List<dynamic>? script}) {
     final tweak = _calculateTweek(_key, script: script);
     final point = tweakTaprootPoint(_key, tweak);
     return bytesToHex(point.sublist(0, 32));
   }
 
+  /// returns the x coordinate only as hex string before tweaking (needed for taproot)
   String toXOnlyHex() {
     return bytesToHex(_key.sublist(0, 32));
   }
@@ -137,11 +151,13 @@ class ECPublic {
     return P2trAddress(program: pubKey);
   }
 
+  /// returns true if the message was signed with this public key's
   bool verify(String message, Uint8List signature) {
     final msg = singleHash(magicMessage(message));
     return ec.verify(msg, toBytes(), signature.sublist(1));
   }
 
+  /// get ECPublic of signatur
   static ECPublic? getSignaturPublic(String message, Uint8List signatur) {
     final msg = singleHash(magicMessage(message));
     int prefix = signatur[0];

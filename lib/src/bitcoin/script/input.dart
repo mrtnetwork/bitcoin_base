@@ -1,8 +1,14 @@
 import 'dart:typed_data';
-import 'package:bitcoin/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 import 'script.dart';
 
+/// A transaction input requires a transaction id of a UTXO and the index of that UTXO.
+///
+/// [txId] the transaction id as a hex string
+/// [txIndex] the index of the UTXO that we want to spend
+/// [scriptSig] the script that satisfies the locking conditions
+/// [sequence] the input sequence (for timelocks, RBF, etc.)
 class TxInput {
   TxInput(
       {required this.txId, required this.txIndex, Script? sig, Uint8List? sq})
@@ -13,10 +19,13 @@ class TxInput {
   final int txIndex;
   Script scriptSig;
   Uint8List sequence;
+
+  /// creates a copy of the object
   TxInput copy() {
     return TxInput(txId: txId, txIndex: txIndex, sig: scriptSig, sq: sequence);
   }
 
+  /// serializes TxInput to bytes
   Uint8List toBytes() {
     final txidBytes = Uint16List.fromList(hexToBytes(txId).reversed.toList());
 

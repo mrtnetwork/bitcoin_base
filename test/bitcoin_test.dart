@@ -1,19 +1,19 @@
-import 'package:bitcoin/bitcoin.dart';
-import 'package:bitcoin/src/models/network.dart';
+import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/models/network.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'example/spend_p2kh_to_p2k.dart';
-import 'example/spend_p2kh_to_p2kh.dart';
-import 'example/spend_p2pk_to_p2pkh.dart';
-import 'example/spend_p2pkh_to_p2sh.dart';
-import 'example/spend_p2pkh_to_p2wpkh.dart';
-import 'example/spend_p2sh_to_p2k.dart';
-import 'example/spend_p2sh_to_p2pkh.dart';
-import 'example/spend_p2sh_to_p2sh.dart';
-import 'example/spend_p2sh_to_p2wkh.dart';
-import 'example/spend_p2wkh_to_p2k.dart';
-import 'example/spend_p2wkh_to_p2wkh.dart';
-import 'example/spend_p2wkh_to_p2kh.dart';
-import 'example/spend_p2wkh_to_p2sh.dart';
+import '../example/spend_p2kh_to_p2k.dart';
+import '../example/spend_p2kh_to_p2kh.dart';
+import '../example/spend_p2pk_to_p2pkh.dart';
+import '../example/spend_p2pkh_to_p2sh.dart';
+import '../example/spend_p2pkh_to_p2wpkh.dart';
+import '../example/spend_p2sh_to_p2k.dart';
+import '../example/spend_p2sh_to_p2pkh.dart';
+import '../example/spend_p2sh_to_p2sh.dart';
+import '../example/spend_p2sh_to_p2wkh.dart';
+import '../example/spend_p2wkh_to_p2k.dart';
+import '../example/spend_p2wkh_to_p2wkh.dart';
+import '../example/spend_p2wkh_to_p2kh.dart';
+import '../example/spend_p2wkh_to_p2sh.dart';
 import 'helper.dart';
 
 void main() async {}

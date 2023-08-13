@@ -1,16 +1,16 @@
 import 'dart:typed_data';
 
-import 'package:bitcoin/src/models/network.dart';
-import 'package:bitcoin/src/bitcoin/address/segwit_address.dart';
-import 'package:bitcoin/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin/src/bitcoin/script/control_block.dart';
-import 'package:bitcoin/src/bitcoin/script/input.dart';
-import 'package:bitcoin/src/bitcoin/script/output.dart';
-import 'package:bitcoin/src/bitcoin/script/script.dart';
-import 'package:bitcoin/src/bitcoin/script/transaction.dart';
-import 'package:bitcoin/src/bitcoin/script/witness.dart';
-import 'package:bitcoin/src/crypto/ec/ec_private.dart';
-import 'package:bitcoin/src/crypto/ec/ec_public.dart';
+import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
+import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/bitcoin/script/control_block.dart';
+import 'package:bitcoin_base/src/bitcoin/script/input.dart';
+import 'package:bitcoin_base/src/bitcoin/script/output.dart';
+import 'package:bitcoin_base/src/bitcoin/script/script.dart';
+import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
+import 'package:bitcoin_base/src/bitcoin/script/witness.dart';
+import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
+import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helper.dart';

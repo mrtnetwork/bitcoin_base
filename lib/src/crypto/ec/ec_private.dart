@@ -1,20 +1,23 @@
 import 'dart:convert';
-import 'package:bitcoin/src/base58/base58.dart' as bs58;
-import 'package:bitcoin/src/bitcoin/tools/tools.dart';
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
-import 'package:bitcoin/src/formating/magic_prefix.dart';
-import 'package:bitcoin/src/models/network.dart';
-import 'package:bitcoin/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin/src/crypto/crypto.dart';
+import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
+import 'package:bitcoin_base/src/bitcoin/tools/tools.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/formating/magic_prefix.dart';
+import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'ec_encryption.dart' as ec;
 
+/// Represents an ECDSA private key.
 class ECPrivate {
   ECPrivate._({
     required String priveHex,
     required String publicHex,
   })  : _publicHex = publicHex,
         _priveHex = priveHex;
+
+  /// creates an object from raw 32 bytes
   factory ECPrivate.fromBytes(Uint8List prive) {
     if (!ec.isPrivate(prive)) {
       throw Exception("wrong ec private");
@@ -28,7 +31,10 @@ class ECPrivate {
     );
   }
 
+  /// returns the corresponding ECPublic object
   ECPublic getPublic() => ECPublic.fromHex(_publicHex);
+
+  /// creates an object from a WIF of WIFC format (string)
   factory ECPrivate.fromWif(String wif) {
     final b64 = Uint8List.fromList(bs58.base58.decode(wif));
     Uint8List keyBytes = b64.sublist(0, b64.length - 4);
@@ -46,6 +52,8 @@ class ECPrivate {
   }
   final String _priveHex;
   final String _publicHex;
+
+  /// returns as WIFC (compressed) or WIF format (string)
   String toWif({bool compressed = true, NetworkInfo? networkType}) {
     final network = networkType ?? NetworkInfo.BITCOIN;
     Uint8List bytes = Uint8List.fromList([network.wif, ...toBytes()]);
@@ -58,8 +66,13 @@ class ECPrivate {
     return bs58.base58.encode(hash);
   }
 
+  /// returns the key's raw bytes
   Uint8List toBytes() {
     return hexToBytes(_priveHex);
+  }
+
+  String toHex() {
+    return _priveHex;
   }
 
   /// Returns a Bitcoin compact signature in hex
@@ -86,6 +99,7 @@ class ECPrivate {
     throw Exception("cannot validate message");
   }
 
+  /// sign transaction digest  and returns the signature.
   String signInput(Uint8List txDigest, {int sigHash = SIGHASH_ALL}) {
     final priveBytes = toBytes();
     Uint8List signature = ec.signDer(txDigest, priveBytes);
@@ -138,6 +152,7 @@ class ECPrivate {
     return bytesToHex(signature);
   }
 
+  /// sign taproot transaction digest and returns the signature.
   String signTapRoot(Uint8List txDigest,
       {sighash = TAPROOT_SIGHASH_ALL,
       List<dynamic> scripts = const [],
@@ -158,16 +173,6 @@ class ECPrivate {
     return bytesToHex(signatur);
   }
 
-  factory ECPrivate.fromSeed(Uint8List seed) {
-    if (seed.length < 16) {
-      throw ArgumentError("Seed should be at least 128 bits");
-    }
-    if (seed.length > 64) {
-      throw ArgumentError("Seed should be at most 512 bits");
-    }
-    final I = hmacSHA512(utf8.encode("Bitcoin seed") as Uint8List, seed);
-    return ECPrivate.fromBytes(I);
-  }
   static ECPrivate random() {
     final secret = generateRandom();
     return ECPrivate.fromBytes(secret);

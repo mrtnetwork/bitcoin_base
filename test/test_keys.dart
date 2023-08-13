@@ -1,10 +1,10 @@
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
-import 'package:bitcoin/src/models/network.dart';
-import 'package:bitcoin/src/bitcoin/address/address.dart';
-import 'package:bitcoin/src/bitcoin/address/segwit_address.dart';
-import 'package:bitcoin/src/bitcoin/script/script.dart';
-import 'package:bitcoin/src/crypto/ec/ec_private.dart';
-import 'package:bitcoin/src/crypto/ec/ec_public.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
+import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
+import 'package:bitcoin_base/src/bitcoin/script/script.dart';
+import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
+import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -129,7 +129,7 @@ void main() {
       final pub1 = ECPublic.fromHex(publicKeyHex);
       expect(pub1.toAddress(copressed: false).toAddress(NetworkInfo.BITCOIN),
           unCompressedAddress);
-      expect(pub1.toBytes(compressedPrefix: null), publicKeyBytes);
+      expect(pub1.toBytes(prefix: null), publicKeyBytes);
       expect(pub1.toHash160(), pub1.toAddress(copressed: true).getH160);
     });
   });

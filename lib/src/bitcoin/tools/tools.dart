@@ -1,6 +1,6 @@
-import 'package:bitcoin/src/base58/base58.dart' as bs58;
-import 'package:bitcoin/src/crypto/crypto.dart';
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
+import 'package:bitcoin_base/src/crypto/crypto.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 import 'package:convert/convert.dart';
 import 'package:flutter/foundation.dart';
 

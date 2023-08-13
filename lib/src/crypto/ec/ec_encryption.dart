@@ -1,8 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 import 'dart:typed_data';
-import 'package:bitcoin/src/crypto/crypto.dart';
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
-import 'package:bitcoin/src/formating/der.dart' show listBigIntToDER;
+import 'package:bitcoin_base/src/crypto/crypto.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/formating/der.dart' show listBigIntToDER;
 import "package:pointycastle/ecc/curves/secp256k1.dart" show ECCurve_secp256k1;
 import "package:pointycastle/api.dart"
     show PrivateKeyParameter, PublicKeyParameter;
@@ -31,6 +31,22 @@ bool isPrivate(Uint8List x) {
   if (!isScalar(x)) return false;
   return _compare(x, ZERO32) > 0 && // > 0
       _compare(x, EC_GROUP_ORDER as Uint8List) < 0; // < G
+}
+
+Uint8List? generateTweek(Uint8List point, Uint8List tweak) {
+  if (!isPrivate(point)) throw ArgumentError("Bad Private");
+  if (!isOrderScalar(tweak)) throw ArgumentError("Bad Tweek");
+  BigInt dd = decodeBigInt(point);
+  BigInt tt = decodeBigInt(tweak);
+  Uint8List dt = encodeBigInt((dd + tt) % n);
+
+  if (dt.length < 32) {
+    Uint8List padLeadingZero = Uint8List(32 - dt.length);
+    dt = Uint8List.fromList(padLeadingZero + dt);
+  }
+
+  if (!isPrivate(dt)) return null;
+  return dt;
 }
 
 bool isPoint(Uint8List p) {

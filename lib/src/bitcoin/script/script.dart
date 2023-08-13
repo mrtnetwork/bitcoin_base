@@ -1,13 +1,16 @@
 import 'dart:typed_data';
 
-import 'package:bitcoin/src/bitcoin/address/address.dart';
-import 'package:bitcoin/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin/src/bitcoin/tools/tools.dart';
-import 'package:bitcoin/src/crypto/crypto.dart';
-import 'package:bitcoin/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
+import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/bitcoin/tools/tools.dart';
+import 'package:bitcoin_base/src/crypto/crypto.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 
-import 'package:bitcoin/src/formating/bytes_tracker.dart';
+import 'package:bitcoin_base/src/formating/bytes_tracker.dart';
 
+/// A Script contains just a list of OP_CODES and also knows how to serialize into bytes
+///
+/// [script] the list with all the script OP_CODES and data
 class Script {
   const Script({required this.script});
   final List<dynamic> script;
@@ -20,6 +23,7 @@ class Script {
     return taggedHash(leafVarBytes, "TapLeaf");
   }
 
+  /// create p2psh script wit current script
   Script toP2shScriptPubKey() {
     final address = P2shAddress(script: this);
     return Script(script: ['OP_HASH160', address.getH160, 'OP_EQUAL']);
@@ -76,6 +80,7 @@ class Script {
     return Script(script: commands);
   }
 
+  /// returns a serialized byte version of the script
   Uint8List toBytes() {
     DynamicByteTracker scriptBytes = DynamicByteTracker();
     for (var token in script) {
@@ -95,6 +100,7 @@ class Script {
     return scriptBytes.toBytes();
   }
 
+  /// returns a serialized version of the script in hex
   String toHex() {
     final bytes = toBytes();
     return bytesToHex(bytes);

@@ -1,10 +1,10 @@
-import 'package:bitcoin/src/bitcoin/address/address.dart';
-import 'package:bitcoin/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin/src/bitcoin/script/input.dart';
-import 'package:bitcoin/src/bitcoin/script/output.dart';
-import 'package:bitcoin/src/bitcoin/script/script.dart';
-import 'package:bitcoin/src/bitcoin/script/transaction.dart';
-import 'package:bitcoin/src/crypto/ec/ec_private.dart';
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
+import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/bitcoin/script/input.dart';
+import 'package:bitcoin_base/src/bitcoin/script/output.dart';
+import 'package:bitcoin_base/src/bitcoin/script/script.dart';
+import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
+import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

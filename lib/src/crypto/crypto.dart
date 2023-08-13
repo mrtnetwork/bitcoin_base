@@ -1,5 +1,7 @@
 library bitcoin_crypto;
 
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:pointycastle/export.dart';
 import "dart:typed_data";
@@ -51,4 +53,12 @@ Uint8List generateRandom({int size = 32}) {
   final r = _randomGenerator!.nextBytes(size);
 
   return r;
+}
+
+Uint8List createSeedFromMnemonic(String mnemonic, {passphrase = ""}) {
+  final salt = Uint8List.fromList(utf8.encode("mnemonic$passphrase"));
+  final drive = PBKDF2KeyDerivator(HMac(SHA512Digest(), 128));
+  drive.reset();
+  drive.init(Pbkdf2Parameters(salt, 2048, 64));
+  return drive.process(Uint8List.fromList(mnemonic.codeUnits));
 }

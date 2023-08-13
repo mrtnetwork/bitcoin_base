@@ -1,11 +1,10 @@
-name: bitcoin
-description: A comprehensive Bitcoin library for Dart that provides functionality to create, sign, and send Bitcoin transactions. This library supports a wide range of Bitcoin transaction types and features, making it suitable for various use cases.
-version: 0.0.1
-homepage:
-
+name: bitcoin_base
+description: A comprehensive Bitcoin library for creating/signing and spending P2PK, P2PKH, P2SH, P2WPKH, P2WSH, Taproot ...
+version: 0.2.0
+homepage: "https://github.com/MohsenHaydari/bitcoin_base"
+repository: "https://github.com/MohsenHaydari/bitcoin_base"
 environment:
   sdk: '>=3.0.6 <4.0.0'
-  flutter: ">=1.17.0"
 
 dependencies:
   flutter:
@@ -13,6 +12,7 @@ dependencies:
   pointycastle: ^3.7.3
   convert: ^3.1.1
   typed_data: ^1.3.2
+  lints: ^2.1.1
 
 dev_dependencies:
   flutter_test:
