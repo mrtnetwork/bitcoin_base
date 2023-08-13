@@ -36,7 +36,7 @@ A comprehensive Bitcoin library for Dart that provides functionality to create, 
   - get public key of signature
 
 ## Example
-A large number of examples and tests have been prepared you can see them in the [test folder](https://github.com/MohsenHaydari/bitcoin_test/tree/main/test)
+A large number of examples and tests have been prepared you can see them in the [test folder](https://github.com/MohsenHaydari/bitcoin/tree/main/test)
 
 - Keys and addresses
 ```
