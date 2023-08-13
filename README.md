@@ -159,5 +159,5 @@ Contributions are welcome! Please follow these guidelines:
 
 ## Feature requests and bugs #
 
-Please file feature requests and bugs in the issue tracker.
+Please file feature requests and bugs in the [issue tracker](https://github.com/MohsenHaydari/bitcoin/issues).
 
