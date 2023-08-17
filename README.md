@@ -170,7 +170,7 @@ If you find this repository useful, show us some love, and give us a star!
 
 Small Bitcoin donations to the following address are also welcome:
 
-bc1qmmd5yf6t93zd502dlct79dqfjj2qh3y8x39r3j
+bc1q2y5rcf6uwmg57zsmqy86xsc0pt0rw7qujn2a2h
 
-1MKMfvpTRHZA2wiqWEvnWuKtMKisoaWtgs
+18Q7w7aQYSAQonWTr2Uj5Z7VT7dNTZFwqk
 
