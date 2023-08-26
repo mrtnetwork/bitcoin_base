@@ -211,5 +211,6 @@ If you find this repository useful, show us some love, and give us a star!
 Small Bitcoin donations to the following address are also welcome:
 
 bc1q2y5rcf6uwmg57zsmqy86xsc0pt0rw7qujn2a2h
+
 18Q7w7aQYSAQonWTr2Uj5Z7VT7dNTZFwqk
 
