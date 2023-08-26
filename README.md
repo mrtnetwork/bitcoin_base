@@ -39,6 +39,8 @@ A comprehensive Bitcoin library for Dart that provides functionality to create, 
 ## Example
 A large number of examples and tests have been prepared you can see them in the [test folder](https://github.com/MohsenHaydari/bitcoin/tree/main/test)
 
+Finalizing the transaction with 15 different input types (spend: p2sh, p2wsh, p2wpkh, p2tr, p2sh, p2shInP2wsh, p2shInP2wpkh, p2shInP2pk, p2shInP2pkh, P2wsh(4-4 multi-sig), P2sh(4-7 multi-sig), and etc...) and 15 different output types within a single transaction. [mempol](https://mempool.space/testnet/tx/ffb96b60303eb8e76654d320204a2727dec57ca00cf947a50c2be40ff084e35e)
+
 - Keys and addresses
 ```
       final mn = BIP39.generateMnemonic();
@@ -206,10 +208,8 @@ Please file feature requests and bugs in the issue tracker.
 ## Support
 
 If you find this repository useful, show us some love, and give us a star!
-
 Small Bitcoin donations to the following address are also welcome:
 
 bc1q2y5rcf6uwmg57zsmqy86xsc0pt0rw7qujn2a2h
-
 18Q7w7aQYSAQonWTr2Uj5Z7VT7dNTZFwqk
 
