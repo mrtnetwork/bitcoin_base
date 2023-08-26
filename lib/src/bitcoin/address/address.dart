@@ -74,10 +74,15 @@ abstract class BipAddress implements BitcoinAddress {
 
 class P2shAddress extends BipAddress {
   /// Encapsulates a P2SH address.
-  P2shAddress({super.address, super.hash160, super.script});
+  P2shAddress({super.address, super.hash160, super.script})
+      : type = AddressType.p2sh;
+  P2shAddress.fromSegwitScript({super.script, this.type = AddressType.p2sh})
+      : assert(type == AddressType.p2sh ||
+            type == AddressType.p2wpkhInP2sh ||
+            type == AddressType.p2wshInP2sh);
 
   @override
-  AddressType get type => AddressType.p2sh;
+  final AddressType type;
 
   /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override

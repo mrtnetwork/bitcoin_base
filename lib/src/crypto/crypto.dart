@@ -53,10 +53,10 @@ Uint8List generateRandom({int size = 32}) {
   return r;
 }
 
-Uint8List createSeedFromMnemonic(String mnemonic, {passphrase = ""}) {
-  final salt = Uint8List.fromList(utf8.encode("mnemonic$passphrase"));
-  final drive = PBKDF2KeyDerivator(HMac(SHA512Digest(), 128));
-  drive.reset();
-  drive.init(Pbkdf2Parameters(salt, 2048, 64));
-  return drive.process(Uint8List.fromList(mnemonic.codeUnits));
+Uint8List pbkdfDeriveDigest(String mnemonic, String salt) {
+  final toBytesSalt = Uint8List.fromList(utf8.encode(salt));
+  final derive = PBKDF2KeyDerivator(HMac(SHA512Digest(), 128));
+  derive.reset();
+  derive.init(Pbkdf2Parameters(toBytesSalt, 2048, 64));
+  return derive.process(Uint8List.fromList(mnemonic.codeUnits));
 }

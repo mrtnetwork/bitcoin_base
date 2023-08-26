@@ -18,9 +18,9 @@ final prime = BigInt.parse(
     radix: 16);
 
 final ZERO32 = Uint8List.fromList(List.generate(32, (index) => 0));
-final EC_GROUP_ORDER = _convertHex(
+final EC_GROUP_ORDER = hexToBytes(
     "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141");
-final EC_P = _convertHex(
+final EC_P = hexToBytes(
     "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f");
 final secp256k1 = ECCurve_secp256k1();
 final n = secp256k1.n;
@@ -30,7 +30,7 @@ BigInt nDiv2 = n >> 1;
 bool isPrivate(Uint8List x) {
   if (!isScalar(x)) return false;
   return _compare(x, ZERO32) > 0 && // > 0
-      _compare(x, EC_GROUP_ORDER as Uint8List) < 0; // < G
+      _compare(x, EC_GROUP_ORDER) < 0; // < G
 }
 
 Uint8List? generateTweek(Uint8List point, Uint8List tweak) {
@@ -59,7 +59,7 @@ bool isPoint(Uint8List p) {
   if (_compare(x, ZERO32) == 0) {
     return false;
   }
-  if (_compare(x, EC_P as Uint8List) == 1) {
+  if (_compare(x, EC_P) == 1) {
     return false;
   }
   try {
@@ -74,7 +74,7 @@ bool isPoint(Uint8List p) {
   if (_compare(y, ZERO32) == 0) {
     return false;
   }
-  if (_compare(y, EC_P as Uint8List) == 1) {
+  if (_compare(y, EC_P) == 1) {
     return false;
   }
   if (t == 0x04 && p.length == 65) {
@@ -89,7 +89,7 @@ bool isScalar(Uint8List x) {
 
 bool isOrderScalar(x) {
   if (!isScalar(x)) return false;
-  return _compare(x, EC_GROUP_ORDER as Uint8List) < 0; // < G
+  return _compare(x, EC_GROUP_ORDER) < 0; // < G
 }
 
 bool isSignature(Uint8List value) {
@@ -97,8 +97,8 @@ bool isSignature(Uint8List value) {
   Uint8List s = value.sublist(32, 64);
 
   return value.length == 64 &&
-      _compare(r, EC_GROUP_ORDER as Uint8List) < 0 &&
-      _compare(s, EC_GROUP_ORDER as Uint8List) < 0;
+      _compare(r, EC_GROUP_ORDER) < 0 &&
+      _compare(s, EC_GROUP_ORDER) < 0;
 }
 
 bool _isPointCompressed(Uint8List p) {
@@ -452,21 +452,21 @@ Uint8List? recoverPublicKeyFromSignature(
   return bytes;
 }
 
-List<int> _convertHex(String input) {
-  const String alphabet = "0123456789abcdef";
-  String str = input.replaceAll(" ", "");
-  str = str.toLowerCase();
-  if (str.length % 2 != 0) {
-    str = "0$str";
-  }
-  Uint8List result = Uint8List(str.length ~/ 2);
-  for (int i = 0; i < result.length; i++) {
-    int firstDigit = alphabet.indexOf(str[i * 2]);
-    int secondDigit = alphabet.indexOf(str[i * 2 + 1]);
-    if (firstDigit == -1 || secondDigit == -1) {
-      throw FormatException("Non-hex character detected in $input");
-    }
-    result[i] = (firstDigit << 4) + secondDigit;
-  }
-  return result;
-}
+// List<int> _convertHex(String input) {
+//   const String alphabet = "0123456789abcdef";
+//   String str = input.replaceAll(" ", "");
+//   str = str.toLowerCase();
+//   if (str.length % 2 != 0) {
+//     str = "0$str";
+//   }
+//   Uint8List result = Uint8List(str.length ~/ 2);
+//   for (int i = 0; i < result.length; i++) {
+//     int firstDigit = alphabet.indexOf(str[i * 2]);
+//     int secondDigit = alphabet.indexOf(str[i * 2 + 1]);
+//     if (firstDigit == -1 || secondDigit == -1) {
+//       throw FormatException("Non-hex character detected in $input");
+//     }
+//     result[i] = (firstDigit << 4) + secondDigit;
+//   }
+//   return result;
+// }

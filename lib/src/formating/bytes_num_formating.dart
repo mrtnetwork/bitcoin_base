@@ -184,3 +184,58 @@ Uint8List hexToBytes(String hexStr) {
 
   return Uint8List.fromList(bytes);
 }
+
+int intFromBytes(List<int> bytes, Endian endian) {
+  if (bytes.isEmpty) {
+    throw ArgumentError("Input bytes should not be empty");
+  }
+
+  final buffer = Uint8List.fromList(bytes);
+  final byteData = ByteData.sublistView(buffer);
+
+  switch (bytes.length) {
+    case 1:
+      return byteData.getInt8(0);
+    case 2:
+      return byteData.getInt16(0, endian);
+    case 4:
+      return byteData.getInt32(0, endian);
+    default:
+      throw ArgumentError("Unsupported byte length: ${bytes.length}");
+  }
+}
+
+bool bytesListEqual(List<int>? a, List<int>? b) {
+  if (a == null) {
+    return b == null;
+  }
+  if (b == null || a.length != b.length) {
+    return false;
+  }
+  if (identical(a, b)) {
+    return true;
+  }
+  for (int index = 0; index < a.length; index += 1) {
+    if (a[index] != b[index]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+Uint8List packUint32BE(int value) {
+  var bytes = Uint8List(4);
+  bytes[0] = (value >> 24) & 0xFF;
+  bytes[1] = (value >> 16) & 0xFF;
+  bytes[2] = (value >> 8) & 0xFF;
+  bytes[3] = value & 0xFF;
+  return bytes;
+}
+
+int binaryToByte(String binary) {
+  return int.parse(binary, radix: 2);
+}
+
+String bytesToBinary(Uint8List bytes) {
+  return bytes.map((byte) => byte.toRadixString(2).padLeft(8, '0')).join('');
+}

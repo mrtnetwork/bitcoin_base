@@ -128,10 +128,10 @@ void main() {
 
     test("testPubkeyCreation", () {
       final pub1 = ECPublic.fromHex(publicKeyHex);
-      expect(pub1.toAddress(copressed: false).toAddress(NetworkInfo.BITCOIN),
+      expect(pub1.toAddress(compressed: false).toAddress(NetworkInfo.BITCOIN),
           unCompressedAddress);
       expect(pub1.toBytes(prefix: null), publicKeyBytes);
-      expect(pub1.toHash160(), pub1.toAddress(copressed: true).getH160);
+      expect(pub1.toHash160(), pub1.toAddress(compressed: true).getH160);
     });
   });
 
@@ -171,8 +171,8 @@ void main() {
     test("getpublic", () {
       final signer = ECPublic.getSignaturPublic(
           message, hexToBytes(deterministicSignature));
-      expect(signer?.toAddress(copressed: true).toAddress(NetworkInfo.BITCOIN),
-          pub.toAddress(copressed: true).toAddress(NetworkInfo.BITCOIN));
+      expect(signer?.toAddress(compressed: true).toAddress(NetworkInfo.BITCOIN),
+          pub.toAddress(compressed: true).toAddress(NetworkInfo.BITCOIN));
     });
     test("test2", () {});
   });

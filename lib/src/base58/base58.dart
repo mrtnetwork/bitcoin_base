@@ -1,4 +1,9 @@
+// import 'package:bitcoin/src/crypto/crypto.dart';
 import 'dart:typed_data';
+
+import 'package:bitcoin_base/src/crypto/crypto.dart';
+import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+// import 'package:flutter/foundation.dart';
 
 const String _btc =
     '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -19,6 +24,13 @@ class Base {
       ALPHABET_MAP[(alphabet)[i]] = i;
     }
   }
+  String encodeCheck(Uint8List bytes) {
+    Uint8List hash = doubleHash(bytes);
+    Uint8List combine = Uint8List.fromList(
+        [bytes, hash.sublist(0, 4)].expand((i) => i).toList(growable: false));
+    return encode(combine);
+  }
+
   String encode(Uint8List source) {
     if (source.isEmpty) {
       return "";
@@ -76,5 +88,19 @@ class Base {
       bytes.add(0);
     }
     return Uint8List.fromList(bytes.reversed.toList());
+  }
+
+  Uint8List decodeCheck(String string) {
+    final bytes = decode(string);
+    if (bytes.length < 5) {
+      throw const FormatException("invalid base58check");
+    }
+    Uint8List payload = bytes.sublist(0, bytes.length - 4);
+    Uint8List checksum = bytes.sublist(bytes.length - 4);
+    Uint8List newChecksum = doubleHash(payload).sublist(0, 4);
+    if (!bytesListEqual(checksum, newChecksum)) {
+      throw ArgumentError("Invalid checksum");
+    }
+    return payload;
   }
 }

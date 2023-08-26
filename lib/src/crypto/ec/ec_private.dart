@@ -83,13 +83,13 @@ class ECPrivate {
     if (compressed) {
       prefix += 4;
     }
-    final address = getPublic().toAddress(copressed: compressed);
+    final address = getPublic().toAddress(compressed: compressed);
     for (int i = prefix; i < prefix + 4; i++) {
       try {
         final sig = Uint8List.fromList(
             [...utf8.encode(String.fromCharCode(i)), ...sign]);
         final pub = ECPublic.getSignaturPublic(message, sig);
-        if (pub?.toAddress(copressed: compressed).getH160 == address.getH160) {
+        if (pub?.toAddress(compressed: compressed).getH160 == address.getH160) {
           return bytesToHex(sig);
         }
       } catch (e) {

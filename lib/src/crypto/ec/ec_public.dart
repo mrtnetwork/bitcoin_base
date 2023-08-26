@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
+import 'package:bitcoin_base/src/bitcoin/address/core.dart';
 import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
 import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
@@ -10,6 +11,14 @@ import 'package:bitcoin_base/src/formating/magic_prefix.dart';
 import 'ec_encryption.dart' as ec;
 
 class ECPublic {
+  ECPublic.fromBytes(Uint8List public) {
+    if (!ec.isPoint(public)) {
+      throw ArgumentError("Bad point");
+    }
+    final d = reEncodedFromForm(public, false);
+    _key = d;
+  }
+
   /// creates an object from a hex string in SEC format (classmethod)
   ECPublic.fromHex(String hex) {
     final toBytes = hexToBytes(hex);
@@ -26,8 +35,8 @@ class ECPublic {
   String toHex({bool compressed = true}) {
     final bytes = toBytes();
     if (compressed) {
-      final d = reEncodedFromForm(bytes, true);
-      return bytesToHex(d);
+      final point = reEncodedFromForm(bytes, true);
+      return bytesToHex(point);
     }
     return bytesToHex(bytes);
   }
@@ -44,29 +53,71 @@ class ECPublic {
   }
 
   /// returns the corresponding P2pkhAddress object
-  P2pkhAddress toAddress({bool copressed = true}) {
-    final h16 = _toHash160(compressed: copressed);
-    final str = bytesToHex(h16);
+  P2pkhAddress toAddress({bool compressed = true}) {
+    final h16 = _toHash160(compressed: compressed);
+    final toHex = bytesToHex(h16);
 
-    return P2pkhAddress(hash160: str);
+    return P2pkhAddress(hash160: toHex);
   }
 
   /// returns the corresponding P2wpkhAddress object
-  P2wpkhAddress toSegwitAddress({bool copressed = true}) {
-    final h16 = _toHash160(compressed: copressed);
-    final str = bytesToHex(h16);
+  P2wpkhAddress toSegwitAddress({bool compressed = true}) {
+    final h16 = _toHash160(compressed: compressed);
+    final toHex = bytesToHex(h16);
 
-    return P2wpkhAddress(program: str);
+    return P2wpkhAddress(program: toHex);
   }
 
-  P2pkAddress toP2pkAddress({bool copressed = true}) {
-    final d = toHex(compressed: copressed);
-    return P2pkAddress(publicKey: d);
+  P2pkAddress toP2pkAddress({bool compressed = true}) {
+    final h = toHex(compressed: compressed);
+    return P2pkAddress(publicKey: h);
   }
 
-  Script toRedeemScript({bool copressed = true}) {
-    final d = toHex(compressed: copressed);
-    return Script(script: [d, "OP_CHECKSIG"]);
+  Script toRedeemScript({bool compressed = true}) {
+    final redeem = toHex(compressed: compressed);
+    return Script(script: [redeem, "OP_CHECKSIG"]);
+  }
+
+  /// p2sh nested p2kh
+  P2shAddress toP2pkhInP2sh({bool compressed = true}) {
+    final addr = toAddress(compressed: compressed);
+    return P2shAddress(script: Script(script: addr.toScriptPubKey()));
+  }
+
+  // return p2sh(p2pk) address
+  P2shAddress toP2pkInP2sh({bool compressed = true}) {
+    return P2shAddress(script: toRedeemScript(compressed: compressed));
+  }
+
+  /// p2sh nested segwit(p2wpkh)
+  P2shAddress toP2wpkhInP2sh({bool compressed = true}) {
+    final addr = toSegwitAddress(compressed: compressed);
+    return P2shAddress.fromSegwitScript(
+        script: Script(script: addr.toScriptPubKey()),
+        type: AddressType.p2wpkhInP2sh);
+  }
+
+  /// return 1-1 multisig segwit script
+  Script toP2wshScript({bool compressed = true}) {
+    return Script(script: [
+      'OP_1',
+      toHex(compressed: compressed),
+      "OP_1",
+      "OP_CHECKMULTISIG"
+    ]);
+  }
+
+  /// return p2wshaddress with 1-1 multisig segwit script
+  P2wshAddress toP2wshAddress({bool compressed = true}) {
+    return P2wshAddress(script: toP2wshScript(compressed: compressed));
+  }
+
+  /// return p2sh(p2wsh) nested 1-1 multisig segwit address
+  P2shAddress toP2wshInP2sh({bool compressed = true}) {
+    final p2sh = toP2wshAddress(compressed: compressed);
+    return P2shAddress.fromSegwitScript(
+        script: Script(script: p2sh.toScriptPubKey()),
+        type: AddressType.p2wshInP2sh);
   }
 
   BigInt calculateTweek({dynamic script}) {
@@ -74,7 +125,7 @@ class ECPublic {
     return decodeBigInt(tweak);
   }
 
-  /// returns the key's raw bytes
+  /// returns the unCompressed key's raw bytes
   Uint8List toBytes({int? prefix = 0x04}) {
     if (prefix != null) {
       return Uint8List.fromList([prefix, ..._key]);
@@ -84,8 +135,8 @@ class ECPublic {
 
   /// returns the Compressed key's raw bytes
   Uint8List toCompressedBytes() {
-    final d = reEncodedFromForm(toBytes(), true);
-    return d;
+    final point = reEncodedFromForm(toBytes(), true);
+    return point;
   }
 
   /// returns the x coordinate only as hex string after tweaking (needed for taproot)
@@ -145,6 +196,7 @@ class ECPublic {
     return taggedHash(Uint8List.fromList([...b, ...a]), "TapBranch");
   }
 
+  /// return p2tr address
   P2trAddress toTaprootAddress({List<dynamic>? scripts}) {
     final pubKey = toTapRotHex(script: scripts);
 
