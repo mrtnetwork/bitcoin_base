@@ -53,11 +53,13 @@ void main() {
 
   /// p2sh(p2wpkh) address for testnet network
   /// 82VHvngNBzjXsb5ZUqHD5hgXKdUdstLsA
-  publicKey.toP2wpkhInP2sh().toAddress(network);
+  final e = publicKey.toP2wpkhInP2sh().toAddress(network);
+  print("e $e");
 
   /// p2sh(p2wsh) address for testnet network 1-1 multisig segwit script
   /// JuynVHdGZY362FodskamvvWSP9Jj58KgA
-  publicKey.toP2wshInP2sh().toAddress(network);
+  final x = publicKey.toP2wshInP2sh().toAddress(network);
+  print("x $x");
 
   /// p2wpkh address
   /// tb1qhmyuz38dy22qlspdnwl6khsycvjpeallzwwcp7

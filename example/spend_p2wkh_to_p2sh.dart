@@ -7,7 +7,7 @@ import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
 import 'package:bitcoin_base/src/bitcoin/script/witness.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
-import '../test/utxo.dart';
+import 'transactions/utxo.dart';
 
 (String, String) spendP2wkhToP2sh({
   required ECPublic receiver,

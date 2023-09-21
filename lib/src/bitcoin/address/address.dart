@@ -57,6 +57,8 @@ abstract class BipAddress implements BitcoinAddress {
   String toAddress(NetworkInfo networkType, {Uint8List? h160}) {
     Uint8List tobytes = h160 ?? hexToBytes(_h160);
     switch (type) {
+      case AddressType.p2wpkhInP2sh:
+      case AddressType.p2wshInP2sh:
       case AddressType.p2sh:
         tobytes = Uint8List.fromList([networkType.p2shPrefix, ...tobytes]);
         break;

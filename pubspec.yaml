@@ -1,6 +1,6 @@
 name: bitcoin_base
 description: A comprehensive Bitcoin library for creating/signing and spending P2PK, P2PKH, P2SH, P2WPKH, P2WSH, Taproot ...
-version: 0.3.0
+version: 0.5.0
 homepage: "https://github.com/MohsenHaydari/bitcoin_base"
 repository: "https://github.com/MohsenHaydari/bitcoin_base"
 environment:

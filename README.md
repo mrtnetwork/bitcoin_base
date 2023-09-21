@@ -92,11 +92,11 @@ Finalizing the transaction with 15 different input types (spend: p2sh, p2wsh, p2
       publicKey.toP2pkhInP2sh().toAddress(NetworkInfo.TESTNET);
 
       /// p2sh(p2wpkh) address for testnet network
-      /// 82VHvngNBzjXsb5ZUqHD5hgXKdUdstLsA
+      /// 2MygAmhWqypY13t8khDM3BtqS9TgHFiSPSi
       publicKey.toP2wpkhInP2sh().toAddress(NetworkInfo.TESTNET);
 
       /// p2sh(p2wsh) address for testnet network 1-1 multisig segwit script
-      /// JuynVHdGZY362FodskamvvWSP9Jj58KgA
+      /// 2N4hx9SvmENd8DCmbfAVgXUe3ddtadwxW4z
       publicKey.toP2wshInP2sh().toAddress(NetworkInfo.TESTNET);
 
       /// p2wpkh address

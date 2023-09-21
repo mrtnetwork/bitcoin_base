@@ -8,7 +8,7 @@ import 'package:bitcoin_base/src/bitcoin/script/output.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
-import '../test/utxo.dart';
+import 'transactions/utxo.dart';
 
 (String, String) spendP2pkToP2pkh({
   required P2pkhAddress receiver,
