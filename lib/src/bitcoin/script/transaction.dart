@@ -66,6 +66,7 @@ class BtcTransaction {
     for (int index = 0; index < vi.$1; index++) {
       final inp =
           TxInput.fromRaw(raw: raw, hasSegwit: hasSegwit, cursor: cursor);
+
       inputs.add(inp.$1);
       cursor = inp.$2;
     }
@@ -95,6 +96,7 @@ class BtcTransaction {
           cursor += wtVi.$1 + wtVi.$2;
           witnessesTmp.add(bytesToHex(witness));
         }
+
         witnesses.add(TxWitnessInput(stack: witnessesTmp));
       }
     }
@@ -446,7 +448,7 @@ class BtcTransaction {
   /// Calculates txid and returns it
   String txId() {
     final bytes = toBytes(segwit: false);
-    final h = doubleHash(bytes).reversed.toList();
-    return bytesToHex(h);
+    final reversedHash = doubleHash(bytes).reversed.toList();
+    return bytesToHex(reversedHash);
   }
 }

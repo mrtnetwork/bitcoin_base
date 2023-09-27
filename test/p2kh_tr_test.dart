@@ -27,12 +27,12 @@ void main() {
         P2pkhAddress(address: 'mytmhndz4UbEMeoSZorXXrLpPfeoFUDzEp');
     final changeTxout = TxOutput(
         amount: BigInt.from(29000000),
-        scriptPubKey: Script(script: changeAddr.toScriptPubKey()));
+        scriptPubKey: changeAddr.toScriptPubKey());
     final changeLowSAddr =
         P2pkhAddress(address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w');
     final changeLowSTxout = TxOutput(
         amount: BigInt.from(29000000),
-        scriptPubKey: Script(script: changeLowSAddr.toScriptPubKey()));
+        scriptPubKey: changeLowSAddr.toScriptPubKey());
     final sk = ECPrivate.fromWif(
         'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9');
     final fromAddr =
@@ -120,7 +120,7 @@ void main() {
       final tx =
           BtcTransaction(inputs: [txin], outputs: [txout, changeLowSTxout]);
       final digit = tx.getTransactionDigest(
-          txInIndex: 0, script: Script(script: fromAddr.toScriptPubKey()));
+          txInIndex: 0, script: fromAddr.toScriptPubKey());
       final sig = sk.signInput(digit);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), coreTxSignedLowSSigallResult);
@@ -130,7 +130,7 @@ void main() {
           BtcTransaction(inputs: [txin], outputs: [txout, changeLowSTxout]);
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
-          script: Script(script: fromAddr.toScriptPubKey()),
+          script: fromAddr.toScriptPubKey(),
           sighash: SIGHASH_NONE);
       final sig = sk.signInput(digit, sigHash: SIGHASH_NONE);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
@@ -142,7 +142,7 @@ void main() {
           BtcTransaction(inputs: [sigTxin1], outputs: [sigTxout1, sigTxout2]);
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
-          script: Script(script: sigFromAddr1.toScriptPubKey()),
+          script: sigFromAddr1.toScriptPubKey(),
           sighash: SIGHASH_SINGLE);
       final sig = sigSk1.signInput(digit, sigHash: SIGHASH_SINGLE);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
@@ -153,12 +153,12 @@ void main() {
           inputs: [sigTxin1, sigTxin2], outputs: [sigTxout1, sigTxout2]);
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
-          script: Script(script: sigFromAddr1.toScriptPubKey()),
+          script: sigFromAddr1.toScriptPubKey(),
           sighash: SIGHASH_ALL);
       final sig = sigSk1.signInput(digit, sigHash: SIGHASH_ALL);
       final digit2 = tx.getTransactionDigest(
           txInIndex: 1,
-          script: Script(script: sigFromAddr2.toScriptPubKey()),
+          script: sigFromAddr2.toScriptPubKey(),
           sighash: SIGHASH_ALL);
       final sig2 = sigSk2.signInput(digit2, sigHash: SIGHASH_ALL);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
@@ -170,12 +170,12 @@ void main() {
           inputs: [sigTxin1, sigTxin2], outputs: [sigTxout1, sigTxout2]);
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
-          script: Script(script: sigFromAddr1.toScriptPubKey()),
+          script: sigFromAddr1.toScriptPubKey(),
           sighash: SIGHASH_NONE);
       final sig = sigSk1.signInput(digit, sigHash: SIGHASH_NONE);
       final digit2 = tx.getTransactionDigest(
           txInIndex: 1,
-          script: Script(script: sigFromAddr2.toScriptPubKey()),
+          script: sigFromAddr2.toScriptPubKey(),
           sighash: SIGHASH_NONE);
       final sig2 = sigSk2.signInput(digit2, sigHash: SIGHASH_NONE);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
@@ -187,7 +187,7 @@ void main() {
           inputs: [sigTxin1, sigTxin2], outputs: [sigTxout1, sigTxout2]);
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
-          script: Script(script: sigFromAddr1.toScriptPubKey()),
+          script: sigFromAddr1.toScriptPubKey(),
           sighash: SIGHASH_ALL | SIGHASH_ANYONECANPAY);
 
       final sig =
@@ -195,7 +195,7 @@ void main() {
 
       final digit2 = tx.getTransactionDigest(
           txInIndex: 1,
-          script: Script(script: sigFromAddr2.toScriptPubKey()),
+          script: sigFromAddr2.toScriptPubKey(),
           sighash: SIGHASH_SINGLE | SIGHASH_ANYONECANPAY);
       final sig2 = sigSk2.signInput(digit2,
           sigHash: SIGHASH_SINGLE | SIGHASH_ANYONECANPAY);

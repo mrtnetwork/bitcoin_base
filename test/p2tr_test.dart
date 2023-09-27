@@ -13,8 +13,6 @@ import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../example/helper.dart';
-
 void main() {
   group('TestCreateP2trWithSingleTapScript', () {
     late ECPrivate toPriv1;
@@ -59,9 +57,8 @@ void main() {
               "3d4c9d73c4c65772e645ff26493590ae4913d9c37125b72398222a553b73fa66",
           txIndex: 0);
       txOut2 = TxOutput(
-          amount: priceToBtcUnit(0.00003),
-          scriptPubKey: Script(script: toAddress2.toScriptPubKey()));
-      scriptPubKey2 = Script(script: fromAddress2.toScriptPubKey());
+          amount: BigInt.from(3000), scriptPubKey: toAddress2.toScriptPubKey());
+      scriptPubKey2 = fromAddress2.toScriptPubKey();
       signedTx2 =
           "0200000000010166fa733b552a229823b72571c3d91349ae90354926ff45e67257c6c4739d4c3d0000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50140f1776ddef90a87b646a45ad4821b8dd33e01c5036cbe071a2e1e609ae0c0963685cb8749001944dbe686662dd7c95178c85c4f59c685b646ab27e34df766b7b100000000";
       signedTx3 =
@@ -147,11 +144,10 @@ void main() {
     late final toPub = toPriv.getPublic();
     late final toAddress = toPub.toTaprootAddress();
     late final txOut = TxOutput(
-        amount: priceToBtcUnit(0.00003),
-        scriptPubKey: Script(script: toAddress.toScriptPubKey()));
+        amount: BigInt.from(3000), scriptPubKey: toAddress.toScriptPubKey());
 
     late final scriptPubkey = fromAddress.toScriptPubKey();
-    late final allUtxosScriptpubkeys = [Script(script: scriptPubkey)];
+    late final allUtxosScriptpubkeys = [scriptPubkey];
     const String signedTx3 =
         "020000000001014dc1c5b54477a18c962d5e065e69a42bd7e9244b74ea2c29f105b0b75dc88e800000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50340ab89d20fee5557e57b7cf85840721ef28d68e91fd162b2d520e553b71d604388ea7c4b2fcc4d946d5d3be3c12ef2d129ffb92594bc1f42cdaec8280d0c83ecc2222013f523102815e9fbbe132ffb8329b0fef5a9e4836d216dce1824633287b0abc6ac41c01036a7ed8d24eac9057e114f22342ebf20c16d37f0d25cfd2c900bf401ec09c9682f0e85d59cb20fd0e4503c035d609f127c786136f276d475e8321ec9e77e6c00000000";
 
@@ -219,8 +215,7 @@ void main() {
     final toPub = toPriv.getPublic();
     final toAddress = toPub.toTaprootAddress();
     final txOut = TxOutput(
-        amount: BigInt.from(3000),
-        scriptPubKey: Script(script: toAddress.toScriptPubKey()));
+        amount: BigInt.from(3000), scriptPubKey: toAddress.toScriptPubKey());
 
     // final fromAmount = priceToBtcUnit(0.000035);
     final allAmounts = [BigInt.from(3500)];
@@ -237,8 +232,7 @@ void main() {
       final digit = tx.getTransactionTaprootDigset(
           txIndex: 0,
           extFlags: 1,
-          scriptPubKeys:
-              allUtxosScriptPubkeys.map((e) => Script(script: e)).toList(),
+          scriptPubKeys: allUtxosScriptPubkeys.map((e) => e).toList(),
           script: trScriptP2pkB,
           amounts: allAmounts.map((e) => e).toList());
       final sig = privkeyTrScriptB.signTapRoot(

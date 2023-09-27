@@ -22,8 +22,7 @@ void main() {
         txIndex: 0);
 
     final txout1 = TxOutput(
-        amount: BigInt.from(990000),
-        scriptPubKey: Script(script: p2wpkhAddr.toScriptPubKey()));
+        amount: BigInt.from(990000), scriptPubKey: p2wpkhAddr.toScriptPubKey());
 
     final txinSpend = TxInput(
         txId:
@@ -31,8 +30,7 @@ void main() {
         txIndex: 0);
     final txinSpendAmount = BigInt.from(990000);
     final txout2 = TxOutput(
-        amount: BigInt.from(980000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(980000), scriptPubKey: p2pkhAddr.toScriptPubKey());
     final p2pkhRedeemScript = Script(script: [
       'OP_DUP',
       'OP_HASH160',
@@ -53,8 +51,7 @@ void main() {
     final txinSpendP2wpkhAmount = BigInt.from(950000);
 
     final txout3 = TxOutput(
-        amount: BigInt.from(1940000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(1940000), scriptPubKey: p2pkhAddr.toScriptPubKey());
 
     final txin1Signone = TxInput(
         txId:
@@ -63,11 +60,9 @@ void main() {
     final txin1SignoneAmount = BigInt.from(1000000);
 
     final txout1Signone = TxOutput(
-        amount: BigInt.from(800000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(800000), scriptPubKey: p2pkhAddr.toScriptPubKey());
     final txout2Signone = TxOutput(
-        amount: BigInt.from(190000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(190000), scriptPubKey: p2pkhAddr.toScriptPubKey());
 
     final txin1Sigsingle = TxInput(
         txId:
@@ -76,11 +71,9 @@ void main() {
     final txin1SigsingleAmount = BigInt.from(1930000);
 
     final txout1Sigsingle = TxOutput(
-        amount: BigInt.from(1000000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(1000000), scriptPubKey: p2pkhAddr.toScriptPubKey());
     final txout2Sigsingle = TxOutput(
-        amount: BigInt.from(920000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(920000), scriptPubKey: p2pkhAddr.toScriptPubKey());
 
     final txin1SiganyonecanpayAll = TxInput(
         txId:
@@ -95,11 +88,9 @@ void main() {
     final txin2SiganyonecanpayAllAmount = BigInt.from(180000);
 
     final txout1SiganyonecanpayAll = TxOutput(
-        amount: BigInt.from(180000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(180000), scriptPubKey: p2pkhAddr.toScriptPubKey());
     final txout2SiganyonecanpayAll = TxOutput(
-        amount: BigInt.from(170000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(170000), scriptPubKey: p2pkhAddr.toScriptPubKey());
 
     final txin1SiganyonecanpayNone = TxInput(
         txId:
@@ -114,11 +105,9 @@ void main() {
     final txin2SiganyonecanpayNoneAmount = BigInt.from(700000);
 
     final txout1SiganyonecanpayNone = TxOutput(
-        amount: BigInt.from(800000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(800000), scriptPubKey: p2pkhAddr.toScriptPubKey());
     final txout2SiganyonecanpayNone = TxOutput(
-        amount: BigInt.from(700000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(700000), scriptPubKey: p2pkhAddr.toScriptPubKey());
 
     final txin1SiganyonecanpaySingle = TxInput(
         txId:
@@ -127,11 +116,9 @@ void main() {
     final txin1SiganyonecanpaySingleAmount = BigInt.from(1000000);
 
     final txout1SiganyonecanpaySingle = TxOutput(
-        amount: BigInt.from(500000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(500000), scriptPubKey: p2pkhAddr.toScriptPubKey());
     final txout2SiganyonecanpaySingle = TxOutput(
-        amount: BigInt.from(490000),
-        scriptPubKey: Script(script: p2pkhAddr.toScriptPubKey()));
+        amount: BigInt.from(490000), scriptPubKey: p2pkhAddr.toScriptPubKey());
 
     const createSendToP2wpkhResult =
         "020000000178105e8743e15494e119a39702704ae9eeb45dd0f1c9cdabb7b7d666aa3a7b5a000000006a4730440220415155963673e5582aadfdb8d53874c9764cfd56c28be8d5f2838fdab6365f9902207bf28f875e15ff53e81f3245feb07c6120df4a653feabba3b7bf274790ea1fd1012102d82c9860e36f15d7b72aa59e29347f951277c21cd4d34822acdeeadbcff8a546ffffffff01301b0f0000000000160014fd337ad3bf81e086d96a68e1f8d6a0a510f8c24a00000000";
@@ -152,7 +139,7 @@ void main() {
     test("test_signed_send_to_p2wpkh", () {
       final tx = BtcTransaction(inputs: [txin1], outputs: [txout1]);
       final digit = tx.getTransactionDigest(
-          txInIndex: 0, script: Script(script: p2pkhAddr.toScriptPubKey()));
+          txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
       final sig = sk.signInput(digit);
       txin1.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), createSendToP2wpkhResult);
@@ -173,7 +160,7 @@ void main() {
           outputs: [txout3],
           hasSegwit: true);
       final digit = tx.getTransactionDigest(
-          txInIndex: 0, script: Script(script: p2pkhAddr.toScriptPubKey()));
+          txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
       final sig = sk.signInput(digit);
       txinSpendP2pkh.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       tx.witnesses.add(TxWitnessInput(stack: []));

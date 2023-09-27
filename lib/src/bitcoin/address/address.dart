@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
+// import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
 import 'package:bitcoin_base/src/bitcoin/address/core.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/tools/tools.dart';
@@ -8,6 +8,7 @@ import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_encryption.dart' as ecc;
+import 'package:blockchain_utils/base58/base58.dart' as bs58;
 
 abstract class BipAddress implements BitcoinAddress {
   /// Represents a Bitcoin address
@@ -43,8 +44,8 @@ abstract class BipAddress implements BitcoinAddress {
   }
 
   static String _addressToHash160(String address) {
-    final dec = bs58.base58.decode(address);
-    return bytesToHex(dec.sublist(1, dec.length - 4));
+    final decode = bs58.decodeCheck(address);
+    return bytesToHex(decode.sublist(1));
   }
 
   static String _scriptToHash160(Script s) {
@@ -54,12 +55,14 @@ abstract class BipAddress implements BitcoinAddress {
   }
 
   /// returns the address's string encoding
+  @override
   String toAddress(NetworkInfo networkType, {Uint8List? h160}) {
     Uint8List tobytes = h160 ?? hexToBytes(_h160);
     switch (type) {
       case AddressType.p2wpkhInP2sh:
       case AddressType.p2wshInP2sh:
-      case AddressType.p2sh:
+      case AddressType.p2pkhInP2sh:
+      case AddressType.p2pkInP2sh:
         tobytes = Uint8List.fromList([networkType.p2shPrefix, ...tobytes]);
         break;
       case const (AddressType.p2pkh) || const (AddressType.p2pk):
@@ -67,19 +70,17 @@ abstract class BipAddress implements BitcoinAddress {
         break;
       default:
     }
-    Uint8List hash = doubleHash(tobytes);
-    hash = Uint8List.fromList(
-        [tobytes, hash.sublist(0, 4)].expand((i) => i).toList(growable: false));
-    return bs58.base58.encode(hash);
+    return bs58.encodeCheck(tobytes);
   }
 }
 
 class P2shAddress extends BipAddress {
   /// Encapsulates a P2SH address.
   P2shAddress({super.address, super.hash160, super.script})
-      : type = AddressType.p2sh;
-  P2shAddress.fromSegwitScript({super.script, this.type = AddressType.p2sh})
-      : assert(type == AddressType.p2sh ||
+      : type = AddressType.p2pkInP2sh;
+  P2shAddress.fromScript({super.script, this.type = AddressType.p2pkInP2sh})
+      : assert(type == AddressType.p2pkInP2sh ||
+            type == AddressType.p2pkhInP2sh ||
             type == AddressType.p2wpkhInP2sh ||
             type == AddressType.p2wshInP2sh);
 
@@ -88,8 +89,8 @@ class P2shAddress extends BipAddress {
 
   /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override
-  List<String> toScriptPubKey() {
-    return ['OP_HASH160', _h160, 'OP_EQUAL'];
+  Script toScriptPubKey() {
+    return Script(script: ['OP_HASH160', _h160, 'OP_EQUAL']);
   }
 }
 
@@ -98,8 +99,14 @@ class P2pkhAddress extends BipAddress {
 
   /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override
-  List<String> toScriptPubKey() {
-    return ['OP_DUP', 'OP_HASH160', _h160, 'OP_EQUALVERIFY', 'OP_CHECKSIG'];
+  Script toScriptPubKey() {
+    return Script(script: [
+      'OP_DUP',
+      'OP_HASH160',
+      _h160,
+      'OP_EQUALVERIFY',
+      'OP_CHECKSIG'
+    ]);
   }
 
   @override
@@ -118,8 +125,8 @@ class P2pkAddress extends BipAddress {
 
   /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override
-  List<String> toScriptPubKey() {
-    return [publicHex, 'OP_CHECKSIG'];
+  Script toScriptPubKey() {
+    return Script(script: [publicHex, 'OP_CHECKSIG']);
   }
 
   @override

@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-
-import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
-import 'package:bitcoin_base/src/crypto/crypto.dart';
+import 'package:blockchain_utils/base58/base58.dart' as bs58;
 import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 import 'package:convert/convert.dart';
 
@@ -9,14 +7,14 @@ bool isValidAddress(String address) {
   if (address.length < 26 || address.length > 35) {
     return false;
   }
-  final decode = bs58.base58.decode(address);
-  Uint8List data = decode.sublist(0, decode.length - 4);
-  Uint8List checksum = decode.sublist(decode.length - 4);
-  Uint8List hash = doubleHash(data).sublist(0, 4);
-  if (!isValidCheckSum(checksum, hash)) {
+  try {
+    bs58.decodeCheck(address);
+    return true;
+  } on ArgumentError {
     return false;
+  } catch (e) {
+    rethrow;
   }
-  return true;
 }
 
 bool isValidHash160(String hash160) {
@@ -84,16 +82,4 @@ Uint8List bytes32FromInt(int x) {
     result[32 - i - 1] = (x >> (8 * i)) & 0xFF;
   }
   return result;
-}
-
-bool isValidCheckSum(List<int> a, List<int> b) {
-  if (a.length != b.length) {
-    return false;
-  }
-  for (int index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index]) {
-      return false;
-    }
-  }
-  return true;
 }

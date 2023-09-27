@@ -2,16 +2,21 @@ import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/address/core.dart';
 import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 
+enum BtcNetwork { mainnet, testnet }
+
 class NetworkInfo {
   final String messagePrefix;
   final String bech32;
   final int p2pkhPrefix;
   final int p2shPrefix;
   final int wif;
+  final BtcNetwork network;
   final Map<AddressType, String> extendPrivate;
   final Map<AddressType, String> extendPublic;
+  bool get isMainnet => network == BtcNetwork.mainnet;
   // ignore: constant_identifier_names
   static const BITCOIN = NetworkInfo(
+      network: BtcNetwork.mainnet,
       messagePrefix: '\x18Bitcoin Signed Message:\n',
       bech32: 'bc',
       p2pkhPrefix: 0x00,
@@ -19,7 +24,7 @@ class NetworkInfo {
       wif: 0x80,
       extendPrivate: {
         AddressType.p2pkh: "0x0488ade4",
-        AddressType.p2sh: "0x0488ade4",
+        AddressType.p2pkhInP2sh: "0x0488ade4",
         AddressType.p2wpkh: "0x04b2430c",
         AddressType.p2wpkhInP2sh: "0x049d7878",
         AddressType.p2wsh: "0x02aa7a99",
@@ -27,7 +32,7 @@ class NetworkInfo {
       },
       extendPublic: {
         AddressType.p2pkh: "0x0488b21e",
-        AddressType.p2sh: "0x0488b21e",
+        AddressType.p2pkhInP2sh: "0x0488b21e",
         AddressType.p2wpkh: "0x04b24746",
         AddressType.p2wpkhInP2sh: "0x049d7cb2",
         AddressType.p2wsh: "0x02aa7ed3",
@@ -36,6 +41,7 @@ class NetworkInfo {
 
   // ignore: constant_identifier_names
   static const TESTNET = NetworkInfo(
+      network: BtcNetwork.testnet,
       messagePrefix: '\x18Bitcoin Signed Message:\n',
       bech32: 'tb',
       p2pkhPrefix: 0x6f,
@@ -43,7 +49,7 @@ class NetworkInfo {
       wif: 0xef,
       extendPrivate: {
         AddressType.p2pkh: "0x04358394",
-        AddressType.p2sh: "0x04358394",
+        AddressType.p2pkhInP2sh: "0x04358394",
         AddressType.p2wpkh: "0x045f18bc",
         AddressType.p2wpkhInP2sh: "0x044a4e28",
         AddressType.p2wsh: "0x02575048",
@@ -51,7 +57,7 @@ class NetworkInfo {
       },
       extendPublic: {
         AddressType.p2pkh: "0x043587cf",
-        AddressType.p2sh: "0x043587cf",
+        AddressType.p2pkhInP2sh: "0x043587cf",
         AddressType.p2wpkh: "0x045f1cf6",
         AddressType.p2wpkhInP2sh: "0x044a5262",
         AddressType.p2wsh: "0x02575483",
@@ -99,5 +105,6 @@ class NetworkInfo {
       required this.p2shPrefix,
       required this.wif,
       required this.extendPrivate,
-      required this.extendPublic});
+      required this.extendPublic,
+      required this.network});
 }

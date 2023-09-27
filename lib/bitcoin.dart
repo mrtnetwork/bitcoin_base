@@ -14,3 +14,5 @@ export 'package:bitcoin_base/src/bitcoin/script/control_block.dart';
 export 'package:bitcoin_base/src/bitcoin/constant/constant_lib.dart';
 
 export 'package:bitcoin_base/src/crypto/crypto.dart';
+
+export 'package:blockchain_utils/blockchain_utils.dart';

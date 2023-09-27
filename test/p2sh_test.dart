@@ -31,8 +31,7 @@ void main() {
 
     final toAddr = fromAddr;
     final txout2 = TxOutput(
-        amount: BigInt.from(8000000),
-        scriptPubKey: Script(script: toAddr.toScriptPubKey()));
+        amount: BigInt.from(8000000), scriptPubKey: toAddr.toScriptPubKey());
     const spendP2shResult =
         '02000000015b940c0a5b932c1f8cea231248346f93f18865904e15cecc64bbfaa7d563b37d000000006c47304402204984c2089bf55d5e24851520ea43c431b0d79f90d464359899f27fb40a11fbd302201cc2099bfdc18c3a412afb2ef1625abad8a2c6b6ae0bf35887b787269a6f2d4d01232103a2fef1829e0742b89c218c51898d9e7cb9d51201ba2bf9d9e9214ebb6af32708acffffffff0100127a00000000001976a914fd337ad3bf81e086d96a68e1f8d6a0a510f8c24a88ac00000000';
 
@@ -56,7 +55,7 @@ void main() {
           txIndex: 0);
       final tx = BtcTransaction(inputs: [txin], outputs: [txout]);
       final digit = tx.getTransactionDigest(
-          txInIndex: 0, script: Script(script: fromAddr.toScriptPubKey()));
+          txInIndex: 0, script: fromAddr.toScriptPubKey());
       final sig = sk.signInput(digit);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), createP2shAndSendResult);
@@ -83,7 +82,7 @@ void main() {
 
       final txout1 = TxOutput(
           amount: BigInt.from(1100000000),
-          scriptPubKey: Script(script: anotherAddr.toScriptPubKey()));
+          scriptPubKey: anotherAddr.toScriptPubKey());
       final tx = BtcTransaction(inputs: [txinSeq], outputs: [txout1]);
 
       final digit = tx.getTransactionDigest(txInIndex: 0, script: redeemScript);

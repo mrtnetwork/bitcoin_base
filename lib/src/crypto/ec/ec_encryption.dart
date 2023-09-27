@@ -124,7 +124,9 @@ Uint8List? pointAddScalar(Uint8List p, Uint8List tweak, bool compress) {
   if (!isOrderScalar(tweak)) throw ArgumentError("Bad Tweek");
   bool compressed = assumeCompression(compress, p);
   ECPoint? pp = _decodeFrom(p);
-  if (_compare(tweak, ZERO32) == 0) return pp!.getEncoded(compressed);
+  if (_compare(tweak, ZERO32) == 0) {
+    return pp!.getEncoded(compressed);
+  }
   BigInt tt = decodeBigInt(tweak);
   ECPoint qq = (G * tt) as ECPoint;
   ECPoint uu = (pp! + qq) as ECPoint;

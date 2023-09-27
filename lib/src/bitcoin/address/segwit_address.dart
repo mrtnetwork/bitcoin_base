@@ -1,4 +1,3 @@
-import 'package:bitcoin_base/src/bech32/bech32.dart' as bech32;
 import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 
@@ -6,6 +5,7 @@ import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/bitcoin/address/core.dart';
 import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
+import 'package:blockchain_utils/bech32/bech32.dart' as bech32;
 
 abstract class SegwitAddress implements BitcoinAddress {
   /// Represents a Bitcoin segwit address
@@ -46,17 +46,18 @@ abstract class SegwitAddress implements BitcoinAddress {
     if (convert == null) {
       throw ArgumentError("Invalid value for parameter address.");
     }
-    final version = convert.$1;
+    final version = convert.version;
     if (version != segwitNumVersion) {
       throw ArgumentError("Invalid segwit version.");
     }
-    return bytesToHex(convert.$2);
+    return bytesToHex(convert.data);
   }
 
   /// returns the address's string encoding (Bech32)
+  @override
   String toAddress(NetworkInfo networkType) {
     final bytes = hexToBytes(_program);
-    final sw = bech32.encodeBech32(networkType.bech32, segwitNumVersion, bytes);
+    final sw = bech32.encodeBech32(networkType.bech32, bytes, segwitNumVersion);
     if (sw == null) {
       throw ArgumentError("invalid address");
     }
@@ -64,10 +65,10 @@ abstract class SegwitAddress implements BitcoinAddress {
     return sw;
   }
 
-  String _scriptToHash(Script s) {
-    final toBytes = s.toBytes();
-    final h = singleHash(toBytes);
-    return bytesToHex(h);
+  String _scriptToHash(Script script) {
+    final toBytes = script.toBytes();
+    final toHash = singleHash(toBytes);
+    return bytesToHex(toHash);
   }
 }
 
@@ -78,8 +79,8 @@ class P2wpkhAddress extends SegwitAddress {
 
   /// returns the scriptPubKey of a P2WPKH witness script
   @override
-  List<String> toScriptPubKey() {
-    return ['OP_0', _program];
+  Script toScriptPubKey() {
+    return Script(script: ['OP_0', _program]);
   }
 
   /// returns the type of address
@@ -96,8 +97,8 @@ class P2trAddress extends SegwitAddress {
 
   /// returns the scriptPubKey of a P2TR witness script
   @override
-  List<String> toScriptPubKey() {
-    return ['OP_1', _program];
+  Script toScriptPubKey() {
+    return Script(script: ['OP_1', _program]);
   }
 
   /// returns the type of address
@@ -107,12 +108,13 @@ class P2trAddress extends SegwitAddress {
 
 class P2wshAddress extends SegwitAddress {
   /// Encapsulates a P2WSH address.
-  P2wshAddress({required super.script}) : super(version: P2WSH_ADDRESS_V0);
+  P2wshAddress({super.script, super.address})
+      : super(version: P2WSH_ADDRESS_V0);
 
   /// Returns the scriptPubKey of a P2WPKH witness script
   @override
-  List<String> toScriptPubKey() {
-    return ['OP_0', _program];
+  Script toScriptPubKey() {
+    return Script(script: ['OP_0', _program]);
   }
 
   /// Returns the type of address

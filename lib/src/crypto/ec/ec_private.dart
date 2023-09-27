@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
+import 'package:blockchain_utils/base58/base58.dart' as bs58;
 import 'package:bitcoin_base/src/bitcoin/tools/tools.dart';
 import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 import 'package:bitcoin_base/src/formating/magic_prefix.dart';
@@ -36,14 +36,7 @@ class ECPrivate {
 
   /// creates an object from a WIF of WIFC format (string)
   factory ECPrivate.fromWif(String wif) {
-    final b64 = Uint8List.fromList(bs58.base58.decode(wif));
-    Uint8List keyBytes = b64.sublist(0, b64.length - 4);
-    final checksum = b64.sublist(b64.length - 4);
-    final h = doubleHash(keyBytes);
-    final isValid = isValidCheckSum(h.sublist(0, 4), checksum);
-    if (!isValid) {
-      throw Exception('Checksum is wrong. Possible mistype?'); // listtEqual
-    }
+    Uint8List keyBytes = Uint8List.fromList(bs58.decodeCheck(wif));
     keyBytes = keyBytes.sublist(1);
     if (keyBytes.length > 32) {
       keyBytes = keyBytes.sublist(0, keyBytes.length - 1);
@@ -60,10 +53,7 @@ class ECPrivate {
     if (compressed) {
       bytes = Uint8List.fromList([...bytes, 0x01]);
     }
-    Uint8List hash = doubleHash(bytes);
-    hash = Uint8List.fromList(
-        [bytes, hash.sublist(0, 4)].expand((i) => i).toList(growable: false));
-    return bs58.base58.encode(hash);
+    return bs58.encodeCheck(bytes);
   }
 
   /// returns the key's raw bytes
@@ -154,7 +144,7 @@ class ECPrivate {
 
   /// sign taproot transaction digest and returns the signature.
   String signTapRoot(Uint8List txDigest,
-      {sighash = TAPROOT_SIGHASH_ALL,
+      {int sighash = TAPROOT_SIGHASH_ALL,
       List<dynamic> scripts = const [],
       bool tweak = true}) {
     Uint8List byteKey = Uint8List(0);

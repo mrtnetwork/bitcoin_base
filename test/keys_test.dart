@@ -191,7 +191,7 @@ void main() {
       final script = Script(script: [pub.toHex(), 'OP_CHECKSIG']);
       final fromScript = script.toP2shScriptPubKey().toHex();
       final addr = P2shAddress(script: script);
-      final fromP2shAddress = Script(script: addr.toScriptPubKey()).toHex();
+      final fromP2shAddress = addr.toScriptPubKey().toHex();
       expect(fromScript, fromP2shAddress);
     });
   });
@@ -217,7 +217,7 @@ void main() {
               "cTmyBsxMQ3vyh4J3jCKYn2Au7AhTKvqeYuxxkinsg6Rz3BBPrYKK")
           .getPublic()
           .toSegwitAddress();
-      final p2sh = P2shAddress(script: Script(script: addr.toScriptPubKey()));
+      final p2sh = P2shAddress(script: addr.toScriptPubKey());
       expect(correctP2shP2wpkhAddress, p2sh.toAddress(NetworkInfo.TESTNET));
     });
     test("test3", () {
@@ -242,7 +242,7 @@ void main() {
         'OP_CHECKMULTISIG'
       ]);
       final pw = P2wshAddress(script: script);
-      final p2sh = P2shAddress(script: Script(script: pw.toScriptPubKey()));
+      final p2sh = P2shAddress(script: pw.toScriptPubKey());
       expect(p2sh.toAddress(NetworkInfo.TESTNET), correctP2shP2wshAddress);
     });
   });

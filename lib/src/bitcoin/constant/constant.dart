@@ -1,5 +1,5 @@
 // ignore_for_file: constant_identifier_names, equal_keys_in_map, non_constant_identifier_names
-
+// Constants and identifiers used in the Bitcoin-related code.
 const Map<String, List<int>> OP_CODES = {
   'OP_0': [0x00],
   'OP_FALSE': [0x00],
@@ -220,30 +220,32 @@ Map<int, String> CODE_OPS = {
   178: 'OP_CHECKSEQUENCEVERIFY',
 };
 
+// SIGHASH types
 const int SIGHASH_SINGLE = 0x03;
 const int SIGHASH_ANYONECANPAY = 0x80;
-
-const int TYPE_ABSOLUTE_TIMELOCK = 0x101;
-const int TYPE_RELATIVE_TIMELOCK = 0x201;
-const int TYPE_REPLACE_BY_FEE = 0x301;
 const int SIGHASH_ALL = 0x01;
 const int SIGHASH_NONE = 0x02;
 const int TAPROOT_SIGHASH_ALL = 0x00;
-const List<int> DEFAULT_TX_LOCKTIME = [0x00, 0x00, 0x00, 0x00];
 
+// Transaction lock types
+const int TYPE_ABSOLUTE_TIMELOCK = 0x101;
+const int TYPE_RELATIVE_TIMELOCK = 0x201;
+const int TYPE_REPLACE_BY_FEE = 0x301;
+
+// Default values and sequences
+const List<int> DEFAULT_TX_LOCKTIME = [0x00, 0x00, 0x00, 0x00];
 const List<int> EMPTY_TX_SEQUENCE = [0x00, 0x00, 0x00, 0x00];
 const List<int> DEFAULT_TX_SEQUENCE = [0xff, 0xff, 0xff, 0xff];
 const List<int> ABSOLUTE_TIMELOCK_SEQUENCE = [0xfe, 0xff, 0xff, 0xff];
-
 const List<int> REPLACE_BY_FEE_SEQUENCE = [0x01, 0x00, 0x00, 0x00];
 
+// Script version and Bitcoin-related identifiers
 const int LEAF_VERSION_TAPSCRIPT = 0xc0;
-
 const List<int> DEFAULT_TX_VERSION = [0x02, 0x00, 0x00, 0x00];
-
 const int SATOSHIS_PER_BITCOIN = 100000000;
 const int NEGATIVE_SATOSHI = -1;
 
+// Bitcoin address types
 const String P2PKH_ADDRESS = "p2pkh";
 const String P2SH_ADDRESS = "p2sh";
 const String P2WPKH_ADDRESS_V0 = "p2wpkhv0";
