@@ -16,3 +16,8 @@
 ## 0.5.0
 
 * Fix p2sh(segwit)
+
+## 1.0.0
+
+* TransactionBuilder
+* Fix bugs
