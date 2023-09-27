@@ -14,8 +14,7 @@ dependencies:
   blockchain_utils: ^0.1.0
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  test: ^1.24.6
   flutter_lints: ^2.0.0
   lints: ^2.1.1
 

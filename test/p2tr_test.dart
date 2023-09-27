@@ -11,7 +11,7 @@ import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
 import 'package:bitcoin_base/src/bitcoin/script/witness.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('TestCreateP2trWithSingleTapScript', () {

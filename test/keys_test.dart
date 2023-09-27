@@ -7,7 +7,7 @@ import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
 import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 void main() {
   group("TestPrivateKeys", () {

@@ -7,7 +7,6 @@ import 'package:bitcoin_base/src/provider/api_provider.dart';
 
 import 'package:bitcoin_base/src/provider/transaction_builder.dart';
 import 'package:bitcoin_base/src/provider/utxo_details.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 import 'spending_builders.dart';
 
