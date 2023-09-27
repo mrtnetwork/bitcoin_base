@@ -22,6 +22,6 @@
 * TransactionBuilder
 * Fix bugs
 
-## 1.0.3
+## 1.1.0
 
 * Update dependencies
