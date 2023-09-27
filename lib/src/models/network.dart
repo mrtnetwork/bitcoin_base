@@ -14,7 +14,8 @@ class NetworkInfo {
   final Map<AddressType, String> extendPrivate;
   final Map<AddressType, String> extendPublic;
   bool get isMainnet => network == BtcNetwork.mainnet;
-  // ignore: constant_identifier_names
+
+  /// ignore: constant_identifier_names
   static const BITCOIN = NetworkInfo(
       network: BtcNetwork.mainnet,
       messagePrefix: '\x18Bitcoin Signed Message:\n',
@@ -39,7 +40,7 @@ class NetworkInfo {
         AddressType.p2wshInP2sh: "0x0295b43f"
       });
 
-  // ignore: constant_identifier_names
+  /// ignore: constant_identifier_names
   static const TESTNET = NetworkInfo(
       network: BtcNetwork.testnet,
       messagePrefix: '\x18Bitcoin Signed Message:\n',

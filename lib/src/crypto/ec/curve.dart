@@ -2,9 +2,11 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:pointycastle/api.dart';
 import 'package:pointycastle/ecc/api.dart';
-// ignore: implementation_imports
+
+/// ignore: implementation_imports
 import 'package:pointycastle/src/registry/registry.dart';
-// ignore: implementation_imports
+
+/// ignore: implementation_imports
 import 'package:pointycastle/src/utils.dart' as utils;
 
 bool _testBit(BigInt i, int n) {
@@ -94,18 +96,18 @@ class CustomECDSASigner implements Signer {
       kCalculator = _RandomKCalculator(n, _random!);
     }
 
-    // 5.3.2
+    /// 5.3.2
     do {
-      // generate s
+      /// generate s
       BigInt? k;
 
       do {
-        // generate r
+        /// generate r
         k = kCalculator.nextK() as BigInt?;
 
         var p = (_pvkey!.parameters!.G * k)!;
 
-        // 5.3.3
+        /// 5.3.3
         var x = p.x!.toBigInteger()!;
 
         r = x % n;
@@ -128,12 +130,12 @@ class CustomECDSASigner implements Signer {
     var r = signature.r;
     var s = signature.s;
 
-    // r in the range [1,n-1]
+    /// r in the range [1,n-1]
     if (r.compareTo(BigInt.one) < 0 || r.compareTo(n) >= 0) {
       return false;
     }
 
-    // s in the range [1,n-1]
+    /// s in the range [1,n-1]
     if (s.compareTo(BigInt.one) < 0 || s.compareTo(n) >= 0) {
       return false;
     }
@@ -147,7 +149,7 @@ class CustomECDSASigner implements Signer {
     var Q = _pbkey!.Q!;
     var point = _sumOfTwoMultiplies(G, u1, Q, u2)!;
 
-    // components must be bogus.
+    /// components must be bogus.
     if (point.isInfinity) {
       return false;
     }
@@ -219,9 +221,11 @@ class CustomECDSASigner implements Signer {
 
 class _RFC6979KCalculator {
   final Mac _mac;
-  // ignore: non_constant_identifier_names
+
+  /// ignore: non_constant_identifier_names
   late Uint8List _K;
-  // ignore: non_constant_identifier_names
+
+  /// ignore: non_constant_identifier_names
   late Uint8List _V;
   final BigInt _n;
 
@@ -303,7 +307,7 @@ class _RFC6979KCalculator {
 
       var k = _bitsToInt(t);
 
-      // ignore: unrelated_type_equality_checks
+      /// ignore: unrelated_type_equality_checks
       if ((k == 0) || (k >= _n)) {
         _mac.update(_V, 0, _V.length);
         _mac.updateByte(0x00);

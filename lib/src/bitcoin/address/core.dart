@@ -1,4 +1,4 @@
-import 'package:bitcoin_base/bitcoin.dart';
+import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 
 enum AddressType {

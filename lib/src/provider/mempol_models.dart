@@ -168,8 +168,9 @@ class MempolUtxo {
       txid: json['txid'],
       vout: json['vout'],
       status: MempoolStatus.fromJson(json['status']),
-      value: BigInt.parse(
-          json['value'].toString()), // Parse the value as a BigInt.
+      value: BigInt.parse(json['value'].toString()),
+
+      /// Parse the value as a BigInt.
     );
   }
 }

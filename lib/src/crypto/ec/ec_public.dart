@@ -11,7 +11,7 @@ import 'package:bitcoin_base/src/formating/magic_prefix.dart';
 import 'ec_encryption.dart' as ec;
 
 class ECPublic {
-  // Constructs an ECPublic key from a byte representation.
+  /// Constructs an ECPublic key from a byte representation.
   ECPublic.fromBytes(Uint8List public) {
     if (!ec.isPoint(public)) {
       throw ArgumentError("Bad point");
@@ -20,7 +20,7 @@ class ECPublic {
     _key = d;
   }
 
-  // Constructs an ECPublic key from hex representation.
+  /// Constructs an ECPublic key from hex representation.
   ECPublic.fromHex(String hex) {
     final toBytes = hexToBytes(hex);
     if (!ec.isPoint(toBytes)) {
@@ -32,8 +32,8 @@ class ECPublic {
 
   late final Uint8List _key;
 
-  // toHex converts the ECPublic key to a hex-encoded string.
-  // If 'compressed' is true, the key is in compressed format.
+  /// toHex converts the ECPublic key to a hex-encoded string.
+  /// If 'compressed' is true, the key is in compressed format.
   String toHex({bool compressed = true}) {
     final bytes = toBytes();
     if (compressed) {
@@ -43,22 +43,22 @@ class ECPublic {
     return bytesToHex(bytes);
   }
 
-  // _toHash160 computes the RIPEMD160 hash of the ECPublic key.
-  // If 'compressed' is true, the key is in compressed format.
+  /// _toHash160 computes the RIPEMD160 hash of the ECPublic key.
+  /// If 'compressed' is true, the key is in compressed format.
   Uint8List _toHash160({bool compressed = true}) {
     final bytes = hexToBytes(toHex(compressed: compressed));
     return hash160(bytes);
   }
 
-  // toHash160 computes the RIPEMD160 hash of the ECPublic key.
-  // If 'compressed' is true, the key is in compressed format.
+  /// toHash160 computes the RIPEMD160 hash of the ECPublic key.
+  /// If 'compressed' is true, the key is in compressed format.
   String toHash160({bool compressed = true}) {
     final bytes = hexToBytes(toHex(compressed: compressed));
     return bytesToHex(hash160(bytes));
   }
 
-  // toAddress generates a P2PKH (Pay-to-Public-Key-Hash) address from the ECPublic key.
-  // If 'compressed' is true, the key is in compressed format.
+  /// toAddress generates a P2PKH (Pay-to-Public-Key-Hash) address from the ECPublic key.
+  /// If 'compressed' is true, the key is in compressed format.
   P2pkhAddress toAddress({bool compressed = true}) {
     final h16 = _toHash160(compressed: compressed);
     final toHex = bytesToHex(h16);
@@ -66,8 +66,8 @@ class ECPublic {
     return P2pkhAddress(hash160: toHex);
   }
 
-  // toSegwitAddress generates a P2WPKH (Pay-to-Witness-Public-Key-Hash) SegWit address
-  // from the ECPublic key. If 'compressed' is true, the key is in compressed format.
+  /// toSegwitAddress generates a P2WPKH (Pay-to-Witness-Public-Key-Hash) SegWit address
+  /// from the ECPublic key. If 'compressed' is true, the key is in compressed format.
   P2wpkhAddress toSegwitAddress({bool compressed = true}) {
     final h16 = _toHash160(compressed: compressed);
     final toHex = bytesToHex(h16);
@@ -75,56 +75,56 @@ class ECPublic {
     return P2wpkhAddress(program: toHex);
   }
 
-  // toP2pkAddress generates a P2PK (Pay-to-Public-Key) address from the ECPublic key.
-  // If 'compressed' is true, the key is in compressed format.
+  /// toP2pkAddress generates a P2PK (Pay-to-Public-Key) address from the ECPublic key.
+  /// If 'compressed' is true, the key is in compressed format.
   P2pkAddress toP2pkAddress({bool compressed = true}) {
     final h = toHex(compressed: compressed);
     return P2pkAddress(publicKey: h);
   }
 
-  // toRedeemScript generates a redeem script from the ECPublic key.
-  // If 'compressed' is true, the key is in compressed format.
+  /// toRedeemScript generates a redeem script from the ECPublic key.
+  /// If 'compressed' is true, the key is in compressed format.
   Script toRedeemScript({bool compressed = true}) {
     final redeem = toHex(compressed: compressed);
     return Script(script: [redeem, "OP_CHECKSIG"]);
   }
 
-  // toP2pkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
-  // wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
-  // If 'compressed' is true, the key is in compressed format.
+  /// toP2pkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
+  /// wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
+  /// If 'compressed' is true, the key is in compressed format.
   P2shAddress toP2pkhInP2sh({bool compressed = true}) {
     final addr = toAddress(compressed: compressed);
     return P2shAddress.fromScript(
         script: addr.toScriptPubKey(), type: AddressType.p2pkhInP2sh);
   }
 
-  // toP2pkInP2sh generates a P2SH (Pay-to-Script-Hash) address
-  // wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
-  // If 'compressed' is true, the key is in compressed format.
+  /// toP2pkInP2sh generates a P2SH (Pay-to-Script-Hash) address
+  /// wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
+  /// If 'compressed' is true, the key is in compressed format.
   P2shAddress toP2pkInP2sh({bool compressed = true}) {
     return P2shAddress(script: toRedeemScript(compressed: compressed));
   }
 
-// ToTaprootAddress generates a P2TR(Taproot) address from the ECPublic key
-// and an optional script. The 'script' parameter can be used to specify
-// custom spending conditions.
+  /// ToTaprootAddress generates a P2TR(Taproot) address from the ECPublic key
+  /// and an optional script. The 'script' parameter can be used to specify
+  /// custom spending conditions.
   P2trAddress toTaprootAddress({List<dynamic>? scripts}) {
     final pubKey = toTapRotHex(script: scripts);
 
     return P2trAddress(program: pubKey);
   }
 
-  // toP2wpkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
-  // wrapping a P2WPKH (Pay-to-Witness-Public-Key-Hash) script derived from the ECPublic key.
-  // If 'compressed' is true, the key is in compressed format.
+  /// toP2wpkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
+  /// wrapping a P2WPKH (Pay-to-Witness-Public-Key-Hash) script derived from the ECPublic key.
+  /// If 'compressed' is true, the key is in compressed format.
   P2shAddress toP2wpkhInP2sh({bool compressed = true}) {
     final addr = toSegwitAddress(compressed: compressed);
     return P2shAddress.fromScript(
         script: addr.toScriptPubKey(), type: AddressType.p2wpkhInP2sh);
   }
 
-  // toP2wshScript generates a P2WSH (Pay-to-Witness-Script-Hash) script
-  // derived from the ECPublic key. If 'compressed' is true, the key is in compressed format.
+  /// toP2wshScript generates a P2WSH (Pay-to-Witness-Script-Hash) script
+  /// derived from the ECPublic key. If 'compressed' is true, the key is in compressed format.
   Script toP2wshScript({bool compressed = true}) {
     return Script(script: [
       'OP_1',
@@ -134,30 +134,30 @@ class ECPublic {
     ]);
   }
 
-  // toP2wshAddress generates a P2WSH (Pay-to-Witness-Script-Hash) address
-  // from the ECPublic key. If 'compressed' is true, the key is in compressed format.
+  /// toP2wshAddress generates a P2WSH (Pay-to-Witness-Script-Hash) address
+  /// from the ECPublic key. If 'compressed' is true, the key is in compressed format.
   P2wshAddress toP2wshAddress({bool compressed = true}) {
     return P2wshAddress(script: toP2wshScript(compressed: compressed));
   }
 
-  // toP2wshInP2sh generates a P2SH (Pay-to-Script-Hash) address
-  // wrapping a P2WSH (Pay-to-Witness-Script-Hash) script derived from the ECPublic key.
-  // If 'compressed' is true, the key is in compressed format.
+  /// toP2wshInP2sh generates a P2SH (Pay-to-Script-Hash) address
+  /// wrapping a P2WSH (Pay-to-Witness-Script-Hash) script derived from the ECPublic key.
+  /// If 'compressed' is true, the key is in compressed format.
   P2shAddress toP2wshInP2sh({bool compressed = true}) {
     final p2sh = toP2wshAddress(compressed: compressed);
     return P2shAddress.fromScript(
         script: p2sh.toScriptPubKey(), type: AddressType.p2wshInP2sh);
   }
 
-  // calculateTweek computes and returns the TapTweak value based on the ECPublic key
-  // and an optional script. It uses the key's x-coordinate and the Merkle root of the script
-  // (if provided) to calculate the tweak.
+  /// calculateTweek computes and returns the TapTweak value based on the ECPublic key
+  /// and an optional script. It uses the key's x-coordinate and the Merkle root of the script
+  /// (if provided) to calculate the tweak.
   BigInt calculateTweek({dynamic script}) {
     final tweak = _calculateTweek(_key, script: script);
     return decodeBigInt(tweak);
   }
 
-  // toBytes returns the uncompressed byte representation of the ECPublic key.
+  /// toBytes returns the uncompressed byte representation of the ECPublic key.
   Uint8List toBytes({int? prefix = 0x04}) {
     if (prefix != null) {
       return Uint8List.fromList([prefix, ..._key]);
@@ -165,28 +165,28 @@ class ECPublic {
     return Uint8List.fromList([..._key]);
   }
 
-  // toCompressedBytes returns the compressed byte representation of the ECPublic key.
+  /// toCompressedBytes returns the compressed byte representation of the ECPublic key.
   Uint8List toCompressedBytes() {
     final point = reEncodedFromForm(toBytes(), true);
     return point;
   }
 
-  // returns the x coordinate only as hex string after tweaking (needed for taproot)
+  /// returns the x coordinate only as hex string after tweaking (needed for taproot)
   String toTapRotHex({List<dynamic>? script}) {
     final tweak = _calculateTweek(_key, script: script);
     final point = tweakTaprootPoint(_key, tweak);
     return bytesToHex(point.sublist(0, 32));
   }
 
-  // toXOnlyHex extracts and returns the x-coordinate (first 32 bytes) of the ECPublic key
-  // as a hexadecimal string.
+  /// toXOnlyHex extracts and returns the x-coordinate (first 32 bytes) of the ECPublic key
+  /// as a hexadecimal string.
   String toXOnlyHex() {
     return bytesToHex(_key.sublist(0, 32));
   }
 
-  // _calculateTweek computes and returns the TapTweak value based on the ECPublic key
-  // and an optional script. It uses the key's x-coordinate and the Merkle root of the script
-  // (if provided) to calculate the tweak.
+  /// _calculateTweek computes and returns the TapTweak value based on the ECPublic key
+  /// and an optional script. It uses the key's x-coordinate and the Merkle root of the script
+  /// (if provided) to calculate the tweak.
   Uint8List _calculateTweek(Uint8List public, {dynamic script}) {
     final keyX = Uint8List.fromList(public.getRange(0, 32).toList());
     if (script == null) {
@@ -199,9 +199,9 @@ class ECPublic {
     return tweek;
   }
 
-  // _getTagHashedMerkleRoot computes and returns the tagged hashed Merkle root for Taproot
-  // based on the provided argument. It handles different argument types, including scripts
-  // and lists of scripts.
+  /// _getTagHashedMerkleRoot computes and returns the tagged hashed Merkle root for Taproot
+  /// based on the provided argument. It handles different argument types, including scripts
+  /// and lists of scripts.
   Uint8List _getTagHashedMerkleRoot(dynamic args) {
     if (args is Script) {
       final tagged = _tapleafTaggedHash(args);
@@ -221,8 +221,8 @@ class ECPublic {
     throw Exception("List cannot have more than 2 branches.");
   }
 
-  // _tapleafTaggedHash computes and returns the tagged hash of a script for Taproot,
-  // using the specified script. It prepends a version byte and then tags the hash with "TapLeaf".
+  /// _tapleafTaggedHash computes and returns the tagged hash of a script for Taproot,
+  /// using the specified script. It prepends a version byte and then tags the hash with "TapLeaf".
   Uint8List _tapleafTaggedHash(Script script) {
     final scriptBytes = prependVarint(script.toBytes());
 
@@ -230,9 +230,9 @@ class ECPublic {
     return taggedHash(part, 'TapLeaf');
   }
 
-  // _tapBranchTaggedHash computes and returns the tagged hash of two byte slices
-  // for Taproot, where 'a' and 'b' are the input byte slices. It ensures that 'a' and 'b'
-  // are sorted and concatenated before tagging the hash with "TapBranch".
+  /// _tapBranchTaggedHash computes and returns the tagged hash of two byte slices
+  /// for Taproot, where 'a' and 'b' are the input byte slices. It ensures that 'a' and 'b'
+  /// are sorted and concatenated before tagging the hash with "TapBranch".
   Uint8List _tapBranchTaggedHash(Uint8List a, Uint8List b) {
     if (isLessThanBytes(a, b)) {
       return taggedHash(Uint8List.fromList([...a, ...b]), "TapBranch");
@@ -246,9 +246,9 @@ class ECPublic {
     return ec.verify(msg, toBytes(), signature.sublist(1));
   }
 
-  // GetSignaturePublic extracts and returns the public key associated with a signature
-  // for the given message. If the extraction is successful, it returns an ECPublic key;
-  // otherwise, it returns nil.
+  /// GetSignaturePublic extracts and returns the public key associated with a signature
+  /// for the given message. If the extraction is successful, it returns an ECPublic key;
+  /// otherwise, it returns nil.
   static ECPublic? getSignaturPublic(String message, Uint8List signatur) {
     final msg = singleHash(magicMessage(message));
     int prefix = signatur[0];

@@ -13,7 +13,8 @@ class TxInput {
   TxInput(
       {required this.txId, required this.txIndex, Script? sig, Uint8List? sq})
       : sequence = sq ?? Uint8List.fromList(DEFAULT_TX_SEQUENCE),
-        // ignore: prefer_const_constructors
+
+        /// ignore: prefer_const_constructors
         scriptSig = sig ?? Script(script: []);
   final String txId;
   final int txIndex;

@@ -1,5 +1,7 @@
-// ignore_for_file: constant_identifier_names, equal_keys_in_map, non_constant_identifier_names
-// Constants and identifiers used in the Bitcoin-related code.
+/// ignore_for_file: constant_identifier_names, equal_keys_in_map, non_constant_identifier_names
+/// Constants and identifiers used in the Bitcoin-related code.
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names, equal_keys_in_map
+
 const Map<String, List<int>> OP_CODES = {
   'OP_0': [0x00],
   'OP_FALSE': [0x00],
@@ -25,7 +27,7 @@ const Map<String, List<int>> OP_CODES = {
   'OP_15': [0x5f],
   'OP_16': [0x60],
 
-  // flow control
+  /// flow control
   'OP_NOP': [0x61],
   'OP_IF': [0x63],
   'OP_NOTIF': [0x64],
@@ -34,7 +36,7 @@ const Map<String, List<int>> OP_CODES = {
   'OP_VERIFY': [0x69],
   'OP_RETURN': [0x6a],
 
-  // stack
+  /// stack
   'OP_TOALTSTACK': [0x6b],
   'OP_FROMALTSTACK': [0x6c],
   'OP_IFDUP': [0x73],
@@ -55,37 +57,39 @@ const Map<String, List<int>> OP_CODES = {
   'OP_2ROT': [0x71],
   'OP_2SWAP': [0x72],
 
-  // splice
-  // 'OP_CAT': [0x7e],
-  // 'OP_SUBSTR': [0x7f],
-  // 'OP_LEFT': [0x80],
-  // 'OP_RIGHT': [0x81],
+  /// splice
+  /// 'OP_CAT': [0x7e],
+  /// 'OP_SUBSTR': [0x7f],
+  /// 'OP_LEFT': [0x80],
+  /// 'OP_RIGHT': [0x81],
   'OP_SIZE': [0x82],
 
-  // bitwise logic
-  // 'OP_INVERT': [0x83],
-  // 'OP_AND': [0x84],
-  // 'OP_OR': [0x85],
-  // 'OP_XOR': [0x86],
+  /// bitwise logic
+  /// 'OP_INVERT': [0x83],
+  /// 'OP_AND': [0x84],
+  /// 'OP_OR': [0x85],
+  /// 'OP_XOR': [0x86],
   'OP_EQUAL': [0x87],
   'OP_EQUALVERIFY': [0x88],
 
-  // arithmetic
+  /// arithmetic
   'OP_1ADD': [0x8b],
   'OP_1SUB': [0x8c],
-  // 'OP_2MUL': [0x8d],
-  // 'OP_2DIV': [0x8e],
+
+  /// 'OP_2MUL': [0x8d],
+  /// 'OP_2DIV': [0x8e],
   'OP_NEGATE': [0x8f],
   'OP_ABS': [0x90],
   'OP_NOT': [0x91],
   'OP_0NOTEQUAL': [0x92],
   'OP_ADD': [0x93],
   'OP_SUB': [0x94],
-  // 'OP_MUL': [0x95],
-  // 'OP_DIV': [0x96],
-  // 'OP_MOD': [0x97],
-  // 'OP_LSHIFT': [0x98],
-  // 'OP_RSHIFT': [0x99],
+
+  /// 'OP_MUL': [0x95],
+  /// 'OP_DIV': [0x96],
+  /// 'OP_MOD': [0x97],
+  /// 'OP_LSHIFT': [0x98],
+  /// 'OP_RSHIFT': [0x99],
   'OP_BOOLAND': [0x9a],
   'OP_BOOLOR': [0x9b],
   'OP_NUMEQUAL': [0x9c],
@@ -99,7 +103,7 @@ const Map<String, List<int>> OP_CODES = {
   'OP_MAX': [0xa4],
   'OP_WITHIN': [0xa5],
 
-  // crypto
+  /// crypto
   'OP_RIPEMD160': [0xa6],
   'OP_SHA1': [0xa7],
   'OP_SHA256': [0xa8],
@@ -111,7 +115,7 @@ const Map<String, List<int>> OP_CODES = {
   'OP_CHECKMULTISIG': [0xae],
   'OP_CHECKMULTISIGVERIFY': [0xaf],
 
-  // locktime
+  /// locktime
   'OP_NOP2': [0xb1],
   'OP_CHECKLOCKTIMEVERIFY': [0xb1],
   'OP_NOP3': [0xb2],
@@ -119,7 +123,7 @@ const Map<String, List<int>> OP_CODES = {
 };
 
 Map<int, String> CODE_OPS = {
-  // constants
+  /// constants
   0: 'OP_0',
   76: 'OP_PUSHDATA1',
   77: 'OP_PUSHDATA2',
@@ -142,7 +146,7 @@ Map<int, String> CODE_OPS = {
   95: 'OP_15',
   96: 'OP_16',
 
-  // flow control
+  /// flow control
   97: 'OP_NOP',
   99: 'OP_IF',
   100: 'OP_NOTIF',
@@ -151,7 +155,7 @@ Map<int, String> CODE_OPS = {
   105: 'OP_VERIFY',
   106: 'OP_RETURN',
 
-  // stack
+  /// stack
   107: 'OP_TOALTSTACK',
   108: 'OP_FROMALTSTACK',
   115: 'OP_IFDUP',
@@ -172,14 +176,14 @@ Map<int, String> CODE_OPS = {
   113: 'OP_2ROT',
   114: 'OP_2SWAP',
 
-  // splice
+  /// splice
   130: 'OP_SIZE',
 
-  // bitwise logic
+  /// bitwise logic
   135: 'OP_EQUAL',
   136: 'OP_EQUALVERIFY',
 
-  // arithmetic
+  /// arithmetic
   139: 'OP_1ADD',
   140: 'OP_1SUB',
   143: 'OP_NEGATE',
@@ -201,7 +205,7 @@ Map<int, String> CODE_OPS = {
   164: 'OP_MAX',
   165: 'OP_WITHIN',
 
-  // crypto
+  /// crypto
   166: 'OP_RIPEMD160',
   167: 'OP_SHA1',
   168: 'OP_SHA256',
@@ -213,39 +217,39 @@ Map<int, String> CODE_OPS = {
   174: 'OP_CHECKMULTISIG',
   175: 'OP_CHECKMULTISIGVERIFY',
 
-  // locktime
+  /// locktime
   177: 'OP_NOP2',
   178: 'OP_NOP3',
   177: 'OP_CHECKLOCKTIMEVERIFY',
   178: 'OP_CHECKSEQUENCEVERIFY',
 };
 
-// SIGHASH types
+/// SIGHASH types
 const int SIGHASH_SINGLE = 0x03;
 const int SIGHASH_ANYONECANPAY = 0x80;
 const int SIGHASH_ALL = 0x01;
 const int SIGHASH_NONE = 0x02;
 const int TAPROOT_SIGHASH_ALL = 0x00;
 
-// Transaction lock types
+/// Transaction lock types
 const int TYPE_ABSOLUTE_TIMELOCK = 0x101;
 const int TYPE_RELATIVE_TIMELOCK = 0x201;
 const int TYPE_REPLACE_BY_FEE = 0x301;
 
-// Default values and sequences
+/// Default values and sequences
 const List<int> DEFAULT_TX_LOCKTIME = [0x00, 0x00, 0x00, 0x00];
 const List<int> EMPTY_TX_SEQUENCE = [0x00, 0x00, 0x00, 0x00];
 const List<int> DEFAULT_TX_SEQUENCE = [0xff, 0xff, 0xff, 0xff];
 const List<int> ABSOLUTE_TIMELOCK_SEQUENCE = [0xfe, 0xff, 0xff, 0xff];
 const List<int> REPLACE_BY_FEE_SEQUENCE = [0x01, 0x00, 0x00, 0x00];
 
-// Script version and Bitcoin-related identifiers
+/// Script version and Bitcoin-related identifiers
 const int LEAF_VERSION_TAPSCRIPT = 0xc0;
 const List<int> DEFAULT_TX_VERSION = [0x02, 0x00, 0x00, 0x00];
 const int SATOSHIS_PER_BITCOIN = 100000000;
 const int NEGATIVE_SATOSHI = -1;
 
-// Bitcoin address types
+/// Bitcoin address types
 const String P2PKH_ADDRESS = "p2pkh";
 const String P2SH_ADDRESS = "p2sh";
 const String P2WPKH_ADDRESS_V0 = "p2wpkhv0";

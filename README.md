@@ -1,5 +1,5 @@
 # BITCOIN Dart Package
-a comprehensive and versatile Go library for all your Bitcoin transaction needs. offers robust support for various Bitcoin transaction types, including spending transactions, Bitcoin address management, Bitcoin Schnorr signatures, BIP-39 mnemonic phrase generation, hierarchical deterministic (HD) wallet derivation, and Web3 Secret Storage Definition.
+a comprehensive and versatile Dart library for all your Bitcoin transaction needs. offers robust support for various Bitcoin transaction types, including spending transactions, Bitcoin address management, Bitcoin Schnorr signatures, BIP-39 mnemonic phrase generation, hierarchical deterministic (HD) wallet derivation, and Web3 Secret Storage Definition.
 
 For BIP32 HD wallet, BIP39, and Secret storage definitions, please refer to the [blockchain_utils](https://github.com/mrtnetwork/blockchain_utils) package.
 
@@ -32,7 +32,7 @@ This comprehensive package provides robust support for a wide array of Bitcoin t
 
 ### Create Transaction
 Using this package, you can create a Bitcoin transaction in two ways: either through the `BtcTransaction` or the `BitcoinTransactionBuilder` class
-- BtcTransaction: To use the `BtcTransaction` struct, you should have a general understanding of how Bitcoin transactions work, including knowledge of UTXOs, scripts, various types of scripts, Bitcoin addresses, signatures, and more. We created examples and tests to enhance your understanding. An example of this transaction type is explained below, and you can also find numerous examples in the [`test`](https://github.com/mrtnetwork/bitcoin_base/tree/main/test) folder.
+- BtcTransaction: To use the `BtcTransaction` class, you should have a general understanding of how Bitcoin transactions work, including knowledge of UTXOs, scripts, various types of scripts, Bitcoin addresses, signatures, and more. We created examples and tests to enhance your understanding. An example of this transaction type is explained below, and you can also find numerous examples in the [`test`](https://github.com/mrtnetwork/bitcoin_base/tree/main/test) folder.
 
 - BitcoinTransactionBuilder: Even with limited prior knowledge, you can utilize this class to send various types of transactions. Below, I've provided an example in which a transaction features 8 distinct input addresses with different types and private keys, as well as 10 different output addresses. Furthermore, additional examples have been prepared, which you can find in the [`example`](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) folder.
 

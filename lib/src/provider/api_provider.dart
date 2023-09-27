@@ -46,7 +46,8 @@ class ApiProvider {
     Map<String, dynamic>? error;
     try {
       error = json.decode(message);
-      // ignore: empty_catches
+
+      /// ignore: empty_catches
     } catch (e) {}
     throw ApiProviderException(
         status: status, message: error != null ? null : message, data: error);

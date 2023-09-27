@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-// import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
+/// import 'package:bitcoin_base/src/base58/base58.dart' as bs58;
 import 'package:bitcoin_base/src/bitcoin/address/core.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/tools/tools.dart';

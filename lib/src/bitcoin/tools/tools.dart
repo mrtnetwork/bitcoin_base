@@ -81,16 +81,16 @@ Uint8List pushInteger(int integer) {
     throw ArgumentError('Integer is currently required to be positive.');
   }
 
-  // Calculate the number of bytes required to represent the integer
+  /// Calculate the number of bytes required to represent the integer
   int numberOfBytes = (integer.bitLength + 7) ~/ 8;
 
-  // Convert to little-endian bytes
+  /// Convert to little-endian bytes
   Uint8List integerBytes = Uint8List(numberOfBytes);
   for (int i = 0; i < numberOfBytes; i++) {
     integerBytes[i] = (integer >> (i * 8)) & 0xFF;
   }
 
-  // If the last bit is set, add a sign byte to signify a positive integer
+  /// If the last bit is set, add a sign byte to signify a positive integer
   if ((integer & (1 << (numberOfBytes * 8 - 1))) != 0) {
     integerBytes = Uint8List.fromList([...integerBytes, 0x00]);
   }

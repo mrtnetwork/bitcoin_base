@@ -328,7 +328,9 @@ class BtcTransaction {
       txForSign.add(hashAmounts);
 
       for (final s in scriptPubKeys) {
-        final h = s.toHex(); // must checked
+        final h = s.toHex();
+
+        /// must checked
         int scriptLen = h.length ~/ 2;
         Uint8List scriptBytes = hexToBytes(h);
         Uint8List lenBytes = Uint8List.fromList([scriptLen]);

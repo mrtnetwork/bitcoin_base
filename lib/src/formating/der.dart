@@ -14,7 +14,9 @@ Uint8List listBigIntToDER(List<BigInt> bigIntList) {
       Uint8List(0), (prev, e) => Uint8List.fromList([...prev, ...e]));
 
   var derBytes = Uint8List.fromList([
-    0x30, ...lengthBytes, // DER SEQUENCE tag and length
+    0x30, ...lengthBytes,
+
+    /// DER SEQUENCE tag and length
     ...contentBytes,
   ]);
 
@@ -36,7 +38,9 @@ Uint8List _encodeLength(int length) {
 }
 
 Uint8List _encodeInteger(BigInt r) {
-  assert(r >= BigInt.zero); // can't support negative numbers yet
+  assert(r >= BigInt.zero);
+
+  /// can't support negative numbers yet
 
   String h = r.toRadixString(16);
   if (h.length % 2 != 0) {
@@ -48,9 +52,9 @@ Uint8List _encodeInteger(BigInt r) {
   if (num <= 0x7F) {
     return Uint8List.fromList([0x02, ..._length(s.length), ...s]);
   } else {
-    // DER integers are two's complement, so if the first byte is
-    // 0x80-0xff then we need an extra 0x00 byte to prevent it from
-    // looking negative.
+    /// DER integers are two's complement, so if the first byte is
+    /// 0x80-0xff then we need an extra 0x00 byte to prevent it from
+    /// looking negative.
     return Uint8List.fromList([0x02, ..._length(s.length + 1), 0x00, ...s]);
   }
 }

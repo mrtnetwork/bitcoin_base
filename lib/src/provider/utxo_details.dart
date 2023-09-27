@@ -1,20 +1,20 @@
-// UtxoOwnerDetails represents ownership details associated with a Bitcoin unspent transaction output (UTXO).
-// It includes information such as the public key, Bitcoin address, and multi-signature address (if applicable)
-// of the UTXO owner.
-import 'package:bitcoin_base/bitcoin.dart';
+/// UtxoOwnerDetails represents ownership details associated with a Bitcoin unspent transaction output (UTXO).
+/// It includes information such as the public key, Bitcoin address, and multi-signature address (if applicable)
+/// of the UTXO owner.
+import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:bitcoin_base/src/bitcoin/address/core.dart';
 
 import 'multisig_script.dart';
 
 class UtxoOwnerDetails {
-  // PublicKey is the public key associated with the UTXO owner.
+  /// PublicKey is the public key associated with the UTXO owner.
   final String? publicKey;
 
-  // Address is the Bitcoin address associated with the UTXO owner.
+  /// Address is the Bitcoin address associated with the UTXO owner.
   final BitcoinAddress address;
 
-  // MultiSigAddress is a pointer to a MultiSignaturAddress instance representing a multi-signature address
-  // associated with the UTXO owner. It may be null if the UTXO owner is not using a multi-signature scheme.
+  /// MultiSigAddress is a pointer to a MultiSignaturAddress instance representing a multi-signature address
+  /// associated with the UTXO owner. It may be null if the UTXO owner is not using a multi-signature scheme.
   final MultiSignatureAddress? multiSigAddress;
 
   UtxoOwnerDetails({
@@ -25,13 +25,13 @@ class UtxoOwnerDetails {
             "use publicKey for normal transaction and multiSigAddress for multi-sig address");
 }
 
-// UtxoWithOwner represents an unspent transaction output (UTXO) along with its associated owner details.
-// It combines information about the UTXO itself (BitcoinUtxo) and the ownership details (UtxoOwnerDetails).
+/// UtxoWithOwner represents an unspent transaction output (UTXO) along with its associated owner details.
+/// It combines information about the UTXO itself (BitcoinUtxo) and the ownership details (UtxoOwnerDetails).
 class UtxoWithOwner {
-  // Utxo is a BitcoinUtxo instance representing the unspent transaction output.
+  /// Utxo is a BitcoinUtxo instance representing the unspent transaction output.
   final BitcoinUtxo utxo;
 
-  // OwnerDetails is a UtxoOwnerDetails instance containing information about the UTXO owner.
+  /// OwnerDetails is a UtxoOwnerDetails instance containing information about the UTXO owner.
   final UtxoOwnerDetails ownerDetails;
 
   UtxoWithOwner({
@@ -52,13 +52,13 @@ class UtxoWithOwner {
   }
 }
 
-// BitcoinOutputDetails represents details about a Bitcoin transaction output, including
-// the recipient address and the value of bitcoins sent to that address.
+/// BitcoinOutputDetails represents details about a Bitcoin transaction output, including
+/// the recipient address and the value of bitcoins sent to that address.
 class BitcoinOutputDetails {
-  // Address is a Bitcoin address representing the recipient of the transaction output.
+  /// Address is a Bitcoin address representing the recipient of the transaction output.
   final BitcoinAddress address;
 
-  // Value is a pointer to a BigInt representing the amount of bitcoins sent to the recipient.
+  /// Value is a pointer to a BigInt representing the amount of bitcoins sent to the recipient.
   final BigInt value;
 
   BitcoinOutputDetails({
@@ -67,24 +67,24 @@ class BitcoinOutputDetails {
   });
 }
 
-// BitcoinUtxo represents an unspent transaction output (UTXO) on the Bitcoin blockchain.
-// It includes details such as the transaction hash (TxHash), the amount of bitcoins (Value),
-// the output index (Vout), the script type (ScriptType), and the block height at which the UTXO
-// was confirmed (BlockHeight).
+/// BitcoinUtxo represents an unspent transaction output (UTXO) on the Bitcoin blockchain.
+/// It includes details such as the transaction hash (TxHash), the amount of bitcoins (Value),
+/// the output index (Vout), the script type (ScriptType), and the block height at which the UTXO
+/// was confirmed (BlockHeight).
 class BitcoinUtxo {
-  // TxHash is the unique identifier of the transaction containing this UTXO.
+  /// TxHash is the unique identifier of the transaction containing this UTXO.
   final String txHash;
 
-  // Value is a pointer to a BigInt representing the amount of bitcoins associated with this UTXO.
+  /// Value is a pointer to a BigInt representing the amount of bitcoins associated with this UTXO.
   final BigInt value;
 
-  // Vout is the output index within the transaction that corresponds to this UTXO.
+  /// Vout is the output index within the transaction that corresponds to this UTXO.
   final int vout;
 
-  // ScriptType specifies the type of Bitcoin script associated with this UTXO.
+  /// ScriptType specifies the type of Bitcoin script associated with this UTXO.
   final AddressType scriptType;
 
-  // BlockHeight represents the block height at which this UTXO was confirmed.
+  /// BlockHeight represents the block height at which this UTXO was confirmed.
   final int blockHeight;
 
   BitcoinUtxo({

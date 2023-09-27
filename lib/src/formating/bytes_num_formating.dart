@@ -2,7 +2,7 @@ import 'dart:core';
 import 'dart:typed_data';
 import 'package:convert/convert.dart';
 
-// ignore: implementation_imports
+/// ignore: implementation_imports
 import 'package:pointycastle/src/utils.dart' as p_utils;
 
 String bytesToHex(
@@ -18,7 +18,7 @@ Uint8List padUint8ListTo32(Uint8List data) {
   assert(data.length <= 32);
   if (data.length == 32) return data;
 
-  // todo there must be a faster way to do this?
+  /// todo there must be a faster way to do this?
   return Uint8List(32)..setRange(32 - data.length, 32, data);
 }
 

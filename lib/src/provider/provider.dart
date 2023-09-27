@@ -1,4 +1,4 @@
-// ignore_for_file: constant_identifier_names
+/// ignore_for_file: constant_identifier_names
 
 import 'package:bitcoin_base/src/models/network.dart';
 

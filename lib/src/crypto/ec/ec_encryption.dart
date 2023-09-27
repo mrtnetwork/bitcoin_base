@@ -1,4 +1,4 @@
-// ignore_for_file: non_constant_identifier_names
+/// ignore_for_file: non_constant_identifier_names
 import 'dart:typed_data';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
@@ -29,8 +29,12 @@ BigInt nDiv2 = n >> 1;
 
 bool isPrivate(Uint8List x) {
   if (!isScalar(x)) return false;
-  return _compare(x, ZERO32) > 0 && // > 0
-      _compare(x, EC_GROUP_ORDER) < 0; // < G
+  return _compare(x, ZERO32) > 0 &&
+
+      /// > 0
+      _compare(x, EC_GROUP_ORDER) < 0;
+
+  /// < G
 }
 
 Uint8List? generateTweek(Uint8List point, Uint8List tweak) {
@@ -89,7 +93,9 @@ bool isScalar(Uint8List x) {
 
 bool isOrderScalar(x) {
   if (!isScalar(x)) return false;
-  return _compare(x, EC_GROUP_ORDER) < 0; // < G
+  return _compare(x, EC_GROUP_ORDER) < 0;
+
+  /// < G
 }
 
 bool isSignature(Uint8List value) {
@@ -454,21 +460,21 @@ Uint8List? recoverPublicKeyFromSignature(
   return bytes;
 }
 
-// List<int> _convertHex(String input) {
-//   const String alphabet = "0123456789abcdef";
-//   String str = input.replaceAll(" ", "");
-//   str = str.toLowerCase();
-//   if (str.length % 2 != 0) {
-//     str = "0$str";
-//   }
-//   Uint8List result = Uint8List(str.length ~/ 2);
-//   for (int i = 0; i < result.length; i++) {
-//     int firstDigit = alphabet.indexOf(str[i * 2]);
-//     int secondDigit = alphabet.indexOf(str[i * 2 + 1]);
-//     if (firstDigit == -1 || secondDigit == -1) {
-//       throw FormatException("Non-hex character detected in $input");
-//     }
-//     result[i] = (firstDigit << 4) + secondDigit;
-//   }
-//   return result;
-// }
+/// List<int> _convertHex(String input) {
+///   const String alphabet = "0123456789abcdef";
+///   String str = input.replaceAll(" ", "");
+///   str = str.toLowerCase();
+///   if (str.length % 2 != 0) {
+///     str = "0$str";
+///   }
+///   Uint8List result = Uint8List(str.length ~/ 2);
+///   for (int i = 0; i < result.length; i++) {
+///     int firstDigit = alphabet.indexOf(str[i * 2]);
+///     int secondDigit = alphabet.indexOf(str[i * 2 + 1]);
+///     if (firstDigit == -1 || secondDigit == -1) {
+///       throw FormatException("Non-hex character detected in $input");
+///     }
+///     result[i] = (firstDigit << 4) + secondDigit;
+///   }
+///   return result;
+/// }

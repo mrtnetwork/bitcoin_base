@@ -8,7 +8,7 @@ import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 
 import 'package:bitcoin_base/src/formating/bytes_tracker.dart';
 
-// ignore: constant_identifier_names
+/// ignore: constant_identifier_names
 enum ScriptType { P2PKH, P2SH, P2WPKH, P2WSH, P2PK }
 
 /// A Script contains just a list of OP_CODES and also knows how to serialize into bytes
