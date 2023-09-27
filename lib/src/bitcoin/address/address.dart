@@ -16,14 +16,18 @@ abstract class BipAddress implements BitcoinAddress {
   /// [hash160] the hash160 string representation of the address; hash160 represents
   /// two consequtive hashes of the public key or the redeam script, first
   /// a SHA-256 and then an RIPEMD-160
-  BipAddress({String? address, String? hash160, Script? script}) {
+  BipAddress(
+      {String? address,
+      String? hash160,
+      Script? script,
+      NetworkInfo? network}) {
     if (hash160 != null) {
       if (!isValidHash160(hash160)) {
         throw Exception("Invalid value for parameter hash160.");
       }
       _h160 = hash160;
     } else if (address != null) {
-      if (!isValidAddress(address)) {
+      if (!isValidAddress(address, type, network: network)) {
         throw ArgumentError("Invalid addres");
       }
       _h160 = _addressToHash160(address);
@@ -76,7 +80,7 @@ abstract class BipAddress implements BitcoinAddress {
 
 class P2shAddress extends BipAddress {
   /// Encapsulates a P2SH address.
-  P2shAddress({super.address, super.hash160, super.script})
+  P2shAddress({super.address, super.hash160, super.script, super.network})
       : type = AddressType.p2pkInP2sh;
   P2shAddress.fromScript({super.script, this.type = AddressType.p2pkInP2sh})
       : assert(type == AddressType.p2pkInP2sh ||
@@ -95,7 +99,7 @@ class P2shAddress extends BipAddress {
 }
 
 class P2pkhAddress extends BipAddress {
-  P2pkhAddress({super.address, super.hash160});
+  P2pkhAddress({super.address, super.hash160, super.network});
 
   /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override

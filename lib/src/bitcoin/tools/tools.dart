@@ -1,20 +1,42 @@
 import 'dart:typed_data';
+import 'package:bitcoin_base/src/bitcoin/address/core.dart';
+import 'package:bitcoin_base/src/models/network.dart';
 import 'package:blockchain_utils/base58/base58.dart' as bs58;
 import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:blockchain_utils/crypto/crypto.dart';
 import 'package:convert/convert.dart';
 
-bool isValidAddress(String address) {
+bool isValidAddress(String address, AddressType type, {NetworkInfo? network}) {
   if (address.length < 26 || address.length > 35) {
     return false;
   }
-  try {
-    bs58.decodeCheck(address);
-    return true;
-  } on ArgumentError {
+  final decode = bs58.decode(address);
+  final int networkPrefix = decode[0];
+  Uint8List data = decode.sublist(0, decode.length - 4);
+  Uint8List checksum = decode.sublist(decode.length - 4);
+  Uint8List hash = doubleHash(data).sublist(0, 4);
+  if (!bytesListEqual(checksum, hash)) {
     return false;
-  } catch (e) {
-    rethrow;
   }
+  switch (type) {
+    case AddressType.p2pkh:
+      if (network != null) {
+        return networkPrefix == network.p2pkhPrefix;
+      }
+      return networkPrefix == NetworkInfo.BITCOIN.p2pkhPrefix ||
+          networkPrefix == NetworkInfo.TESTNET.p2pkhPrefix;
+    case AddressType.p2pkhInP2sh:
+    case AddressType.p2pkInP2sh:
+    case AddressType.p2wshInP2sh:
+    case AddressType.p2wpkhInP2sh:
+      if (network != null) {
+        return networkPrefix == network.p2shPrefix;
+      }
+      return networkPrefix == NetworkInfo.BITCOIN.p2shPrefix ||
+          networkPrefix == NetworkInfo.TESTNET.p2shPrefix;
+    default:
+  }
+  return true;
 }
 
 bool isValidHash160(String hash160) {
