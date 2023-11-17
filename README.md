@@ -75,7 +75,7 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
     ```
     // Create an EC private key instance from a WIF (Wallet Import Format) encoded string.
     final privateKey =
-      ECPrivate.fromWif("cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR");
+      ECPrivate.fromWif("cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR", netVersion: BitcoinNetwork.mainnet.wifNetVer);
 
     // Retrieve the corresponding public key from the private key.
     final publicKey = privateKey.getPublic();
@@ -96,7 +96,7 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
 - Public key
   ```
   // Create an instance of an EC public key from a hexadecimal representation.
-  final publicKey = ECPublic.fromHex('');
+  final publicKey = ECPublic.fromHex('.....');
 
   // Generate a Pay-to-Public-Key-Hash (P2PKH) address from the public key.
   final p2pkh = publicKey.toAddress();
@@ -131,11 +131,6 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   // Extract and return the x-coordinate (first 32 bytes) of the ECPublic key as a hexadecimal string.
   final onlyX = publicKey.toXOnlyHex();
 
-  // CalculateTweak computes and returns the TapTweak value based on the ECPublic key
-  // and an optional script. It uses the key's x-coordinate and the Merkle root of the script
-  // (if provided) to calculate the tweak.
-  final tweak = publicKey.calculateTweek();
-
   // Compute and return the Taproot commitment point's x-coordinate
   // derived from the ECPublic key and an optional script, represented as a hexadecimal string.
   final taproot = publicKey.toTapRotHex();
@@ -150,7 +145,7 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   // Generate a Pay-to-Public-Key-Hash (P2PKH) address from the public key.
   final p2pkh = P2pkhAddress(
       address: "1Q5odQtVCc4PDmP5ncrp7DSuVbh2ML4Gnb",
-      network: NetworkInfo.BITCOIN);
+      network: BitcoinNetwork.mainnet);
 
   // Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) Segregated Witness (SegWit) address from the public key.
   final p2wpkh =
@@ -203,7 +198,7 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
 
   // The method calculates the address checksum and returns the Base58-encoded
   // Bitcoin legacy address or the Bech32 format for SegWit addresses.
-  p2sh3Of5.toAddress(NetworkInfo.BITCOIN);
+  p2sh3Of5.toAddress(BitcoinNetwork.mainnet);
 
   // Return the scriptPubKey that corresponds to this address.
   p2sh3Of5.toScriptPubKey();
@@ -216,28 +211,29 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
 - With TransactionBuilder
   ```
   // select network
-  const NetworkInfo network = NetworkInfo.TESTNET;
-
+  const BitcoinNetwork network = BitcoinNetwork.testnet;
+  final service = BitcoinApiService();
   // select api for read accounts UTXOs and send transaction
   // Mempool or BlockCypher
-  final api = ApiProvider.fromMempl(network);
+  final api = ApiProvider.fromMempool(network, service);
 
-  const mnemonic =
-      "spy often critic spawn produce volcano depart fire theory fog turn retire";
+  final mnemonic = Bip39SeedGenerator(Mnemonic.fromString(
+          "spy often critic spawn produce volcano depart fire theory fog turn retire"))
+      .generate();
 
-  final masterWallet = BIP32HWallet.fromMnemonic(mnemonic);
+  final bip32 = Bip32Slip10Secp256k1.fromSeed(mnemonic);
 
   // i generate 4 HD wallet for this test and now i have access to private and pulic key of each wallet
-  final sp1 = BIP32HWallet.drivePath(masterWallet, "m/44'/0'/0'/0/0/1");
-  final sp2 = BIP32HWallet.drivePath(masterWallet, "m/44'/0'/0'/0/0/2");
-  final sp3 = BIP32HWallet.drivePath(masterWallet, "m/44'/0'/0'/0/0/3");
-  final sp4 = BIP32HWallet.drivePath(masterWallet, "m/44'/0'/0'/0/0/4");
+  final sp1 = bip32.derivePath("m/44'/0'/0'/0/0/1");
+  final sp2 = bip32.derivePath("m/44'/0'/0'/0/0/2");
+  final sp3 = bip32.derivePath("m/44'/0'/0'/0/0/3");
+  final sp4 = bip32.derivePath("m/44'/0'/0'/0/0/4");
 
   // access to private key `ECPrivate`
-  final private1 = ECPrivate.fromBytes(sp1.privateKey);
-  final private2 = ECPrivate.fromBytes(sp2.privateKey);
-  final private3 = ECPrivate.fromBytes(sp3.privateKey);
-  final private4 = ECPrivate.fromBytes(sp4.privateKey);
+  final private1 = ECPrivate.fromBytes(sp1.privateKey.raw);
+  final private2 = ECPrivate.fromBytes(sp2.privateKey.raw);
+  final private3 = ECPrivate.fromBytes(sp3.privateKey.raw);
+  final private4 = ECPrivate.fromBytes(sp4.privateKey.raw);
 
   // access to public key `ECPublic`
   final public1 = private1.getPublic();
@@ -271,20 +267,20 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   // now i want to spending from 8 address in one transaction
   // we need publicKeys and address
   final spenders = [
-    UtxoOwnerDetails(publicKey: public1.toHex(), address: exampleAddr1),
-    UtxoOwnerDetails(publicKey: public2.toHex(), address: exampleAddr2),
-    UtxoOwnerDetails(publicKey: public3.toHex(), address: exampleAddr7),
-    UtxoOwnerDetails(publicKey: public3.toHex(), address: exampleAddr9),
-    UtxoOwnerDetails(publicKey: public3.toHex(), address: exampleAddr10),
-    UtxoOwnerDetails(publicKey: public2.toHex(), address: exampleAddr3),
-    UtxoOwnerDetails(publicKey: public4.toHex(), address: exampleAddr8),
-    UtxoOwnerDetails(publicKey: public3.toHex(), address: exampleAddr4),
+    UtxoAddressDetails(publicKey: public1.toHex(), address: exampleAddr1),
+    UtxoAddressDetails(publicKey: public2.toHex(), address: exampleAddr2),
+    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr7),
+    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr9),
+    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr10),
+    UtxoAddressDetails(publicKey: public2.toHex(), address: exampleAddr3),
+    UtxoAddressDetails(publicKey: public4.toHex(), address: exampleAddr8),
+    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr4),
   ];
 
   // i need now to read spenders account UTXOS
   final List<UtxoWithOwner> utxos = [];
 
-  // i add some method for provider to read utxos from mempol or blockCypher
+  // i add some method for provider to read utxos from mempool or blockCypher
   // looping address to read Utxos
   for (final spender in spenders) {
     try {
@@ -297,7 +293,7 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
       }
 
       utxos.addAll(spenderUtxos);
-    } on ApiProviderException {
+    } on Exception {
       // something bad happen when reading Utxos:
       return;
     }
@@ -324,25 +320,25 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   // we create 10 different output with  different address type like (pt2r, p2sh(p2wpkh), p2sh(p2wsh), p2pkh, etc.)
   // We consider the spendable amount for 10 outputs and divide by 10, each output 117,414
   final output1 =
-      BitcoinOutputDetails(address: exampleAddr4, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr4, value: BigInt.from(117414));
   final output2 =
-      BitcoinOutputDetails(address: exampleAddr9, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr9, value: BigInt.from(117414));
   final output3 =
-      BitcoinOutputDetails(address: exampleAddr10, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr10, value: BigInt.from(117414));
   final output4 =
-      BitcoinOutputDetails(address: exampleAddr1, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr1, value: BigInt.from(117414));
   final output5 =
-      BitcoinOutputDetails(address: exampleAddr3, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr3, value: BigInt.from(117414));
   final output6 =
-      BitcoinOutputDetails(address: exampleAddr2, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr2, value: BigInt.from(117414));
   final output7 =
-      BitcoinOutputDetails(address: exampleAddr7, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr7, value: BigInt.from(117414));
   final output8 =
-      BitcoinOutputDetails(address: exampleAddr8, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr8, value: BigInt.from(117414));
   final output9 =
-      BitcoinOutputDetails(address: exampleAddr5, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr5, value: BigInt.from(117414));
   final output10 =
-      BitcoinOutputDetails(address: exampleAddr6, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr6, value: BigInt.from(117414));
 
   // Well, now it is clear to whom we are going to pay the amount
   // Now let's create the transaction
@@ -422,7 +418,7 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
     if (utxo.utxo.isP2tr()) {
       // yes is p2tr utxo and now we use SignTaprootTransaction(Schnorr sign)
       // for now this transaction builder support only tweak transaction
-      // If you want to spend a Taproot script-path spending, you must create your own transaction builder.
+      // If you want to spend a Taproot tapleaf script-path spending, you must create your own transaction builder.
       return key.signTapRoot(trDigest);
     } else {
       // is seqwit(v0) or lagacy address we use  SingInput (ECDSA)
@@ -439,11 +435,9 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   final isSegwitTr = transactionBuilder.hasSegwit();
 
   // transaction id
-  // ignore: unused_local_variable
   final transactionId = transaction.txId();
 
   // transaction size
-  // ignore: unused_local_variable
   int transactionSize;
 
   if (isSegwitTr) {
@@ -457,8 +451,8 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
     // ignore: unused_local_variable
     final txId = await api.sendRawTransaction(digest);
     // Yes, we did :)  2625cd75f6576c38445deb2a9573c12ccc3438c3a6dd16fd431162d3f2fbb6c8
-    // Now we check Mempol for what happened https://mempool.space/testnet/tx/2625cd75f6576c38445deb2a9573c12ccc3438c3a6dd16fd431162d3f2fbb6c8
-  } on ApiProviderException {
+    // Now we check mempool for what happened https://mempool.space/testnet/tx/2625cd75f6576c38445deb2a9573c12ccc3438c3a6dd16fd431162d3f2fbb6c8
+  } on Exception {
     // Something went wrong when sending the transaction
   }
 
@@ -484,7 +478,7 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
           TxOutput(amount: e.value, scriptPubKey: e.address.toScriptPubKey()))
       .toList();
 
-    // For P2TR, P2WPKH, P2WSH, and P2SH (SegWit) transactions, we need to set 'hasSegwit' to true.
+    // For P2TR, P2WPKH, P2WSH, and P2SH(Segwit) transactions, we need to set 'hasSegwit' to true.
     final tx = BtcTransaction(inputs: txin, outputs: txOut, hasSegwit: true);
 
     // in a SegWit (Segregated Witness) transaction, the witness data serves as the unlocking script
@@ -510,10 +504,10 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
           utxo.map((e) => e.ownerDetails.address.toScriptPubKey()).toList(),
         amounts: utxo.map((e) => e.utxo.value).toList(),
 
-        // The script that we are spending (ext_flag=1)
+        // The tapleaf version script path when (extFlags=1)
         script: const Script(script: []),
         sighash: TAPROOT_SIGHASH_ALL,
-      // default is 0; 1 is for script spending (BIP342)
+        // default is 0; 1 is for tweak transacation
         extFlags: 0,
       );
 
@@ -555,7 +549,8 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
             TxOutput(amount: e.value, scriptPubKey: e.address.toScriptPubKey()))
         .toList();
 
-    // For P2TR, P2WPKH, P2WSH, and P2SH (SegWit) transactions, we need to set 'hasSegwit' to false.
+    // For P2TR, P2WPKH, P2WSH, and P2SH (SegWit) transactions, we need to set 'hasSegwit' to true.
+    // in this case P2pKH is not segwit and  we need to set 'hasSegwit' to false
     final tx = BtcTransaction(inputs: txin, outputs: txOut, hasSegwit: false);
     for (int i = 0; i < txin.length; i++) {
       // For None-SegWit transactions, we use the 'getTransactionDigest' method
@@ -577,11 +572,14 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   
 ### Node provider
 ```
+
 // Define the blockchain network you want to work with, in this case, it's Bitcoin.
-  const network = NetworkInfo.BITCOIN;
+  const network = BitcoinNetwork.mainnet;
+// see the example_service.dart for how to create a http service.
+final service = BitcoinApiService();
 
 // Create an API provider instance for interacting with the BlockCypher API for the specified network.
-  final api = ApiProvider.fromBlocCypher(network);
+  final api = ApiProvider.fromBlocCypher(network, service);
 
 // Get the current network fee rate, which is essential for estimating transaction fees.
   final fee = await api.getNetworkFeeRate();

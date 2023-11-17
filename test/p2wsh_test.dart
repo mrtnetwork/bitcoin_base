@@ -4,15 +4,18 @@ import 'package:bitcoin_base/src/bitcoin/script/output.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
 import 'package:bitcoin_base/src/bitcoin/script/witness.dart';
-import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
+import 'package:bitcoin_base/src/crypto/keypair/ec_private.dart';
+import 'package:bitcoin_base/src/models/network.dart';
 import 'package:test/test.dart';
 
 void main() {
   group("P2WSH", () {
     final sk1 = ECPrivate.fromWif(
-        "cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo");
+        "cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo",
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final sk2 = ECPrivate.fromWif(
-        "cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9");
+        "cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9",
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
 
     final p2wshScript = Script(script: [
       'OP_2',

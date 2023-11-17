@@ -1,11 +1,12 @@
-import 'package:bitcoin_base/src/bitcoin/address/address.dart';
-import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/bitcoin/address/legacy_address.dart';
+import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/input.dart';
 import 'package:bitcoin_base/src/bitcoin/script/output.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/script/sequence.dart';
 import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
-import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
+import 'package:bitcoin_base/src/crypto/keypair/ec_private.dart';
+import 'package:bitcoin_base/src/models/network.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -13,9 +14,11 @@ void main() {
     final fromAddr =
         P2pkhAddress(address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR');
     final sk = ECPrivate.fromWif(
-        'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo');
+        'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final p2pkSk = ECPrivate.fromWif(
-        'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9');
+        'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final p2pkRedeemScript =
         Script(script: [p2pkSk.getPublic().toHex(), 'OP_CHECKSIG']);
     final txout = TxOutput(
@@ -36,8 +39,10 @@ void main() {
         '02000000015b940c0a5b932c1f8cea231248346f93f18865904e15cecc64bbfaa7d563b37d000000006c47304402204984c2089bf55d5e24851520ea43c431b0d79f90d464359899f27fb40a11fbd302201cc2099bfdc18c3a412afb2ef1625abad8a2c6b6ae0bf35887b787269a6f2d4d01232103a2fef1829e0742b89c218c51898d9e7cb9d51201ba2bf9d9e9214ebb6af32708acffffffff0100127a00000000001976a914fd337ad3bf81e086d96a68e1f8d6a0a510f8c24a88ac00000000';
 
     final skCsvP2pkh = ECPrivate.fromWif(
-        'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9');
-    final seq = Sequence(seqType: TYPE_RELATIVE_TIMELOCK, value: 200);
+        'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
+    final seq = Sequence(
+        seqType: BitcoinOpCodeConst.TYPE_RELATIVE_TIMELOCK, value: 200);
     final txinSeq = TxInput(
         txId:
             'f557c623e55f0affc696b742630770df2342c4aac395e0ed470923247bc51b95',

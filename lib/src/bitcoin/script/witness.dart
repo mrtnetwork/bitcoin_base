@@ -1,5 +1,5 @@
-import 'dart:typed_data';
-import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:blockchain_utils/binary/utils.dart';
+import 'package:blockchain_utils/numbers/int_utils.dart';
 
 /// A list of the witness items required to satisfy the locking conditions of a segwit input (aka witness stack).
 ///
@@ -14,12 +14,13 @@ class TxWitnessInput {
   }
 
   /// returns a serialized byte version of the witness items list
-  Uint8List toBytes() {
-    Uint8List stackBytes = Uint8List(0);
+  List<int> toBytes() {
+    List<int> stackBytes = [];
 
     for (String item in stack) {
-      Uint8List itemBytes = prependVarint(hexToBytes(item));
-      stackBytes = Uint8List.fromList([...stackBytes, ...itemBytes]);
+      List<int> itemBytes =
+          IntUtils.prependVarint(BytesUtils.fromHexString(item));
+      stackBytes = [...stackBytes, ...itemBytes];
     }
 
     return stackBytes;

@@ -1,19 +1,15 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:bitcoin_base/src/bitcoin/address/core.dart';
-import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
-import 'package:bitcoin_base/src/models/network.dart';
-import 'package:bitcoin_base/src/provider/utxo_details.dart';
+import 'package:blockchain_utils/binary/utils.dart';
 
 typedef BitcoinSignerCallBack = String Function(
-    Uint8List trDigest, UtxoWithOwner utxo, String publicKey);
+    List<int> trDigest, UtxoWithAddress utxo, String publicKey);
 
 class BitcoinTransactionBuilder {
-  final List<BitcoinOutputDetails> outPuts;
+  final List<BitcoinOutput> outPuts;
   final BigInt fee;
-  final NetworkInfo network;
-  final List<UtxoWithOwner> utxos;
+  final BitcoinNetwork network;
+  final List<UtxoWithAddress> utxos;
   final String? memo;
   final bool enableRBF;
   final bool isFakeTransaction;
@@ -31,18 +27,17 @@ class BitcoinTransactionBuilder {
   /// allowing us to obtain the size of the original transaction
   /// before conducting the actual transaction. This helps us estimate the transaction cost
   static int estimateTransactionSize(
-      {required List<UtxoWithOwner> utxos,
+      {required List<UtxoWithAddress> utxos,
       required List<BitcoinAddress> outputs,
-      required NetworkInfo network,
+      required BitcoinNetwork network,
       String? memo,
       bool enableRBF = false}) {
     final sum = utxos.sumOfUtxosValue();
 
     /// We consider the total amount for the output because,
     /// in all cases, the size of the amount is 8 bytes.
-    final outs = outputs
-        .map((e) => BitcoinOutputDetails(address: e, value: sum))
-        .toList();
+    final outs =
+        outputs.map((e) => BitcoinOutput(address: e, value: sum)).toList();
     final transactionBuilder = BitcoinTransactionBuilder(
       /// Now, we provide the UTXOs we want to spend.
       utxos: utxos,
@@ -125,18 +120,18 @@ class BitcoinTransactionBuilder {
   }
 
   /// It is used to make the appropriate scriptSig
-  Script buildInputScriptPubKeys(UtxoWithOwner utxo, bool isTaproot) {
+  Script buildInputScriptPubKeys(UtxoWithAddress utxo, bool isTaproot) {
     if (utxo.isMultiSig()) {
       final script = Script.fromRaw(
           hexData: utxo.ownerDetails.multiSigAddress!.scriptDetails,
           hasSegwit: true);
       switch (utxo.ownerDetails.multiSigAddress!.address.type) {
-        case AddressType.p2wshInP2sh:
+        case BitcoinAddressType.p2wshInP2sh:
           if (isTaproot) {
             return utxo.ownerDetails.multiSigAddress!.address.toScriptPubKey();
           }
           return script;
-        case AddressType.p2wsh:
+        case BitcoinAddressType.p2wsh:
           if (isTaproot) {
             return utxo.ownerDetails.multiSigAddress!.address.toScriptPubKey();
           }
@@ -148,38 +143,38 @@ class BitcoinTransactionBuilder {
 
     final senderPub = utxo.public();
     switch (utxo.utxo.scriptType) {
-      case AddressType.p2pk:
+      case BitcoinAddressType.p2pk:
         return senderPub.toRedeemScript();
-      case AddressType.p2wsh:
+      case BitcoinAddressType.p2wsh:
         if (isTaproot) {
           return senderPub.toP2wshAddress().toScriptPubKey();
         }
         return senderPub.toP2wshScript();
-      case AddressType.p2pkh:
+      case BitcoinAddressType.p2pkh:
         return senderPub.toAddress().toScriptPubKey();
-      case AddressType.p2wpkh:
+      case BitcoinAddressType.p2wpkh:
         if (isTaproot) {
           return senderPub.toSegwitAddress().toScriptPubKey();
         }
         return senderPub.toAddress().toScriptPubKey();
-      case AddressType.p2tr:
+      case BitcoinAddressType.p2tr:
         return senderPub.toTaprootAddress().toScriptPubKey();
-      case AddressType.p2pkhInP2sh:
+      case BitcoinAddressType.p2pkhInP2sh:
         if (isTaproot) {
           return senderPub.toP2pkhInP2sh().toScriptPubKey();
         }
         return senderPub.toAddress().toScriptPubKey();
-      case AddressType.p2wpkhInP2sh:
+      case BitcoinAddressType.p2wpkhInP2sh:
         if (isTaproot) {
           return senderPub.toP2wpkhInP2sh().toScriptPubKey();
         }
         return senderPub.toAddress().toScriptPubKey();
-      case AddressType.p2wshInP2sh:
+      case BitcoinAddressType.p2wshInP2sh:
         if (isTaproot) {
           return senderPub.toP2wshInP2sh().toScriptPubKey();
         }
         return senderPub.toP2wshScript();
-      case AddressType.p2pkInP2sh:
+      case BitcoinAddressType.p2pkInP2sh:
         if (isTaproot) {
           return senderPub.toP2pkInP2sh().toScriptPubKey();
         }
@@ -197,17 +192,17 @@ class BitcoinTransactionBuilder {
   /// Parameters:
   /// - scriptPubKeys: representing the scriptPubKey for the transaction output being spent.
   /// - input: An integer indicating the index of the input being processed within the transaction.
-  /// - utox: A UtxoWithOwner instance representing the unspent transaction output (UTXO) associated with the input.
+  /// - utox: A UtxoWithAddress instance representing the unspent transaction output (UTXO) associated with the input.
   /// - transaction: A BtcTransaction representing the Bitcoin transaction being constructed.
   /// - taprootAmounts: A List of BigInt containing taproot-specific amounts for P2TR inputs (ignored for non-P2TR inputs).
   /// - tapRootPubKeys: A List of of Script representing taproot public keys for P2TR inputs (ignored for non-P2TR inputs).
 //
   /// Returns:
-  /// - Uint8List: representing the transaction digest to be used for signing the input.
-  Uint8List generateTransactionDigest(
+  /// - List<int>: representing the transaction digest to be used for signing the input.
+  List<int> generateTransactionDigest(
       Script scriptPubKeys,
       int input,
-      UtxoWithOwner utox,
+      UtxoWithAddress utox,
       BtcTransaction transaction,
       List<BigInt> taprootAmounts,
       List<Script> tapRootPubKeys) {
@@ -232,12 +227,12 @@ class BitcoinTransactionBuilder {
   //
   /// Parameters:
   /// - signedDigest: A List of strings containing the signed transaction digest elements.
-  /// - utx: A UtxoWithOwner instance representing the unspent transaction output (UTXO) and its owner details.
+  /// - utx: A UtxoWithAddress instance representing the unspent transaction output (UTXO) and its owner details.
   //
   /// Returns:
   /// - List<String>: A List of strings representing the script signature for the P2WSH or P2SH input.
   List<String> buildP2wshOrP2shScriptSig(
-      List<String> signedDigest, UtxoWithOwner utx) {
+      List<String> signedDigest, UtxoWithAddress utx) {
     /// The constructed script signature consists of the signed digest elements followed by
     /// the script details of the multi-signature address.
     return [
@@ -252,14 +247,14 @@ class BitcoinTransactionBuilder {
   /// based on the UTXO and UTXO owner details and creates the appropriate script signature.
   //
   /// Parameters:
-  /// - utx0: A UtxoWithOwner instance representing the unspent transaction output (UTXO) and its owner details.
+  /// - utx0: A UtxoWithAddress instance representing the unspent transaction output (UTXO) and its owner details.
   //
   /// Returns:
   /// - List<string>: A List of strings representing the script signature for the P2SH SegWit input.
-  List<String> buildP2shSegwitRedeemScriptSig(UtxoWithOwner utx0) {
+  List<String> buildP2shSegwitRedeemScriptSig(UtxoWithAddress utx0) {
     if (utx0.isMultiSig()) {
       switch (utx0.ownerDetails.multiSigAddress!.address.type) {
-        case AddressType.p2wshInP2sh:
+        case BitcoinAddressType.p2wshInP2sh:
           final script = Script.fromRaw(
               hexData: utx0.ownerDetails.multiSigAddress!.scriptDetails,
               hasSegwit: true);
@@ -271,10 +266,10 @@ class BitcoinTransactionBuilder {
     }
     final senderPub = utx0.public();
     switch (utx0.utxo.scriptType) {
-      case AddressType.p2wshInP2sh:
+      case BitcoinAddressType.p2wshInP2sh:
         final script = senderPub.toP2wshAddress().toScriptPubKey();
         return [script.toHex()];
-      case AddressType.p2wpkhInP2sh:
+      case BitcoinAddressType.p2wpkhInP2sh:
         final script = senderPub.toSegwitAddress().toScriptPubKey();
         return [script.toHex()];
       default:
@@ -288,15 +283,15 @@ the unlocking script because it provides data and instructions to unlock
 a specific output. It contains information and cryptographic signatures
 that demonstrate the right to spend the bitcoins associated with the corresponding scriptPubKey output.
 */
-  List<String> buildScriptSig(String signedDigest, UtxoWithOwner utx) {
+  List<String> buildScriptSig(String signedDigest, UtxoWithAddress utx) {
     final senderPub = utx.public();
     if (utx.utxo.isSegwit()) {
       if (utx.utxo.isP2tr()) {
         return [signedDigest];
       }
       switch (utx.utxo.scriptType) {
-        case AddressType.p2wshInP2sh:
-        case AddressType.p2wsh:
+        case BitcoinAddressType.p2wshInP2sh:
+        case BitcoinAddressType.p2wsh:
           final script = senderPub.toP2wshScript();
           return ['', signedDigest, script.toHex()];
         default:
@@ -304,14 +299,14 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
       }
     } else {
       switch (utx.utxo.scriptType) {
-        case AddressType.p2pk:
+        case BitcoinAddressType.p2pk:
           return [signedDigest];
-        case AddressType.p2pkh:
+        case BitcoinAddressType.p2pkh:
           return [signedDigest, senderPub.toHex()];
-        case AddressType.p2pkhInP2sh:
+        case BitcoinAddressType.p2pkhInP2sh:
           final script = senderPub.toAddress().toScriptPubKey();
           return [signedDigest, senderPub.toHex(), script.toHex()];
-        case AddressType.p2pkInP2sh:
+        case BitcoinAddressType.p2pkInP2sh:
           final script = senderPub.toRedeemScript();
           return [signedDigest, script.toHex()];
         default:
@@ -323,7 +318,10 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
 
   List<TxInput> buildInputs() {
     final sequence = enableRBF
-        ? (Sequence(seqType: TYPE_REPLACE_BY_FEE, value: 0, isTypeBlock: true))
+        ? (Sequence(
+                seqType: BitcoinOpCodeConst.TYPE_REPLACE_BY_FEE,
+                value: 0,
+                isTypeBlock: true))
             .forInputSequence()
         : null;
     final inputs = <TxInput>[];
@@ -353,7 +351,7 @@ with that UTXO. When creating a Bitcoin transaction, the spending conditions
 specified by the scriptPubKey must be satisfied by the corresponding scriptSig
 in the transaction input to spend the UTXO.
 */
-  Script buildOutputScriptPubKey(BitcoinOutputDetails addr) {
+  Script buildOutputScriptPubKey(BitcoinOutput addr) {
     return addr.address.toScriptPubKey();
   }
 
@@ -365,13 +363,13 @@ be retrieved by anyone who examines the blockchain's history.
 */
   Script opReturn(String message) {
     try {
-      hexToBytes(message);
+      BytesUtils.fromHexString(message);
       return Script(script: ["OP_RETURN", message]);
 
       /// ignore: empty_catches
     } catch (e) {}
     final toBytes = utf8.encode(message);
-    final toHex = bytesToHex(toBytes);
+    final toHex = BytesUtils.toHexString(toBytes);
     return Script(script: ["OP_RETURN", toHex]);
   }
 

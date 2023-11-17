@@ -2,15 +2,15 @@ import 'dart:typed_data';
 
 import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
-import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/control_block.dart';
 import 'package:bitcoin_base/src/bitcoin/script/input.dart';
 import 'package:bitcoin_base/src/bitcoin/script/output.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
 import 'package:bitcoin_base/src/bitcoin/script/witness.dart';
-import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
-import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
+import 'package:bitcoin_base/src/crypto/keypair/ec_private.dart';
+import 'package:bitcoin_base/src/crypto/keypair/ec_public.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -35,23 +35,29 @@ void main() {
 
     setUp(() {
       toPriv1 = ECPrivate.fromWif(
-          "cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR");
+          "cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR",
+          netVersion: BitcoinNetwork.testnet.wifNetVer);
       toPub1 = toPriv1.getPublic();
       toPriv2 = ECPrivate.fromWif(
-          "cNxX8M7XU8VNa5ofd8yk1eiZxaxNrQQyb7xNpwAmsrzEhcVwtCjs");
+          "cNxX8M7XU8VNa5ofd8yk1eiZxaxNrQQyb7xNpwAmsrzEhcVwtCjs",
+          netVersion: BitcoinNetwork.testnet.wifNetVer);
       toPub2 = toPriv2.getPublic();
       toAddress2 = toPub2.toTaprootAddress();
       privkeyTrScript1 = ECPrivate.fromWif(
-          "cSW2kQbqC9zkqagw8oTYKFTozKuZ214zd6CMTDs4V32cMfH3dgKa");
+          "cSW2kQbqC9zkqagw8oTYKFTozKuZ214zd6CMTDs4V32cMfH3dgKa",
+          netVersion: BitcoinNetwork.testnet.wifNetVer);
       pubkeyTrScript1 = privkeyTrScript1.getPublic();
       trScriptP2pk1 =
           Script(script: [pubkeyTrScript1.toXOnlyHex(), 'OP_CHECKSIG']);
       toTaprootScriptAddress1 =
           "tb1p0fcjs5l5xqdyvde5u7ut7sr0gzaxp4yya8mv06d2ygkeu82l65xs6k4uqr";
       fromPriv2 = ECPrivate.fromWif(
-          "cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR");
+          "cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR",
+          netVersion: BitcoinNetwork.testnet.wifNetVer);
       fromPub2 = fromPriv2.getPublic();
-      fromAddress2 = fromPub2.toTaprootAddress(scripts: [trScriptP2pk1]);
+      fromAddress2 = fromPub2.toTaprootAddress(scripts: [
+        [trScriptP2pk1]
+      ]);
       txIn2 = TxInput(
           txId:
               "3d4c9d73c4c65772e645ff26493590ae4913d9c37125b72398222a553b73fa66",
@@ -68,9 +74,12 @@ void main() {
 
     // 1-create address with single script spending path
     test('address_with_script_path', () {
-      var toAddress = toPub1.toTaprootAddress(scripts: [trScriptP2pk1]);
+      var toAddress = toPub1.toTaprootAddress(scripts: [
+        [trScriptP2pk1]
+      ]);
 
-      expect(toAddress.toAddress(NetworkInfo.TESTNET), toTaprootScriptAddress1);
+      expect(
+          toAddress.toAddress(BitcoinNetwork.testnet), toTaprootScriptAddress1);
     });
 
     // 2-spend taproot from key path (has single tapleaf script for spending)
@@ -78,14 +87,17 @@ void main() {
       var tx =
           BtcTransaction(inputs: [txIn2], outputs: [txOut2], hasSegwit: true);
 
-      const int signHash = TAPROOT_SIGHASH_ALL;
+      const int signHash = BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL;
       final txDigit = tx.getTransactionTaprootDigset(
           txIndex: 0,
           scriptPubKeys: [scriptPubKey2],
           amounts: [BigInt.from(3500)],
           sighash: signHash);
       final signatur = fromPriv2.signTapRoot(txDigit,
-          scripts: [trScriptP2pk1], sighash: signHash);
+          tapScripts: [
+            [trScriptP2pk1]
+          ],
+          sighash: signHash);
       tx.witnesses.add(TxWitnessInput(stack: [signatur]));
       expect(tx.serialize(), signedTx2);
     });
@@ -105,7 +117,7 @@ void main() {
         script: trScriptP2pk1,
       );
       final sig = privkeyTrScript1.signTapRoot(digit,
-          scripts: [trScriptP2pk1], sighash: TAPROOT_SIGHASH_ALL, tweak: false);
+          sighash: BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL, tweak: false);
       final controlBlock = ControlBlock(public: fromPub2);
 
       tx.witnesses.add(TxWitnessInput(
@@ -116,23 +128,27 @@ void main() {
 
   group('TestCreateP2trWithTwoTapScripts', () {
     late final ECPrivate privkeyTrScriptA = ECPrivate.fromWif(
-        'cSW2kQbqC9zkqagw8oTYKFTozKuZ214zd6CMTDs4V32cMfH3dgKa');
+        'cSW2kQbqC9zkqagw8oTYKFTozKuZ214zd6CMTDs4V32cMfH3dgKa',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     late final ECPublic pubkeyTrScriptA = privkeyTrScriptA.getPublic();
     late final trScriptP2pkA =
         Script(script: [pubkeyTrScriptA.toXOnlyHex(), 'OP_CHECKSIG']);
 
     late final ECPrivate privkeyTrScriptB = ECPrivate.fromWif(
-        'cSv48xapaqy7fPs8VvoSnxNBNA2jpjcuURRqUENu3WVq6Eh4U3JU');
+        'cSv48xapaqy7fPs8VvoSnxNBNA2jpjcuURRqUENu3WVq6Eh4U3JU',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     late final ECPublic pubkeyTrScriptB = privkeyTrScriptB.getPublic();
 
     late final trScriptP2pkB =
         Script(script: [pubkeyTrScriptB.toXOnlyHex(), 'OP_CHECKSIG']);
 
     late final ECPrivate fromPriv = ECPrivate.fromWif(
-        "cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR");
+        "cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR",
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     late final fromPub = fromPriv.getPublic();
-    late final fromAddress =
-        fromPub.toTaprootAddress(scripts: [trScriptP2pkA, trScriptP2pkB]);
+    late final fromAddress = fromPub.toTaprootAddress(scripts: [
+      [trScriptP2pkA, trScriptP2pkB]
+    ]);
 
     late final txIn = TxInput(
         txId:
@@ -140,7 +156,8 @@ void main() {
         txIndex: 0);
 
     late final ECPrivate toPriv = ECPrivate.fromWif(
-        "cNxX8M7XU8VNa5ofd8yk1eiZxaxNrQQyb7xNpwAmsrzEhcVwtCjs");
+        "cNxX8M7XU8VNa5ofd8yk1eiZxaxNrQQyb7xNpwAmsrzEhcVwtCjs",
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     late final toPub = toPriv.getPublic();
     late final toAddress = toPub.toTaprootAddress();
     late final txOut = TxOutput(
@@ -165,7 +182,6 @@ void main() {
 
       final sign = privkeyTrScriptA.signTapRoot(
         txDigit,
-        scripts: [trScriptP2pkA, trScriptP2pkB],
         tweak: false,
       );
       final leafB = trScriptP2pkB.toTapleafTaggedHash();
@@ -180,29 +196,33 @@ void main() {
   group("TestCreateP2trWithThreeTapScripts", () {
     // 1-spend taproot from key path (has three tapleaf script for spending)
     final privkeyTrScriptA = ECPrivate.fromWif(
-        'cSW2kQbqC9zkqagw8oTYKFTozKuZ214zd6CMTDs4V32cMfH3dgKa');
+        'cSW2kQbqC9zkqagw8oTYKFTozKuZ214zd6CMTDs4V32cMfH3dgKa',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final pubkeyTrScriptA = privkeyTrScriptA.getPublic();
     final trScriptP2pkA =
         Script(script: [pubkeyTrScriptA.toXOnlyHex(), 'OP_CHECKSIG']);
 
     final privkeyTrScriptB = ECPrivate.fromWif(
-        'cSv48xapaqy7fPs8VvoSnxNBNA2jpjcuURRqUENu3WVq6Eh4U3JU');
+        'cSv48xapaqy7fPs8VvoSnxNBNA2jpjcuURRqUENu3WVq6Eh4U3JU',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final pubkeyTrScriptB = privkeyTrScriptB.getPublic();
     final trScriptP2pkB =
         Script(script: [pubkeyTrScriptB.toXOnlyHex(), 'OP_CHECKSIG']);
 
     final privkeyTrScriptC = ECPrivate.fromWif(
-        'cRkZPNnn3jdr64o3PDxNHG68eowDfuCdcyL6nVL4n3czvunuvryC');
+        'cRkZPNnn3jdr64o3PDxNHG68eowDfuCdcyL6nVL4n3czvunuvryC',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final pubkeyTrScriptC = privkeyTrScriptC.getPublic();
     final trScriptP2pkC =
         Script(script: [pubkeyTrScriptC.toXOnlyHex(), 'OP_CHECKSIG']);
 
     final fromPriv = ECPrivate.fromWif(
-        'cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR');
+        'cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final fromPub = fromPriv.getPublic();
     final fromAddress = fromPub.toTaprootAddress(scripts: [
       [trScriptP2pkA, trScriptP2pkB],
-      trScriptP2pkC
+      [trScriptP2pkC]
     ]);
 
     final txIn = TxInput(
@@ -211,7 +231,8 @@ void main() {
         txIndex: 0);
 
     final toPriv = ECPrivate.fromWif(
-        'cNxX8M7XU8VNa5ofd8yk1eiZxaxNrQQyb7xNpwAmsrzEhcVwtCjs');
+        'cNxX8M7XU8VNa5ofd8yk1eiZxaxNrQQyb7xNpwAmsrzEhcVwtCjs',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final toPub = toPriv.getPublic();
     final toAddress = toPub.toTaprootAddress();
     final txOut = TxOutput(
@@ -237,10 +258,6 @@ void main() {
           amounts: allAmounts.map((e) => e).toList());
       final sig = privkeyTrScriptB.signTapRoot(
         digit,
-        scripts: [
-          [trScriptP2pkA, trScriptP2pkB],
-          trScriptP2pkC
-        ],
         tweak: false,
       );
 

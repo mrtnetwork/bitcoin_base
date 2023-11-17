@@ -1,20 +1,27 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:bitcoin_base/src/models/network.dart';
 
-enum AddressType {
-  p2pkh,
-  p2wpkh,
-  p2pk,
-  p2tr,
-  p2wsh,
-  p2wshInP2sh,
-  p2wpkhInP2sh,
-  p2pkhInP2sh,
-  p2pkInP2sh
+enum BitcoinAddressType {
+  p2pkh("P2PKH"),
+  p2wpkh("P2WPKH"),
+  p2pk("P2PK"),
+  p2tr("P2TR"),
+  p2wsh("P2WSH"),
+  p2wshInP2sh("P2SH/P2WSH"),
+  p2wpkhInP2sh("P2SH/P2WPKh"),
+  p2pkhInP2sh("P2SH/P2PKH"),
+  p2pkInP2sh("P2SH/P2PK");
+
+  static BitcoinAddressType fromNameOrValue(String value) {
+    return values.firstWhere(
+        (element) => element.name == value || element.value == value);
+  }
+
+  final String value;
+  const BitcoinAddressType(this.value);
 }
 
 abstract class BitcoinAddress {
-  AddressType get type;
+  BitcoinAddressType get type;
   Script toScriptPubKey();
-  String toAddress(NetworkInfo networkType);
+  String toAddress(BitcoinNetwork networkType);
 }

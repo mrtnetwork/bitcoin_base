@@ -1,10 +1,4 @@
-import 'package:bitcoin_base/src/bitcoin/address/address.dart';
-import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin_base/src/bitcoin/script/input.dart';
-import 'package:bitcoin_base/src/bitcoin/script/output.dart';
-import 'package:bitcoin_base/src/bitcoin/script/script.dart';
-import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
-import 'package:bitcoin_base/src/crypto/ec/ec_private.dart';
+import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -34,7 +28,8 @@ void main() {
         amount: BigInt.from(29000000),
         scriptPubKey: changeLowSAddr.toScriptPubKey());
     final sk = ECPrivate.fromWif(
-        'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9');
+        'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final fromAddr =
         P2pkhAddress(address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e');
 
@@ -62,9 +57,11 @@ void main() {
     final sigFromAddr2 =
         P2pkhAddress(address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w');
     final sigSk1 = ECPrivate.fromWif(
-        'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo');
+        'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final sigSk2 = ECPrivate.fromWif(
-        'cVf3kGh6552jU2rLaKwXTKq5APHPoZqCP4GQzQirWGHFoHQ9rEVt');
+        'cVf3kGh6552jU2rLaKwXTKq5APHPoZqCP4GQzQirWGHFoHQ9rEVt',
+        netVersion: BitcoinNetwork.testnet.wifNetVer);
     final sigToAddr1 =
         P2pkhAddress(address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e');
     final sigTxout1 = TxOutput(
@@ -131,8 +128,8 @@ void main() {
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
           script: fromAddr.toScriptPubKey(),
-          sighash: SIGHASH_NONE);
-      final sig = sk.signInput(digit, sigHash: SIGHASH_NONE);
+          sighash: BitcoinOpCodeConst.SIGHASH_NONE);
+      final sig = sk.signInput(digit, sigHash: BitcoinOpCodeConst.SIGHASH_NONE);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), coreTxSignedLowSSignoneResult);
       expect(tx.txId(), coreTxSignedLowSSignoneTxid);
@@ -143,8 +140,9 @@ void main() {
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
           script: sigFromAddr1.toScriptPubKey(),
-          sighash: SIGHASH_SINGLE);
-      final sig = sigSk1.signInput(digit, sigHash: SIGHASH_SINGLE);
+          sighash: BitcoinOpCodeConst.SIGHASH_SINGLE);
+      final sig =
+          sigSk1.signInput(digit, sigHash: BitcoinOpCodeConst.SIGHASH_SINGLE);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       expect(tx.serialize(), sigSighashSingleResult);
     });
@@ -154,13 +152,15 @@ void main() {
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
           script: sigFromAddr1.toScriptPubKey(),
-          sighash: SIGHASH_ALL);
-      final sig = sigSk1.signInput(digit, sigHash: SIGHASH_ALL);
+          sighash: BitcoinOpCodeConst.SIGHASH_ALL);
+      final sig =
+          sigSk1.signInput(digit, sigHash: BitcoinOpCodeConst.SIGHASH_ALL);
       final digit2 = tx.getTransactionDigest(
           txInIndex: 1,
           script: sigFromAddr2.toScriptPubKey(),
-          sighash: SIGHASH_ALL);
-      final sig2 = sigSk2.signInput(digit2, sigHash: SIGHASH_ALL);
+          sighash: BitcoinOpCodeConst.SIGHASH_ALL);
+      final sig2 =
+          sigSk2.signInput(digit2, sigHash: BitcoinOpCodeConst.SIGHASH_ALL);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       sigTxin2.scriptSig = Script(script: [sig2, sigSk2.getPublic().toHex()]);
       expect(tx.serialize(), signSighashAll2in2outResult);
@@ -171,13 +171,15 @@ void main() {
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
           script: sigFromAddr1.toScriptPubKey(),
-          sighash: SIGHASH_NONE);
-      final sig = sigSk1.signInput(digit, sigHash: SIGHASH_NONE);
+          sighash: BitcoinOpCodeConst.SIGHASH_NONE);
+      final sig =
+          sigSk1.signInput(digit, sigHash: BitcoinOpCodeConst.SIGHASH_NONE);
       final digit2 = tx.getTransactionDigest(
           txInIndex: 1,
           script: sigFromAddr2.toScriptPubKey(),
-          sighash: SIGHASH_NONE);
-      final sig2 = sigSk2.signInput(digit2, sigHash: SIGHASH_NONE);
+          sighash: BitcoinOpCodeConst.SIGHASH_NONE);
+      final sig2 =
+          sigSk2.signInput(digit2, sigHash: BitcoinOpCodeConst.SIGHASH_NONE);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       sigTxin2.scriptSig = Script(script: [sig2, sigSk2.getPublic().toHex()]);
       expect(tx.serialize(), signSighashNone2in2outResult);
@@ -188,17 +190,21 @@ void main() {
       final digit = tx.getTransactionDigest(
           txInIndex: 0,
           script: sigFromAddr1.toScriptPubKey(),
-          sighash: SIGHASH_ALL | SIGHASH_ANYONECANPAY);
+          sighash: BitcoinOpCodeConst.SIGHASH_ALL |
+              BitcoinOpCodeConst.SIGHASH_ANYONECANPAY);
 
-      final sig =
-          sigSk1.signInput(digit, sigHash: SIGHASH_ALL | SIGHASH_ANYONECANPAY);
+      final sig = sigSk1.signInput(digit,
+          sigHash: BitcoinOpCodeConst.SIGHASH_ALL |
+              BitcoinOpCodeConst.SIGHASH_ANYONECANPAY);
 
       final digit2 = tx.getTransactionDigest(
           txInIndex: 1,
           script: sigFromAddr2.toScriptPubKey(),
-          sighash: SIGHASH_SINGLE | SIGHASH_ANYONECANPAY);
+          sighash: BitcoinOpCodeConst.SIGHASH_SINGLE |
+              BitcoinOpCodeConst.SIGHASH_ANYONECANPAY);
       final sig2 = sigSk2.signInput(digit2,
-          sigHash: SIGHASH_SINGLE | SIGHASH_ANYONECANPAY);
+          sigHash: BitcoinOpCodeConst.SIGHASH_SINGLE |
+              BitcoinOpCodeConst.SIGHASH_ANYONECANPAY);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       sigTxin2.scriptSig = Script(script: [sig2, sigSk2.getPublic().toHex()]);
       expect(tx.serialize(), signSighashAllSingleAnyone2in2outResult);

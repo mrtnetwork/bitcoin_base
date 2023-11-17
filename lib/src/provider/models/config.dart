@@ -1,10 +1,9 @@
-// ignore_for_file: constant_identifier_names
-
-import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/provider/constant/constant.dart';
 
 enum APIType {
-  MempoolApi,
-  BlockCypherApi,
+  mempool,
+  blockCypher,
 }
 
 class APIConfig {
@@ -14,11 +13,11 @@ class APIConfig {
   final String transactions;
   final String sendTransaction;
   final APIType apiType;
-  final NetworkInfo network;
+  final BitcoinNetwork network;
 
-  factory APIConfig.selectApi(APIType apiType, NetworkInfo network) {
+  factory APIConfig.selectApi(APIType apiType, BitcoinNetwork network) {
     switch (apiType) {
-      case APIType.MempoolApi:
+      case APIType.mempool:
         return APIConfig.mempool(network);
       default:
         return APIConfig.mempool(network);
@@ -44,30 +43,33 @@ class APIConfig {
     return baseUrl.replaceAll("###", address);
   }
 
-  factory APIConfig.fromBlockCypher(NetworkInfo network) {
-    String baseUrl =
-        network.isMainnet ? blockCypherMainBaseURL : blockCypherBaseURL;
+  factory APIConfig.fromBlockCypher(BitcoinNetwork network) {
+    String baseUrl = network.isMainnet
+        ? BtcApiConst.blockCypherMainBaseURL
+        : BtcApiConst.blockCypherBaseURL;
 
     return APIConfig(
       url: "$baseUrl/addrs/###/?unspentOnly=true&includeScript=true&limit=2000",
       feeRate: baseUrl,
       transaction: "$baseUrl/txs/###",
       sendTransaction: "$baseUrl/txs/push",
-      apiType: APIType.BlockCypherApi,
+      apiType: APIType.blockCypher,
       transactions: "$baseUrl/addrs/###/full?limit=200",
       network: network,
     );
   }
 
-  factory APIConfig.mempool(NetworkInfo network) {
-    String baseUrl = network.isMainnet ? mempoolMainBaseURL : mempoolBaseURL;
+  factory APIConfig.mempool(BitcoinNetwork network) {
+    String baseUrl = network.isMainnet
+        ? BtcApiConst.mempoolMainBaseURL
+        : BtcApiConst.mempoolBaseURL;
 
     return APIConfig(
       url: "$baseUrl/address/###/utxo",
       feeRate: "$baseUrl/v1/fees/recommended",
       transaction: "$baseUrl/tx/###",
       sendTransaction: "$baseUrl/tx",
-      apiType: APIType.MempoolApi,
+      apiType: APIType.mempool,
       transactions: "$baseUrl/address/###/txs",
       network: network,
     );
@@ -83,11 +85,3 @@ class APIConfig {
     required this.network,
   });
 }
-
-const String blockCypherBaseURL = "https://api.blockcypher.com/v1/btc/test3";
-const String mempoolBaseURL = "https://mempool.space/testnet/api";
-const String blockstreamBaseURL = "https://blockstream.info/testnet/api";
-
-const String blockCypherMainBaseURL = "https://api.blockcypher.com/v1/btc/main";
-const String mempoolMainBaseURL = "https://mempool.space/api";
-const String blockstreamMainBaseURL = "https://blockstream.info/api";

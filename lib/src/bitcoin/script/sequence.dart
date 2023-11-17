@@ -1,6 +1,6 @@
-import 'dart:typed_data';
-
-import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
+import 'package:blockchain_utils/binary/binary_operation.dart';
+import 'package:blockchain_utils/numbers/int_utils.dart';
 
 /// Helps setting up appropriate sequence. Used to provide the sequence to transaction inputs and to scripts.
 ///
@@ -10,7 +10,8 @@ import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
 class Sequence {
   Sequence(
       {required this.seqType, required this.value, this.isTypeBlock = true}) {
-    if (seqType == TYPE_RELATIVE_TIMELOCK && (value < 1 || value > 0xffff)) {
+    if (seqType == BitcoinOpCodeConst.TYPE_RELATIVE_TIMELOCK &&
+        (value < 1 || value > mask16)) {
       throw ArgumentError('Sequence should be between 1 and 65535');
     }
   }
@@ -19,26 +20,21 @@ class Sequence {
   final bool isTypeBlock;
 
   /// Serializes the relative sequence as required in a transaction
-  Uint8List forInputSequence() {
-    if (seqType == TYPE_ABSOLUTE_TIMELOCK) {
-      return Uint8List.fromList(ABSOLUTE_TIMELOCK_SEQUENCE);
+  List<int> forInputSequence() {
+    if (seqType == BitcoinOpCodeConst.TYPE_ABSOLUTE_TIMELOCK) {
+      return List<int>.from(BitcoinOpCodeConst.ABSOLUTE_TIMELOCK_SEQUENCE);
     }
 
-    if (seqType == TYPE_REPLACE_BY_FEE) {
-      return Uint8List.fromList(REPLACE_BY_FEE_SEQUENCE);
+    if (seqType == BitcoinOpCodeConst.TYPE_REPLACE_BY_FEE) {
+      return List<int>.from(BitcoinOpCodeConst.REPLACE_BY_FEE_SEQUENCE);
     }
-    if (seqType == TYPE_RELATIVE_TIMELOCK) {
+    if (seqType == BitcoinOpCodeConst.TYPE_RELATIVE_TIMELOCK) {
       int seq = 0;
       if (!isTypeBlock) {
         seq |= 1 << 22;
       }
       seq |= value;
-      return Uint8List.fromList([
-        seq & 0xFF,
-        (seq >> 8) & 0xFF,
-        (seq >> 16) & 0xFF,
-        (seq >> 24) & 0xFF,
-      ]);
+      return IntUtils.toBytes(seq, length: 4);
     }
 
     throw ArgumentError("Invalid seqType");
@@ -46,11 +42,11 @@ class Sequence {
 
   /// Returns the appropriate integer for a script; e.g. for relative timelocks
   int forScript() {
-    if (seqType == TYPE_REPLACE_BY_FEE) {
+    if (seqType == BitcoinOpCodeConst.TYPE_REPLACE_BY_FEE) {
       throw const FormatException("RBF is not to be included in a script.");
     }
     int scriptIntiger = value;
-    if (seqType == TYPE_RELATIVE_TIMELOCK && !isTypeBlock) {
+    if (seqType == BitcoinOpCodeConst.TYPE_RELATIVE_TIMELOCK && !isTypeBlock) {
       scriptIntiger |= 1 << 22;
     }
     return scriptIntiger;

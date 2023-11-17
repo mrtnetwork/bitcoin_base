@@ -1,8 +1,6 @@
-import 'dart:typed_data';
-
-import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin_base/src/crypto/ec/ec_public.dart';
-import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
+import 'package:bitcoin_base/src/crypto/keypair/ec_public.dart';
+import 'package:blockchain_utils/binary/utils.dart';
 
 import 'script.dart';
 
@@ -10,17 +8,17 @@ class ControlBlock {
   ControlBlock({required this.public, this.scriptToSpend, this.scripts});
   late final ECPublic public;
   Script? scriptToSpend;
-  Uint8List? scripts;
+  List<int>? scripts;
 
-  Uint8List toBytes() {
-    final Uint8List version = Uint8List.fromList([LEAF_VERSION_TAPSCRIPT]);
+  List<int> toBytes() {
+    final List<int> version = [BitcoinOpCodeConst.LEAF_VERSION_TAPSCRIPT];
 
-    final Uint8List pubKey = hexToBytes(public.toXOnlyHex());
-    final Uint8List marklePath = scripts ?? Uint8List(0);
-    return Uint8List.fromList([...version, ...pubKey, ...marklePath]);
+    final List<int> pubKey = BytesUtils.fromHexString(public.toXOnlyHex());
+    final List<int> marklePath = scripts ?? [];
+    return [...version, ...pubKey, ...marklePath];
   }
 
   String toHex() {
-    return bytesToHex(toBytes());
+    return BytesUtils.toHexString(toBytes());
   }
 }

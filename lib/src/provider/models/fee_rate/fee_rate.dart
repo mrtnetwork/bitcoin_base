@@ -1,13 +1,13 @@
 class BitcoinFeeRate {
   BitcoinFeeRate._(
       {required this.high, required this.medium, required this.low});
-  BigInt high;
+  final BigInt high;
 
   /// High fee rate in satoshis per byte
-  BigInt medium;
+  final BigInt medium;
 
   /// Medium fee rate in satoshis per byte
-  BigInt low;
+  final BigInt low;
 
   /// Low fee rate in satoshis per byte
 
@@ -37,9 +37,9 @@ class BitcoinFeeRate {
   /// information for high, medium, and low fee levels.
   factory BitcoinFeeRate.fromMempool(Map<String, dynamic> json) {
     return BitcoinFeeRate._(
-        high: parseMempoolFees(json['fastestFee'])!,
-        medium: parseMempoolFees(json['halfHourFee'])!,
-        low: parseMempoolFees(json['minimumFee'])!);
+        high: _parseMempoolFees(json['fastestFee']),
+        medium: _parseMempoolFees(json['halfHourFee']),
+        low: _parseMempoolFees(json['minimumFee']));
   }
 
   /// NewBitcoinFeeRateFromBlockCypher creates a BitcoinFeeRate structure from JSON data retrieved
@@ -57,7 +57,7 @@ class BitcoinFeeRate {
 /// mempool fees in satoshis per kilobyte (sat/KB). The function performs the conversion
 /// based on the type of the input data, which can be either a double (floating-point
 /// fee rate) or an int (integer fee rate in satoshis per byte).
-BigInt? parseMempoolFees(dynamic data) {
+BigInt _parseMempoolFees(dynamic data) {
   const kb = 1024;
 
   if (data is double) {
@@ -65,6 +65,7 @@ BigInt? parseMempoolFees(dynamic data) {
   } else if (data is int) {
     return BigInt.from((data * kb));
   } else {
-    return null;
+    throw StateError(
+        "cannot parse mempool fees excepted double, string got ${data.runtimeType}");
   }
 }

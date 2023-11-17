@@ -1,12 +1,9 @@
-/// UtxoOwnerDetails represents ownership details associated with a Bitcoin unspent transaction output (UTXO).
+/// UtxoAddressDetails represents ownership details associated with a Bitcoin unspent transaction output (UTXO).
 /// It includes information such as the public key, Bitcoin address, and multi-signature address (if applicable)
 /// of the UTXO owner.
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:bitcoin_base/src/bitcoin/address/core.dart';
 
-import 'multisig_script.dart';
-
-class UtxoOwnerDetails {
+class UtxoAddressDetails {
   /// PublicKey is the public key associated with the UTXO owner.
   final String? publicKey;
 
@@ -17,24 +14,28 @@ class UtxoOwnerDetails {
   /// associated with the UTXO owner. It may be null if the UTXO owner is not using a multi-signature scheme.
   final MultiSignatureAddress? multiSigAddress;
 
-  UtxoOwnerDetails({
+  UtxoAddressDetails({
     this.publicKey,
     required this.address,
     this.multiSigAddress,
   }) : assert(publicKey != null || multiSigAddress != null,
             "use publicKey for normal transaction and multiSigAddress for multi-sig address");
+
+  UtxoAddressDetails.watchOnly(this.address)
+      : publicKey = null,
+        multiSigAddress = null;
 }
 
-/// UtxoWithOwner represents an unspent transaction output (UTXO) along with its associated owner details.
-/// It combines information about the UTXO itself (BitcoinUtxo) and the ownership details (UtxoOwnerDetails).
-class UtxoWithOwner {
+/// UtxoWithAddress represents an unspent transaction output (UTXO) along with its associated owner details.
+/// It combines information about the UTXO itself (BitcoinUtxo) and the ownership details (UtxoAddressDetails).
+class UtxoWithAddress {
   /// Utxo is a BitcoinUtxo instance representing the unspent transaction output.
   final BitcoinUtxo utxo;
 
-  /// OwnerDetails is a UtxoOwnerDetails instance containing information about the UTXO owner.
-  final UtxoOwnerDetails ownerDetails;
+  /// OwnerDetails is a UtxoAddressDetails instance containing information about the UTXO owner.
+  final UtxoAddressDetails ownerDetails;
 
-  UtxoWithOwner({
+  UtxoWithAddress({
     required this.utxo,
     required this.ownerDetails,
   });
@@ -52,16 +53,16 @@ class UtxoWithOwner {
   }
 }
 
-/// BitcoinOutputDetails represents details about a Bitcoin transaction output, including
+/// BitcoinOutput represents details about a Bitcoin transaction output, including
 /// the recipient address and the value of bitcoins sent to that address.
-class BitcoinOutputDetails {
+class BitcoinOutput {
   /// Address is a Bitcoin address representing the recipient of the transaction output.
   final BitcoinAddress address;
 
   /// Value is a pointer to a BigInt representing the amount of bitcoins sent to the recipient.
   final BigInt value;
 
-  BitcoinOutputDetails({
+  BitcoinOutput({
     required this.address,
     required this.value,
   });
@@ -82,7 +83,7 @@ class BitcoinUtxo {
   final int vout;
 
   /// ScriptType specifies the type of Bitcoin script associated with this UTXO.
-  final AddressType scriptType;
+  final BitcoinAddressType scriptType;
 
   /// BlockHeight represents the block height at which this UTXO was confirmed.
   final int blockHeight;
@@ -96,23 +97,23 @@ class BitcoinUtxo {
   });
 
   bool isP2tr() {
-    return scriptType == AddressType.p2tr;
+    return scriptType == BitcoinAddressType.p2tr;
   }
 
   bool isSegwit() {
-    return scriptType == AddressType.p2wpkh ||
-        scriptType == AddressType.p2wsh ||
-        scriptType == AddressType.p2tr ||
+    return scriptType == BitcoinAddressType.p2wpkh ||
+        scriptType == BitcoinAddressType.p2wsh ||
+        scriptType == BitcoinAddressType.p2tr ||
         isP2shSegwit();
   }
 
   bool isP2shSegwit() {
-    return scriptType == AddressType.p2wpkhInP2sh ||
-        scriptType == AddressType.p2wshInP2sh;
+    return scriptType == BitcoinAddressType.p2wpkhInP2sh ||
+        scriptType == BitcoinAddressType.p2wshInP2sh;
   }
 }
 
-extension Calculate on List<UtxoWithOwner> {
+extension Calculate on List<UtxoWithAddress> {
   BigInt sumOfUtxosValue() {
     BigInt sum = BigInt.zero;
     for (var utxo in this) {

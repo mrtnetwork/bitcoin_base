@@ -1,4 +1,4 @@
-import 'package:bitcoin_base/src/provider/utxo_details.dart';
+import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
 
 class MempoolPrevOut {
   final String scriptPubKey;
@@ -169,15 +169,13 @@ class MempolUtxo {
       vout: json['vout'],
       status: MempoolStatus.fromJson(json['status']),
       value: BigInt.parse(json['value'].toString()),
-
-      /// Parse the value as a BigInt.
     );
   }
 }
 
 extension MempoolUtxoExtentions on List<MempolUtxo> {
-  List<UtxoWithOwner> toUtxoWithOwnerList(UtxoOwnerDetails owner) {
-    List<UtxoWithOwner> utxos = map((e) => UtxoWithOwner(
+  List<UtxoWithAddress> toUtxoWithOwnerList(UtxoAddressDetails owner) {
+    List<UtxoWithAddress> utxos = map((e) => UtxoWithAddress(
           utxo: BitcoinUtxo(
             txHash: e.txid,
             value: e.value,

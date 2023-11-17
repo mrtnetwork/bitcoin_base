@@ -1,11 +1,10 @@
-import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
-
-import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/bitcoin/address/core.dart';
-import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
+import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
-import 'package:blockchain_utils/bech32/bech32.dart' as bech32;
+import 'package:bitcoin_base/src/models/network.dart';
+import 'package:blockchain_utils/bech32/bech32.dart';
+import 'package:blockchain_utils/binary/utils.dart';
+import 'package:blockchain_utils/crypto/quick_crypto.dart';
 
 abstract class SegwitAddress implements BitcoinAddress {
   /// Represents a Bitcoin segwit address
@@ -17,10 +16,11 @@ abstract class SegwitAddress implements BitcoinAddress {
       {String? address,
       String? program,
       Script? script,
-      this.version = P2WPKH_ADDRESS_V0}) {
-    if (version == P2WPKH_ADDRESS_V0 || version == P2WSH_ADDRESS_V0) {
+      this.version = BitcoinOpCodeConst.P2WPKH_ADDRESS_V0}) {
+    if (version == BitcoinOpCodeConst.P2WPKH_ADDRESS_V0 ||
+        version == BitcoinOpCodeConst.P2WSH_ADDRESS_V0) {
       segwitNumVersion = 0;
-    } else if (version == P2TR_ADDRESS_V1) {
+    } else if (version == BitcoinOpCodeConst.P2TR_ADDRESS_V1) {
       segwitNumVersion = 1;
     } else {
       throw ArgumentError('A valid segwit version is required.');
@@ -42,40 +42,37 @@ abstract class SegwitAddress implements BitcoinAddress {
   late final int segwitNumVersion;
 
   String _addressToHash(String address) {
-    final convert = bech32.decodeBech32(address);
-    if (convert == null) {
-      throw ArgumentError("Invalid value for parameter address.");
-    }
-    final version = convert.version;
+    final convert = SegwitBech32Decoder.decode(null, address);
+
+    final version = convert.$1;
     if (version != segwitNumVersion) {
       throw ArgumentError("Invalid segwit version.");
     }
-    return bytesToHex(convert.data);
+    return BytesUtils.toHexString(convert.$2);
   }
 
   /// returns the address's string encoding (Bech32)
   @override
-  String toAddress(NetworkInfo networkType) {
-    final bytes = hexToBytes(_program);
-    final sw = bech32.encodeBech32(networkType.bech32, bytes, segwitNumVersion);
-    if (sw == null) {
-      throw ArgumentError("invalid address");
-    }
-
+  String toAddress(BitcoinNetwork networkType) {
+    final bytes = BytesUtils.fromHexString(_program);
+    final sw = SegwitBech32Encoder.encode(
+        networkType.p2wpkhHrp, segwitNumVersion, bytes);
     return sw;
   }
 
   String _scriptToHash(Script script) {
     final toBytes = script.toBytes();
-    final toHash = singleHash(toBytes);
-    return bytesToHex(toHash);
+    final toHash = QuickCrypto.sha256Hash(toBytes);
+    return BytesUtils.toHexString(toHash);
   }
 }
 
 class P2wpkhAddress extends SegwitAddress {
   /// Encapsulates a P2WPKH address.
   P2wpkhAddress(
-      {super.address, super.program, super.version = P2WPKH_ADDRESS_V0});
+      {super.address,
+      super.program,
+      super.version = BitcoinOpCodeConst.P2WPKH_ADDRESS_V0});
 
   /// returns the scriptPubKey of a P2WPKH witness script
   @override
@@ -85,7 +82,7 @@ class P2wpkhAddress extends SegwitAddress {
 
   /// returns the type of address
   @override
-  AddressType get type => AddressType.p2wpkh;
+  BitcoinAddressType get type => BitcoinAddressType.p2wpkh;
 }
 
 class P2trAddress extends SegwitAddress {
@@ -93,7 +90,7 @@ class P2trAddress extends SegwitAddress {
   P2trAddress({
     super.program,
     super.address,
-  }) : super(version: P2TR_ADDRESS_V1);
+  }) : super(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
 
   /// returns the scriptPubKey of a P2TR witness script
   @override
@@ -103,13 +100,13 @@ class P2trAddress extends SegwitAddress {
 
   /// returns the type of address
   @override
-  AddressType get type => AddressType.p2tr;
+  BitcoinAddressType get type => BitcoinAddressType.p2tr;
 }
 
 class P2wshAddress extends SegwitAddress {
   /// Encapsulates a P2WSH address.
   P2wshAddress({super.script, super.address})
-      : super(version: P2WSH_ADDRESS_V0);
+      : super(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);
 
   /// Returns the scriptPubKey of a P2WPKH witness script
   @override
@@ -119,5 +116,5 @@ class P2wshAddress extends SegwitAddress {
 
   /// Returns the type of address
   @override
-  AddressType get type => AddressType.p2wsh;
+  BitcoinAddressType get type => BitcoinAddressType.p2wsh;
 }

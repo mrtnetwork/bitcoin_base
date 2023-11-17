@@ -1,20 +1,16 @@
 // ignore_for_file: unused_local_variable
 
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:bitcoin_base/src/bitcoin/address/core.dart';
-import 'package:bitcoin_base/src/models/network.dart';
-import 'package:bitcoin_base/src/provider/api_provider.dart';
 
-import 'package:bitcoin_base/src/provider/transaction_builder.dart';
-import 'package:bitcoin_base/src/provider/utxo_details.dart';
-
+import '../example_service.dart';
 import 'spending_builders.dart';
 
 // Define the network as the Testnet (used for testing and development purposes).
-const network = NetworkInfo.TESTNET;
+const network = BitcoinNetwork.testnet;
+final service = BitcoinApiService();
 
 // Initialize an API provider for interacting with the Testnet's blockchain data.
-final api = ApiProvider.fromMempl(network);
+final api = ApiProvider.fromMempool(network, service);
 
 // In these tutorials, you will learn how to spend various types of UTXOs.
 // Each method is specific to a type of UTXO.
@@ -33,7 +29,7 @@ Future<void> spendingP2WPKH(ECPrivate sWallet, ECPrivate rWallet) async {
   final sender = publicKey.toSegwitAddress();
   // Read UTXOs of accounts from the BlockCypher API.
   final utxo = await api.getAccountUtxo(
-      UtxoOwnerDetails(address: sender, publicKey: publicKey.toHex()));
+      UtxoAddressDetails(address: sender, publicKey: publicKey.toHex()));
   // The total amount of UTXOs that we can spend.
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
@@ -75,7 +71,7 @@ Future<void> spendingP2WPKH(ECPrivate sWallet, ECPrivate rWallet) async {
   // We specify the desired amount for each address. Here, I have divided the desired total
   // amount by the number of outputs to ensure an equal amount for each.
   final outPutWithValue = outputsAdress
-      .map((e) => BitcoinOutputDetails(
+      .map((e) => BitcoinOutput(
           address: e, value: canSpend ~/ BigInt.from(outputsAdress.length)))
       .toList();
 
@@ -113,7 +109,7 @@ Future<void> spendingP2WSH(ECPrivate sWallet, ECPrivate rWallet) async {
   // P2WSH ADDRESS
   final sender = addr.toP2wshAddress();
   final utxo = await api.getAccountUtxo(
-      UtxoOwnerDetails(address: sender, publicKey: addr.toHex()));
+      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
@@ -134,7 +130,7 @@ Future<void> spendingP2WSH(ECPrivate sWallet, ECPrivate rWallet) async {
       feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
-      .map((e) => BitcoinOutputDetails(
+      .map((e) => BitcoinOutput(
           address: e, value: canSpend ~/ BigInt.from(outputsAdress.length)))
       .toList();
   final transaction = buildP2WSHTransaction(
@@ -158,7 +154,7 @@ Future<void> spendingP2PKH(ECPrivate sWallet, ECPrivate rWallet) async {
   // P2PKH
   final sender = addr.toAddress();
   final utxo = await api.getAccountUtxo(
-      UtxoOwnerDetails(address: sender, publicKey: addr.toHex()));
+      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
@@ -178,7 +174,7 @@ Future<void> spendingP2PKH(ECPrivate sWallet, ECPrivate rWallet) async {
       feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
-      .map((e) => BitcoinOutputDetails(
+      .map((e) => BitcoinOutput(
           address: e, value: canSpend ~/ BigInt.from(outputsAdress.length)))
       .toList();
 
@@ -206,7 +202,7 @@ Future<void> spendingP2SHNoneSegwit(
   // P2SH(P2PK)
   final sender = addr.toP2pkInP2sh();
   final utxo = await api.getAccountUtxo(
-      UtxoOwnerDetails(address: sender, publicKey: addr.toHex()));
+      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
@@ -226,7 +222,7 @@ Future<void> spendingP2SHNoneSegwit(
       feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
-      .map((e) => BitcoinOutputDetails(
+      .map((e) => BitcoinOutput(
           address: e, value: canSpend ~/ BigInt.from(outputsAdress.length)))
       .toList();
   final transaction = buildP2shNoneSegwitTransaction(
@@ -252,7 +248,7 @@ Future<void> spendingP2shSegwit(ECPrivate sWallet, ECPrivate rWallet) async {
   // P2SH(P2PWKH)
   final sender = addr.toP2wpkhInP2sh();
   final utxo = await api.getAccountUtxo(
-      UtxoOwnerDetails(address: sender, publicKey: addr.toHex()));
+      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
@@ -273,7 +269,7 @@ Future<void> spendingP2shSegwit(ECPrivate sWallet, ECPrivate rWallet) async {
       feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
-      .map((e) => BitcoinOutputDetails(
+      .map((e) => BitcoinOutput(
           address: e, value: canSpend ~/ BigInt.from(outputsAdress.length)))
       .toList();
 
@@ -300,7 +296,7 @@ Future<void> spendingP2TR(ECPrivate sWallet, ECPrivate rWallet) async {
   // P2TR address
   final sender = addr.toTaprootAddress();
   final utxo = await api.getAccountUtxo(
-      UtxoOwnerDetails(address: sender, publicKey: addr.toHex()));
+      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
@@ -320,7 +316,7 @@ Future<void> spendingP2TR(ECPrivate sWallet, ECPrivate rWallet) async {
       feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
-      .map((e) => BitcoinOutputDetails(
+      .map((e) => BitcoinOutput(
           address: e, value: canSpend ~/ BigInt.from(outputsAdress.length)))
       .toList();
 

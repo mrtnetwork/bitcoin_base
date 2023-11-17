@@ -1,5 +1,4 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:bitcoin_base/src/bitcoin/address/core.dart';
 
 /// MultiSignatureSigner is an interface that defines methods required for representing
 /// signers in a multi-signature scheme. A multi-signature signer typically includes
@@ -55,17 +54,18 @@ class MultiSignatureAddress {
   factory MultiSignatureAddress({
     required int threshold,
     required List<MultiSignatureSigner> signers,
-    required AddressType addressType,
+    required BitcoinAddressType addressType,
   }) {
     final sumWeight = signers.fold(0, (sum, signer) => sum + signer.weight);
     if (threshold > 16 || threshold < 1) {
-      throw Exception('The threshold should be between 1 and 16');
+      throw ArgumentError('The threshold should be between 1 and 16');
     }
     if (sumWeight > 16) {
-      throw Exception('The total weight of the owners should not exceed 16');
+      throw ArgumentError(
+          'The total weight of the owners should not exceed 16');
     }
     if (sumWeight < threshold) {
-      throw Exception(
+      throw ArgumentError(
           'The total weight of the signatories should reach the threshold');
     }
     final multiSigScript = <Object>['OP_$threshold'];
@@ -78,7 +78,7 @@ class MultiSignatureAddress {
     final script = Script(script: multiSigScript);
     final p2wsh = P2wshAddress(script: script);
     switch (addressType) {
-      case AddressType.p2wsh:
+      case BitcoinAddressType.p2wsh:
         {
           return MultiSignatureAddress._(
             signers: signers,
@@ -87,10 +87,11 @@ class MultiSignatureAddress {
             scriptDetails: script.toHex(),
           );
         }
-      case AddressType.p2wshInP2sh:
+      case BitcoinAddressType.p2wshInP2sh:
         {
           final addr = P2shAddress.fromScript(
-              script: p2wsh.toScriptPubKey(), type: AddressType.p2wshInP2sh);
+              script: p2wsh.toScriptPubKey(),
+              type: BitcoinAddressType.p2wshInP2sh);
           return MultiSignatureAddress._(
             signers: signers,
             threshold: threshold,
@@ -100,20 +101,8 @@ class MultiSignatureAddress {
         }
       default:
         {
-          throw Exception('addressType should be P2WSH or P2WSHInP2SH');
+          throw ArgumentError('addressType should be P2WSH or P2WSHInP2SH');
         }
     }
-  }
-
-  List<String> showScript() {
-    final sumWeight = signers.fold(0, (sum, signer) => sum + signer.weight);
-    final multiSigScript = <String>['OP_$threshold'];
-    for (final signer in signers) {
-      for (var w = 0; w < signer.weight; w++) {
-        multiSigScript.add(signer.publicKey);
-      }
-    }
-    multiSigScript.addAll(['OP_$sumWeight', 'OP_CHECKMULTISIG']);
-    return multiSigScript;
   }
 }

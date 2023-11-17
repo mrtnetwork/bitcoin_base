@@ -1,35 +1,36 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:bitcoin_base/src/models/network.dart';
-import 'package:bitcoin_base/src/provider/api_provider.dart';
-import 'package:bitcoin_base/src/provider/transaction_builder.dart';
-import 'package:bitcoin_base/src/provider/utxo_details.dart';
+import 'package:blockchain_utils/bip/mnemonic/mnemonic.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
+
+import '../example_service.dart';
 
 // spend from 8 different address type to 10 different output
 void main() async {
+  final service = BitcoinApiService();
   // select network
-  const NetworkInfo network = NetworkInfo.TESTNET;
+  const BitcoinNetwork network = BitcoinNetwork.testnet;
 
   // select api for read accounts UTXOs and send transaction
   // Mempool or BlockCypher
-  final api = ApiProvider.fromMempl(network);
+  final api = ApiProvider.fromBlocCypher(network, service);
 
-  const mnemonic =
-      "spy often critic spawn produce volcano depart fire theory fog turn retire";
+  final mnemonic = Bip39SeedGenerator(Mnemonic.fromString(
+          "spy often critic spawn produce volcano depart fire theory fog turn retire"))
+      .generate();
 
-  final masterWallet = BIP32HWallet.fromMnemonic(mnemonic);
+  final bip32 = Bip32Slip10Secp256k1.fromSeed(mnemonic);
 
   // i generate 4 HD wallet for this test and now i have access to private and pulic key of each wallet
-  final sp1 = BIP32HWallet.drivePath(masterWallet, "m/44'/0'/0'/0/0/1");
-  final sp2 = BIP32HWallet.drivePath(masterWallet, "m/44'/0'/0'/0/0/2");
-  final sp3 = BIP32HWallet.drivePath(masterWallet, "m/44'/0'/0'/0/0/3");
-  final sp4 = BIP32HWallet.drivePath(masterWallet, "m/44'/0'/0'/0/0/4");
+  final sp1 = bip32.derivePath("m/44'/0'/0'/0/0/1");
+  final sp2 = bip32.derivePath("m/44'/0'/0'/0/0/2");
+  final sp3 = bip32.derivePath("m/44'/0'/0'/0/0/3");
+  final sp4 = bip32.derivePath("m/44'/0'/0'/0/0/4");
 
   // access to private key `ECPrivate`
-  final private1 = ECPrivate.fromBytes(sp1.privateKey);
-  final private2 = ECPrivate.fromBytes(sp2.privateKey);
-  final private3 = ECPrivate.fromBytes(sp3.privateKey);
-  final private4 = ECPrivate.fromBytes(sp4.privateKey);
+  final private1 = ECPrivate.fromBytes(sp1.privateKey.raw);
+  final private2 = ECPrivate.fromBytes(sp2.privateKey.raw);
+  final private3 = ECPrivate.fromBytes(sp3.privateKey.raw);
+  final private4 = ECPrivate.fromBytes(sp4.privateKey.raw);
 
   // access to public key `ECPublic`
   final public1 = private1.getPublic();
@@ -39,8 +40,10 @@ void main() async {
 
   // P2PKH ADDRESS
   final exampleAddr1 = public1.toAddress();
+
   // P2TR
   final exampleAddr2 = public2.toTaprootAddress();
+
   // P2PKHINP2SH
   final exampleAddr3 = public2.toP2pkhInP2sh();
   // P2KH
@@ -63,18 +66,18 @@ void main() async {
   // now i want to spending from 8 address in one transaction
   // we need publicKeys and address
   final spenders = [
-    UtxoOwnerDetails(publicKey: public1.toHex(), address: exampleAddr1),
-    UtxoOwnerDetails(publicKey: public2.toHex(), address: exampleAddr2),
-    UtxoOwnerDetails(publicKey: public3.toHex(), address: exampleAddr7),
-    UtxoOwnerDetails(publicKey: public3.toHex(), address: exampleAddr9),
-    UtxoOwnerDetails(publicKey: public3.toHex(), address: exampleAddr10),
-    UtxoOwnerDetails(publicKey: public2.toHex(), address: exampleAddr3),
-    UtxoOwnerDetails(publicKey: public4.toHex(), address: exampleAddr8),
-    UtxoOwnerDetails(publicKey: public3.toHex(), address: exampleAddr4),
+    UtxoAddressDetails(publicKey: public1.toHex(), address: exampleAddr1),
+    UtxoAddressDetails(publicKey: public2.toHex(), address: exampleAddr2),
+    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr7),
+    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr9),
+    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr10),
+    UtxoAddressDetails(publicKey: public2.toHex(), address: exampleAddr3),
+    UtxoAddressDetails(publicKey: public4.toHex(), address: exampleAddr8),
+    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr4),
   ];
 
   // i need now to read spenders account UTXOS
-  final List<UtxoWithOwner> utxos = [];
+  final List<UtxoWithAddress> utxos = [];
 
   // i add some method for provider to read utxos from mempol or blockCypher
   // looping address to read Utxos
@@ -89,7 +92,7 @@ void main() async {
       }
 
       utxos.addAll(spenderUtxos);
-    } on ApiProviderException {
+    } on Exception {
       // something bad happen when reading Utxos:
       return;
     }
@@ -116,25 +119,25 @@ void main() async {
   // we create 10 different output with  different address type like (pt2r, p2sh(p2wpkh), p2sh(p2wsh), p2pkh, etc.)
   // We consider the spendable amount for 10 outputs and divide by 10, each output 117,414
   final output1 =
-      BitcoinOutputDetails(address: exampleAddr4, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr4, value: BigInt.from(117414));
   final output2 =
-      BitcoinOutputDetails(address: exampleAddr9, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr9, value: BigInt.from(117414));
   final output3 =
-      BitcoinOutputDetails(address: exampleAddr10, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr10, value: BigInt.from(117414));
   final output4 =
-      BitcoinOutputDetails(address: exampleAddr1, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr1, value: BigInt.from(117414));
   final output5 =
-      BitcoinOutputDetails(address: exampleAddr3, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr3, value: BigInt.from(117414));
   final output6 =
-      BitcoinOutputDetails(address: exampleAddr2, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr2, value: BigInt.from(117414));
   final output7 =
-      BitcoinOutputDetails(address: exampleAddr7, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr7, value: BigInt.from(117414));
   final output8 =
-      BitcoinOutputDetails(address: exampleAddr8, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr8, value: BigInt.from(117414));
   final output9 =
-      BitcoinOutputDetails(address: exampleAddr5, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr5, value: BigInt.from(117414));
   final output10 =
-      BitcoinOutputDetails(address: exampleAddr6, value: BigInt.from(117414));
+      BitcoinOutput(address: exampleAddr6, value: BigInt.from(117414));
 
   // Well, now it is clear to whom we are going to pay the amount
   // Now let's create the transaction
@@ -250,7 +253,7 @@ void main() async {
     final txId = await api.sendRawTransaction(digest);
     // Yes, we did :)  2625cd75f6576c38445deb2a9573c12ccc3438c3a6dd16fd431162d3f2fbb6c8
     // Now we check Mempol for what happened https://mempool.space/testnet/tx/2625cd75f6576c38445deb2a9573c12ccc3438c3a6dd16fd431162d3f2fbb6c8
-  } on ApiProviderException {
+  } on Exception {
     // Something went wrong when sending the transaction
   }
 }

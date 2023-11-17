@@ -1,12 +1,11 @@
-import 'dart:typed_data';
-
-import 'package:bitcoin_base/src/bitcoin/address/address.dart';
-import 'package:bitcoin_base/src/bitcoin/constant/constant.dart';
-import 'package:bitcoin_base/src/bitcoin/tools/tools.dart';
+import 'package:bitcoin_base/src/bitcoin/address/legacy_address.dart';
+import 'package:bitcoin_base/src/bitcoin/script/op_code/constant_lib.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
 
-import 'package:bitcoin_base/src/formating/bytes_tracker.dart';
+import 'package:bitcoin_base/src/bytes_utils/dynamic_byte.dart';
+import 'package:blockchain_utils/binary/binary_operation.dart';
+import 'package:blockchain_utils/binary/utils.dart';
+import 'package:blockchain_utils/numbers/int_utils.dart';
 
 /// ignore: constant_identifier_names
 enum ScriptType { P2PKH, P2SH, P2WPKH, P2WSH, P2PK }
@@ -18,11 +17,11 @@ class Script {
   const Script({required this.script});
   final List<dynamic> script;
 
-  Uint8List toTapleafTaggedHash() {
-    final leafVarBytes = Uint8List.fromList([
-      ...Uint8List.fromList([LEAF_VERSION_TAPSCRIPT]),
-      ...prependVarint(toBytes())
-    ]);
+  List<int> toTapleafTaggedHash() {
+    final leafVarBytes = [
+      BitcoinOpCodeConst.LEAF_VERSION_TAPSCRIPT,
+      ...IntUtils.prependVarint(toBytes())
+    ];
     return taggedHash(leafVarBytes, "TapLeaf");
   }
 
@@ -35,11 +34,11 @@ class Script {
   static Script fromRaw({required String hexData, bool hasSegwit = false}) {
     List<String> commands = [];
     int index = 0;
-    final scriptraw = hexToBytes(hexData);
+    final scriptraw = BytesUtils.fromHexString(hexData);
     while (index < scriptraw.length) {
       int byte = scriptraw[index];
-      if (CODE_OPS.containsKey(byte)) {
-        commands.add(CODE_OPS[byte]!);
+      if (BitcoinOpCodeConst.CODE_OPS.containsKey(byte)) {
+        commands.add(BitcoinOpCodeConst.CODE_OPS[byte]!);
         index = index + 1;
       } else if (!hasSegwit && byte == 0x4c) {
         int bytesToRead = scriptraw[index + 1];
@@ -50,8 +49,8 @@ class Script {
             .join());
         index = index + bytesToRead;
       } else if (!hasSegwit && byte == 0x4d) {
-        int bytesToRead = ByteData.sublistView(scriptraw, index + 1, index + 3)
-            .getUint16(0, Endian.little);
+        int bytesToRead = readUint16LE(scriptraw, index + 1);
+
         index = index + 3;
         commands.add(scriptraw
             .sublist(index, index + bytesToRead)
@@ -59,8 +58,8 @@ class Script {
             .join());
         index = index + bytesToRead;
       } else if (!hasSegwit && byte == 0x4e) {
-        int bytesToRead = ByteData.sublistView(scriptraw, index + 1, index + 5)
-            .getUint32(0, Endian.little);
+        int bytesToRead = readUint32LE(scriptraw, index + 1);
+
         index = index + 5;
         commands.add(scriptraw
             .sublist(index, index + bytesToRead)
@@ -68,13 +67,15 @@ class Script {
             .join());
         index = index + bytesToRead;
       } else {
-        final viAndSize = viToInt(scriptraw.sublist(index, index + 9));
+        final viAndSize =
+            IntUtils.decodeVarint(scriptraw.sublist(index, index + 9));
         int dataSize = viAndSize.$1;
         int size = viAndSize.$2;
         final lastIndex = (index + size + dataSize) > scriptraw.length
             ? scriptraw.length
             : (index + size + dataSize);
-        commands.add(bytesToHex(scriptraw.sublist(index + size, lastIndex)));
+        commands.add(
+            BytesUtils.toHexString(scriptraw.sublist(index + size, lastIndex)));
         index = index + dataSize + size;
       }
     }
@@ -115,33 +116,29 @@ class Script {
   }
 
   /// returns a serialized byte version of the script
-  Uint8List toBytes() {
+  List<int> toBytes() {
     DynamicByteTracker scriptBytes = DynamicByteTracker();
-    try {
-      for (var token in script) {
-        if (OP_CODES.containsKey(token)) {
-          scriptBytes.add(OP_CODES[token]!);
-        } else if (token is int && token >= 0 && token <= 16) {
-          scriptBytes.add(OP_CODES['OP_$token']!);
+    for (var token in script) {
+      if (BitcoinOpCodeConst.OP_CODES.containsKey(token)) {
+        scriptBytes.add(BitcoinOpCodeConst.OP_CODES[token]!);
+      } else if (token is int && token >= 0 && token <= 16) {
+        scriptBytes.add(BitcoinOpCodeConst.OP_CODES['OP_$token']!);
+      } else {
+        if (token is int) {
+          scriptBytes.add(pushInteger(token));
         } else {
-          if (token is int) {
-            scriptBytes.add(pushInteger(token));
-          } else {
-            scriptBytes.add(opPushData(token));
-          }
+          scriptBytes.add(opPushData(token));
         }
       }
-
-      return scriptBytes.toBytes();
-    } finally {
-      scriptBytes.close();
     }
+
+    return scriptBytes.toBytes();
   }
 
   /// returns a serialized version of the script in hex
   String toHex() {
     final bytes = toBytes();
-    return bytesToHex(bytes);
+    return BytesUtils.toHexString(bytes);
   }
 
   @override

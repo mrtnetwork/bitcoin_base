@@ -1,4 +1,4 @@
-import 'package:bitcoin_base/src/provider/utxo_details.dart';
+import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
 
 class TxRef {
   final String txHash;
@@ -79,16 +79,17 @@ class BlockCypherUtxo {
       nTx: json['n_tx'],
       unconfirmedNTx: json['unconfirmed_n_tx'],
       finalNTx: json['final_n_tx'],
-      txRefs: (json['txrefs'] as List<dynamic>)
-          .map((ref) => TxRef.fromJson(ref))
-          .toList(),
+      txRefs: (json['txrefs'] as List?)
+              ?.map((ref) => TxRef.fromJson(ref))
+              .toList() ??
+          <TxRef>[],
       txURL: json['tx_url'],
     );
   }
 
-  List<UtxoWithOwner> toUtxoWithOwner(UtxoOwnerDetails owner) {
-    List<UtxoWithOwner> utxos = txRefs.map((ref) {
-      return UtxoWithOwner(
+  List<UtxoWithAddress> toUtxoWithOwner(UtxoAddressDetails owner) {
+    List<UtxoWithAddress> utxos = txRefs.map((ref) {
+      return UtxoWithAddress(
         utxo: BitcoinUtxo(
           txHash: ref.txHash,
           value: ref.value,
@@ -279,9 +280,11 @@ class BlockCypherAddressInfo {
       numTransactions: json['n_tx'],
       unconfirmedNumTx: json['unconfirmed_n_tx'],
       finalNumTx: json['final_n_tx'],
-      txs: (json['txs'] as List)
-          .map((transaction) => BlockCypherTransaction.fromJson(transaction))
-          .toList(),
+      txs: (json['txs'] as List?)
+              ?.map(
+                  (transaction) => BlockCypherTransaction.fromJson(transaction))
+              .toList() ??
+          [],
     );
   }
 }

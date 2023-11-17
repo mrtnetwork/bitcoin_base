@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
-import 'package:bitcoin_base/src/formating/bytes_num_formating.dart';
+import 'package:blockchain_utils/binary/utils.dart';
+import 'package:blockchain_utils/numbers/bigint_utils.dart';
+import 'package:blockchain_utils/numbers/int_utils.dart';
 
 /// Represents a transaction output.
 ///
@@ -17,30 +19,36 @@ class TxOutput {
   }
 
   /// serializes TxInput to bytes
-  Uint8List toBytes() {
-    final amountBytes = packBigIntToLittleEndian(amount);
-    Uint8List scriptBytes = scriptPubKey.toBytes();
-    final data = Uint8List.fromList(
-        [...amountBytes, ...encodeVarint(scriptBytes.length), ...scriptBytes]);
+  List<int> toBytes() {
+    final amountBytes =
+        BigintUtils.toBytes(amount, length: 8, order: Endian.little);
+    List<int> scriptBytes = scriptPubKey.toBytes();
+    final data = [
+      ...amountBytes,
+      ...IntUtils.encodeVarint(scriptBytes.length),
+      ...scriptBytes
+    ];
     return data;
   }
 
   static (TxOutput, int) fromRaw(
       {required String raw, required int cursor, bool hasSegwit = false}) {
-    final txoutputraw = hexToBytes(raw);
-    int value = ByteData.sublistView(txoutputraw, cursor, cursor + 8)
-        .getInt64(0, Endian.little);
+    final txoutputraw = BytesUtils.fromHexString(raw);
+    final value = BigintUtils.fromBytes(txoutputraw.sublist(cursor, cursor + 8),
+            byteOrder: Endian.little)
+        .toSigned(64);
     cursor += 8;
 
-    final vi = viToInt(txoutputraw.sublist(cursor, cursor + 9));
+    final vi = IntUtils.decodeVarint(txoutputraw.sublist(cursor, cursor + 9));
     cursor += vi.$2;
-    Uint8List lockScript = txoutputraw.sublist(cursor, cursor + vi.$1);
+    List<int> lockScript = txoutputraw.sublist(cursor, cursor + vi.$1);
     cursor += vi.$1;
     return (
       TxOutput(
-          amount: BigInt.from(value),
+          amount: value,
           scriptPubKey: Script.fromRaw(
-              hexData: bytesToHex(lockScript), hasSegwit: hasSegwit)),
+              hexData: BytesUtils.toHexString(lockScript),
+              hasSegwit: hasSegwit)),
       cursor
     );
   }
