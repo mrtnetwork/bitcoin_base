@@ -612,4 +612,12 @@ Contributions are welcome! Please follow these guidelines:
 
 Please file feature requests and bugs in the issue tracker.
 
+## Support
+
+If you find this repository useful, show us some love, and give us a star!
+Small Bitcoin donations to the following address are also welcome:
+
+bc1qu5yjkaulduunc5dvcrvu8437y7rg0r9t655cel
+
+1Mt2j4LrZzCmWuRucAn1zRV5PAtT2JFjr1
 
