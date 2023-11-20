@@ -617,7 +617,7 @@ Please file feature requests and bugs in the issue tracker.
 If you find this repository useful, show us some love, and give us a star!
 Small Bitcoin donations to the following address are also welcome:
 
-bc1qu5yjkaulduunc5dvcrvu8437y7rg0r9t655cel
+bc1qz4pzpfpk82nn0e5wxl8k87a6psgamrjgpurhu42469vlhaa7z6yqn0fang
 
-1Mt2j4LrZzCmWuRucAn1zRV5PAtT2JFjr1
+1wzyhtcLYgKA4ZjRX1Yn9UkKhCMnuVNsj
 
