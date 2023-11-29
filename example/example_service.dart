@@ -57,7 +57,7 @@ class BitcoinApiService implements ApiService {
   }
 
   void _readErr(http.Response response) {
-    if (response.statusCode == 200) return;
+    if (response.statusCode == 200 || response.statusCode == 201) return;
     String toString = StringUtils.decode(response.bodyBytes);
     Map<String, dynamic>? errorResult;
     try {

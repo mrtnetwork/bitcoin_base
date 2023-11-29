@@ -53,7 +53,7 @@ class ECPublic {
     final h16 = _toHash160(compressed: compressed);
     final toHex = BytesUtils.toHexString(h16);
 
-    return P2pkhAddress(hash160: toHex);
+    return P2pkhAddress.fromHash160(addrHash: toHex);
   }
 
   /// toSegwitAddress generates a P2WPKH (Pay-to-Witness-Public-Key-Hash) SegWit address
@@ -62,7 +62,7 @@ class ECPublic {
     final h16 = _toHash160(compressed: compressed);
     final toHex = BytesUtils.toHexString(h16);
 
-    return P2wpkhAddress(program: toHex);
+    return P2wpkhAddress.fromProgram(program: toHex);
   }
 
   /// toP2pkAddress generates a P2PK (Pay-to-Public-Key) address from the ECPublic key.
@@ -92,7 +92,8 @@ class ECPublic {
   /// wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
   P2shAddress toP2pkInP2sh({bool compressed = true}) {
-    return P2shAddress(script: toRedeemScript(compressed: compressed));
+    return P2shAddress.fromScript(
+        script: toRedeemScript(compressed: compressed));
   }
 
   /// ToTaprootAddress generates a P2TR(Taproot) address from the ECPublic key
@@ -100,7 +101,7 @@ class ECPublic {
   /// custom spending conditions.
   P2trAddress toTaprootAddress({List<List<Script>>? scripts}) {
     final pubKey = toTapRotHex(script: scripts);
-    return P2trAddress(program: pubKey);
+    return P2trAddress.fromProgram(program: pubKey);
   }
 
   /// toP2wpkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
@@ -126,7 +127,8 @@ class ECPublic {
   /// toP2wshAddress generates a P2WSH (Pay-to-Witness-Script-Hash) address
   /// from the ECPublic key. If 'compressed' is true, the key is in compressed format.
   P2wshAddress toP2wshAddress({bool compressed = true}) {
-    return P2wshAddress(script: toP2wshScript(compressed: compressed));
+    return P2wshAddress.fromScript(
+        script: toP2wshScript(compressed: compressed));
   }
 
   /// toP2wshInP2sh generates a P2SH (Pay-to-Script-Hash) address

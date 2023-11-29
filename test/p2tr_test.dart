@@ -98,7 +98,7 @@ void main() {
             [trScriptP2pk1]
           ],
           sighash: signHash);
-      tx.witnesses.add(TxWitnessInput(stack: [signatur]));
+      tx.addWitnesses(TxWitnessInput(stack: [signatur]));
       expect(tx.serialize(), signedTx2);
     });
 
@@ -120,7 +120,7 @@ void main() {
           sighash: BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL, tweak: false);
       final controlBlock = ControlBlock(public: fromPub2);
 
-      tx.witnesses.add(TxWitnessInput(
+      tx.addWitnesses(TxWitnessInput(
           stack: [sig, trScriptP2pk1.toHex(), controlBlock.toHex()]));
       expect(tx.serialize(), signedTx3);
     });
@@ -187,7 +187,7 @@ void main() {
       final leafB = trScriptP2pkB.toTapleafTaggedHash();
 
       final controlBlock = ControlBlock(public: fromPub, scripts: leafB);
-      tx.witnesses.add(TxWitnessInput(
+      tx.addWitnesses(TxWitnessInput(
           stack: [sign, trScriptP2pkA.toHex(), controlBlock.toHex()]));
       expect(tx.serialize(), signedTx3);
     });
@@ -266,7 +266,7 @@ void main() {
       final controlBlock = ControlBlock(
           public: fromPub, scripts: Uint8List.fromList([...leafA, ...leafC]));
 
-      tx.witnesses.add(TxWitnessInput(
+      tx.addWitnesses(TxWitnessInput(
           stack: [sig, trScriptP2pkB.toHex(), controlBlock.toHex()]));
 
       expect(tx.serialize(), signedTx);

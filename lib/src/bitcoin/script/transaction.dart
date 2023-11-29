@@ -24,21 +24,29 @@ class BtcTransaction {
   BtcTransaction(
       {required this.inputs,
       required this.outputs,
-      List<TxWitnessInput> w = const [],
+      List<TxWitnessInput> witnesses = const [],
       this.hasSegwit = false,
       List<int>? lock,
-      List<int>? v})
-      : locktime =
-            lock ?? List<int>.from(BitcoinOpCodeConst.DEFAULT_TX_LOCKTIME),
-        version = v ?? List<int>.from(BitcoinOpCodeConst.DEFAULT_TX_VERSION) {
-    witnesses.addAll(w);
+      List<int>? version})
+      : locktime = List<int>.unmodifiable(
+            lock ?? BitcoinOpCodeConst.DEFAULT_TX_LOCKTIME),
+        version = List<int>.unmodifiable(
+            version ?? BitcoinOpCodeConst.DEFAULT_TX_VERSION) {
+    _witnesses.addAll(witnesses);
   }
   final List<TxInput> inputs;
   final List<TxOutput> outputs;
   final List<int> locktime;
   late final List<int> version;
   final bool hasSegwit;
-  final List<TxWitnessInput> witnesses = [];
+  final List<TxWitnessInput> _witnesses = [];
+
+  List<TxWitnessInput> get witnesses =>
+      List.unmodifiable(_witnesses.map((e) => e.copy()).toList());
+
+  void addWitnesses(TxWitnessInput witness) {
+    _witnesses.add(witness);
+  }
 
   /// creates a copy of the object (classmethod)
   static BtcTransaction copy(BtcTransaction tx) {
@@ -46,9 +54,9 @@ class BtcTransaction {
         hasSegwit: tx.hasSegwit,
         inputs: tx.inputs.map((e) => e.copy()).toList(),
         outputs: tx.outputs.map((e) => e.copy()).toList(),
-        w: tx.witnesses.map((e) => e.copy()).toList(),
+        witnesses: tx._witnesses.map((e) => e.copy()).toList(),
         lock: tx.locktime,
-        v: tx.version);
+        version: tx.version);
   }
 
   /// Instantiates a Transaction from serialized raw hexadacimal data (classmethod)
@@ -106,7 +114,10 @@ class BtcTransaction {
       }
     }
     return BtcTransaction(
-        inputs: inputs, outputs: outputs, w: witnesses, hasSegwit: hasSegwit);
+        inputs: inputs,
+        outputs: outputs,
+        witnesses: witnesses,
+        hasSegwit: hasSegwit);
   }
 
   /// returns the transaction input's digest that is to be signed according.
@@ -120,7 +131,7 @@ class BtcTransaction {
       int sighash = BitcoinOpCodeConst.SIGHASH_ALL}) {
     final tx = copy(this);
     for (final i in tx.inputs) {
-      i.scriptSig = const Script(script: []);
+      i.scriptSig = Script(script: []);
     }
     tx.inputs[txInIndex].scriptSig = script;
     if ((sighash & 0x1f) == BitcoinOpCodeConst.SIGHASH_NONE) {
@@ -128,7 +139,7 @@ class BtcTransaction {
       for (int i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
           tx.inputs[i].sequence =
-              List<int>.from(BitcoinOpCodeConst.EMPTY_TX_SEQUENCE);
+              List<int>.unmodifiable(BitcoinOpCodeConst.EMPTY_TX_SEQUENCE);
         }
       }
     } else if ((sighash & 0x1f) == BitcoinOpCodeConst.SIGHASH_SINGLE) {
@@ -141,13 +152,13 @@ class BtcTransaction {
       for (int i = 0; i < txInIndex; i++) {
         tx.outputs.add(TxOutput(
             amount: BigInt.from(BitcoinOpCodeConst.NEGATIVE_SATOSHI),
-            scriptPubKey: const Script(script: [])));
+            scriptPubKey: Script(script: [])));
       }
       tx.outputs.add(txout);
       for (int i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
           tx.inputs[i].sequence =
-              List<int>.from(BitcoinOpCodeConst.EMPTY_TX_SEQUENCE);
+              List<int>.unmodifiable(BitcoinOpCodeConst.EMPTY_TX_SEQUENCE);
         }
       }
     }
@@ -182,7 +193,7 @@ class BtcTransaction {
       data.add(txOut.toBytes());
     }
     if (segwit) {
-      for (final wit in witnesses) {
+      for (final wit in _witnesses) {
         final witnessesCountBytes = List<int>.from([wit.stack.length]);
         data.add(witnessesCountBytes);
         data.add(wit.toBytes());
@@ -296,7 +307,7 @@ class BtcTransaction {
       required List<Script> scriptPubKeys,
       required List<BigInt> amounts,
       int extFlags = 0,
-      Script script = const Script(script: []),
+      Script? script,
       int leafVar = BitcoinOpCodeConst.LEAF_VERSION_TAPSCRIPT,
       int sighash = BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL}) {
     final newTx = copy(this);
@@ -410,7 +421,7 @@ class BtcTransaction {
     }
     if (extFlags == 1) {
       final leafVarBytes = List<int>.from(
-          [leafVar, ...IntUtils.prependVarint(script.toBytes())]);
+          [leafVar, ...IntUtils.prependVarint(script?.toBytes() ?? <int>[])]);
       txForSign.add(taggedHash(leafVarBytes, "TapLeaf"));
       txForSign.add([0]);
       txForSign.add(List<int>.filled(4, mask8));
@@ -442,7 +453,7 @@ class BtcTransaction {
     int markerSize = 2;
     int witSize = 0;
     List<int> data = <int>[];
-    for (final w in witnesses) {
+    for (final w in _witnesses) {
       final countBytes = List<int>.from([w.stack.length]);
       data = List<int>.from([...data, ...countBytes, ...w.toBytes()]);
     }

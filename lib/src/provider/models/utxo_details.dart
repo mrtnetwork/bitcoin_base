@@ -124,6 +124,6 @@ extension Calculate on List<UtxoWithAddress> {
 
   bool canSpend() {
     final value = sumOfUtxosValue();
-    return value.compareTo(BigInt.zero) != 0;
+    return value > BigInt.zero;
   }
 }

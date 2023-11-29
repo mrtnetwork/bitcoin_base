@@ -1,9 +1,8 @@
 name: bitcoin_base
 description: A comprehensive Bitcoin library for creating/signing and spending P2PK, P2PKH, P2SH, P2WPKH, P2WSH, Taproot ...
-version: 1.2.0
+version: 1.3.0
 homepage: "https://github.com/mrtnetwork/bitcoin_base"
 repository: "https://github.com/mrtnetwork/bitcoin_base"
-
 Author: mrhaydari.t@gmail.com
 topics:
   - bitcoin
@@ -17,7 +16,7 @@ environment:
 
 
 dependencies:
-  blockchain_utils: ^1.0.6
+  blockchain_utils: ^1.1.0
 
 dev_dependencies:
   test: ^1.24.6

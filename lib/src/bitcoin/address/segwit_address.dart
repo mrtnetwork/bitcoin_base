@@ -7,32 +7,34 @@ import 'package:blockchain_utils/binary/utils.dart';
 import 'package:blockchain_utils/crypto/quick_crypto.dart';
 
 abstract class SegwitAddress implements BitcoinAddress {
-  /// Represents a Bitcoin segwit address
-  ///
-  /// [program] for segwit v0 this is the hash string representation of either the address;
-  /// it can be either a public key hash (P2WPKH) or the hash of the script (P2WSH)
-  /// for segwit v1 (aka taproot) this is the public key
-  SegwitAddress(
-      {String? address,
-      String? program,
-      Script? script,
-      this.version = BitcoinOpCodeConst.P2WPKH_ADDRESS_V0}) {
+  static int _segwitVersion(String version) {
     if (version == BitcoinOpCodeConst.P2WPKH_ADDRESS_V0 ||
         version == BitcoinOpCodeConst.P2WSH_ADDRESS_V0) {
-      segwitNumVersion = 0;
+      return 0;
     } else if (version == BitcoinOpCodeConst.P2TR_ADDRESS_V1) {
-      segwitNumVersion = 1;
+      return 1;
     } else {
       throw ArgumentError('A valid segwit version is required.');
     }
-    if (program != null) {
-      _program = program;
-    } else if (address != null) {
-      _program = _addressToHash(address);
-    } else if (script != null) {
-      _program = _scriptToHash(script);
-    }
   }
+
+  SegwitAddress.fromAddress(
+      {required String address,
+      BitcoinNetwork? network,
+      this.version = BitcoinOpCodeConst.P2WPKH_ADDRESS_V0})
+      : segwitNumVersion = _segwitVersion(version) {
+    _program = _addressToHash(address, network: network);
+  }
+  SegwitAddress.fromProgram(
+      {required String program,
+      this.version = BitcoinOpCodeConst.P2WPKH_ADDRESS_V0})
+      : segwitNumVersion = _segwitVersion(version),
+        _program = program;
+  SegwitAddress.fromScript(
+      {required Script script,
+      this.version = BitcoinOpCodeConst.P2WPKH_ADDRESS_V0})
+      : segwitNumVersion = _segwitVersion(version),
+        _program = _scriptToHash(script);
 
   late final String _program;
 
@@ -41,8 +43,8 @@ abstract class SegwitAddress implements BitcoinAddress {
   final String version;
   late final int segwitNumVersion;
 
-  String _addressToHash(String address) {
-    final convert = SegwitBech32Decoder.decode(null, address);
+  String _addressToHash(String address, {BitcoinNetwork? network}) {
+    final convert = SegwitBech32Decoder.decode(network?.p2wpkhHrp, address);
 
     final version = convert.$1;
     if (version != segwitNumVersion) {
@@ -60,7 +62,7 @@ abstract class SegwitAddress implements BitcoinAddress {
     return sw;
   }
 
-  String _scriptToHash(Script script) {
+  static String _scriptToHash(Script script) {
     final toBytes = script.toBytes();
     final toHash = QuickCrypto.sha256Hash(toBytes);
     return BytesUtils.toHexString(toHash);
@@ -68,11 +70,13 @@ abstract class SegwitAddress implements BitcoinAddress {
 }
 
 class P2wpkhAddress extends SegwitAddress {
-  /// Encapsulates a P2WPKH address.
-  P2wpkhAddress(
-      {super.address,
-      super.program,
-      super.version = BitcoinOpCodeConst.P2WPKH_ADDRESS_V0});
+  P2wpkhAddress.fromAddress({required super.address, super.network})
+      : super.fromAddress(version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0);
+
+  P2wpkhAddress.fromProgram({required super.program})
+      : super.fromProgram(version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0);
+  P2wpkhAddress.fromScript({required super.script})
+      : super.fromScript(version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0);
 
   /// returns the scriptPubKey of a P2WPKH witness script
   @override
@@ -86,11 +90,12 @@ class P2wpkhAddress extends SegwitAddress {
 }
 
 class P2trAddress extends SegwitAddress {
-  /// Encapsulates a P2TR (Taproot) address.
-  P2trAddress({
-    super.program,
-    super.address,
-  }) : super(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
+  P2trAddress.fromAddress({required super.address, super.network})
+      : super.fromAddress(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
+  P2trAddress.fromProgram({required super.program})
+      : super.fromProgram(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
+  P2trAddress.fromScript({required super.script})
+      : super.fromScript(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
 
   /// returns the scriptPubKey of a P2TR witness script
   @override
@@ -104,9 +109,12 @@ class P2trAddress extends SegwitAddress {
 }
 
 class P2wshAddress extends SegwitAddress {
-  /// Encapsulates a P2WSH address.
-  P2wshAddress({super.script, super.address})
-      : super(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);
+  P2wshAddress.fromAddress({required super.address, super.network})
+      : super.fromAddress(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);
+  P2wshAddress.fromProgram({required super.program})
+      : super.fromProgram(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);
+  P2wshAddress.fromScript({required super.script})
+      : super.fromScript(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);
 
   /// Returns the scriptPubKey of a P2WPKH witness script
   @override

@@ -8,13 +8,9 @@ class ECPrivate {
 
   /// creates an object from raw 32 bytes
   factory ECPrivate.fromBytes(List<int> prive) {
-    try {
-      final key = Bip32PrivateKey.fromBytes(prive, Bip32KeyData(),
-          Bip32Const.mainNetKeyNetVersions, EllipticCurveTypes.secp256k1);
-      return ECPrivate(key);
-    } catch (e) {
-      throw ArgumentError("wrong secp256k1 private key");
-    }
+    final key = Bip32PrivateKey.fromBytes(prive, Bip32KeyData(),
+        Bip32Const.mainNetKeyNetVersions, EllipticCurveTypes.secp256k1);
+    return ECPrivate(key);
   }
 
   /// returns the corresponding ECPublic object

@@ -61,7 +61,9 @@ BtcTransaction buildP2wpkTransaction({
     witnesses.add(p2wpkhWitness);
   }
   // add all witnesses to the transaction
-  tx.witnesses.addAll(witnesses);
+  for (final wit in witnesses) {
+    tx.addWitnesses(wit);
+  }
   return tx;
 }
 
@@ -127,7 +129,9 @@ BtcTransaction buildP2WSHTransaction({
     witnesses.add(p2wshWitness);
   }
   // add all witnesses to the transaction
-  tx.witnesses.addAll(witnesses);
+  for (final wit in witnesses) {
+    tx.addWitnesses(wit);
+  }
   return tx;
 }
 
@@ -372,7 +376,7 @@ BtcTransaction buildP2trTransaction({
       amounts: utxo.map((e) => e.utxo.value).toList(),
 
       // The tapleaf script that we are spending (ext_flag=1)
-      script: const Script(script: []),
+      script: null,
       sighash: BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL,
       // default is 0; 1 is for script spending (BIP342)
       extFlags: 0,
@@ -385,8 +389,10 @@ BtcTransaction buildP2trTransaction({
     // add witness for current index
     witnesses.add(TxWitnessInput(stack: [signedTx]));
   }
-  // add all witness to transaction
-  tx.witnesses.addAll(witnesses);
+
+  for (final wit in witnesses) {
+    tx.addWitnesses(wit);
+  }
 
   return tx;
 }

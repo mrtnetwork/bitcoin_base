@@ -5,12 +5,13 @@ import 'package:blockchain_utils/numbers/int_utils.dart';
 ///
 /// [stack] the witness items (hex str) list
 class TxWitnessInput {
-  TxWitnessInput({required this.stack});
+  TxWitnessInput({required List<String> stack})
+      : stack = List.unmodifiable(stack);
   final List<String> stack;
 
   /// creates a copy of the object (classmethod)
   TxWitnessInput copy() {
-    return TxWitnessInput(stack: List.from(stack, growable: false));
+    return TxWitnessInput(stack: stack);
   }
 
   /// returns a serialized byte version of the witness items list

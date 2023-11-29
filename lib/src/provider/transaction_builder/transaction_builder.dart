@@ -18,7 +18,7 @@ class BitcoinTransactionBuilder {
     required this.fee,
     required this.network,
     required this.utxos,
-    this.memo = '',
+    this.memo,
     this.enableRBF = false,
     this.isFakeTransaction = false,
   });
@@ -70,14 +70,21 @@ class BitcoinTransactionBuilder {
       /// and doesn't generate errors when determining the transaction size.
       isFakeTransaction: true,
     );
-    ECPrivate? fakePrivate;
+
+    /// 64 byte schnorr signature length
+    const String fakeSchnorSignaturBytes =
+        "01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101";
+
+    /// 71 bytes (64 byte signature, 6-7 byte Der encoding length)
+    const String fakeECDSASignatureBytes =
+        "0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101";
+
     final transaction = transactionBuilder
         .buildTransaction((trDigest, utxo, multiSigPublicKey) {
-      fakePrivate ??= ECPrivate.random();
       if (utxo.utxo.isP2tr()) {
-        return fakePrivate!.signTapRoot(trDigest);
+        return fakeSchnorSignaturBytes;
       } else {
-        return fakePrivate!.signInput(trDigest);
+        return fakeECDSASignatureBytes;
       }
     });
 
@@ -123,21 +130,26 @@ class BitcoinTransactionBuilder {
   Script buildInputScriptPubKeys(UtxoWithAddress utxo, bool isTaproot) {
     if (utxo.isMultiSig()) {
       final script = Script.fromRaw(
-          hexData: utxo.ownerDetails.multiSigAddress!.scriptDetails,
+          hexData: utxo.ownerDetails.multiSigAddress!.multiSigScript.toHex(),
           hasSegwit: true);
-      switch (utxo.ownerDetails.multiSigAddress!.address.type) {
+      switch (utxo.utxo.scriptType) {
         case BitcoinAddressType.p2wshInP2sh:
           if (isTaproot) {
-            return utxo.ownerDetails.multiSigAddress!.address.toScriptPubKey();
+            return utxo.ownerDetails.multiSigAddress!
+                .toP2wshInP2shAddress()
+                .toScriptPubKey();
           }
           return script;
         case BitcoinAddressType.p2wsh:
           if (isTaproot) {
-            return utxo.ownerDetails.multiSigAddress!.address.toScriptPubKey();
+            return utxo.ownerDetails.multiSigAddress!
+                .toP2wshAddress()
+                .toScriptPubKey();
           }
           return script;
         default:
-          return const Script(script: []);
+          throw ArgumentError(
+              "unsuported multi-sig type ${utxo.utxo.scriptType}");
       }
     }
 
@@ -179,8 +191,6 @@ class BitcoinTransactionBuilder {
           return senderPub.toP2pkInP2sh().toScriptPubKey();
         }
         return senderPub.toRedeemScript();
-      default:
-        return const Script(script: []);
     }
   }
 
@@ -238,7 +248,7 @@ class BitcoinTransactionBuilder {
     return [
       '',
       ...signedDigest,
-      utx.ownerDetails.multiSigAddress!.scriptDetails
+      utx.ownerDetails.multiSigAddress!.multiSigScript.toHex()
     ];
   }
 
@@ -253,12 +263,13 @@ class BitcoinTransactionBuilder {
   /// - List<string>: A List of strings representing the script signature for the P2SH SegWit input.
   List<String> buildP2shSegwitRedeemScriptSig(UtxoWithAddress utx0) {
     if (utx0.isMultiSig()) {
-      switch (utx0.ownerDetails.multiSigAddress!.address.type) {
+      switch (utx0.utxo.scriptType) {
         case BitcoinAddressType.p2wshInP2sh:
           final script = Script.fromRaw(
-              hexData: utx0.ownerDetails.multiSigAddress!.scriptDetails,
+              hexData:
+                  utx0.ownerDetails.multiSigAddress!.multiSigScript.toHex(),
               hasSegwit: true);
-          final p2wsh = P2wshAddress(script: script);
+          final p2wsh = P2wshAddress.fromScript(script: script);
           return [p2wsh.toScriptPubKey().toHex()];
         default:
           throw Exception('Does not support this script type');
@@ -330,7 +341,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
       inputs.add(TxInput(
           txId: e.utxo.txHash,
           txIndex: e.utxo.vout,
-          sq: i == 0 && enableRBF ? sequence : null));
+          sequance: i == 0 && enableRBF ? sequence : null));
     }
     return inputs;
   }
@@ -419,7 +430,7 @@ be retrieved by anyone who examines the blockchain's history.
         BtcTransaction(inputs: inputs, outputs: outputs, hasSegwit: hasSegwit);
 
     /// we define empty witnesses. maybe the transaction is segwit and We need this
-    final wintnesses = <TxWitnessInput>[];
+    final witnesses = <TxWitnessInput>[];
 
     /// when the transaction is taproot and we must use getTaproot tansaction digest
     /// we need all of inputs amounts and owner script pub keys
@@ -476,7 +487,7 @@ be retrieved by anyone who examines the blockchain's history.
 
         /// Now we need to add it to the transaction
         /// check if current utxo is segwit or not
-        wintnesses.add(TxWitnessInput(stack: scriptSig));
+        witnesses.add(TxWitnessInput(stack: scriptSig));
         if (utxos[i].utxo.isP2shSegwit()) {
           /*
 				check if we need redeemScriptSig or not
@@ -501,7 +512,7 @@ be retrieved by anyone who examines the blockchain's history.
       /// check if current utxo is segwit or not
       if (utxos[i].utxo.isSegwit()) {
         /// ok is segwit and we append to witness list
-        wintnesses.add(TxWitnessInput(stack: scriptSig));
+        witnesses.add(TxWitnessInput(stack: scriptSig));
         if (utxos[i].utxo.isP2shSegwit()) {
           /*
 				check if we need redeemScriptSig or not
@@ -523,14 +534,17 @@ be retrieved by anyone who examines the blockchain's history.
 			 the SegWit transaction format. This is achieved through the use of an "empty witness."
 			*/
         if (hasSegwit) {
-          wintnesses.add(TxWitnessInput(stack: []));
+          witnesses.add(TxWitnessInput(stack: []));
         }
       }
     }
 
     /// ok we now check if the transaction is segwit We add all witnesses to the transaction
     if (hasSegwit) {
-      transaction.witnesses.addAll(wintnesses);
+      // add all witnesses to the transaction
+      for (final wit in witnesses) {
+        transaction.addWitnesses(wit);
+      }
     }
 
     return transaction;

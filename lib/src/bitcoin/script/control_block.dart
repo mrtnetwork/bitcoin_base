@@ -7,8 +7,8 @@ import 'script.dart';
 class ControlBlock {
   ControlBlock({required this.public, this.scriptToSpend, this.scripts});
   late final ECPublic public;
-  Script? scriptToSpend;
-  List<int>? scripts;
+  final Script? scriptToSpend;
+  final List<int>? scripts;
 
   List<int> toBytes() {
     final List<int> version = [BitcoinOpCodeConst.LEAF_VERSION_TAPSCRIPT];

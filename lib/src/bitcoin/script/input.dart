@@ -12,11 +12,13 @@ import 'script.dart';
 /// [sequence] the input sequence (for timelocks, RBF, etc.)
 class TxInput {
   TxInput(
-      {required this.txId, required this.txIndex, Script? sig, List<int>? sq})
-      : sequence = sq ?? BitcoinOpCodeConst.DEFAULT_TX_SEQUENCE,
-
-        /// ignore: prefer_const_constructors
-        scriptSig = sig ?? Script(script: []);
+      {required this.txId,
+      required this.txIndex,
+      Script? scriptSig,
+      List<int>? sequance})
+      : sequence = List.unmodifiable(
+            sequance ?? BitcoinOpCodeConst.DEFAULT_TX_SEQUENCE),
+        scriptSig = scriptSig ?? Script(script: []);
   final String txId;
   final int txIndex;
   Script scriptSig;
@@ -24,7 +26,8 @@ class TxInput {
 
   /// creates a copy of the object
   TxInput copy() {
-    return TxInput(txId: txId, txIndex: txIndex, sig: scriptSig, sq: sequence);
+    return TxInput(
+        txId: txId, txIndex: txIndex, scriptSig: scriptSig, sequance: sequence);
   }
 
   /// serializes TxInput to bytes
@@ -68,10 +71,10 @@ class TxInput {
       TxInput(
           txId: BytesUtils.toHexString(inpHash),
           txIndex: int.parse(BytesUtils.toHexString(outputN), radix: 16),
-          sig: Script.fromRaw(
+          scriptSig: Script.fromRaw(
               hexData: BytesUtils.toHexString(unlockingScript),
               hasSegwit: hasSegwit),
-          sq: sequenceNumberData),
+          sequance: sequenceNumberData),
       cursor
     );
   }

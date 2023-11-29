@@ -61,8 +61,8 @@ Future<void> spendingP2WPKH(ECPrivate sWallet, ECPrivate rWallet) async {
 
   // Now that we've determined the transaction size, let's calculate the transaction fee
   // based on the transaction size and the desired fee rate.
-  final estimateFee =
-      feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
+  final estimateFee = feeRate.getEstimate(transactionSize,
+      feeRateType: BitcoinFeeRateType.medium);
 
   // We subtract the fee from the total amount of UTXOs to calculate
   // the actual amount we can spend in this transaction.
@@ -126,8 +126,8 @@ Future<void> spendingP2WSH(ECPrivate sWallet, ECPrivate rWallet) async {
   final List<BitcoinAddress> outputsAdress = [receiver, changeAddress];
   final transactionSize = BitcoinTransactionBuilder.estimateTransactionSize(
       utxos: utxo, outputs: outputsAdress, network: network);
-  final estimateFee =
-      feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
+  final estimateFee = feeRate.getEstimate(transactionSize,
+      feeRateType: BitcoinFeeRateType.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
       .map((e) => BitcoinOutput(
@@ -170,8 +170,8 @@ Future<void> spendingP2PKH(ECPrivate sWallet, ECPrivate rWallet) async {
   final List<BitcoinAddress> outputsAdress = [receiver, changeAddress];
   final transactionSize = BitcoinTransactionBuilder.estimateTransactionSize(
       utxos: utxo, outputs: outputsAdress, network: network);
-  final estimateFee =
-      feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
+  final estimateFee = feeRate.getEstimate(transactionSize,
+      feeRateType: BitcoinFeeRateType.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
       .map((e) => BitcoinOutput(
@@ -218,8 +218,8 @@ Future<void> spendingP2SHNoneSegwit(
   final List<BitcoinAddress> outputsAdress = [receiver, changeAddress];
   final transactionSize = BitcoinTransactionBuilder.estimateTransactionSize(
       utxos: utxo, outputs: outputsAdress, network: network);
-  final estimateFee =
-      feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
+  final estimateFee = feeRate.getEstimate(transactionSize,
+      feeRateType: BitcoinFeeRateType.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
       .map((e) => BitcoinOutput(
@@ -265,8 +265,8 @@ Future<void> spendingP2shSegwit(ECPrivate sWallet, ECPrivate rWallet) async {
   final List<BitcoinAddress> outputsAdress = [receiver, changeAddress];
   final transactionSize = BitcoinTransactionBuilder.estimateTransactionSize(
       utxos: utxo, outputs: outputsAdress, network: network);
-  final estimateFee =
-      feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
+  final estimateFee = feeRate.getEstimate(transactionSize,
+      feeRateType: BitcoinFeeRateType.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
       .map((e) => BitcoinOutput(
@@ -312,8 +312,8 @@ Future<void> spendingP2TR(ECPrivate sWallet, ECPrivate rWallet) async {
   final List<BitcoinAddress> outputsAdress = [receiver, changeAddress];
   final transactionSize = BitcoinTransactionBuilder.estimateTransactionSize(
       utxos: utxo, outputs: outputsAdress, network: network);
-  final estimateFee =
-      feeRate.getEstimate(transactionSize, feeRate: feeRate.medium);
+  final estimateFee = feeRate.getEstimate(transactionSize,
+      feeRateType: BitcoinFeeRateType.medium);
   final canSpend = sumOfUtxo - estimateFee;
   final outPutWithValue = outputsAdress
       .map((e) => BitcoinOutput(

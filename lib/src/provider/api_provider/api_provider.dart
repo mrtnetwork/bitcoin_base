@@ -21,48 +21,17 @@ class ApiProvider {
   }
   final APIConfig api;
   final ApiService service;
-  // final http.Client client;
+
   final Map<String, String> _header;
-
-  // void _getException(int status, List<int> data) {
-  //   if (data.isEmpty) throw ApiProviderException(status: status);
-  //   String message = utf8.decode(data);
-  //   Map<String, dynamic>? error;
-  //   try {
-  //     error = json.decode(message);
-
-  //     /// ignore: empty_catches
-  //   } catch (e) {}
-  //   throw ApiProviderException(
-  //       status: status, message: error != null ? null : message, data: error);
-  // }
 
   Future<T> _getRequest<T>(String url) async {
     final response = await service.get<T>(url);
     return response;
-    // if (response.statusCode != 200) {
-    //   _getException(response.statusCode, response.bodyBytes);
-    // }
-    // switch (T) {
-    //   case String:
-    //     return utf8.decode(response.bodyBytes) as T;
-    //   default:
-    //     return json.decode(utf8.decode(response.bodyBytes)) as T;
-    // }
   }
 
   Future<T> _postReqiest<T>(String url, Object? data) async {
     final response = await service.post<T>(url, body: data, headers: _header);
     return response;
-    // if (response.statusCode != 200) {
-    //   _getException(response.statusCode, response.bodyBytes);
-    // }
-    // switch (T) {
-    //   case String:
-    //     return utf8.decode(response.bodyBytes) as T;
-    //   default:
-    //     return json.decode(utf8.decode(response.bodyBytes)) as T;
-    // }
   }
 
   Future<Map<String, dynamic>> testmempool(List<dynamic> params) async {
@@ -107,8 +76,13 @@ class ApiProvider {
         final Map<String, dynamic> digestData = {"tx": txDigest};
         final response = await _postReqiest<Map<String, dynamic>>(
             url, json.encode(digestData));
-        final blockCypherUtxo = BlockCypherTransaction.fromJson(response);
-        return blockCypherUtxo.hash;
+        BlockCypherTransaction? tr;
+        if (response["tx"] != null) {
+          tr = BlockCypherTransaction.fromJson(response[["tx"]]);
+        }
+
+        tr ??= BlockCypherTransaction.fromJson(response);
+        return tr.hash;
     }
   }
 

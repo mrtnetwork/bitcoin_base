@@ -7,7 +7,8 @@ void main() {
         txId:
             'fb48f4e23bf6ddf606714141ac78c3e921c8c0bebeb7c8abb2c799e9ff96ce6c',
         txIndex: 0);
-    final addr = P2pkhAddress(address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR');
+    final addr =
+        P2pkhAddress.fromAddress(address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR');
     final txout = TxOutput(
         amount: BigInt.from(10000000),
         scriptPubKey: Script(script: [
@@ -18,12 +19,12 @@ void main() {
           'OP_CHECKSIG'
         ]));
     final changeAddr =
-        P2pkhAddress(address: 'mytmhndz4UbEMeoSZorXXrLpPfeoFUDzEp');
+        P2pkhAddress.fromAddress(address: 'mytmhndz4UbEMeoSZorXXrLpPfeoFUDzEp');
     final changeTxout = TxOutput(
         amount: BigInt.from(29000000),
         scriptPubKey: changeAddr.toScriptPubKey());
     final changeLowSAddr =
-        P2pkhAddress(address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w');
+        P2pkhAddress.fromAddress(address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w');
     final changeLowSTxout = TxOutput(
         amount: BigInt.from(29000000),
         scriptPubKey: changeLowSAddr.toScriptPubKey());
@@ -31,7 +32,7 @@ void main() {
         'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
     final fromAddr =
-        P2pkhAddress(address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e');
+        P2pkhAddress.fromAddress(address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e');
 
     const String coreTxResult =
         '02000000016cce96ffe999c7b2abc8b7bebec0c821e9c378ac41417106f6ddf63be2f448fb0000000000ffffffff0280969800000000001976a914fd337ad3bf81e086d96a68e1f8d6a0a510f8c24a88ac4081ba01000000001976a914c992931350c9ba48538003706953831402ea34ea88ac00000000';
@@ -53,9 +54,9 @@ void main() {
             '76464c2b9e2af4d63ef38a77964b3b77e629dddefc5cb9eb1a3645b1608b790f',
         txIndex: 1);
     final sigFromAddr1 =
-        P2pkhAddress(address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR');
+        P2pkhAddress.fromAddress(address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR');
     final sigFromAddr2 =
-        P2pkhAddress(address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w');
+        P2pkhAddress.fromAddress(address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w');
     final sigSk1 = ECPrivate.fromWif(
         'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
@@ -63,7 +64,7 @@ void main() {
         'cVf3kGh6552jU2rLaKwXTKq5APHPoZqCP4GQzQirWGHFoHQ9rEVt',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
     final sigToAddr1 =
-        P2pkhAddress(address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e');
+        P2pkhAddress.fromAddress(address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e');
     final sigTxout1 = TxOutput(
         amount: BigInt.from(9000000),
         scriptPubKey: Script(script: [
@@ -74,7 +75,7 @@ void main() {
           'OP_CHECKSIG'
         ]));
     final sigToAddr2 =
-        P2pkhAddress(address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w');
+        P2pkhAddress.fromAddress(address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w');
     final sigTxout2 = TxOutput(
         amount: BigInt.from(900000),
         scriptPubKey: Script(script: [

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:bitcoin_base/src/bitcoin/address/legacy_address.dart';
-import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
+
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/crypto/keypair/ec_private.dart';
 import 'package:bitcoin_base/src/crypto/keypair/ec_public.dart';
@@ -146,14 +146,14 @@ void main() {
     const String address = '1EHNa6Q4Jz2uvNExL497mE43ikXhwF6kZm';
     const String addressc = '1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH';
     test("test1", () {
-      final p1 = P2pkhAddress(hash160: hash160);
-      final p2 = P2pkhAddress(hash160: hash160c);
+      final p1 = P2pkhAddress.fromHash160(addrHash: hash160);
+      final p2 = P2pkhAddress.fromHash160(addrHash: hash160c);
       expect(p1.toAddress(BitcoinNetwork.mainnet), address);
       expect(p2.toAddress(BitcoinNetwork.mainnet), addressc);
     });
     test("test2", () {
-      final p1 = P2pkhAddress(address: address);
-      final p2 = P2pkhAddress(address: addressc);
+      final p1 = P2pkhAddress.fromAddress(address: address);
+      final p2 = P2pkhAddress.fromAddress(address: addressc);
       expect(p1.getH160, hash160);
       expect(p2.getH160, hash160c);
     });
@@ -186,13 +186,13 @@ void main() {
     const String p2shaddress = '2NDkr9uD2MSY5em3rsjkff8fLZcJzCfY3W1';
     test("test create", () {
       final script = Script(script: [pub.toHex(), 'OP_CHECKSIG']);
-      final addr = P2shAddress(script: script);
+      final addr = P2shAddress.fromScript(script: script);
       expect(addr.toAddress(BitcoinNetwork.testnet), p2shaddress);
     });
     test("p2sh to script", () {
       final script = Script(script: [pub.toHex(), 'OP_CHECKSIG']);
       final fromScript = script.toP2shScriptPubKey().toHex();
-      final addr = P2shAddress(script: script);
+      final addr = P2shAddress.fromScript(script: script);
       final fromP2shAddress = addr.toScriptPubKey().toHex();
       expect(fromScript, fromP2shAddress);
     });
@@ -212,7 +212,8 @@ void main() {
     const String correctP2shP2wshAddress =
         '2NC2DBZd3WfEF9cZcpBRDYxCTGCVCfPUf7Q';
     test("test1", () {
-      final address = P2wpkhAddress(program: pub.toSegwitAddress().getProgram);
+      final address =
+          P2wpkhAddress.fromProgram(program: pub.toSegwitAddress().getProgram);
       expect(correctP2wpkhAddress, address.toAddress(BitcoinNetwork.testnet));
     });
     test("test2", () {
@@ -221,7 +222,7 @@ void main() {
               netVersion: BitcoinNetwork.testnet.wifNetVer)
           .getPublic()
           .toSegwitAddress();
-      final p2sh = P2shAddress(script: addr.toScriptPubKey());
+      final p2sh = P2shAddress.fromScript(script: addr.toScriptPubKey());
       expect(correctP2shP2wpkhAddress, p2sh.toAddress(BitcoinNetwork.testnet));
     });
     test("test3", () {
@@ -234,7 +235,7 @@ void main() {
         'OP_1',
         'OP_CHECKMULTISIG'
       ]);
-      final pw = P2wshAddress(script: script);
+      final pw = P2wshAddress.fromScript(script: script);
       expect(pw.toAddress(BitcoinNetwork.testnet), correctP2wshAddress);
     });
     test("test4", () {
@@ -247,8 +248,8 @@ void main() {
         'OP_1',
         'OP_CHECKMULTISIG'
       ]);
-      final pw = P2wshAddress(script: script);
-      final p2sh = P2shAddress(script: pw.toScriptPubKey());
+      final pw = P2wshAddress.fromScript(script: script);
+      final p2sh = P2shAddress.fromScript(script: pw.toScriptPubKey());
       expect(p2sh.toAddress(BitcoinNetwork.testnet), correctP2shP2wshAddress);
     });
   });

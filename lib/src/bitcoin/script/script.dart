@@ -14,7 +14,7 @@ enum ScriptType { P2PKH, P2SH, P2WPKH, P2WSH, P2PK }
 ///
 /// [script] the list with all the script OP_CODES and data
 class Script {
-  const Script({required this.script});
+  Script({required List<dynamic> script}) : script = List.unmodifiable(script);
   final List<dynamic> script;
 
   List<int> toTapleafTaggedHash() {
@@ -27,7 +27,7 @@ class Script {
 
   /// create p2psh script wit current script
   Script toP2shScriptPubKey() {
-    final address = P2shAddress(script: this);
+    final address = P2shAddress.fromScript(script: this);
     return Script(script: ['OP_HASH160', address.getH160, 'OP_EQUAL']);
   }
 

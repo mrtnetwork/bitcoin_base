@@ -1,11 +1,4 @@
-import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
-import 'package:bitcoin_base/src/bitcoin/script/input.dart';
-import 'package:bitcoin_base/src/bitcoin/script/output.dart';
-import 'package:bitcoin_base/src/bitcoin/script/script.dart';
-import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
-import 'package:bitcoin_base/src/bitcoin/script/witness.dart';
-import 'package:bitcoin_base/src/crypto/keypair/ec_private.dart';
-import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -25,7 +18,7 @@ void main() {
       'OP_CHECKMULTISIG'
     ]);
 
-    final p2wshAddr = P2wshAddress(script: p2wshScript);
+    final p2wshAddr = P2wshAddress.fromScript(script: p2wshScript);
 
     final p2pkhAddr = sk1.getPublic().toAddress();
 
@@ -92,7 +85,7 @@ void main() {
       final sig1 = sk1.signInput(digit1);
       final sig2 = sk2.signInput(digit1);
       final pk = p2wshRedeemScript.toHex();
-      tx.witnesses.add(TxWitnessInput(stack: ['', sig1, sig2, pk]));
+      tx.addWitnesses(TxWitnessInput(stack: ['', sig1, sig2, pk]));
       expect(tx.serialize(), spendP2pkhResult);
     });
     test("test3", () {
@@ -104,20 +97,20 @@ void main() {
           txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
       final sig1 = sk1.signInput(digit1);
       txin1Multiple.scriptSig = Script(script: [sig1, sk1.getPublic().toHex()]);
-      tx.witnesses.add(TxWitnessInput(stack: []));
+      tx.addWitnesses(TxWitnessInput(stack: []));
       final seqwitDigit = tx.getTransactionSegwitDigit(
           txInIndex: 1, script: p2wshRedeemScript, amount: txin2MultipleAmount);
       final sigP2sh1 = sk1.signInput(seqwitDigit);
       final sigP2sh2 = sk2.signInput(seqwitDigit);
 
-      tx.witnesses.add(TxWitnessInput(
+      tx.addWitnesses(TxWitnessInput(
           stack: ['', sigP2sh1, sigP2sh2, p2wshRedeemScript.toHex()]));
       final segwitDigitIndex2 = tx.getTransactionSegwitDigit(
           txInIndex: 2,
           script: p2pkhAddr.toScriptPubKey(),
           amount: txin3MultipleAmount);
       final sig3 = sk1.signInput(segwitDigitIndex2);
-      tx.witnesses.add(TxWitnessInput(stack: [sig3, sk1.getPublic().toHex()]));
+      tx.addWitnesses(TxWitnessInput(stack: [sig3, sk1.getPublic().toHex()]));
       expect(tx.serialize(), multipleInputMultipleOuputResult);
     });
   });

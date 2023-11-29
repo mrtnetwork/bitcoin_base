@@ -1,7 +1,6 @@
 // spend from 8 different address type to 10 different output
 // ignore_for_file: unused_local_variable
 
-import 'package:bitcoin_base/src/bitcoin/address/core.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/provider/api_provider.dart';
@@ -57,13 +56,14 @@ void main() async {
   final signer4 = MultiSignatureSigner(publicKey: public4.toHex(), weight: 1);
 
   final MultiSignatureAddress multiSignatureAddress = MultiSignatureAddress(
-      threshold: 4,
-      signers: [signer1, signer2, signer3, signer4],
-      addressType: BitcoinAddressType.p2wsh);
+    threshold: 4,
+    signers: [signer1, signer2, signer3, signer4],
+  );
   // P2WSH Multisig 4-6
   // tb1qxt3c7849m0m6cv3z3s35c3zvdna3my3yz0r609qd9g0dcyyk580sgyldhe
 
-  final p2wshMultiSigAddress = multiSignatureAddress.address.toAddress(network);
+  final p2wshMultiSigAddress =
+      multiSignatureAddress.toP2wshAddress().toAddress(network);
 
   // p2sh(p2wsh) multisig
   final signerP2sh1 =
@@ -76,12 +76,13 @@ void main() async {
       MultiSignatureSigner(publicKey: public1.toHex(), weight: 1);
 
   final MultiSignatureAddress p2shMultiSignature = MultiSignatureAddress(
-      threshold: 2,
-      signers: [signerP2sh1, signerP2sh2, signerP2sh3],
-      addressType: BitcoinAddressType.p2wshInP2sh);
+    threshold: 2,
+    signers: [signerP2sh1, signerP2sh2, signerP2sh3],
+  );
   // P2SH(P2WSH) miltisig 2-3
   // 2N8co8bth9CNKtnWGfHW6HuUNgnNPNdpsMj
-  final p2shMultisigAddress = p2shMultiSignature.address.toAddress(network);
+  final p2shMultisigAddress =
+      p2shMultiSignature.toP2wshInP2shAddress().toAddress(network);
 
   // P2TR
   final exampleAddr2 = public2.toTaprootAddress();
@@ -94,10 +95,10 @@ void main() async {
   final spenders = [
     UtxoAddressDetails(
         multiSigAddress: multiSignatureAddress,
-        address: multiSignatureAddress.address),
+        address: multiSignatureAddress.toP2wshAddress()),
     UtxoAddressDetails(
         multiSigAddress: p2shMultiSignature,
-        address: p2shMultiSignature.address),
+        address: p2shMultiSignature.toP2wshInP2shAddress()),
     UtxoAddressDetails(publicKey: public2.toHex(), address: exampleAddr2),
   ];
 
@@ -149,8 +150,8 @@ void main() async {
   int size = BitcoinTransactionBuilder.estimateTransactionSize(
       utxos: utxos,
       outputs: [
-        p2shMultiSignature.address,
-        multiSignatureAddress.address,
+        p2shMultiSignature.toP2wshInP2shAddress(),
+        multiSignatureAddress.toP2wshAddress(),
         exampleAddr2,
         exampleAddr4
       ],
@@ -174,7 +175,7 @@ void main() async {
   // Well now we have the transaction fee and we can create the outputs based on this
   // 565 byte / 1024 * (feeRate / 32279 )  = 17810
 
-  final fee = feeRate.getEstimate(size, feeRate: feeRate.medium);
+  final fee = feeRate.getEstimate(size, feeRateType: BitcoinFeeRateType.medium);
   // fee = 17,810
 
   // We consider 17,810 satoshi for the cost
@@ -184,9 +185,11 @@ void main() async {
   // We consider the spendable amount for 4 outputs and divide by 4, each output 365448.5,
   // 365448 for two addresses and 365449 for two addresses because of decimal
   final output1 = BitcoinOutput(
-      address: p2shMultiSignature.address, value: BigInt.from(365449));
+      address: p2shMultiSignature.toP2wshInP2shAddress(),
+      value: BigInt.from(365449));
   final output2 = BitcoinOutput(
-      address: multiSignatureAddress.address, value: BigInt.from(365449));
+      address: multiSignatureAddress.toP2wshAddress(),
+      value: BigInt.from(365449));
   final output3 =
       BitcoinOutput(address: exampleAddr2, value: BigInt.from(365448));
   final output4 =

@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 void main() {
   group("P2Sh", () {
     final fromAddr =
-        P2pkhAddress(address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR');
+        P2pkhAddress.fromAddress(address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR');
     final sk = ECPrivate.fromWif(
         'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
@@ -47,9 +47,9 @@ void main() {
         txId:
             'f557c623e55f0affc696b742630770df2342c4aac395e0ed470923247bc51b95',
         txIndex: 0,
-        sq: seq.forInputSequence());
+        sequance: seq.forInputSequence());
     final anotherAddr =
-        P2pkhAddress(address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR');
+        P2pkhAddress.fromAddress(address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR');
     const spendP2shCsvP2pkhResult =
         '0200000001951bc57b24230947ede095c3aac44223df70076342b796c6ff0a5fe523c657f5000000008947304402205c2e23d8ad7825cf44b998045cb19b49cf6447cbc1cb76a254cda43f7939982002202d8f88ab6afd2e8e1d03f70e5edc2a277c713018225d5b18889c5ad8fd6677b4012103a2fef1829e0742b89c218c51898d9e7cb9d51201ba2bf9d9e9214ebb6af327081e02c800b27576a914c3f8e5b0f8455a2b02c29c4488a550278209b66988acc80000000100ab9041000000001976a914fd337ad3bf81e086d96a68e1f8d6a0a510f8c24a88ac00000000';
 

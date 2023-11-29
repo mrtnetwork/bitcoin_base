@@ -33,19 +33,28 @@ class MultiSignatureAddress {
   /// with this address.
   final int threshold;
 
-  /// Address represents the Bitcoin address associated with this multi-signature configuration.
-  final BitcoinAddress address;
+  // /// Address represents the Bitcoin address associated with this multi-signature configuration.
+  // final BitcoinAddress address;
 
   /// ScriptDetails provides details about the multi-signature script used in transactions,
   /// including "OP_M", compressed public keys, "OP_N", and "OP_CHECKMULTISIG."
-  final String scriptDetails;
+  final Script multiSigScript;
 
-  MultiSignatureAddress._({
-    required this.signers,
-    required this.threshold,
-    required this.address,
-    required this.scriptDetails,
-  });
+  BitcoinAddress toP2wshAddress() {
+    return P2wshAddress.fromScript(script: multiSigScript);
+  }
+
+  BitcoinAddress toP2wshInP2shAddress() {
+    final p2wsh = toP2wshAddress();
+    return P2shAddress.fromScript(
+        script: p2wsh.toScriptPubKey(), type: BitcoinAddressType.p2wshInP2sh);
+  }
+
+  MultiSignatureAddress._(
+      {required this.signers,
+      required this.threshold,
+      // required this.address,
+      required this.multiSigScript});
 
   /// CreateMultiSignatureAddress creates a new instance of a MultiSignatureAddress, representing
   /// a multi-signature Bitcoin address configuration. It allows you to specify the minimum number
@@ -54,7 +63,6 @@ class MultiSignatureAddress {
   factory MultiSignatureAddress({
     required int threshold,
     required List<MultiSignatureSigner> signers,
-    required BitcoinAddressType addressType,
   }) {
     final sumWeight = signers.fold(0, (sum, signer) => sum + signer.weight);
     if (threshold > 16 || threshold < 1) {
@@ -76,33 +84,7 @@ class MultiSignatureAddress {
     }
     multiSigScript.addAll(['OP_$sumWeight', 'OP_CHECKMULTISIG']);
     final script = Script(script: multiSigScript);
-    final p2wsh = P2wshAddress(script: script);
-    switch (addressType) {
-      case BitcoinAddressType.p2wsh:
-        {
-          return MultiSignatureAddress._(
-            signers: signers,
-            threshold: threshold,
-            address: p2wsh,
-            scriptDetails: script.toHex(),
-          );
-        }
-      case BitcoinAddressType.p2wshInP2sh:
-        {
-          final addr = P2shAddress.fromScript(
-              script: p2wsh.toScriptPubKey(),
-              type: BitcoinAddressType.p2wshInP2sh);
-          return MultiSignatureAddress._(
-            signers: signers,
-            threshold: threshold,
-            address: addr,
-            scriptDetails: script.toHex(),
-          );
-        }
-      default:
-        {
-          throw ArgumentError('addressType should be P2WSH or P2WSHInP2SH');
-        }
-    }
+    return MultiSignatureAddress._(
+        signers: signers, threshold: threshold, multiSigScript: script);
   }
 }

@@ -1,15 +1,17 @@
+enum BitcoinFeeRateType { low, medium, high }
+
 class BitcoinFeeRate {
   BitcoinFeeRate._(
       {required this.high, required this.medium, required this.low});
+
+  /// High fee rate in satoshis per kilobyte
   final BigInt high;
 
-  /// High fee rate in satoshis per byte
+  /// Medium fee rate in satoshis per kilobyte
   final BigInt medium;
 
-  /// Medium fee rate in satoshis per byte
+  /// low fee rate in satoshis per kilobyte
   final BigInt low;
-
-  /// Low fee rate in satoshis per byte
 
   /// GetEstimate calculates the estimated fee in satoshis for a given transaction size
   /// and fee rate (in satoshis per kilobyte) using the formula:
@@ -22,9 +24,25 @@ class BitcoinFeeRate {
   //
   /// Returns:
   /// - BigInt: A BigInt containing the estimated fee in satoshis.
-  BigInt getEstimate(int trSize, {BigInt? feeRate}) {
+  BigInt getEstimate(int trSize,
+      {BigInt? customFeeRatePerKb,
+      BitcoinFeeRateType feeRateType = BitcoinFeeRateType.medium}) {
+    BigInt? feeRate = customFeeRatePerKb;
+    if (feeRate == null) {
+      switch (feeRateType) {
+        case BitcoinFeeRateType.low:
+          feeRate = low;
+          break;
+        case BitcoinFeeRateType.medium:
+          feeRate = medium;
+          break;
+        default:
+          feeRate = high;
+          break;
+      }
+    }
     final trSizeBigInt = BigInt.from(trSize);
-    return (trSizeBigInt * (feeRate ?? medium)) ~/ BigInt.from(1024);
+    return (trSizeBigInt * feeRate) ~/ BigInt.from(1024);
   }
 
   @override
