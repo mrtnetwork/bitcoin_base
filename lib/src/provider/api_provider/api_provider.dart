@@ -78,7 +78,7 @@ class ApiProvider {
             url, json.encode(digestData));
         BlockCypherTransaction? tr;
         if (response["tx"] != null) {
-          tr = BlockCypherTransaction.fromJson(response[["tx"]]);
+          tr = BlockCypherTransaction.fromJson(response["tx"]);
         }
 
         tr ??= BlockCypherTransaction.fromJson(response);

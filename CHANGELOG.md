@@ -1,3 +1,7 @@
+## 1.4.0
+
+* Fix blockcypher API
+
 ## 1.3.0
 
 * Include a constructor in the address for improved clarity and comprehension.
