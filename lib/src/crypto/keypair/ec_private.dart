@@ -25,9 +25,11 @@ class ECPrivate {
   }
 
   /// returns as WIFC (compressed) or WIF format (string)
-  String toWif({bool compressed = true, BitcoinNetwork? networkType}) {
-    final network = networkType ?? BitcoinNetwork.mainnet;
-    List<int> bytes = <int>[...network.wifNetVer, ...toBytes()];
+  String toWif({bool compressed = true, BitcoinNetwork? network}) {
+    List<int> bytes = <int>[
+      ...(network ?? BitcoinNetwork.mainnet).wifNetVer,
+      ...toBytes()
+    ];
     if (compressed) {
       bytes = <int>[...bytes, 0x01];
     }

@@ -13,9 +13,9 @@ class APIConfig {
   final String transactions;
   final String sendTransaction;
   final APIType apiType;
-  final BitcoinNetwork network;
+  final BasedUtxoNetwork network;
 
-  factory APIConfig.selectApi(APIType apiType, BitcoinNetwork network) {
+  factory APIConfig.selectApi(APIType apiType, BasedUtxoNetwork network) {
     switch (apiType) {
       case APIType.mempool:
         return APIConfig.mempool(network);
@@ -43,10 +43,27 @@ class APIConfig {
     return baseUrl.replaceAll("###", address);
   }
 
-  factory APIConfig.fromBlockCypher(BitcoinNetwork network) {
-    String baseUrl = network.isMainnet
-        ? BtcApiConst.blockCypherMainBaseURL
-        : BtcApiConst.blockCypherBaseURL;
+  factory APIConfig.fromBlockCypher(BasedUtxoNetwork network) {
+    String baseUrl;
+    switch (network) {
+      case BitcoinNetwork.mainnet:
+        baseUrl = BtcApiConst.blockCypherMainBaseURL;
+      case BitcoinNetwork.testnet:
+        baseUrl = BtcApiConst.blockCypherBaseURL;
+        break;
+      case DashNetwork.mainnet:
+        baseUrl = BtcApiConst.blockCypherDashBaseUri;
+        break;
+      case DogecoinNetwork.mainnet:
+        baseUrl = BtcApiConst.blockCypherDogeBaseUri;
+        break;
+      case LitecoinNetwork.mainnet:
+        baseUrl = BtcApiConst.blockCypherLitecoinBaseUri;
+        break;
+      default:
+        throw UnimplementedError(
+            "blockcypher does not support ${network.conf.coinName.name}, u must use your own provider");
+    }
 
     return APIConfig(
       url: "$baseUrl/addrs/###/?unspentOnly=true&includeScript=true&limit=2000",
@@ -59,10 +76,18 @@ class APIConfig {
     );
   }
 
-  factory APIConfig.mempool(BitcoinNetwork network) {
-    String baseUrl = network.isMainnet
-        ? BtcApiConst.mempoolMainBaseURL
-        : BtcApiConst.mempoolBaseURL;
+  factory APIConfig.mempool(BasedUtxoNetwork network) {
+    String baseUrl;
+    switch (network) {
+      case BitcoinNetwork.mainnet:
+        baseUrl = BtcApiConst.mempoolMainBaseURL;
+      case BitcoinNetwork.testnet:
+        baseUrl = BtcApiConst.mempoolBaseURL;
+        break;
+      default:
+        throw UnimplementedError(
+            "mempool does not support ${network.conf.coinName.name}");
+    }
 
     return APIConfig(
       url: "$baseUrl/address/###/utxo",

@@ -3,6 +3,7 @@ import 'package:bitcoin_base/src/bitcoin/address/validate.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 import 'package:blockchain_utils/base58/base58.dart';
+import 'package:blockchain_utils/bech32/bch_bech32.dart';
 import 'package:blockchain_utils/binary/utils.dart';
 import 'package:blockchain_utils/bip/ecc/keys/secp256k1_keys_ecdsa.dart';
 import 'package:blockchain_utils/crypto/quick_crypto.dart';
@@ -20,13 +21,14 @@ abstract class LegacyAddress implements BitcoinAddress {
     _h160 = addrHash;
   }
   LegacyAddress.fromAddress(
-      {required String address, BitcoinNetwork? network}) {
-    if (!isValidAddress(address, type, network: network)) {
-      throw ArgumentError("Invalid addres");
+      {required String address, required BasedUtxoNetwork network}) {
+    final decode = decodeLagacyAddress(address, type, network: network);
+    if (decode == null) {
+      throw ArgumentError("Invalid ${network.conf.coinName.name} address");
     }
-    _h160 = _addressToHash160(address);
+    _h160 = BytesUtils.toHexString(decode);
   }
-  LegacyAddress.fromScript({required Script script, BitcoinNetwork? network})
+  LegacyAddress.fromScript({required Script script})
       : _h160 = _scriptToHash160(script);
   LegacyAddress._();
 
@@ -38,38 +40,49 @@ abstract class LegacyAddress implements BitcoinAddress {
     return _h160;
   }
 
-  static String _addressToHash160(String address) {
-    final decode = Base58Decoder.checkDecode(address);
-    return BytesUtils.toHexString(decode.sublist(1));
-  }
-
   static String _scriptToHash160(Script s) {
     final b = s.toBytes();
     final h160 = QuickCrypto.hash160(b);
     return BytesUtils.toHexString(h160);
   }
 
-  /// returns the address's string encoding
   @override
-  String toAddress(BitcoinNetwork network) {
+  String toAddress(BasedUtxoNetwork network) {
     List<int> hashToBytes = BytesUtils.fromHexString(_h160);
     return _lagacyToAddress(network, hashToBytes);
   }
 
-  String _lagacyToAddress(BitcoinNetwork network, List<int> hash160) {
+  String _lagacyToAddress(BasedUtxoNetwork network, List<int> scriptBytes) {
+    if (network is BitcoinCashNetwork) {
+      return _toBchAddress(network, scriptBytes);
+    }
     switch (type) {
       case BitcoinAddressType.p2wpkhInP2sh:
       case BitcoinAddressType.p2wshInP2sh:
       case BitcoinAddressType.p2pkhInP2sh:
       case BitcoinAddressType.p2pkInP2sh:
-        hash160 = [...network.p2shNetVer, ...hash160];
+        scriptBytes = [...network.p2shNetVer, ...scriptBytes];
         break;
       case const (BitcoinAddressType.p2pkh) || const (BitcoinAddressType.p2pk):
-        hash160 = [...network.p2pkhNetVer, ...hash160];
+        scriptBytes = [...network.p2pkhNetVer, ...scriptBytes];
         break;
       default:
     }
-    return Base58Encoder.checkEncode(hash160);
+
+    return Base58Encoder.checkEncode(scriptBytes);
+  }
+
+  String _toBchAddress(BasedUtxoNetwork network, List<int> scriptBytes) {
+    String hrp;
+    List<int> netVersion;
+    if (type.isP2sh) {
+      hrp = network.conf.params.p2shStdHrp!;
+      netVersion = network.conf.params.p2shStdNetVer!;
+    } else {
+      hrp = network.conf.params.p2pkhStdHrp!;
+      netVersion = network.conf.params.p2pkhStdNetVer!;
+    }
+    return BchBech32Encoder.encode(hrp, netVersion, scriptBytes);
   }
 
   void _validateP2shType() {
@@ -92,7 +105,7 @@ class P2shAddress extends LegacyAddress {
 
   P2shAddress.fromAddress(
       {required super.address,
-      super.network,
+      required super.network,
       this.type = BitcoinAddressType.p2pkInP2sh})
       : super.fromAddress() {
     _validateP2shType();
@@ -106,6 +119,20 @@ class P2shAddress extends LegacyAddress {
   @override
   final BitcoinAddressType type;
 
+  void _validateP2shSupport(BasedUtxoNetwork network) {
+    if (network is BitcoinNetwork || network is LitecoinNetwork) return;
+    if (type == BitcoinAddressType.p2wshInP2sh ||
+        type == BitcoinAddressType.p2wpkhInP2sh) {
+      throw ArgumentError("Bitcoin forks that do not support Segwit");
+    }
+  }
+
+  @override
+  String toAddress(BasedUtxoNetwork network) {
+    _validateP2shSupport(network);
+    return super.toAddress(network);
+  }
+
   /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override
   Script toScriptPubKey() {
@@ -115,7 +142,7 @@ class P2shAddress extends LegacyAddress {
 
 class P2pkhAddress extends LegacyAddress {
   P2pkhAddress.fromScript({required super.script}) : super.fromScript();
-  P2pkhAddress.fromAddress({required super.address, super.network})
+  P2pkhAddress.fromAddress({required super.address, required super.network})
       : super.fromAddress();
   P2pkhAddress.fromHash160({required String addrHash})
       : super.fromHash160(addrHash);
@@ -152,7 +179,7 @@ class P2pkAddress extends LegacyAddress {
   }
 
   @override
-  String toAddress(BitcoinNetwork network) {
+  String toAddress(BasedUtxoNetwork network) {
     final bytes = BytesUtils.fromHexString(publicHex);
     List<int> ripemd160Hash = QuickCrypto.hash160(bytes);
     return _lagacyToAddress(network, ripemd160Hash);

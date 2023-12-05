@@ -152,8 +152,10 @@ void main() {
       expect(p2.toAddress(BitcoinNetwork.mainnet), addressc);
     });
     test("test2", () {
-      final p1 = P2pkhAddress.fromAddress(address: address);
-      final p2 = P2pkhAddress.fromAddress(address: addressc);
+      final p1 = P2pkhAddress.fromAddress(
+          address: address, network: BitcoinNetwork.mainnet);
+      final p2 = P2pkhAddress.fromAddress(
+          address: addressc, network: BitcoinNetwork.mainnet);
       expect(p1.getH160, hash160);
       expect(p2.getH160, hash160c);
     });

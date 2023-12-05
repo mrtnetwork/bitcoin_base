@@ -186,7 +186,7 @@ void main() async {
   // utxo  infos with owner details
   // trDigest transaction digest of current UTXO (must be sign with correct privateKey)
   final transaction =
-      transactionBuilder.buildTransaction((trDigest, utxo, publicKey) {
+      transactionBuilder.buildTransaction((trDigest, utxo, publicKey, sighash) {
     late ECPrivate key;
 
     // ok we have the public key of the current UTXO and we use some conditions to find private  key and sign transaction
@@ -218,10 +218,10 @@ void main() async {
       // yes is p2tr utxo and now we use SignTaprootTransaction(Schnorr sign)
       // for now this transaction builder support only tweak transaction
       // If you want to spend a Taproot script-path spending, you must create your own transaction builder.
-      return key.signTapRoot(trDigest);
+      return key.signTapRoot(trDigest, sighash: sighash);
     } else {
       // is seqwit(v0) or lagacy address we use  SingInput (ECDSA)
-      return key.signInput(trDigest);
+      return key.signInput(trDigest, sigHash: sighash);
     }
   });
 
@@ -231,7 +231,7 @@ void main() async {
 
   // we check if transaction is segwit or not
   // When one of the input UTXO addresses is SegWit, the transaction is considered SegWit.
-  final isSegwitTr = transactionBuilder.hasSegwit();
+  final isSegwitTr = transaction.hasSegwit;
 
   // transaction id
   // ignore: unused_local_variable

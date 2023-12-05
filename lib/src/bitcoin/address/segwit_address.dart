@@ -20,10 +20,10 @@ abstract class SegwitAddress implements BitcoinAddress {
 
   SegwitAddress.fromAddress(
       {required String address,
-      BitcoinNetwork? network,
+      required BasedUtxoNetwork network,
       this.version = BitcoinOpCodeConst.P2WPKH_ADDRESS_V0})
       : segwitNumVersion = _segwitVersion(version) {
-    _program = _addressToHash(address, network: network);
+    _program = _addressToHash(address, network);
   }
   SegwitAddress.fromProgram(
       {required String program,
@@ -43,8 +43,8 @@ abstract class SegwitAddress implements BitcoinAddress {
   final String version;
   late final int segwitNumVersion;
 
-  String _addressToHash(String address, {BitcoinNetwork? network}) {
-    final convert = SegwitBech32Decoder.decode(network?.p2wpkhHrp, address);
+  String _addressToHash(String address, BasedUtxoNetwork network) {
+    final convert = SegwitBech32Decoder.decode(network.p2wpkhHrp, address);
 
     final version = convert.$1;
     if (version != segwitNumVersion) {
@@ -55,10 +55,10 @@ abstract class SegwitAddress implements BitcoinAddress {
 
   /// returns the address's string encoding (Bech32)
   @override
-  String toAddress(BitcoinNetwork networkType) {
+  String toAddress(BasedUtxoNetwork network) {
     final bytes = BytesUtils.fromHexString(_program);
-    final sw = SegwitBech32Encoder.encode(
-        networkType.p2wpkhHrp, segwitNumVersion, bytes);
+    final sw =
+        SegwitBech32Encoder.encode(network.p2wpkhHrp, segwitNumVersion, bytes);
     return sw;
   }
 
@@ -70,7 +70,7 @@ abstract class SegwitAddress implements BitcoinAddress {
 }
 
 class P2wpkhAddress extends SegwitAddress {
-  P2wpkhAddress.fromAddress({required super.address, super.network})
+  P2wpkhAddress.fromAddress({required super.address, required super.network})
       : super.fromAddress(version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0);
 
   P2wpkhAddress.fromProgram({required super.program})
@@ -90,7 +90,7 @@ class P2wpkhAddress extends SegwitAddress {
 }
 
 class P2trAddress extends SegwitAddress {
-  P2trAddress.fromAddress({required super.address, super.network})
+  P2trAddress.fromAddress({required super.address, required super.network})
       : super.fromAddress(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
   P2trAddress.fromProgram({required super.program})
       : super.fromProgram(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
@@ -109,7 +109,7 @@ class P2trAddress extends SegwitAddress {
 }
 
 class P2wshAddress extends SegwitAddress {
-  P2wshAddress.fromAddress({required super.address, super.network})
+  P2wshAddress.fromAddress({required super.address, required super.network})
       : super.fromAddress(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);
   P2wshAddress.fromProgram({required super.program})
       : super.fromProgram(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);

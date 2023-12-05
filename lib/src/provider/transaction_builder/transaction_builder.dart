@@ -3,12 +3,12 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/binary/utils.dart';
 
 typedef BitcoinSignerCallBack = String Function(
-    List<int> trDigest, UtxoWithAddress utxo, String publicKey);
+    List<int> trDigest, UtxoWithAddress utxo, String publicKey, int sighash);
 
 class BitcoinTransactionBuilder {
   final List<BitcoinOutput> outPuts;
   final BigInt fee;
-  final BitcoinNetwork network;
+  final BasedUtxoNetwork network;
   final List<UtxoWithAddress> utxos;
   final String? memo;
   final bool enableRBF;
@@ -21,7 +21,25 @@ class BitcoinTransactionBuilder {
     this.memo,
     this.enableRBF = false,
     this.isFakeTransaction = false,
-  });
+  }) {
+    _validateBuilder();
+  }
+
+  /// validate network and address suport before create transaction
+  void _validateBuilder() {
+    if (network is BitcoinCashNetwork) {
+      throw ArgumentError(
+          "invalid network for BitcoinTransactionBuilder use BCHTransactionBuilder");
+    }
+    for (final i in utxos) {
+      /// Verify each input for its association with this network's address. Raise an exception if the address is incorrect.
+      i.ownerDetails.address.toAddress(network);
+    }
+    for (final i in outPuts) {
+      /// Verify each output for its association with this network's address. Raise an exception if the address is incorrect.
+      i.address.toAddress(network);
+    }
+  }
 
   /// This method is used to create a dummy transaction,
   /// allowing us to obtain the size of the original transaction
@@ -29,7 +47,7 @@ class BitcoinTransactionBuilder {
   static int estimateTransactionSize(
       {required List<UtxoWithAddress> utxos,
       required List<BitcoinAddress> outputs,
-      required BitcoinNetwork network,
+      required BasedUtxoNetwork network,
       String? memo,
       bool enableRBF = false}) {
     final sum = utxos.sumOfUtxosValue();
@@ -80,7 +98,7 @@ class BitcoinTransactionBuilder {
         "0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101";
 
     final transaction = transactionBuilder
-        .buildTransaction((trDigest, utxo, multiSigPublicKey) {
+        .buildTransaction((trDigest, utxo, multiSigPublicKey, int sighash) {
       if (utxo.utxo.isP2tr()) {
         return fakeSchnorSignaturBytes;
       } else {
@@ -102,7 +120,7 @@ class BitcoinTransactionBuilder {
 //
   /// Returns:
   /// - bool: True if at least one UTXO in the list is a SegWit UTXO, false otherwise.
-  bool hasSegwit() {
+  bool _hasSegwit() {
     for (final element in utxos) {
       if (element.utxo.isSegwit()) {
         return true;
@@ -117,7 +135,7 @@ class BitcoinTransactionBuilder {
 //
   /// Returns:
   /// - bool: True if at least one UTXO in the list is a P2TR UTXO, false otherwise.
-  bool hasTaproot() {
+  bool _hasTaproot() {
     for (final element in utxos) {
       if (element.utxo.isP2tr()) {
         return true;
@@ -127,24 +145,28 @@ class BitcoinTransactionBuilder {
   }
 
   /// It is used to make the appropriate scriptSig
-  Script buildInputScriptPubKeys(UtxoWithAddress utxo, bool isTaproot) {
+  Script _findLockingScript(UtxoWithAddress utxo, bool isTaproot) {
     if (utxo.isMultiSig()) {
-      final script = Script.fromRaw(
-          hexData: utxo.ownerDetails.multiSigAddress!.multiSigScript.toHex(),
-          hasSegwit: true);
+      final multiSigAAddr = utxo.multiSigAddress;
+      final script = multiSigAAddr.multiSigScript;
       switch (utxo.utxo.scriptType) {
         case BitcoinAddressType.p2wshInP2sh:
           if (isTaproot) {
-            return utxo.ownerDetails.multiSigAddress!
-                .toP2wshInP2shAddress()
+            return multiSigAAddr
+                .toP2wshInP2shAddress(network: network)
                 .toScriptPubKey();
           }
           return script;
         case BitcoinAddressType.p2wsh:
           if (isTaproot) {
-            return utxo.ownerDetails.multiSigAddress!
-                .toP2wshAddress()
+            return multiSigAAddr
+                .toP2wshAddress(network: network)
                 .toScriptPubKey();
+          }
+          return script;
+        case BitcoinAddressType.p2pkhInP2sh:
+          if (isTaproot) {
+            return multiSigAAddr.toP2shAddress().toScriptPubKey();
           }
           return script;
         default:
@@ -209,7 +231,7 @@ class BitcoinTransactionBuilder {
 //
   /// Returns:
   /// - List<int>: representing the transaction digest to be used for signing the input.
-  List<int> generateTransactionDigest(
+  List<int> _generateTransactionDigest(
       Script scriptPubKeys,
       int input,
       UtxoWithAddress utox,
@@ -241,15 +263,12 @@ class BitcoinTransactionBuilder {
   //
   /// Returns:
   /// - List<String>: A List of strings representing the script signature for the P2WSH or P2SH input.
-  List<String> buildP2wshOrP2shScriptSig(
+  List<String> _buildMiltisigUnlockingScript(
       List<String> signedDigest, UtxoWithAddress utx) {
     /// The constructed script signature consists of the signed digest elements followed by
     /// the script details of the multi-signature address.
-    return [
-      '',
-      ...signedDigest,
-      utx.ownerDetails.multiSigAddress!.multiSigScript.toHex()
-    ];
+
+    return ['', ...signedDigest, utx.multiSigAddress.multiSigScript.toHex()];
   }
 
   /// buildP2shSegwitRedeemScriptSig constructs and returns a script signature (represented as a List of strings)
@@ -257,26 +276,26 @@ class BitcoinTransactionBuilder {
   /// based on the UTXO and UTXO owner details and creates the appropriate script signature.
   //
   /// Parameters:
-  /// - utx0: A UtxoWithAddress instance representing the unspent transaction output (UTXO) and its owner details.
+  /// - utxo: A UtxoWithAddress instance representing the unspent transaction output (UTXO) and its owner details.
   //
   /// Returns:
   /// - List<string>: A List of strings representing the script signature for the P2SH SegWit input.
-  List<String> buildP2shSegwitRedeemScriptSig(UtxoWithAddress utx0) {
-    if (utx0.isMultiSig()) {
-      switch (utx0.utxo.scriptType) {
+  List<String> _buildNestedSegwitReedemScript(UtxoWithAddress utxo) {
+    if (utxo.isMultiSig()) {
+      switch (utxo.utxo.scriptType) {
         case BitcoinAddressType.p2wshInP2sh:
           final script = Script.fromRaw(
-              hexData:
-                  utx0.ownerDetails.multiSigAddress!.multiSigScript.toHex(),
+              hexData: utxo.multiSigAddress.multiSigScript.toHex(),
               hasSegwit: true);
           final p2wsh = P2wshAddress.fromScript(script: script);
           return [p2wsh.toScriptPubKey().toHex()];
         default:
-          throw Exception('Does not support this script type');
+          throw Exception(
+              "Invalid p2sh nested segwit type ${utxo.utxo.scriptType.name}");
       }
     }
-    final senderPub = utx0.public();
-    switch (utx0.utxo.scriptType) {
+    final senderPub = utxo.public();
+    switch (utxo.utxo.scriptType) {
       case BitcoinAddressType.p2wshInP2sh:
         final script = senderPub.toP2wshAddress().toScriptPubKey();
         return [script.toHex()];
@@ -284,7 +303,8 @@ class BitcoinTransactionBuilder {
         final script = senderPub.toSegwitAddress().toScriptPubKey();
         return [script.toHex()];
       default:
-        throw Exception('Does not support this script type');
+        throw Exception(
+            "Invalid p2sh nested segwit type ${utxo.utxo.scriptType.name}");
     }
   }
 
@@ -294,7 +314,7 @@ the unlocking script because it provides data and instructions to unlock
 a specific output. It contains information and cryptographic signatures
 that demonstrate the right to spend the bitcoins associated with the corresponding scriptPubKey output.
 */
-  List<String> buildScriptSig(String signedDigest, UtxoWithAddress utx) {
+  List<String> _buildUnlockingScript(String signedDigest, UtxoWithAddress utx) {
     final senderPub = utx.public();
     if (utx.utxo.isSegwit()) {
       if (utx.utxo.isP2tr()) {
@@ -305,8 +325,12 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
         case BitcoinAddressType.p2wsh:
           final script = senderPub.toP2wshScript();
           return ['', signedDigest, script.toHex()];
-        default:
+        case BitcoinAddressType.p2wpkh:
+        case BitcoinAddressType.p2wpkhInP2sh:
           return [signedDigest, senderPub.toHex()];
+        default:
+          throw Exception(
+              "invalid segwit address type ${utx.utxo.scriptType.name}");
       }
     } else {
       switch (utx.utxo.scriptType) {
@@ -321,13 +345,12 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           final script = senderPub.toRedeemScript();
           return [signedDigest, script.toHex()];
         default:
-          throw Exception(
-              'Cannot send from this type of address ${utx.utxo.scriptType}');
+          throw Exception("invalid address type ${utx.utxo.scriptType.name}");
       }
     }
   }
 
-  List<TxInput> buildInputs() {
+  List<TxInput> _buildInputs() {
     final sequence = enableRBF
         ? (Sequence(
                 seqType: BitcoinOpCodeConst.TYPE_REPLACE_BY_FEE,
@@ -346,33 +369,20 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
     return inputs;
   }
 
-  List<TxOutput> buildOutputs() {
+  List<TxOutput> _buildOutputs() {
     final outputs = <TxOutput>[];
     for (final e in outPuts) {
       outputs.add(
-          TxOutput(amount: e.value, scriptPubKey: buildOutputScriptPubKey(e)));
+          TxOutput(amount: e.value, scriptPubKey: e.address.toScriptPubKey()));
     }
     return outputs;
   }
 
-/*
-the scriptPubKey of a UTXO (Unspent Transaction Output) is used as the locking
-script that defines the spending conditions for the bitcoins associated
-with that UTXO. When creating a Bitcoin transaction, the spending conditions
-specified by the scriptPubKey must be satisfied by the corresponding scriptSig
-in the transaction input to spend the UTXO.
-*/
-  Script buildOutputScriptPubKey(BitcoinOutput addr) {
-    return addr.address.toScriptPubKey();
-  }
-
-/*
-The primary use case for OP_RETURN is data storage. You can embed various types of
-data within the OP_RETURN output, such as text messages, document hashes, or metadata
-related to a transaction. This data is permanently recorded on the blockchain and can
-be retrieved by anyone who examines the blockchain's history.
-*/
-  Script opReturn(String message) {
+  /// The primary use case for OP_RETURN is data storage. You can embed various types of
+  /// data within the OP_RETURN output, such as text messages, document hashes, or metadata
+  /// related to a transaction. This data is permanently recorded on the blockchain and can
+  /// be retrieved by anyone who examines the blockchain's history.
+  Script _opReturn(String message) {
     try {
       BytesUtils.fromHexString(message);
       return Script(script: ["OP_RETURN", message]);
@@ -385,7 +395,7 @@ be retrieved by anyone who examines the blockchain's history.
   }
 
   /// Total amount to spend excluding fees
-  BigInt sumOutputAmounts() {
+  BigInt _sumOutputAmounts() {
     BigInt sum = BigInt.zero;
     for (final e in outPuts) {
       sum += e.value;
@@ -395,24 +405,25 @@ be retrieved by anyone who examines the blockchain's history.
 
   BtcTransaction buildTransaction(BitcoinSignerCallBack sign) {
     /// build inputs
-    final inputs = buildInputs();
+    final inputs = _buildInputs();
 
     /// build outout
-    final outputs = buildOutputs();
+    final outputs = _buildOutputs();
 
     /// check transaction is segwit
-    final hasSegwit = this.hasSegwit();
+    final hasSegwit = _hasSegwit();
 
     /// check transaction is taproot
-    final hasTaproot = this.hasTaproot();
+    final hasTaproot = _hasTaproot();
 
     /// check if you set memos or not
     if (memo != null) {
-      outputs.add(TxOutput(amount: BigInt.zero, scriptPubKey: opReturn(memo!)));
+      outputs
+          .add(TxOutput(amount: BigInt.zero, scriptPubKey: _opReturn(memo!)));
     }
 
     /// sum of amounts you filled in outputs
-    final sumOutputAmounts = this.sumOutputAmounts();
+    final sumOutputAmounts = _sumOutputAmounts();
 
     /// sum of UTXOS amount
     final sumUtxoAmount = utxos.sumOfUtxosValue();
@@ -422,7 +433,7 @@ be retrieved by anyone who examines the blockchain's history.
 
     /// We will check whether you have spent the correct amounts or not
     if (!isFakeTransaction && sumAmountsWithFee != sumUtxoAmount) {
-      throw Exception('Sum value of utxo not spending');
+      throw ArgumentError('Sum value of utxo not spending');
     }
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
@@ -439,30 +450,32 @@ be retrieved by anyone who examines the blockchain's history.
 
     if (hasTaproot) {
       taprootAmounts = utxos.map((e) => e.utxo.value).toList();
-      taprootScripts =
-          utxos.map((e) => buildInputScriptPubKeys(e, true)).toList();
+      taprootScripts = utxos.map((e) => _findLockingScript(e, true)).toList();
     }
 
     /// Well, now let's do what we want for each input
     for (int i = 0; i < inputs.length; i++) {
       /// We receive the owner's ScriptPubKey
-      final script = buildInputScriptPubKeys(utxos[i], false);
+      final script = _findLockingScript(utxos[i], false);
 
       /// We generate transaction digest for current input
-      final digest = generateTransactionDigest(
+      final digest = _generateTransactionDigest(
           script, i, utxos[i], transaction, taprootAmounts, taprootScripts);
+      final int sighash = utxos[i].utxo.isP2tr()
+          ? BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL
+          : BitcoinOpCodeConst.SIGHASH_ALL;
 
       /// handle multisig address
       if (utxos[i].isMultiSig()) {
-        final multiSigAddress = utxos[i].ownerDetails.multiSigAddress;
+        final multiSigAddress = utxos[i].multiSigAddress;
         int sumMultiSigWeight = 0;
         final mutlsiSigSignatures = <String>[];
         for (int ownerIndex = 0;
-            ownerIndex < multiSigAddress!.signers.length;
+            ownerIndex < multiSigAddress.signers.length;
             ownerIndex++) {
           /// now we need sign the transaction digest
-          final sig = sign(
-              digest, utxos[i], multiSigAddress.signers[ownerIndex].publicKey);
+          final sig = sign(digest, utxos[i],
+              multiSigAddress.signers[ownerIndex].publicKey, sighash);
           if (sig.isEmpty) continue;
           for (int weight = 0;
               weight < multiSigAddress.signers[ownerIndex].weight;
@@ -480,63 +493,23 @@ be retrieved by anyone who examines the blockchain's history.
         if (sumMultiSigWeight != multiSigAddress.threshold) {
           throw StateError("some multisig signature does not exist");
         }
-
-        /// ok we signed, now we need unlocking script for this input
-        final scriptSig =
-            buildP2wshOrP2shScriptSig(mutlsiSigSignatures, utxos[i]);
-
-        /// Now we need to add it to the transaction
-        /// check if current utxo is segwit or not
-        witnesses.add(TxWitnessInput(stack: scriptSig));
-        if (utxos[i].utxo.isP2shSegwit()) {
-          /*
-				check if we need redeemScriptSig or not
-				In a Pay-to-Script-Hash (P2SH) Segregated Witness (SegWit) input,
-				the redeemScriptSig is needed for historical and compatibility reasons,
-				even though the actual script execution has moved to the witness field (the witnessScript).
-				This design choice preserves backward compatibility with older Bitcoin clients that do not support SegWit.
-			*/
-          final p2shSegwitScript = buildP2shSegwitRedeemScriptSig(utxos[i]);
-          inputs[i].scriptSig = Script(script: p2shSegwitScript);
-        }
+        _addUnlockScriptScript(
+            hasSegwit: hasSegwit,
+            input: inputs[i],
+            signatures: mutlsiSigSignatures,
+            utxo: utxos[i],
+            witnesses: witnesses);
         continue;
       }
 
       /// now we need sign the transaction digest
-      final sig = sign(digest, utxos[i], utxos[i].ownerDetails.publicKey!);
-
-      /// ok we signed, now we need unlocking script for this input
-      final scriptSig = buildScriptSig(sig, utxos[i]);
-
-      /// Now we need to add it to the transaction
-      /// check if current utxo is segwit or not
-      if (utxos[i].utxo.isSegwit()) {
-        /// ok is segwit and we append to witness list
-        witnesses.add(TxWitnessInput(stack: scriptSig));
-        if (utxos[i].utxo.isP2shSegwit()) {
-          /*
-				check if we need redeemScriptSig or not
-				In a Pay-to-Script-Hash (P2SH) Segregated Witness (SegWit) input,
-				the redeemScriptSig is needed for historical and compatibility reasons,
-				even though the actual script execution has moved to the witness field (the witnessScript).
-				This design choice preserves backward compatibility with older Bitcoin clients that do not support SegWit.
-			*/
-          final p2shSegwitScript = buildP2shSegwitRedeemScriptSig(utxos[i]);
-          inputs[i].scriptSig = Script(script: p2shSegwitScript);
-        }
-      } else {
-        /// ok input is not segwit and we use SetScriptSig to set the correct scriptSig
-        inputs[i].scriptSig = Script(script: scriptSig);
-        /*
-			 the concept of an "empty witness" is related to Segregated Witness (SegWit) transactions
-			 and the way transaction data is structured. When a transaction input is not associated
-			 with a SegWit UTXO, it still needs to be compatible with
-			 the SegWit transaction format. This is achieved through the use of an "empty witness."
-			*/
-        if (hasSegwit) {
-          witnesses.add(TxWitnessInput(stack: []));
-        }
-      }
+      final sig = sign(digest, utxos[i], utxos[i].public().toHex(), sighash);
+      _addUnlockScriptScript(
+          hasSegwit: hasSegwit,
+          input: inputs[i],
+          signatures: [sig],
+          utxo: utxos[i],
+          witnesses: witnesses);
     }
 
     /// ok we now check if the transaction is segwit We add all witnesses to the transaction
@@ -548,5 +521,44 @@ be retrieved by anyone who examines the blockchain's history.
     }
 
     return transaction;
+  }
+
+  /// add unlocking script to each input
+  void _addUnlockScriptScript(
+      {required UtxoWithAddress utxo,
+      required TxInput input,
+      required List<String> signatures,
+      required List<TxWitnessInput> witnesses,
+      required bool hasSegwit}) {
+    /// ok we signed, now we need unlocking script for this input
+    final scriptSig = utxo.isMultiSig()
+        ? _buildMiltisigUnlockingScript(signatures, utxo)
+        : _buildUnlockingScript(signatures.first, utxo);
+
+    /// Now we need to add it to the transaction
+    /// check if current utxo is segwit or not
+    if (utxo.utxo.isSegwit()) {
+      witnesses.add(TxWitnessInput(stack: scriptSig));
+      if (utxo.utxo.isP2shSegwit()) {
+        /// check if we need redeemScriptSig or not
+        /// In a Pay-to-Script-Hash (P2SH) Segregated Witness (SegWit) input,
+        /// the redeemScriptSig is needed for historical and compatibility reasons,
+        /// even though the actual script execution has moved to the witness field (the witnessScript).
+        /// This design choice preserves backward compatibility with older Bitcoin clients that do not support SegWit.
+        final p2shSegwitScript = _buildNestedSegwitReedemScript(utxo);
+        input.scriptSig = Script(script: p2shSegwitScript);
+      }
+    } else {
+      /// ok input is not segwit and we use SetScriptSig to set the correct scriptSig
+      input.scriptSig = Script(script: scriptSig);
+
+      /// the concept of an "empty witness" is related to Segregated Witness (SegWit) transactions
+      ///  and the way transaction data is structured. When a transaction input is not associated
+      ///  with a SegWit UTXO, it still needs to be compatible with
+      ///  the SegWit transaction format. This is achieved through the use of an "empty witness."
+      if (hasSegwit) {
+        witnesses.add(TxWitnessInput(stack: []));
+      }
+    }
   }
 }

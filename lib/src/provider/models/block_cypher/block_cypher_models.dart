@@ -176,7 +176,7 @@ class BlockCypherTransaction {
   final int total;
   final int fees;
   final int size;
-  final int vSize;
+  final int? vSize;
   final String preference;
   final String? relayedBy;
   final DateTime? received;

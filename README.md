@@ -1,11 +1,19 @@
 # BITCOIN Dart Package
-a comprehensive and versatile Dart library for all your Bitcoin transaction needs. offers robust support for various Bitcoin transaction types, including spending transactions, Bitcoin address management, Bitcoin Schnorr signatures, BIP-39 mnemonic phrase generation, hierarchical deterministic (HD) wallet derivation, and Web3 Secret Storage Definition.
+a comprehensive and versatile Dart library that provides robust support for various cryptocurrency transaction types. It is designed to meet your transaction needs for Bitcoin, Dogecoin, Litecoin, Dash, and Bitcoin Cash. The library offers features such as spending transactions, address management, Schnorr signatures for Bitcoin, BIP-39 mnemonic phrase generation, hierarchical deterministic (HD) wallet derivation, and Web3 Secret Storage Definition..
 
 For BIP32 HD wallet, BIP39, and Secret storage definitions, please refer to the [blockchain_utils](https://github.com/mrtnetwork/blockchain_utils) package.
 
 This package was inspired by the [python-bitcoin-utils](https://github.com/karask/python-bitcoin-utils) package and turned into Dart
 
 ## Features
+
+### Supported Cryptocurrencies
+
+- Bitcoin
+- Dogecoin
+- Litecoin
+- Dash
+- Bitcoin Cash
 
 ### Transaction Types
 This comprehensive package provides robust support for a wide array of Bitcoin transaction types, encompassing the full spectrum of Bitcoin transaction capabilities. Whether you need to execute standard payments, facilitate complex multi-signature wallets, leverage Segregated Witness (SegWit) transactions for lower fees and enhanced scalability, or embrace the privacy and flexibility of Pay-to-Taproot (P2TR) transactions, this package has you covered. Additionally, it empowers users to engage in legacy transactions, create time-locked transactions, and harness the security of multisignature (multisig) transactions. With this package, you can seamlessly navigate the diverse landscape of Bitcoin transactions, ensuring your interactions with the Bitcoin network are secure, efficient, and tailored to your specific needs.
@@ -66,7 +74,9 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
     enhances privacy.
 
 ### Node Provider
-We have added two APIs (Mempool and BlockCypher) to the plugin for network access. You can easily use these two APIs to obtain information such as unspent transactions (UTXO), network fees, sending transactions, receiving transaction information, and retrieving account transactions.
+We have integrated two APIs, Mempool and BlockCypher, into the plugin to facilitate network access. These APIs enable seamless retrieval of information such as unspent transactions (UTXO), network fees, sending transactions, receiving transaction details, and fetching account transactions.
+
+As of now, supports Bitcoin on both the testnet and mainnet, as well as Dogecoin, Litecoin, and Dash on the mainnet. However, for Bitcoin Cash, please note that we are currently exploring options for a free provider to implement support.
 
 ## EXAMPLES
 
@@ -208,6 +218,9 @@ We have added two APIs (Mempool and BlockCypher) to the plugin for network acces
   ```
   
 ### Transaction
+
+In the 'examples' folder, you'll find various examples tailored for each supported network, including Bitcoin, Dogecoin, Litecoin, Bitcoin Cash, and Dash.
+
 - With TransactionBuilder
   ```
   // select network

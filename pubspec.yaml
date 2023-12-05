@@ -1,15 +1,15 @@
 name: bitcoin_base
-description: A comprehensive Bitcoin library for creating/signing and spending P2PK, P2PKH, P2SH, P2WPKH, P2WSH, Taproot ...
-version: 1.4.0
+description: A versatile library for Bitcoin, Dogecoin, Litecoin, Dash, and Bitcoin Cash. Supports P2PK, P2PKH, P2SH, P2WPKH, P2WSH, Taproot, with advanced creation, signing, and spending capabilities.
+version: 1.5.0
 homepage: "https://github.com/mrtnetwork/bitcoin_base"
 repository: "https://github.com/mrtnetwork/bitcoin_base"
 Author: mrhaydari.t@gmail.com
 topics:
   - bitcoin
-  - p2pk-p2pkh
-  - p2tr
-  - p2sh
-  - p2wpkh-p2wsh
+  - dogecoin
+  - litecoin
+  - bitcoincash
+  - dash
   
 environment:
   sdk: '>=3.0.6 <4.0.0'

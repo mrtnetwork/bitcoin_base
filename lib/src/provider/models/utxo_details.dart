@@ -5,25 +5,29 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 
 class UtxoAddressDetails {
   /// PublicKey is the public key associated with the UTXO owner.
-  final String? publicKey;
+  final String? _publicKey;
 
   /// Address is the Bitcoin address associated with the UTXO owner.
   final BitcoinAddress address;
 
   /// MultiSigAddress is a pointer to a MultiSignaturAddress instance representing a multi-signature address
   /// associated with the UTXO owner. It may be null if the UTXO owner is not using a multi-signature scheme.
-  final MultiSignatureAddress? multiSigAddress;
+  final MultiSignatureAddress? _multiSigAddress;
 
   UtxoAddressDetails({
-    this.publicKey,
+    required String publicKey,
     required this.address,
-    this.multiSigAddress,
-  }) : assert(publicKey != null || multiSigAddress != null,
-            "use publicKey for normal transaction and multiSigAddress for multi-sig address");
+  })  : _multiSigAddress = null,
+        _publicKey = publicKey;
+
+  UtxoAddressDetails.multiSigAddress(
+      {required MultiSignatureAddress multiSigAddress, required this.address})
+      : _publicKey = null,
+        _multiSigAddress = multiSigAddress;
 
   UtxoAddressDetails.watchOnly(this.address)
-      : publicKey = null,
-        multiSigAddress = null;
+      : _publicKey = null,
+        _multiSigAddress = null;
 }
 
 /// UtxoWithAddress represents an unspent transaction output (UTXO) along with its associated owner details.
@@ -43,14 +47,23 @@ class UtxoWithAddress {
   ECPublic public() {
     if (isMultiSig()) {
       throw ArgumentError(
-          "Cannot access public key in multi-signature address; use owner's public keys");
+          "Cannot access public key in multi-signature address");
     }
-    return ECPublic.fromHex(ownerDetails.publicKey!);
+    if (ownerDetails._publicKey == null) {
+      throw ArgumentError(
+          "Cannot access public key in watch only address; use UtxoAddressDetails constractor instead `UtxoAddressDetails.watchOnly`");
+    }
+    return ECPublic.fromHex(ownerDetails._publicKey!);
   }
 
   bool isMultiSig() {
-    return ownerDetails.multiSigAddress != null;
+    return ownerDetails._multiSigAddress != null;
   }
+
+  MultiSignatureAddress get multiSigAddress => isMultiSig()
+      ? ownerDetails._multiSigAddress!
+      : throw ArgumentError(
+          "The address is not associated with a multi-signature setup");
 }
 
 /// BitcoinOutput represents details about a Bitcoin transaction output, including
@@ -86,14 +99,14 @@ class BitcoinUtxo {
   final BitcoinAddressType scriptType;
 
   /// BlockHeight represents the block height at which this UTXO was confirmed.
-  final int blockHeight;
+  final int? blockHeight;
 
   BitcoinUtxo({
     required this.txHash,
     required this.value,
     required this.vout,
     required this.scriptType,
-    required this.blockHeight,
+    this.blockHeight,
   });
 
   bool isP2tr() {
@@ -110,6 +123,11 @@ class BitcoinUtxo {
   bool isP2shSegwit() {
     return scriptType == BitcoinAddressType.p2wpkhInP2sh ||
         scriptType == BitcoinAddressType.p2wshInP2sh;
+  }
+
+  @override
+  String toString() {
+    return "txid: $txHash vout: $vout script: ${scriptType.name} value: $value blockHeight: $blockHeight";
   }
 }
 

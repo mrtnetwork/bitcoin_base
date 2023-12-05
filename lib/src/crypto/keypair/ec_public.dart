@@ -28,8 +28,6 @@ class ECPublic {
     if (compressed) {
       return BytesUtils.toHexString(publicKey.compressed);
     }
-    // print("uncom ${publicKey.uncompressed}");
-    // print("hasapre ${publicKey.uncompressed[0] == 0x04}");
     return BytesUtils.toHexString(publicKey.uncompressed);
   }
 
@@ -52,7 +50,6 @@ class ECPublic {
   P2pkhAddress toAddress({bool compressed = true}) {
     final h16 = _toHash160(compressed: compressed);
     final toHex = BytesUtils.toHexString(h16);
-
     return P2pkhAddress.fromHash160(addrHash: toHex);
   }
 
@@ -84,6 +81,7 @@ class ECPublic {
   /// If 'compressed' is true, the key is in compressed format.
   P2shAddress toP2pkhInP2sh({bool compressed = true}) {
     final addr = toAddress(compressed: compressed);
+
     return P2shAddress.fromScript(
         script: addr.toScriptPubKey(), type: BitcoinAddressType.p2pkhInP2sh);
   }

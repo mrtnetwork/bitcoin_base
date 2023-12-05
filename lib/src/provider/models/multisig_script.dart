@@ -40,14 +40,23 @@ class MultiSignatureAddress {
   /// including "OP_M", compressed public keys, "OP_N", and "OP_CHECKMULTISIG."
   final Script multiSigScript;
 
-  BitcoinAddress toP2wshAddress() {
+  BitcoinAddress toP2wshAddress({required BasedUtxoNetwork network}) {
+    if (network is! LitecoinNetwork && network is! BitcoinNetwork) {
+      throw ArgumentError(
+          "${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress");
+    }
     return P2wshAddress.fromScript(script: multiSigScript);
   }
 
-  BitcoinAddress toP2wshInP2shAddress() {
-    final p2wsh = toP2wshAddress();
+  BitcoinAddress toP2wshInP2shAddress({required BasedUtxoNetwork network}) {
+    final p2wsh = toP2wshAddress(network: network);
     return P2shAddress.fromScript(
         script: p2wsh.toScriptPubKey(), type: BitcoinAddressType.p2wshInP2sh);
+  }
+
+  BitcoinAddress toP2shAddress() {
+    return P2shAddress.fromScript(
+        script: multiSigScript, type: BitcoinAddressType.p2pkhInP2sh);
   }
 
   MultiSignatureAddress._(

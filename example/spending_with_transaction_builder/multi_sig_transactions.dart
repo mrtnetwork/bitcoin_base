@@ -1,9 +1,8 @@
 // spend from 8 different address type to 10 different output
 // ignore_for_file: unused_local_variable
 
-import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/models/network.dart';
-import 'package:bitcoin_base/src/provider/api_provider.dart';
+import 'package:bitcoin_base/bitcoin_base.dart';
+
 import 'package:blockchain_utils/bip/mnemonic/mnemonic.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
@@ -63,7 +62,7 @@ void main() async {
   // tb1qxt3c7849m0m6cv3z3s35c3zvdna3my3yz0r609qd9g0dcyyk580sgyldhe
 
   final p2wshMultiSigAddress =
-      multiSignatureAddress.toP2wshAddress().toAddress(network);
+      multiSignatureAddress.toP2wshAddress(network: network).toAddress(network);
 
   // p2sh(p2wsh) multisig
   final signerP2sh1 =
@@ -81,8 +80,9 @@ void main() async {
   );
   // P2SH(P2WSH) miltisig 2-3
   // 2N8co8bth9CNKtnWGfHW6HuUNgnNPNdpsMj
-  final p2shMultisigAddress =
-      p2shMultiSignature.toP2wshInP2shAddress().toAddress(network);
+  final p2shMultisigAddress = p2shMultiSignature
+      .toP2wshInP2shAddress(network: network)
+      .toAddress(network);
 
   // P2TR
   final exampleAddr2 = public2.toTaprootAddress();
@@ -93,12 +93,12 @@ void main() async {
   // now i want to spending from 8 address in one transaction
   // we need publicKeys and address
   final spenders = [
-    UtxoAddressDetails(
+    UtxoAddressDetails.multiSigAddress(
         multiSigAddress: multiSignatureAddress,
-        address: multiSignatureAddress.toP2wshAddress()),
-    UtxoAddressDetails(
+        address: multiSignatureAddress.toP2wshAddress(network: network)),
+    UtxoAddressDetails.multiSigAddress(
         multiSigAddress: p2shMultiSignature,
-        address: p2shMultiSignature.toP2wshInP2shAddress()),
+        address: p2shMultiSignature.toP2wshInP2shAddress(network: network)),
     UtxoAddressDetails(publicKey: public2.toHex(), address: exampleAddr2),
   ];
 
@@ -150,8 +150,8 @@ void main() async {
   int size = BitcoinTransactionBuilder.estimateTransactionSize(
       utxos: utxos,
       outputs: [
-        p2shMultiSignature.toP2wshInP2shAddress(),
-        multiSignatureAddress.toP2wshAddress(),
+        p2shMultiSignature.toP2wshInP2shAddress(network: network),
+        multiSignatureAddress.toP2wshAddress(network: network),
         exampleAddr2,
         exampleAddr4
       ],
@@ -185,10 +185,10 @@ void main() async {
   // We consider the spendable amount for 4 outputs and divide by 4, each output 365448.5,
   // 365448 for two addresses and 365449 for two addresses because of decimal
   final output1 = BitcoinOutput(
-      address: p2shMultiSignature.toP2wshInP2shAddress(),
+      address: p2shMultiSignature.toP2wshInP2shAddress(network: network),
       value: BigInt.from(365449));
   final output2 = BitcoinOutput(
-      address: multiSignatureAddress.toP2wshAddress(),
+      address: multiSignatureAddress.toP2wshAddress(network: network),
       value: BigInt.from(365449));
   final output3 =
       BitcoinOutput(address: exampleAddr2, value: BigInt.from(365448));
@@ -232,7 +232,7 @@ void main() async {
   // This method sends you the public key for each UTXO,
   // allowing you to sign the desired input with the associated private key
   final transaction =
-      transactionBuilder.buildTransaction((trDigest, utxo, publicKey) {
+      transactionBuilder.buildTransaction((trDigest, utxo, publicKey, sighash) {
     late ECPrivate key;
 
     // ok we have the public key of the current UTXO and we use some conditions to find private  key and sign transaction
@@ -267,10 +267,10 @@ void main() async {
       // yes is p2tr utxo and now we use SignTaprootTransaction(Schnorr sign)
       // for now this transaction builder support only tweak transaction
       // If you want to spend a Taproot script-path spending, you must create your own transaction builder.
-      return key.signTapRoot(trDigest);
+      return key.signTapRoot(trDigest, sighash: sighash);
     } else {
       // is seqwit(v0) or lagacy address we use  SingInput (ECDSA)
-      return key.signInput(trDigest);
+      return key.signInput(trDigest, sigHash: sighash);
     }
   });
 
@@ -280,7 +280,7 @@ void main() async {
 
   // we check if transaction is segwit or not
   // When one of the input UTXO addresses is SegWit, the transaction is considered SegWit.
-  final isSegwitTr = transactionBuilder.hasSegwit();
+  final isSegwitTr = transaction.hasSegwit;
 
   // transaction id
   final transactionId = transaction.txId();
