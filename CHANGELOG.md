@@ -1,3 +1,7 @@
+## 2.0.0
+
+* Added support for Dogecoin, Litecoin, Bitcoin Cash, and Dash.
+
 ## 1.4.0
 
 * Fix blockcypher API

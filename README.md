@@ -219,7 +219,7 @@ As of now, supports Bitcoin on both the testnet and mainnet, as well as Dogecoin
   
 ### Transaction
 
-In the 'examples' folder, you'll find various examples tailored for each supported network, including Bitcoin, Dogecoin, Litecoin, Bitcoin Cash, and Dash.
+In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) folder, you'll find various examples tailored for each supported network, including Bitcoin, Dogecoin, Litecoin, Bitcoin Cash, and Dash.
 
 - With TransactionBuilder
   ```
