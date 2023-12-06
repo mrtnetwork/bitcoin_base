@@ -59,6 +59,22 @@ class MultiSignatureAddress {
         script: multiSigScript, type: BitcoinAddressType.p2pkhInP2sh);
   }
 
+  BitcoinAddress fromType(
+      {required BasedUtxoNetwork network,
+      required BitcoinAddressType addressType}) {
+    switch (addressType) {
+      case BitcoinAddressType.p2wsh:
+        return toP2wshAddress(network: network);
+      case BitcoinAddressType.p2wshInP2sh:
+        return toP2wshInP2shAddress(network: network);
+      case BitcoinAddressType.p2pkhInP2sh:
+        return toP2shAddress();
+      default:
+        throw ArgumentError(
+            "invalid multisig address type. use of of them [BitcoinAddressType.p2wsh, BitcoinAddressType.p2wshInP2sh, BitcoinAddressType.p2pkhInP2sh]");
+    }
+  }
+
   MultiSignatureAddress._(
       {required this.signers,
       required this.threshold,

@@ -1,3 +1,7 @@
+## 2.0.1
+
+* add some types for find network address support
+
 ## 2.0.0
 
 * Added support for Dogecoin, Litecoin, Bitcoin Cash, and Dash.

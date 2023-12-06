@@ -1,3 +1,4 @@
+import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/bip/coin_conf/coin_conf.dart';
 import 'package:blockchain_utils/bip/coin_conf/coins_conf.dart';
 
@@ -17,6 +18,8 @@ abstract class BasedUtxoNetwork {
 
   /// Configuration object specific to the coin.
   abstract final CoinConf conf;
+
+  abstract final List<BitcoinAddressType> supportedAddress;
 }
 
 /// Enum representing different Bitcoin networks, implementing the `BasedUtxoNetwork` abstract class.
@@ -53,6 +56,10 @@ enum BitcoinNetwork implements BasedUtxoNetwork {
 
   /// Checks if the current network is the mainnet.
   bool get isMainnet => this == BitcoinNetwork.mainnet;
+
+  @override
+  List<BitcoinAddressType> get supportedAddress =>
+      BitcoinAddressType.values.toList();
 }
 
 /// Enum representing different Litecoin networks, implementing the `BasedUtxoNetwork` abstract class.
@@ -89,6 +96,11 @@ enum LitecoinNetwork implements BasedUtxoNetwork {
 
   /// Checks if the current network is the mainnet.
   bool get isMainnet => this == LitecoinNetwork.mainnet;
+
+  @override
+  List<BitcoinAddressType> get supportedAddress => BitcoinAddressType.values
+      .where((element) => element != BitcoinAddressType.p2tr)
+      .toList();
 }
 
 /// Enum representing different Dash networks, implementing the `BasedUtxoNetwork` abstract class.
@@ -125,6 +137,14 @@ enum DashNetwork implements BasedUtxoNetwork {
 
   /// Checks if the current network is the mainnet.
   bool get isMainnet => this == DashNetwork.mainnet;
+
+  @override
+  final List<BitcoinAddressType> supportedAddress = const [
+    BitcoinAddressType.p2pk,
+    BitcoinAddressType.p2pkh,
+    BitcoinAddressType.p2pkhInP2sh,
+    BitcoinAddressType.p2pkInP2sh
+  ];
 }
 
 /// Enum representing different Dogecoin networks, implementing the `BasedUtxoNetwork` abstract class.
@@ -161,6 +181,14 @@ enum DogecoinNetwork implements BasedUtxoNetwork {
 
   /// Checks if the current network is the mainnet.
   bool get isMainnet => this == DogecoinNetwork.mainnet;
+
+  @override
+  final List<BitcoinAddressType> supportedAddress = const [
+    BitcoinAddressType.p2pk,
+    BitcoinAddressType.p2pkh,
+    BitcoinAddressType.p2pkhInP2sh,
+    BitcoinAddressType.p2pkInP2sh
+  ];
 }
 
 /// Enum representing different Bitcoin Cash networks, implementing the `BasedUtxoNetwork` abstract class.
@@ -197,4 +225,12 @@ enum BitcoinCashNetwork implements BasedUtxoNetwork {
 
   /// Checks if the current network is the mainnet.
   bool get isMainnet => this == BitcoinCashNetwork.mainnet;
+
+  @override
+  final List<BitcoinAddressType> supportedAddress = const [
+    BitcoinAddressType.p2pk,
+    BitcoinAddressType.p2pkh,
+    BitcoinAddressType.p2pkhInP2sh,
+    BitcoinAddressType.p2pkInP2sh
+  ];
 }
