@@ -2,6 +2,7 @@ import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:blockchain_utils/binary/binary_operation.dart';
 import 'package:blockchain_utils/binary/utils.dart';
 import 'package:blockchain_utils/numbers/int_utils.dart';
+import 'package:blockchain_utils/tuple/tuple.dart';
 import 'script.dart';
 
 /// A transaction input requires a transaction id of a UTXO and the index of that UTXO.
@@ -49,7 +50,7 @@ class TxInput {
     return data;
   }
 
-  static (TxInput, int) fromRaw(
+  static Tuple<TxInput, int> fromRaw(
       {required String raw, int cursor = 0, bool hasSegwit = false}) {
     final txInputRaw = BytesUtils.fromHexString(raw);
     List<int> inpHash =
@@ -62,20 +63,19 @@ class TxInput {
         txInputRaw.sublist(cursor + 32, cursor + 36).reversed.toList();
     cursor += 36;
     final vi = IntUtils.decodeVarint(txInputRaw.sublist(cursor, cursor + 9));
-    cursor += vi.$2;
-    List<int> unlockingScript = txInputRaw.sublist(cursor, cursor + vi.$1);
-    cursor += vi.$1;
+    cursor += vi.item2;
+    List<int> unlockingScript = txInputRaw.sublist(cursor, cursor + vi.item1);
+    cursor += vi.item1;
     List<int> sequenceNumberData = txInputRaw.sublist(cursor, cursor + 4);
     cursor += 4;
-    return (
-      TxInput(
-          txId: BytesUtils.toHexString(inpHash),
-          txIndex: int.parse(BytesUtils.toHexString(outputN), radix: 16),
-          scriptSig: Script.fromRaw(
-              hexData: BytesUtils.toHexString(unlockingScript),
-              hasSegwit: hasSegwit),
-          sequance: sequenceNumberData),
-      cursor
-    );
+    return Tuple(
+        TxInput(
+            txId: BytesUtils.toHexString(inpHash),
+            txIndex: int.parse(BytesUtils.toHexString(outputN), radix: 16),
+            scriptSig: Script.fromRaw(
+                hexData: BytesUtils.toHexString(unlockingScript),
+                hasSegwit: hasSegwit),
+            sequance: sequenceNumberData),
+        cursor);
   }
 }

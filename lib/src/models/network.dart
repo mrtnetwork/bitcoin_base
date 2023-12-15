@@ -22,20 +22,22 @@ abstract class BasedUtxoNetwork {
   abstract final List<BitcoinAddressType> supportedAddress;
 }
 
-/// Enum representing different Bitcoin networks, implementing the `BasedUtxoNetwork` abstract class.
-enum BitcoinNetwork implements BasedUtxoNetwork {
+/// Class representing a Bitcoin network, implementing the `BasedUtxoNetwork` abstract class.
+class BitcoinNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  mainnet(CoinsConf.bitcoinMainNet),
+  static const BitcoinNetwork mainnet =
+      BitcoinNetwork._(CoinsConf.bitcoinMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
-  testnet(CoinsConf.bitcoinTestNet);
+  static const BitcoinNetwork testnet =
+      BitcoinNetwork._(CoinsConf.bitcoinTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Bitcoin network with a specific configuration.
-  const BitcoinNetwork(this.conf);
+  const BitcoinNetwork._(this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -58,24 +60,25 @@ enum BitcoinNetwork implements BasedUtxoNetwork {
   bool get isMainnet => this == BitcoinNetwork.mainnet;
 
   @override
-  List<BitcoinAddressType> get supportedAddress =>
-      BitcoinAddressType.values.toList();
+  List<BitcoinAddressType> get supportedAddress => BitcoinAddressType.values;
 }
 
-/// Enum representing different Litecoin networks, implementing the `BasedUtxoNetwork` abstract class.
-enum LitecoinNetwork implements BasedUtxoNetwork {
+/// Class representing a Litecoin network, implementing the `BasedUtxoNetwork` abstract class.
+class LitecoinNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  mainnet(CoinsConf.litecoinMainNet),
+  static const LitecoinNetwork mainnet =
+      LitecoinNetwork._(CoinsConf.litecoinMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
-  testnet(CoinsConf.litecoinTestNet);
+  static const LitecoinNetwork testnet =
+      LitecoinNetwork._(CoinsConf.litecoinTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Litecoin network with a specific configuration.
-  const LitecoinNetwork(this.conf);
+  const LitecoinNetwork._(this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -98,25 +101,32 @@ enum LitecoinNetwork implements BasedUtxoNetwork {
   bool get isMainnet => this == LitecoinNetwork.mainnet;
 
   @override
-  List<BitcoinAddressType> get supportedAddress => BitcoinAddressType.values
-      .where((element) => element != BitcoinAddressType.p2tr)
-      .toList();
+  final List<BitcoinAddressType> supportedAddress = const [
+    BitcoinAddressType.p2pkh,
+    BitcoinAddressType.p2wpkh,
+    BitcoinAddressType.p2pk,
+    BitcoinAddressType.p2wsh,
+    BitcoinAddressType.p2wshInP2sh,
+    BitcoinAddressType.p2wpkhInP2sh,
+    BitcoinAddressType.p2pkhInP2sh,
+    BitcoinAddressType.p2pkInP2sh,
+  ];
 }
 
-/// Enum representing different Dash networks, implementing the `BasedUtxoNetwork` abstract class.
-enum DashNetwork implements BasedUtxoNetwork {
+/// Class representing a Dash network, implementing the `BasedUtxoNetwork` abstract class.
+class DashNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  mainnet(CoinsConf.dashMainNet),
+  static const DashNetwork mainnet = DashNetwork._(CoinsConf.dashMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
-  testnet(CoinsConf.dashTestNet);
+  static const DashNetwork testnet = DashNetwork._(CoinsConf.dashTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Dash network with a specific configuration.
-  const DashNetwork(this.conf);
+  const DashNetwork._(this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -132,8 +142,8 @@ enum DashNetwork implements BasedUtxoNetwork {
 
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
   @override
-  String get p2wpkhHrp =>
-      throw UnimplementedError("{$name} network does not support P2WPKH/P2WSH");
+  String get p2wpkhHrp => throw UnimplementedError(
+      "DashNetwork network does not support P2WPKH/P2WSH");
 
   /// Checks if the current network is the mainnet.
   bool get isMainnet => this == DashNetwork.mainnet;
@@ -147,20 +157,22 @@ enum DashNetwork implements BasedUtxoNetwork {
   ];
 }
 
-/// Enum representing different Dogecoin networks, implementing the `BasedUtxoNetwork` abstract class.
-enum DogecoinNetwork implements BasedUtxoNetwork {
+/// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
+class DogecoinNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  mainnet(CoinsConf.dogecoinMainNet),
+  static const DogecoinNetwork mainnet =
+      DogecoinNetwork._(CoinsConf.dogecoinMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
-  testnet(CoinsConf.dogecoinTestNet);
+  static const DogecoinNetwork testnet =
+      DogecoinNetwork._(CoinsConf.dogecoinTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Dogecoin network with a specific configuration.
-  const DogecoinNetwork(this.conf);
+  const DogecoinNetwork._(this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -176,8 +188,8 @@ enum DogecoinNetwork implements BasedUtxoNetwork {
 
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
   @override
-  String get p2wpkhHrp =>
-      throw UnimplementedError("{$name} network does not support P2WPKH/P2WSH");
+  String get p2wpkhHrp => throw UnimplementedError(
+      "DogecoinNetwork network does not support P2WPKH/P2WSH");
 
   /// Checks if the current network is the mainnet.
   bool get isMainnet => this == DogecoinNetwork.mainnet;
@@ -191,20 +203,22 @@ enum DogecoinNetwork implements BasedUtxoNetwork {
   ];
 }
 
-/// Enum representing different Bitcoin Cash networks, implementing the `BasedUtxoNetwork` abstract class.
-enum BitcoinCashNetwork implements BasedUtxoNetwork {
+/// Class representing a Bitcoin Cash network, implementing the `BasedUtxoNetwork` abstract class.
+class BitcoinCashNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  mainnet(CoinsConf.bitcoinCashMainNet),
+  static const BitcoinCashNetwork mainnet =
+      BitcoinCashNetwork._(CoinsConf.bitcoinCashMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
-  testnet(CoinsConf.bitcoinCashTestNet);
+  static const BitcoinCashNetwork testnet =
+      BitcoinCashNetwork._(CoinsConf.bitcoinCashTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Bitcoin Cash network with a specific configuration.
-  const BitcoinCashNetwork(this.conf);
+  const BitcoinCashNetwork._(this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override

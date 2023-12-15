@@ -1,3 +1,8 @@
+## 3.0.0
+
+* Downgrade dart SDK from 3.1 to 2.15
+* Update dependencies
+
 ## 2.0.1
 
 * add some types for find network address support

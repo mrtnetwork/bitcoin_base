@@ -89,7 +89,8 @@ class MultiSignatureAddress {
     required int threshold,
     required List<MultiSignatureSigner> signers,
   }) {
-    final sumWeight = signers.fold(0, (sum, signer) => sum + signer.weight);
+    final sumWeight =
+        signers.fold<int>(0, (sum, signer) => sum + signer.weight);
     if (threshold > 16 || threshold < 1) {
       throw ArgumentError('The threshold should be between 1 and 16');
     }

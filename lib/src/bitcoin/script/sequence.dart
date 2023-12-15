@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:blockchain_utils/binary/binary_operation.dart';
 import 'package:blockchain_utils/numbers/int_utils.dart';
@@ -34,7 +36,7 @@ class Sequence {
         seq |= 1 << 22;
       }
       seq |= value;
-      return IntUtils.toBytes(seq, length: 4);
+      return IntUtils.toBytes(seq, length: 4, byteOrder: Endian.little);
     }
 
     throw ArgumentError("Invalid seqType");

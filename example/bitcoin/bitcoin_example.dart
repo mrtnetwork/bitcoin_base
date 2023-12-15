@@ -21,7 +21,7 @@ import '../example_service.dart';
 /// Returns:
 /// - The change value.
 BigInt _changeValue(BigInt sum, List<BigInt> all) {
-  final sumAll = all.fold(
+  final sumAll = all.fold<BigInt>(
       BigInt.zero, (previousValue, element) => previousValue + element);
 
   final remind = sum - sumAll;

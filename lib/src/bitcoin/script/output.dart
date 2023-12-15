@@ -3,6 +3,7 @@ import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:blockchain_utils/binary/utils.dart';
 import 'package:blockchain_utils/numbers/bigint_utils.dart';
 import 'package:blockchain_utils/numbers/int_utils.dart';
+import 'package:blockchain_utils/tuple/tuple.dart';
 
 /// Represents a transaction output.
 ///
@@ -31,7 +32,7 @@ class TxOutput {
     return data;
   }
 
-  static (TxOutput, int) fromRaw(
+  static Tuple<TxOutput, int> fromRaw(
       {required String raw, required int cursor, bool hasSegwit = false}) {
     final txoutputraw = BytesUtils.fromHexString(raw);
     final value = BigintUtils.fromBytes(txoutputraw.sublist(cursor, cursor + 8),
@@ -40,16 +41,15 @@ class TxOutput {
     cursor += 8;
 
     final vi = IntUtils.decodeVarint(txoutputraw.sublist(cursor, cursor + 9));
-    cursor += vi.$2;
-    List<int> lockScript = txoutputraw.sublist(cursor, cursor + vi.$1);
-    cursor += vi.$1;
-    return (
-      TxOutput(
-          amount: value,
-          scriptPubKey: Script.fromRaw(
-              hexData: BytesUtils.toHexString(lockScript),
-              hasSegwit: hasSegwit)),
-      cursor
-    );
+    cursor += vi.item2;
+    List<int> lockScript = txoutputraw.sublist(cursor, cursor + vi.item1);
+    cursor += vi.item1;
+    return Tuple(
+        TxOutput(
+            amount: value,
+            scriptPubKey: Script.fromRaw(
+                hexData: BytesUtils.toHexString(lockScript),
+                hasSegwit: hasSegwit)),
+        cursor);
   }
 }

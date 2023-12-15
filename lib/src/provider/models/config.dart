@@ -48,6 +48,7 @@ class APIConfig {
     switch (network) {
       case BitcoinNetwork.mainnet:
         baseUrl = BtcApiConst.blockCypherMainBaseURL;
+        break;
       case BitcoinNetwork.testnet:
         baseUrl = BtcApiConst.blockCypherBaseURL;
         break;
@@ -81,6 +82,7 @@ class APIConfig {
     switch (network) {
       case BitcoinNetwork.mainnet:
         baseUrl = BtcApiConst.mempoolMainBaseURL;
+        break;
       case BitcoinNetwork.testnet:
         baseUrl = BtcApiConst.mempoolBaseURL;
         break;

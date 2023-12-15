@@ -214,6 +214,7 @@ class BitcoinTransactionBuilder {
         }
         return senderPub.toRedeemScript();
     }
+    throw ArgumentError("invalid bitcoin address type");
   }
 
   /// generateTransactionDigest generates and returns a transaction digest for a given input in the context of a Bitcoin
@@ -291,7 +292,7 @@ class BitcoinTransactionBuilder {
           return [p2wsh.toScriptPubKey().toHex()];
         default:
           throw Exception(
-              "Invalid p2sh nested segwit type ${utxo.utxo.scriptType.name}");
+              "Invalid p2sh nested segwit type ${utxo.utxo.scriptType.value}");
       }
     }
     final senderPub = utxo.public();
@@ -304,7 +305,7 @@ class BitcoinTransactionBuilder {
         return [script.toHex()];
       default:
         throw Exception(
-            "Invalid p2sh nested segwit type ${utxo.utxo.scriptType.name}");
+            "Invalid p2sh nested segwit type ${utxo.utxo.scriptType.value}");
     }
   }
 
@@ -330,7 +331,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           return [signedDigest, senderPub.toHex()];
         default:
           throw Exception(
-              "invalid segwit address type ${utx.utxo.scriptType.name}");
+              "invalid segwit address type ${utx.utxo.scriptType.value}");
       }
     } else {
       switch (utx.utxo.scriptType) {
@@ -345,7 +346,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           final script = senderPub.toRedeemScript();
           return [signedDigest, script.toHex()];
         default:
-          throw Exception("invalid address type ${utx.utxo.scriptType.name}");
+          throw Exception("invalid address type ${utx.utxo.scriptType.value}");
       }
     }
   }

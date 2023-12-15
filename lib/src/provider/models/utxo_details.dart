@@ -127,7 +127,7 @@ class BitcoinUtxo {
 
   @override
   String toString() {
-    return "txid: $txHash vout: $vout script: ${scriptType.name} value: $value blockHeight: $blockHeight";
+    return "txid: $txHash vout: $vout script: ${scriptType.value} value: $value blockHeight: $blockHeight";
   }
 }
 

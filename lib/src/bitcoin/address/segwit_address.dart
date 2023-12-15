@@ -46,11 +46,11 @@ abstract class SegwitAddress implements BitcoinAddress {
   String _addressToHash(String address, BasedUtxoNetwork network) {
     final convert = SegwitBech32Decoder.decode(network.p2wpkhHrp, address);
 
-    final version = convert.$1;
+    final version = convert.item1;
     if (version != segwitNumVersion) {
       throw ArgumentError("Invalid segwit version.");
     }
-    return BytesUtils.toHexString(convert.$2);
+    return BytesUtils.toHexString(convert.item2);
   }
 
   /// returns the address's string encoding (Bech32)
@@ -70,13 +70,19 @@ abstract class SegwitAddress implements BitcoinAddress {
 }
 
 class P2wpkhAddress extends SegwitAddress {
-  P2wpkhAddress.fromAddress({required super.address, required super.network})
-      : super.fromAddress(version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0);
+  P2wpkhAddress.fromAddress(
+      {required String address, required BasedUtxoNetwork network})
+      : super.fromAddress(
+            version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0,
+            address: address,
+            network: network);
 
-  P2wpkhAddress.fromProgram({required super.program})
-      : super.fromProgram(version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0);
-  P2wpkhAddress.fromScript({required super.script})
-      : super.fromScript(version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0);
+  P2wpkhAddress.fromProgram({required String program})
+      : super.fromProgram(
+            version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0, program: program);
+  P2wpkhAddress.fromScript({required Script script})
+      : super.fromScript(
+            version: BitcoinOpCodeConst.P2WPKH_ADDRESS_V0, script: script);
 
   /// returns the scriptPubKey of a P2WPKH witness script
   @override
@@ -90,12 +96,18 @@ class P2wpkhAddress extends SegwitAddress {
 }
 
 class P2trAddress extends SegwitAddress {
-  P2trAddress.fromAddress({required super.address, required super.network})
-      : super.fromAddress(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
-  P2trAddress.fromProgram({required super.program})
-      : super.fromProgram(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
-  P2trAddress.fromScript({required super.script})
-      : super.fromScript(version: BitcoinOpCodeConst.P2TR_ADDRESS_V1);
+  P2trAddress.fromAddress(
+      {required String address, required BasedUtxoNetwork network})
+      : super.fromAddress(
+            version: BitcoinOpCodeConst.P2TR_ADDRESS_V1,
+            address: address,
+            network: network);
+  P2trAddress.fromProgram({required String program})
+      : super.fromProgram(
+            version: BitcoinOpCodeConst.P2TR_ADDRESS_V1, program: program);
+  P2trAddress.fromScript({required Script script})
+      : super.fromScript(
+            version: BitcoinOpCodeConst.P2TR_ADDRESS_V1, script: script);
 
   /// returns the scriptPubKey of a P2TR witness script
   @override
@@ -109,12 +121,18 @@ class P2trAddress extends SegwitAddress {
 }
 
 class P2wshAddress extends SegwitAddress {
-  P2wshAddress.fromAddress({required super.address, required super.network})
-      : super.fromAddress(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);
-  P2wshAddress.fromProgram({required super.program})
-      : super.fromProgram(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);
-  P2wshAddress.fromScript({required super.script})
-      : super.fromScript(version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0);
+  P2wshAddress.fromAddress(
+      {required String address, required BasedUtxoNetwork network})
+      : super.fromAddress(
+            version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0,
+            address: address,
+            network: network);
+  P2wshAddress.fromProgram({required String program})
+      : super.fromProgram(
+            version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0, program: program);
+  P2wshAddress.fromScript({required Script script})
+      : super.fromScript(
+            version: BitcoinOpCodeConst.P2WSH_ADDRESS_V0, script: script);
 
   /// Returns the scriptPubKey of a P2WPKH witness script
   @override

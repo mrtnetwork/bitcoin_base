@@ -21,7 +21,7 @@ class ECPrivate {
   factory ECPrivate.fromWif(String wif, {required List<int>? netVersion}) {
     final decode = WifDecoder.decode(wif,
         netVer: netVersion ?? BitcoinNetwork.mainnet.wifNetVer);
-    return ECPrivate.fromBytes(decode.$1);
+    return ECPrivate.fromBytes(decode.item1);
   }
 
   /// returns as WIFC (compressed) or WIF format (string)

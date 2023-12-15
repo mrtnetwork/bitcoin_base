@@ -69,8 +69,8 @@ class Script {
       } else {
         final viAndSize =
             IntUtils.decodeVarint(scriptraw.sublist(index, index + 9));
-        int dataSize = viAndSize.$1;
-        int size = viAndSize.$2;
+        int dataSize = viAndSize.item1;
+        int size = viAndSize.item2;
         final lastIndex = (index + size + dataSize) > scriptraw.length
             ? scriptraw.length
             : (index + size + dataSize);
@@ -86,11 +86,19 @@ class Script {
       {required String hexData, bool hasSegwit = false}) {
     final Script s = fromRaw(hexData: hexData, hasSegwit: hasSegwit);
     if (s.script.isEmpty) return null;
-    final first = s.script.elementAtOrNull(0);
-    final sec = s.script.elementAtOrNull(1);
-    final th = s.script.elementAtOrNull(2);
-    final four = s.script.elementAtOrNull(3);
-    final five = s.script.elementAtOrNull(4);
+
+    dynamic findScriptParam(int index) {
+      if (index < s.script.length) {
+        return s.script[index];
+      }
+      return null;
+    }
+
+    final first = findScriptParam(0);
+    final sec = findScriptParam(1);
+    final th = findScriptParam(2);
+    final four = findScriptParam(3);
+    final five = findScriptParam(4);
     if (first == "OP_0") {
       if (sec is String?) {
         if (sec?.length == 40) {

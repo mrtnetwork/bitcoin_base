@@ -8,7 +8,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:http/http.dart' as http;
 
 BigInt _changeValue(BigInt sum, List<BigInt> all) {
-  final sumAll = all.fold(
+  final sumAll = all.fold<BigInt>(
       BigInt.zero, (previousValue, element) => previousValue + element);
 
   final remind = sum - sumAll;

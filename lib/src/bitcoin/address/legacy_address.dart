@@ -63,7 +63,8 @@ abstract class LegacyAddress implements BitcoinAddress {
       case BitcoinAddressType.p2pkInP2sh:
         scriptBytes = [...network.p2shNetVer, ...scriptBytes];
         break;
-      case const (BitcoinAddressType.p2pkh) || const (BitcoinAddressType.p2pk):
+      case BitcoinAddressType.p2pkh:
+      case BitcoinAddressType.p2pk:
         scriptBytes = [...network.p2pkhNetVer, ...scriptBytes];
         break;
       default:
@@ -98,16 +99,16 @@ abstract class LegacyAddress implements BitcoinAddress {
 
 class P2shAddress extends LegacyAddress {
   P2shAddress.fromScript(
-      {required super.script, this.type = BitcoinAddressType.p2pkInP2sh})
-      : super.fromScript() {
+      {required Script script, this.type = BitcoinAddressType.p2pkInP2sh})
+      : super.fromScript(script: script) {
     _validateP2shType();
   }
 
   P2shAddress.fromAddress(
-      {required super.address,
-      required super.network,
+      {required String address,
+      required BasedUtxoNetwork network,
       this.type = BitcoinAddressType.p2pkInP2sh})
-      : super.fromAddress() {
+      : super.fromAddress(address: address, network: network) {
     _validateP2shType();
   }
   P2shAddress.fromHash160(
@@ -141,9 +142,11 @@ class P2shAddress extends LegacyAddress {
 }
 
 class P2pkhAddress extends LegacyAddress {
-  P2pkhAddress.fromScript({required super.script}) : super.fromScript();
-  P2pkhAddress.fromAddress({required super.address, required super.network})
-      : super.fromAddress();
+  P2pkhAddress.fromScript({required Script script})
+      : super.fromScript(script: script);
+  P2pkhAddress.fromAddress(
+      {required String address, required BasedUtxoNetwork network})
+      : super.fromAddress(address: address, network: network);
   P2pkhAddress.fromHash160({required String addrHash})
       : super.fromHash160(addrHash);
 

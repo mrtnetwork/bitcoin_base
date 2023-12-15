@@ -73,40 +73,40 @@ class BtcTransaction {
       cursor += 2;
     }
     final vi = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
-    cursor += vi.$2;
+    cursor += vi.item2;
 
     List<TxInput> inputs = [];
-    for (int index = 0; index < vi.$1; index++) {
+    for (int index = 0; index < vi.item1; index++) {
       final inp =
           TxInput.fromRaw(raw: raw, hasSegwit: hasSegwit, cursor: cursor);
 
-      inputs.add(inp.$1);
-      cursor = inp.$2;
+      inputs.add(inp.item1);
+      cursor = inp.item2;
     }
 
     List<TxOutput> outputs = [];
     final viOut = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
-    cursor += viOut.$2;
-    for (int index = 0; index < viOut.$1; index++) {
+    cursor += viOut.item2;
+    for (int index = 0; index < viOut.item1; index++) {
       final inp =
           TxOutput.fromRaw(raw: raw, hasSegwit: hasSegwit, cursor: cursor);
-      outputs.add(inp.$1);
-      cursor = inp.$2;
+      outputs.add(inp.item1);
+      cursor = inp.item2;
     }
     List<TxWitnessInput> witnesses = [];
     if (hasSegwit) {
       for (int n = 0; n < inputs.length; n++) {
         final wVi = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
-        cursor += wVi.$2;
+        cursor += wVi.item2;
         List<String> witnessesTmp = [];
-        for (int n = 0; n < wVi.$1; n++) {
+        for (int n = 0; n < wVi.item1; n++) {
           List<int> witness = <int>[];
           final wtVi = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
-          if (wtVi.$1 != 0) {
-            witness =
-                rawtx.sublist(cursor + wtVi.$2, cursor + wtVi.$1 + wtVi.$2);
+          if (wtVi.item1 != 0) {
+            witness = rawtx.sublist(
+                cursor + wtVi.item2, cursor + wtVi.item1 + wtVi.item2);
           }
-          cursor += wtVi.$1 + wtVi.$2;
+          cursor += wtVi.item1 + wtVi.item2;
           witnessesTmp.add(BytesUtils.toHexString(witness));
         }
 
@@ -169,8 +169,10 @@ class BtcTransaction {
     }
     List<int> txForSign = tx.toBytes(segwit: false);
 
-    txForSign =
-        List<int>.from([...txForSign, ...IntUtils.toBytes(sighash, length: 4)]);
+    txForSign = List<int>.from([
+      ...txForSign,
+      ...IntUtils.toBytes(sighash, length: 4, byteOrder: Endian.little)
+    ]);
     return QuickCrypto.sha256DoubleHash(txForSign);
   }
 
@@ -231,7 +233,7 @@ class BtcTransaction {
         hashPrevouts = List<int>.from([
           ...hashPrevouts,
           ...txidBytes,
-          ...IntUtils.toBytes(txin.txIndex, length: 4)
+          ...IntUtils.toBytes(txin.txIndex, length: 4, byteOrder: Endian.little)
         ]);
       }
       hashPrevouts = QuickCrypto.sha256DoubleHash(hashPrevouts);
@@ -278,8 +280,10 @@ class BtcTransaction {
 
     List<int> txidBytes =
         List<int>.from(BytesUtils.fromHexString(txIn.txId).reversed.toList());
-    txForSigning.add(List<int>.from(
-        [...txidBytes, ...IntUtils.toBytes(txIn.txIndex, length: 4)]));
+    txForSigning.add(List<int>.from([
+      ...txidBytes,
+      ...IntUtils.toBytes(txIn.txIndex, length: 4, byteOrder: Endian.little)
+    ]));
     txForSigning.add(List<int>.from([script.toBytes().length]));
     txForSigning.add(script.toBytes());
     List<int> packedAmount =
@@ -288,7 +292,8 @@ class BtcTransaction {
     txForSigning.add(txIn.sequence);
     txForSigning.add(hashOutputs);
     txForSigning.add(locktime);
-    txForSigning.add(IntUtils.toBytes(sighash, length: 4));
+    txForSigning
+        .add(IntUtils.toBytes(sighash, length: 4, byteOrder: Endian.little));
 
     return QuickCrypto.sha256DoubleHash(txForSigning.toBytes());
   }
@@ -332,7 +337,7 @@ class BtcTransaction {
         hashPrevouts = List<int>.from([
           ...hashPrevouts,
           ...txidBytes,
-          ...IntUtils.toBytes(txin.txIndex, length: 4)
+          ...IntUtils.toBytes(txin.txIndex, length: 4, byteOrder: Endian.little)
         ]);
       }
       hashPrevouts = QuickCrypto.sha256Hash(hashPrevouts);
@@ -391,8 +396,10 @@ class BtcTransaction {
       final txin = newTx.inputs[txIndex];
       List<int> txidBytes =
           List<int>.from(BytesUtils.fromHexString(txin.txId).reversed.toList());
-      List<int> result = List<int>.from(
-          [...txidBytes, ...IntUtils.toBytes(txin.txIndex, length: 4)]);
+      List<int> result = List<int>.from([
+        ...txidBytes,
+        ...IntUtils.toBytes(txin.txIndex, length: 4, byteOrder: Endian.little)
+      ]);
       txForSign.add(result);
       txForSign.add(BigintUtils.toBytes(amounts[txIndex],
           length: 8, order: Endian.little));

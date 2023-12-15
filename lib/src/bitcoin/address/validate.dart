@@ -71,8 +71,8 @@ List<int>? decodeBchAddress(
     }
 
     final decode = BchBech32Decoder.decode(hrp, address);
-    if (bytesEqual(decode.$1, netVersion)) {
-      return decode.$2;
+    if (bytesEqual(decode.item1, netVersion)) {
+      return decode.item2;
     }
     return null;
   } catch (e) {
