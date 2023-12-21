@@ -1,3 +1,7 @@
+# 3.0.1
+
+* Update dependencies
+
 ## 3.0.0
 
 * Downgrade dart SDK from 3.1 to 2.15

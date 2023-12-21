@@ -1,9 +1,10 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/utils/enumerate.dart';
 import 'package:blockchain_utils/bip/coin_conf/coin_conf.dart';
 import 'package:blockchain_utils/bip/coin_conf/coins_conf.dart';
 
 /// Abstract class representing a base for UTXO-based cryptocurrency networks.
-abstract class BasedUtxoNetwork {
+abstract class BasedUtxoNetwork implements Enumerate {
   /// List of version bytes for Wallet Import Format (WIF).
   abstract final List<int> wifNetVer;
 
@@ -20,24 +21,38 @@ abstract class BasedUtxoNetwork {
   abstract final CoinConf conf;
 
   abstract final List<BitcoinAddressType> supportedAddress;
+
+  @override
+  operator ==(other) {
+    if (identical(other, this)) return true;
+    return other is BasedUtxoNetwork &&
+        other.runtimeType == runtimeType &&
+        value == other.value;
+  }
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 /// Class representing a Bitcoin network, implementing the `BasedUtxoNetwork` abstract class.
 class BitcoinNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
   static const BitcoinNetwork mainnet =
-      BitcoinNetwork._(CoinsConf.bitcoinMainNet);
+      BitcoinNetwork._("bitcoinMainnet", CoinsConf.bitcoinMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
   static const BitcoinNetwork testnet =
-      BitcoinNetwork._(CoinsConf.bitcoinTestNet);
+      BitcoinNetwork._("bitcoinTestnet", CoinsConf.bitcoinTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
+  @override
+  final String value;
+
   /// Constructor for creating a Bitcoin network with a specific configuration.
-  const BitcoinNetwork._(this.conf);
+  const BitcoinNetwork._(this.value, this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -67,18 +82,20 @@ class BitcoinNetwork implements BasedUtxoNetwork {
 class LitecoinNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
   static const LitecoinNetwork mainnet =
-      LitecoinNetwork._(CoinsConf.litecoinMainNet);
+      LitecoinNetwork._("litecoinMainnet", CoinsConf.litecoinMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
   static const LitecoinNetwork testnet =
-      LitecoinNetwork._(CoinsConf.litecoinTestNet);
+      LitecoinNetwork._("litecoinTestnet", CoinsConf.litecoinTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
+  @override
+  final String value;
 
   /// Constructor for creating a Litecoin network with a specific configuration.
-  const LitecoinNetwork._(this.conf);
+  const LitecoinNetwork._(this.value, this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -116,17 +133,19 @@ class LitecoinNetwork implements BasedUtxoNetwork {
 /// Class representing a Dash network, implementing the `BasedUtxoNetwork` abstract class.
 class DashNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  static const DashNetwork mainnet = DashNetwork._(CoinsConf.dashMainNet);
+  static const DashNetwork mainnet =
+      DashNetwork._("dashMainnet", CoinsConf.dashMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
-  static const DashNetwork testnet = DashNetwork._(CoinsConf.dashTestNet);
+  static const DashNetwork testnet =
+      DashNetwork._("dashTestnet", CoinsConf.dashTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Dash network with a specific configuration.
-  const DashNetwork._(this.conf);
+  const DashNetwork._(this.value, this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -155,24 +174,30 @@ class DashNetwork implements BasedUtxoNetwork {
     BitcoinAddressType.p2pkhInP2sh,
     BitcoinAddressType.p2pkInP2sh
   ];
+
+  @override
+  final String value;
 }
 
 /// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
 class DogecoinNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
   static const DogecoinNetwork mainnet =
-      DogecoinNetwork._(CoinsConf.dogecoinMainNet);
+      DogecoinNetwork._("dogeMainnet", CoinsConf.dogecoinMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
   static const DogecoinNetwork testnet =
-      DogecoinNetwork._(CoinsConf.dogecoinTestNet);
+      DogecoinNetwork._("dogeTestnet", CoinsConf.dogecoinTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Dogecoin network with a specific configuration.
-  const DogecoinNetwork._(this.conf);
+  const DogecoinNetwork._(this.value, this.conf);
+
+  @override
+  final String value;
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -207,18 +232,20 @@ class DogecoinNetwork implements BasedUtxoNetwork {
 class BitcoinCashNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
   static const BitcoinCashNetwork mainnet =
-      BitcoinCashNetwork._(CoinsConf.bitcoinCashMainNet);
+      BitcoinCashNetwork._("bitcoinCashMainnet", CoinsConf.bitcoinCashMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
   static const BitcoinCashNetwork testnet =
-      BitcoinCashNetwork._(CoinsConf.bitcoinCashTestNet);
+      BitcoinCashNetwork._("bitcoinCashTestnet", CoinsConf.bitcoinCashTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Bitcoin Cash network with a specific configuration.
-  const BitcoinCashNetwork._(this.conf);
+  const BitcoinCashNetwork._(this.value, this.conf);
+  @override
+  final String value;
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override

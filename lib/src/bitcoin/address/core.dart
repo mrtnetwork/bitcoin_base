@@ -1,6 +1,7 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/utils/enumerate.dart';
 
-class BitcoinAddressType {
+class BitcoinAddressType implements Enumerate {
   static const BitcoinAddressType p2pkh = BitcoinAddressType._("P2PKH");
   static const BitcoinAddressType p2wpkh = BitcoinAddressType._("P2WPKH");
   static const BitcoinAddressType p2pk = BitcoinAddressType._("P2PK");
@@ -15,6 +16,7 @@ class BitcoinAddressType {
   static const BitcoinAddressType p2pkInP2sh =
       BitcoinAddressType._("P2SH/P2PK");
 
+  @override
   final String value;
 
   const BitcoinAddressType._(this.value);
@@ -28,15 +30,8 @@ class BitcoinAddressType {
 
   /// Check if the address type is Pay-to-Script-Hash (P2SH).
   bool get isP2sh {
-    switch (this) {
-      case p2wshInP2sh:
-      case p2wpkhInP2sh:
-      case p2pkhInP2sh:
-      case p2pkInP2sh:
-        return true;
-      default:
-        return false;
-    }
+    if (value.startsWith("P2SH")) return true;
+    return false;
   }
 
   // Enum values as a list for iteration
