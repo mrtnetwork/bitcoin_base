@@ -32,6 +32,23 @@ abstract class BasedUtxoNetwork implements Enumerate {
 
   @override
   int get hashCode => value.hashCode;
+
+  static List<BasedUtxoNetwork> values = const [
+    BitcoinNetwork.mainnet,
+    BitcoinNetwork.testnet,
+    LitecoinNetwork.mainnet,
+    LitecoinNetwork.testnet,
+    DashNetwork.mainnet,
+    DashNetwork.testnet,
+    DogecoinNetwork.mainnet,
+    DogecoinNetwork.testnet,
+    BitcoinCashNetwork.mainnet,
+    BitcoinCashNetwork.testnet
+  ];
+
+  static BasedUtxoNetwork fromName(String name) {
+    return values.firstWhere((element) => element.value == name);
+  }
 }
 
 /// Class representing a Bitcoin network, implementing the `BasedUtxoNetwork` abstract class.
