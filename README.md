@@ -1,5 +1,5 @@
 # BITCOIN Dart Package
-a comprehensive and versatile Dart library that provides robust support for various cryptocurrency transaction types. It is designed to meet your transaction needs for Bitcoin, Dogecoin, Litecoin, Dash, and Bitcoin Cash. The library offers features such as spending transactions, address management, Schnorr signatures for Bitcoin, BIP-39 mnemonic phrase generation, hierarchical deterministic (HD) wallet derivation, and Web3 Secret Storage Definition..
+a comprehensive and versatile Dart library that provides robust support for various cryptocurrency transaction types. It is designed to meet your transaction needs for Bitcoin, Dogecoin, Litecoin, Dash, Bitcoin Cash and Bitcoin SV. The library offers features such as spending transactions, address management, Schnorr signatures for Bitcoin, BIP-39 mnemonic phrase generation, hierarchical deterministic (HD) wallet derivation, and Web3 Secret Storage Definition..
 
 For BIP32 HD wallet, BIP39, and Secret storage definitions, please refer to the [blockchain_utils](https://github.com/mrtnetwork/blockchain_utils) package.
 
@@ -9,11 +9,19 @@ This package was inspired by the [python-bitcoin-utils](https://github.com/karas
 
 ### Supported Cryptocurrencies
 
-- Bitcoin
-- Dogecoin
-- Litecoin
-- Dash
-- Bitcoin Cash
+- **Bitcoin**
+  - P2PK, P2PKH, P2SH, P2WPKH, P2WSH, P2TR
+- **Dogecoin**
+  - P2PK, P2PKH, P2SH
+- **Litecoin**
+  - P2PK, P2PKH, P2SH, P2WPKH, P2WSH
+- **Dash**
+  - P2PK, P2PKH, P2SH
+- **Bitcoin Cash**
+  - P2PK, P2PKH, P2SH, P2SH32, Token-aware, CashTOKEN
+- **Bitcoin SV**
+  - P2PK, P2PKH
+
 
 ### Transaction Types
 This comprehensive package provides robust support for a wide array of Bitcoin transaction types, encompassing the full spectrum of Bitcoin transaction capabilities. Whether you need to execute standard payments, facilitate complex multi-signature wallets, leverage Segregated Witness (SegWit) transactions for lower fees and enhanced scalability, or embrace the privacy and flexibility of Pay-to-Taproot (P2TR) transactions, this package has you covered. Additionally, it empowers users to engage in legacy transactions, create time-locked transactions, and harness the security of multisignature (multisig) transactions. With this package, you can seamlessly navigate the diverse landscape of Bitcoin transactions, ensuring your interactions with the Bitcoin network are secure, efficient, and tailored to your specific needs.
@@ -38,6 +46,15 @@ This comprehensive package provides robust support for a wide array of Bitcoin t
 
 - Coinbase Transactions: The first transaction in each block, generating new Bitcoins as a block reward for miners. It includes the miner's payout address.
 
+### Tokens on Bitcoin Cash
+CashTokens are digital assets that can be created and used on the global, decentralized Bitcoin Cash (BCH) network. These tokens can be issued by any person, organization, or decentralized application.
+
+- Fungible tokens: Create, sign, spend, and burn.
+
+- Non-fungible tokens: Create, sign, mint, send, and burn with multiple capabilities (none, mutable, minting).
+
+- BCMR: Metadata Registries CHIP
+
 ### Create Transaction
 Using this package, you can create a Bitcoin transaction in two ways: either through the `BtcTransaction` or the `BitcoinTransactionBuilder` class
 - BtcTransaction: To use the `BtcTransaction` class, you should have a general understanding of how Bitcoin transactions work, including knowledge of UTXOs, scripts, various types of scripts, Bitcoin addresses, signatures, and more. We created examples and tests to enhance your understanding. An example of this transaction type is explained below, and you can also find numerous examples in the [`test`](https://github.com/mrtnetwork/bitcoin_base/tree/main/test) folder.
@@ -45,6 +62,7 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
 - BitcoinTransactionBuilder: Even with limited prior knowledge, you can utilize this class to send various types of transactions. Below, I've provided an example in which a transaction features 8 distinct input addresses with different types and private keys, as well as 10 different output addresses. Furthermore, additional examples have been prepared, which you can find in the [`example`](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) folder.
 
 ### Addresses
+
 - P2PKH A P2PKH (Pay-to-Public-Key-Hash) address in Bitcoin represents ownership of a cryptocurrency wallet by encoding a hashed public key
   
 - P2WPKH: A P2WPKH (Pay-to-Witness-Public-Key-Hash) address in Bitcoin is a Segregated Witness (SegWit) address that enables more efficient and secure transactions by segregating witness data, enhancing network scalability and security.
@@ -56,6 +74,15 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
 - P2SH: A P2SH (Pay-to-Script-Hash) address in Bitcoin is an address type that enables the use of more complex scripting, often associated with multi-signature transactions or other advanced smart contract functionality, enhancing flexibility and security.
   
 - P2SH(SEGWIT): A P2SH (Pay-to-Script-Hash) Segregated Witness (SegWit) address in Bitcoin combines the benefits of P2SH and SegWit technologies, allowing for enhanced transaction security, reduced fees, and improved scalability.
+
+### Addresses specific to Bitcoin Cash
+
+- P2SH32: Pay to Script Hash 32
+
+- P2SH32WT: Pay to Script Hash 32 With Token
+
+- P2PKHWT: Pay to Public Key Hash With Token
+
 
 ### Sign
 - Sign message: ECDSA Signature Algorithm
@@ -150,71 +177,81 @@ As of now, supports Bitcoin on both the testnet and mainnet, as well as Dogecoin
   ```
 - Addresses
   ```
-  // If you also want to verify that the address belongs to a specific network,
-  // please select the desired network using the parameters.
-  // Generate a Pay-to-Public-Key-Hash (P2PKH) address from the public key.
-  final p2pkh = P2pkhAddress(
+  final p2pkh = P2pkhAddress.fromAddress(
       address: "1Q5odQtVCc4PDmP5ncrp7DSuVbh2ML4Gnb",
       network: BitcoinNetwork.mainnet);
 
-  // Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) Segregated Witness (SegWit) address from the public key.
-  final p2wpkh =
-      P2wpkhAddress(address: "bc1ql5eh45als8sgdkt2drsl344q55g03sj2u9enzz");
+  /// Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) Segregated Witness (SegWit) address from the public key.
+  final p2wpkh = P2wpkhAddress.fromAddress(
+      address: "bc1ql5eh45als8sgdkt2drsl344q55g03sj2u9enzz",
+      network: BitcoinNetwork.mainnet);
 
-  // Generate a Pay-to-Witness-Script-Hash (P2WSH) Segregated Witness (SegWit) address from the public key.
-  final p2wsh = P2wshAddress(
-      address:
-          "bc1qf90kcg2ktg0wm983cyvhy0jsrj2fmqz26ugf5jz3uw68mtnr8ljsnf8pqe");
+  /// Generate a Pay-to-Witness-Script-Hash (P2WSH) Segregated Witness (SegWit) address from the public key.
+  final p2wsh = P2wshAddress.fromAddress(
+      address: "bc1qf90kcg2ktg0wm983cyvhy0jsrj2fmqz26ugf5jz3uw68mtnr8ljsnf8pqe",
+      network: BitcoinNetwork.mainnet);
 
-  // Generate a Taproot address from the public key.
-  final p2tr = P2trAddress(
-      address:
-          "bc1pmelvn3xz2n3dmcsvk2k99na7kc55ry77zmhg4z39upry05myjthq37f6jk");
+  /// Generate a Taproot address from the public key.
+  final p2tr = P2trAddress.fromAddress(
+      address: "bc1pmelvn3xz2n3dmcsvk2k99na7kc55ry77zmhg4z39upry05myjthq37f6jk",
+      network: BitcoinNetwork.mainnet);
 
-  // Generate a Pay-to-Public-Key-Hash (P2PKH) inside Pay-to-Script-Hash (P2SH) address from the public key.
-  final p2pkhInP2sh =
-      P2shAddress(address: "3HDtvvRMu3yKGFXYFSubTspbhbLagpdKJ7");
+  /// Generate a Pay-to-Public-Key-Hash (P2PKH) inside Pay-to-Script-Hash (P2SH) address from the public key.
+  final p2sh = P2shAddress.fromAddress(
+      address: "3HDtvvRMu3yKGFXYFSubTspbhbLagpdKJ7",
+      network: BitcoinNetwork.mainnet);
 
-  // Generate a Pay-to-Witness-Public-Key-Hash (P2WPKH) inside Pay-to-Script-Hash (P2SH) address from the public key.
-  final p2wpkhInP2sh =
-      P2shAddress(address: "36Dq32LRMW8EJyD3T2usHaxeMBmUpsXhq2");
+  /// You can create any type of Bitcoin address with scripts.
+  /// Create an address with scripts for P2WSH multisig 2-of-2.
+  final newScript =
+      Script(script: ["OP_2", public1, public2, "OP_2", "OP_CHECKMULTISIG"]);
 
-  // Generate a Pay-to-Witness-Script-Hash (P2WSH) inside Pay-to-Script-Hash (P2SH) address from the public key.
-  final p2wshInP2sh =
-      P2shAddress(address: "3PPL49fMytbEKJsjjPnkfWh3iWzrZxQZAg");
+  /// Generate a P2WSH 3-of-5 address.
+  final p2wsh3of5Address = P2wshAddress.fromScript(script: newScript);
 
-  // Generate a Pay-to-Public-Key (P2PK) inside Pay-to-Script-Hash (P2SH) address from the public key.
-  final p2pkInP2sh = P2shAddress(address: "3NCe6AGzjz2jSyRKCc8o3Bg5MG6pUM92bg");
-
-  // You can create any type of Bitcoin address with scripts.
-  // Create an address with scripts for P2WSH multisig 3-of-5.
-  final newScript = Script(script: [
-    "OP_3",
-    public1,
-    public2,
-    public3,
-    public4,
-    public5,
-    "OP_5",
-    "OP_CHECKMULTISIG"
-  ]);
-
-  // Generate a P2WSH 3-of-5 address.
-  final p2wsh3of5Address = P2wshAddress(script: newScript);
-
-  // Generate a P2SH 3-of-5 address from the P2WSH address.
+  /// Generate a P2SH 3-of-5 address from the P2WSH address.
   final p2sh3Of5 =
       P2shAddress.fromScript(script: p2wsh3of5Address.toScriptPubKey());
 
-  // The method calculates the address checksum and returns the Base58-encoded
-  // Bitcoin legacy address or the Bech32 format for SegWit addresses.
-  p2sh3Of5.toAddress(BitcoinNetwork.mainnet);
+  /// Implemented classes for each network to better manage network-specific addresses.
+  /// Integrated these classes to eliminate the necessity of using the main class and type for each address.
+  final bitcoinAddress = BitcoinAddress(
+      "tb1qg07pp4w4q6mzv2uh6n7f32tjq3g2uduwt70krjf0m75xgv9xtmwsp27wuw",
+      network: BitcoinNetwork.testnet);
 
-  // Return the scriptPubKey that corresponds to this address.
-  p2sh3Of5.toScriptPubKey();
+  /// access to `BitcoinBaseAddress`
+  final baseAddress = bitcoinAddress.baseAddress;
 
-  // Access the legacy or SegWit program of the address.
-  p2sh3Of5.getH160;
+  /// type of address
+  final type = bitcoinAddress.type;
+
+  final litecoin = LitecoinAddress("QQ2nmQTtA4eckgQNhmo7hGERpkBSzffWXK",
+      network: LitecoinNetwork.testnet);
+
+  /// BCH/P2PKH
+  final bch = BitcoinCashAddress(
+      "bchtest:qqddwd05aw9etm4pwcmgh5favujyy8uhuu5ypwyh6p",
+      network: BitcoinCashNetwork.testnet);
+
+  /// BCH/P2SH32
+  final bchp2sh32 = BitcoinCashAddress(
+      "bchtest:p04ycd9t3pr25jte9tl0vhlamnqqxdhkep6qenrj4fazg4qlxaxevfgeknvm9",
+      network: BitcoinCashNetwork.testnet);
+
+  /// BCH/P2SH32WT 
+  final bchp2sh32wt = BitcoinCashAddress(
+      "bchtest:r0nxrdjg297tup5gfe6307mh6u94rn3mnzcq6znepym2ju6ne7ae7kpu9hw64",
+      network: BitcoinCashNetwork.testnet);
+
+  final dash = DashAddress("Xqzs7FnTLc5PqEKWQXjvBLhjC7nMeofkUn",
+      network: DashNetwork.mainnet);
+
+  final doge = DogeAddress("DMovt5M6umoXzs95XNQWSHrHKP5RPwtsJA",
+      network: DogecoinNetwork.mainnet);
+
+  final bitcoinSV = BitcoinSVAddress("15ATt31qva5gkpa6e7ux3if5YSACiAx7s4",
+      network: BitcoinSVNetwork.mainnet);
+      
   ```
   
 ### Transaction
@@ -222,252 +259,292 @@ As of now, supports Bitcoin on both the testnet and mainnet, as well as Dogecoin
 In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) folder, you'll find various examples tailored for each supported network, including Bitcoin, Dogecoin, Litecoin, Bitcoin Cash, and Dash.
 
 - With TransactionBuilder
+  BitcoinTransactionBuilder supports the Bitcoin, Dogecoin, Dash, and Litecoin networks, allowing for easy creation and signing of various address types.
+
   ```
-  // select network
-  const BitcoinNetwork network = BitcoinNetwork.testnet;
-  final service = BitcoinApiService();
-  // select api for read accounts UTXOs and send transaction
-  // Mempool or BlockCypher
-  final api = ApiProvider.fromMempool(network, service);
+  /// connect to electrum service with websocket
+  /// please see [services_examples](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) folder for how to 
+  /// create electrum websocket service
+  final service = await ElectrumWebSocketService.connect("....");
 
-  final mnemonic = Bip39SeedGenerator(Mnemonic.fromString(
-          "spy often critic spawn produce volcano depart fire theory fog turn retire"))
-      .generate();
+  /// create provider with service
+  final provider = ElectrumApiProvider(service);
 
-  final bip32 = Bip32Slip10Secp256k1.fromSeed(mnemonic);
+  /// spender details
+  /// Define private key from wif
+  final ECPrivate examplePrivateKey2 = ECPrivate.fromWif(
+      'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
+      netVersion: BitcoinNetwork.testnet.wifNetVer);
+  final examplePublicKey2 = examplePrivateKey2.getPublic();
+  final p2pkhAddress = examplePublicKey2.toAddress();
 
-  // i generate 4 HD wallet for this test and now i have access to private and pulic key of each wallet
-  final sp1 = bip32.derivePath("m/44'/0'/0'/0/0/1");
-  final sp2 = bip32.derivePath("m/44'/0'/0'/0/0/2");
-  final sp3 = bip32.derivePath("m/44'/0'/0'/0/0/3");
-  final sp4 = bip32.derivePath("m/44'/0'/0'/0/0/4");
+  /// receiver addresses i use public key for generate address
+  final examplePublicKey = ECPublic.fromHex(
+      "032a4f8be9ebffb46e2c6a1c240702553b9c9c8ad9638650833d07d5d22f618621");
 
-  // access to private key `ECPrivate`
-  final private1 = ECPrivate.fromBytes(sp1.privateKey.raw);
-  final private2 = ECPrivate.fromBytes(sp2.privateKey.raw);
-  final private3 = ECPrivate.fromBytes(sp3.privateKey.raw);
-  final private4 = ECPrivate.fromBytes(sp4.privateKey.raw);
+  const network = BitcoinNetwork.testnet;
 
-  // access to public key `ECPublic`
-  final public1 = private1.getPublic();
-  final public2 = private2.getPublic();
-  final public3 = private3.getPublic();
-  final public4 = private4.getPublic();
+  /// Reads all UTXOs (Unspent Transaction Outputs) associated with the account
+  final elctrumUtxos = await provider.request(ElectrumScriptHashListUnspent(
+      scriptHash: examplePublicKey2.toAddress().pubKeyHash()));
 
-  // P2PKH ADDRESS
-  final exampleAddr1 = public1.toAddress();
-  // P2TR
-  final exampleAddr2 = public2.toTaprootAddress();
-  // P2PKHINP2SH
-  final exampleAddr3 = public2.toP2pkhInP2sh();
-  // P2KH
-  final exampleAddr4 = public3.toAddress();
-  // P2PKHINP2SH
-  final exampleAddr5 = public3.toP2pkhInP2sh();
-  // P2WSHINP2SH 1-1 multisig
-  final exampleAddr6 = public3.toP2wshInP2sh();
-  // P2WPKHINP2SH
-  final exampleAddr7 = public3.toP2wpkhInP2sh();
-  // P2PKINP2SH
-  final exampleAddr8 = public4.toP2pkInP2sh();
-  // P2WPKH
-  final exampleAddr9 = public3.toSegwitAddress();
-  // P2WSH 1-1 multisig
-  final exampleAddr10 = public3.toP2wshAddress();
+  /// Converts all UTXOs to a list of UtxoWithAddress, containing UTXO information along with address details.
+  /// read spender utxos
+  final List<UtxoWithAddress> utxos = elctrumUtxos
+      .map((e) => UtxoWithAddress(
+          utxo: e.toUtxo(p2pkhAddress.type),
+          ownerDetails: UtxoAddressDetails(
+              publicKey: examplePublicKey2.toHex(), address: p2pkhAddress)))
+      .toList();
 
-  // Spending List
-  // i use some different address type for this
-  // now i want to spending from 8 address in one transaction
-  // we need publicKeys and address
-  final spenders = [
-    UtxoAddressDetails(publicKey: public1.toHex(), address: exampleAddr1),
-    UtxoAddressDetails(publicKey: public2.toHex(), address: exampleAddr2),
-    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr7),
-    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr9),
-    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr10),
-    UtxoAddressDetails(publicKey: public2.toHex(), address: exampleAddr3),
-    UtxoAddressDetails(publicKey: public4.toHex(), address: exampleAddr8),
-    UtxoAddressDetails(publicKey: public3.toHex(), address: exampleAddr4),
-  ];
-
-  // i need now to read spenders account UTXOS
-  final List<UtxoWithOwner> utxos = [];
-
-  // i add some method for provider to read utxos from mempool or blockCypher
-  // looping address to read Utxos
-  for (final spender in spenders) {
-    try {
-      // read each address utxo from mempool
-      final spenderUtxos = await api.getAccountUtxo(spender);
-      // check if account have any utxo for spending (balance)
-      if (!spenderUtxos.canSpend()) {
-        // address does not have any satoshi for spending:
-        continue;
-      }
-
-      utxos.addAll(spenderUtxos);
-    } on Exception {
-      // something bad happen when reading Utxos:
-      return;
-    }
-  }
-  // Well, now we calculate how much we can spend
+  /// get sum of values
   final sumOfUtxo = utxos.sumOfUtxosValue();
-  // 1,224,143 sum of all utxos
-
-  final hasSatoshi = sumOfUtxo != BigInt.zero;
-
-  if (!hasSatoshi) {
-    // Are you kidding? We don't have btc to spend
+  if (sumOfUtxo == BigInt.zero) {
     return;
   }
 
-  // In the 'p2wsh_multi_sig_test' example, I have provided a comprehensive
-  // explanation of how to determine the transaction fee
-  // before creating the original transaction.
+  /// When creating outputs with an address, I utilize the public key. Alternatively, an address class, such as
+  /// P2pkhAddress.fromAddress(address: ".....", network: network);
+  /// P2trAddress.fromAddress(address: "....", network: network)
+  /// ....
+  final List<BitcoinOutput> outPuts = [
+    BitcoinOutput(
+        address: examplePublicKey.toAddress(),
+        value: BtcUtils.toSatoshi("0.00001")),
+    BitcoinOutput(
+        address: examplePublicKey.toSegwitAddress(),
+        value: BtcUtils.toSatoshi("0.00001")),
+    BitcoinOutput(
+        address: examplePublicKey.toTaprootAddress(),
+        value: BtcUtils.toSatoshi("0.00001")),
+    BitcoinOutput(
+        address: examplePublicKey.toP2pkhInP2sh(),
+        value: BtcUtils.toSatoshi("0.00001")),
+    BitcoinOutput(
+        address: examplePublicKey.toP2pkInP2sh(),
+        value: BtcUtils.toSatoshi("0.00001")),
+    BitcoinOutput(
+        address: examplePublicKey.toP2wshAddress(),
+        value: BtcUtils.toSatoshi("0.00001")),
+    BitcoinOutput(
+        address: examplePublicKey.toP2wpkhInP2sh(),
+        value: BtcUtils.toSatoshi("0.00001")),
+  ];
 
-  // We consider 50,003 satoshi for the cost
-  final fee = BigInt.from(50003);
+  /// OP_RETURN
+  const String memo = "https://github.com/mrtnetwork";
 
-  // now we have 1,174,140 satoshi for spending let do it
-  // we create 10 different output with  different address type like (pt2r, p2sh(p2wpkh), p2sh(p2wsh), p2pkh, etc.)
-  // We consider the spendable amount for 10 outputs and divide by 10, each output 117,414
-  final output1 =
-      BitcoinOutput(address: exampleAddr4, value: BigInt.from(117414));
-  final output2 =
-      BitcoinOutput(address: exampleAddr9, value: BigInt.from(117414));
-  final output3 =
-      BitcoinOutput(address: exampleAddr10, value: BigInt.from(117414));
-  final output4 =
-      BitcoinOutput(address: exampleAddr1, value: BigInt.from(117414));
-  final output5 =
-      BitcoinOutput(address: exampleAddr3, value: BigInt.from(117414));
-  final output6 =
-      BitcoinOutput(address: exampleAddr2, value: BigInt.from(117414));
-  final output7 =
-      BitcoinOutput(address: exampleAddr7, value: BigInt.from(117414));
-  final output8 =
-      BitcoinOutput(address: exampleAddr8, value: BigInt.from(117414));
-  final output9 =
-      BitcoinOutput(address: exampleAddr5, value: BigInt.from(117414));
-  final output10 =
-      BitcoinOutput(address: exampleAddr6, value: BigInt.from(117414));
+  /// SUM OF OUTOUT AMOUNTS
+  final sumOfOutputs = outPuts.fold(
+      BigInt.zero, (previousValue, element) => previousValue + element.value);
 
-  // Well, now it is clear to whom we are going to pay the amount
-  // Now let's create the transaction
-  final transactionBuilder = BitcoinTransactionBuilder(
-    // Now, we provide the UTXOs we want to spend.
-    utxos: utxos,
-    // We select transaction outputs
-    outPuts: [
-      output1,
-      output2,
-      output3,
-      output4,
-      output5,
-      output6,
-      output7,
-      output8,
-      output9,
-      output10
-    ],
-    /*
-			Transaction fee
-			Ensure that you have accurately calculated the amounts.
-			If the sum of the outputs, including the transaction fee,
-			does not match the total amount of UTXOs,
-			it will result in an error. Please double-check your calculations.
-		*/
-    fee: fee,
-    // network, testnet, mainnet
-    network: network,
-    // If you like the note write something else and leave it blank
-    // I will put my GitHub address here
-    memo: "https://github.com/mrtnetwork",
-    /*
-			RBF, or Replace-By-Fee, is a feature in Bitcoin that allows you to increase the fee of an unconfirmed
-			transaction that you've broadcasted to the network.
-			This feature is useful when you want to speed up a
-			transaction that is taking longer than expected to get confirmed due to low transaction fees.
-		*/
-    enableRBF: true,
-  );
+  /// ESTIMATE TRANSACTION SIZE
+  int estimateSize = BitcoinTransactionBuilder.estimateTransactionSize(
+      utxos: utxos,
+      outputs: [
+        ...outPuts,
 
-  // now we use BuildTransaction to complete them
-  // I considered a method parameter for this, to sign the transaction
+        /// I add more output for change value to get correct transaction size
+        BitcoinOutput(
+            address: examplePublicKey2.toAddress(), value: BigInt.zero)
+      ],
 
-  // parameters
-  // utxo  infos with owner details
-  // trDigest transaction digest of current UTXO (must be sign with correct privateKey)
+      /// network
+      network: network,
+
+      /// memp
+      memo: memo,
+
+      /// rbf
+      enableRBF: true);
+
+  /// get network fee esmtimate (kb/s)
+  final networkEstimate = await provider.request(ElectrumEstimateFee());
+
+  /// kb to bytes and mul with transaction size and now we have fee
+  final fee =
+      BigInt.from(estimateSize) * (networkEstimate ~/ BigInt.from(1000));
+
+  /// change value
+  final changeValue = sumOfUtxo - (sumOfOutputs + fee);
+
+  if (changeValue.isNegative) return;
+  //// if we have change value we back amount to account
+  if (changeValue > BigInt.zero) {
+    final changeOutput = BitcoinOutput(
+        address: examplePublicKey2.toAddress(), value: changeValue);
+    outPuts.add(changeOutput);
+  }
+
+  /// create transaction builder
+  final builder = BitcoinTransactionBuilder(
+      outPuts: outPuts,
+      fee: fee,
+      network: network,
+      utxos: utxos,
+      memo: memo,
+      inputOrdering: BitcoinOrdering.bip69,
+      outputOrdering: BitcoinOrdering.bip69,
+      enableRBF: true);
+
+  /// create transaction and sign it
   final transaction =
-      transactionBuilder.buildTransaction((trDigest, utxo, publicKey) {
-    late ECPrivate key;
-
-    // ok we have the public key of the current UTXO and we use some conditions to find private  key and sign transaction
-    String currentPublicKey = publicKey;
-
-    // if is multi-sig and we dont have access to some private key of address we return empty string
-    // Note that you must have access to keys with the required signature(threshhold) ; otherwise,
-    // you will receive an error.
-    if (utxo.isMultiSig()) {
-      // check we have private keys of this sigerns or not
-      // return ""
-    }
-
-    if (currentPublicKey == public3.toHex()) {
-      key = private3;
-    } else if (currentPublicKey == public2.toHex()) {
-      key = private2;
-    } else if (currentPublicKey == public1.toHex()) {
-      key = private1;
-    } else if (currentPublicKey == public4.toHex()) {
-      key = private4;
-    } else {
-      throw Exception("Cannot find private key");
-    }
-
-    // Ok, now we have the private key, we need to check which method to use for signing
-    // We check whether the UTX corresponds to the P2TR address or not.
+      builder.buildTransaction((trDigest, utxo, publicKey, sighash) {
     if (utxo.utxo.isP2tr()) {
-      // yes is p2tr utxo and now we use SignTaprootTransaction(Schnorr sign)
-      // for now this transaction builder support only tweak transaction
-      // If you want to spend a Taproot tapleaf script-path spending, you must create your own transaction builder.
-      return key.signTapRoot(trDigest);
-    } else {
-      // is seqwit(v0) or lagacy address we use  SingInput (ECDSA)
-      return key.signInput(trDigest);
+      return examplePrivateKey2.signTapRoot(trDigest, sighash: sighash);
     }
+    return examplePrivateKey2.signInput(trDigest, sigHash: sighash);
   });
 
-  // ok everything is fine and we need a transaction output for broadcasting
-  // We use the Serialize method to receive the transaction output
-  final digest = transaction.serialize();
+  /// get tx id
+  transaction.txId();
 
-  // we check if transaction is segwit or not
-  // When one of the input UTXO addresses is SegWit, the transaction is considered SegWit.
-  final isSegwitTr = transactionBuilder.hasSegwit();
+  /// get transaction encoded data
+  final raw = transaction.serialize();
 
-  // transaction id
-  final transactionId = transaction.txId();
+  /// send to network
+  await provider.request(ElectrumBroadCastTransaction(transactionRaw: raw));
 
-  // transaction size
-  int transactionSize;
+  /// Once completed, we verify the status by checking the mempool or using another explorer to review the transaction details.
+  /// https://mempool.space/testnet/tx/abab018f3d2b92bf30c63b4aca419cf6d6571692b3620f06311c7e5a21a88b56
 
-  if (isSegwitTr) {
-    transactionSize = transaction.getVSize();
-  } else {
-    transactionSize = transaction.getSize();
+  ```
+- With ForkedTransactionBuilder
+  ForkedTransactionBuilder supports the BitcoinCash and bitcoinSV for easy creation and signing of various address types.
+  For spending network amounts, it functions similarly to TransactionBuilder. However, in this example, the focus is on spending CashToken (BCH Feature). For minting, burning, and creating FTs (Fungible Tokens) and NFTs (Non-Fungible Tokens), you can refer to the example folders
+  
+  ```
+  /// connect to electrum service with websocket
+  /// please see `services_examples` folder for how to create electrum websocket service
+  final service = await ElectrumWebSocketService.connect(
+      "wss://chipnet.imaginary.cash:50004");
+
+  /// create provider with service
+  final provider = ElectrumApiProvider(service);
+
+  /// initialize private key
+  final privateKey = ECPrivate.fromBytes(BytesUtils.fromHexString(
+      "f9061c5cb343c6b6a73900ee29509bb0bd2213319eea46d2f2a431068c9da06b"));
+
+  /// public key
+  final publicKey = privateKey.getPublic();
+
+  /// network
+  const network = BitcoinCashNetwork.testnet;
+
+  /// Derives a P2PKH address from the given public key and converts it to a Bitcoin Cash address
+  /// for enhanced accessibility within the network.
+  final p2pkhAddress = BitcoinCashAddress.fromBaseAddress(
+      publicKey.toP2pkInP2sh(useBCHP2sh32: true));
+
+  /// p2pkh with token address ()
+  final receiver1 = P2pkhAddress.fromHash160(
+      addrHash: publicKey.toAddress().addressProgram,
+      type: P2pkhAddressType.p2pkhwt);
+
+  /// Reads all UTXOs (Unspent Transaction Outputs) associated with the account.
+  /// We does not need tokens utxo and we set to false.
+  final elctrumUtxos = await provider.request(ElectrumScriptHashListUnspent(
+    scriptHash: p2pkhAddress.baseAddress.pubKeyHash(),
+    includeTokens: true,
+  ));
+  // return;
+
+  /// Converts all UTXOs to a list of UtxoWithAddress, containing UTXO information along with address details.
+  final List<UtxoWithAddress> utxos = elctrumUtxos
+      .map((e) => UtxoWithAddress(
+          utxo: e.toUtxo(p2pkhAddress.type),
+          ownerDetails: UtxoAddressDetails(
+              publicKey: publicKey.toHex(), address: p2pkhAddress.baseAddress)))
+      .toList()
+
+      /// we only filter the utxos for this token or none token utxos
+      .where((element) =>
+          element.utxo.token?.category ==
+              "4e7873d4529edfd2c6459139257042950230baa9297f111b8675829443f70430" ||
+          element.utxo.token == null)
+      .toList();
+
+  /// som of utxos in satoshi
+  final sumOfUtxo = utxos.sumOfUtxosValue();
+  if (sumOfUtxo == BigInt.zero) {
+    return;
   }
 
-  try {
-    // now we send transaction to network
-    // ignore: unused_local_variable
-    final txId = await api.sendRawTransaction(digest);
-    // Yes, we did :)  2625cd75f6576c38445deb2a9573c12ccc3438c3a6dd16fd431162d3f2fbb6c8
-    // Now we check mempool for what happened https://mempool.space/testnet/tx/2625cd75f6576c38445deb2a9573c12ccc3438c3a6dd16fd431162d3f2fbb6c8
-  } on Exception {
-    // Something went wrong when sending the transaction
-  }
+  /// CashToken{bitfield: 16, commitment: null, amount: 2000, category: 4e7873d4529edfd2c6459139257042950230baa9297f111b8675829443f70430}
+  final CashToken token = elctrumUtxos
+      .firstWhere((e) =>
+          e.token?.category ==
+          "4e7873d4529edfd2c6459139257042950230baa9297f111b8675829443f70430")
+      .token!;
+
+  /// sum of ft token amounts with category "4e7873d4529edfd2c6459139257042950230baa9297f111b8675829443f70430"
+  final sumofTokenUtxos = utxos
+      .where((element) =>
+          element.utxo.token?.category ==
+          "4e7873d4529edfd2c6459139257042950230baa9297f111b8675829443f70430")
+      .fold(
+          BigInt.zero,
+          (previousValue, element) =>
+              previousValue + element.utxo.token!.amount);
+
+  final bchTransaction = ForkedTransactionBuilder(
+    outPuts: [
+      /// change address for bch values (sum of bch amout - (outputs amount + fee))
+      BitcoinOutput(
+        address: p2pkhAddress.baseAddress,
+        value: sumOfUtxo -
+            (BtcUtils.toSatoshi("0.00002") + BtcUtils.toSatoshi("0.00003")),
+      ),
+      BitcoinTokenOutput(
+          utxoHash: utxos.first.utxo.txHash,
+          address: receiver1,
+
+          /// for a token-bearing output (600-700) satoshi
+          /// hard-coded value which is expected to be enough to allow
+          /// all conceivable token-bearing UTXOs (1000 satoshi)
+          value: BtcUtils.toSatoshi("0.00001"),
+
+          /// clone the token with new token amount for output1 (15 amount of category)
+          token: token.copyWith(amount: BigInt.from(15))),
+
+      /// another change token value to change account like bch
+      BitcoinTokenOutput(
+          utxoHash: utxos.first.utxo.txHash,
+          address: p2pkhAddress.baseAddress,
+
+          /// for a token-bearing output (600-700) satoshi
+          /// hard-coded value which is expected to be enough to allow
+          /// all conceivable token-bearing UTXOs (1000 satoshi)
+          value: BtcUtils.toSatoshi("0.00001"),
+
+          /// clone the token with new token amount for output1 (15 amount of category)
+          token: token.copyWith(amount: sumofTokenUtxos - BigInt.from(15))),
+    ],
+    fee: BtcUtils.toSatoshi("0.00003"),
+    network: network,
+    utxos: utxos,
+  );
+  final transaaction =
+      bchTransaction.buildTransaction((trDigest, utxo, publicKey, sighash) {
+    return privateKey.signInput(trDigest, sigHash: sighash);
+  });
+
+  /// transaction ID
+  transaaction.txId();
+
+  /// for calculation fee
+  transaaction.getSize();
+
+  /// raw of encoded transaction in hex
+  final transactionRaw = transaaction.toHex();
+
+  /// send transaction to network
+  await provider
+      .request(ElectrumBroadCastTransaction(transactionRaw: transactionRaw));
+
+  /// done! check the transaction in block explorer
+  ///  https://chipnet.imaginary.cash/tx/97030c1236a024de7cad7ceadf8571833029c508e016bcc8173146317e367ae6
 
   ```
 - With BtcTransaction
@@ -584,32 +661,68 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) f
     ```
   
 ### Node provider
+I haven't implemented any specific HTTP service or socket service within this plugin. The reason is that different applications may use various plugins or methods to interact with network protocols. However, I have included numerous examples to demonstrate how Electrum and HTTP services can be utilized. You can leverage these examples as a reference to easily create services tailored to your application's specific needs. [examples](https://github.com/mrtnetwork/bitcoin_base/tree/main/example)
+
+- Electrum API (Websocket, TCP, SSL)
+```
+  const network = BitcoinNetwork.mainnet;
+
+  /// connect to electrum service with websocket
+  /// please see `services_examples` folder for how to create electrum websocket service
+  final service =
+      await ElectrumSSLService.connect("testnet.aranguren.org:51002");
+
+  /// create provider with service
+  final provider = ElectrumApiProvider(service);
+
+  final address = P2trAddress.fromAddress(address: ".....", network: network);
+
+  /// Return the confirmed and unconfirmed balances of a script hash.
+  final accountBalance = await provider
+      .request(ElectrumGetScriptHashBalance(scriptHash: address.pubKeyHash()));
+
+  /// Return an ordered list of UTXOs sent to a script hash.
+  final accountUnspend = await provider
+      .request(ElectrumScriptHashListUnspent(scriptHash: address.pubKeyHash()));
+
+  /// Return the confirmed and unconfirmed history of a script hash.
+  final accountHistory = await provider
+      .request(ElectrumScriptHashGetHistory(scriptHash: address.pubKeyHash()));
+
+  /// Broadcast a transaction to the network.
+  final broadcastTransaction = await provider
+      .request(ElectrumBroadCastTransaction(transactionRaw: "txDigest"));
+
+  /// ....
 ```
 
-// Define the blockchain network you want to work with, in this case, it's Bitcoin.
+- Explorer API (blockCypher, mempool)
+```
+  /// Define the blockchain network you want to work with, in this case, it's Bitcoin.
   const network = BitcoinNetwork.mainnet;
-// see the example_service.dart for how to create a http service.
-final service = BitcoinApiService();
 
-// Create an API provider instance for interacting with the BlockCypher API for the specified network.
+  /// see the example_service.dart for how to create a http service.
+  final service = BitcoinApiService();
+
+  /// Create an API provider instance for interacting with the BlockCypher API for the specified network.
   final api = ApiProvider.fromBlocCypher(network, service);
 
-// Get the current network fee rate, which is essential for estimating transaction fees.
+  /// Get the current network fee rate, which is essential for estimating transaction fees.
   final fee = await api.getNetworkFeeRate();
 
-// Send a raw transaction represented by its transaction digest to the blockchain network.
+  /// Send a raw transaction represented by its transaction digest to the blockchain network.
   final transactionId = await api.sendRawTransaction("txDigest");
 
-// Retrieve the Unspent Transaction Outputs (UTXOs) associated with a specific address.
+  /// Retrieve the Unspent Transaction Outputs (UTXOs) associated with a specific address.
   final utxo = await api.getAccountUtxo(address);
 
-// Fetch information about a specific transaction using its transaction ID.
-// For the Mempool API, use MempoolTransaction in the function template to receive the correct type.
+  /// Fetch information about a specific transaction using its transaction ID.
+  /// For the Mempool API, use MempoolTransaction in the function template to receive the correct type.
   final transaction =
       await api.getTransaction<BlockCypherTransaction>(transactionId);
 
-// Get a list of account transactions related to a specific address.
-// For the Mempool API, use MempoolTransaction in the function template to receive the correct type.
+  /// Get a list of account transactions related to a specific address.
+  /// For the Mempool API, use MempoolTransaction in the function template to receive the correct type.
   final accountTransactions =
       await api.getAccountTransactions<MempoolTransaction>('address');
 ```

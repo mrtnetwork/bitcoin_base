@@ -8,7 +8,6 @@ class BtcApiConst {
       "https://api.blockcypher.com/v1/btc/main";
   static const String mempoolMainBaseURL = "https://mempool.space/api";
   static const String blockstreamMainBaseURL = "https://blockstream.info/api";
-
   //
   static const String blockCypherDashBaseUri =
       "https://api.blockcypher.com/v1/dash/main";

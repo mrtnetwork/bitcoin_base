@@ -1,12 +1,4 @@
-import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
-import 'package:bitcoin_base/src/bitcoin/script/input.dart';
-import 'package:bitcoin_base/src/bitcoin/script/output.dart';
-import 'package:bitcoin_base/src/bitcoin/script/script.dart';
-import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
-import 'package:bitcoin_base/src/bitcoin/script/witness.dart';
-import 'package:bitcoin_base/src/crypto/keypair/ec_private.dart';
-import 'package:bitcoin_base/src/models/network.dart';
-
+import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -37,7 +29,7 @@ void main() {
     final p2pkhRedeemScript = Script(script: [
       'OP_DUP',
       'OP_HASH160',
-      p2pkhAddr.getH160,
+      p2pkhAddr.addressProgram,
       'OP_EQUALVERIFY',
       'OP_CHECKSIG'
     ]);
@@ -148,17 +140,20 @@ void main() {
       expect(tx.serialize(), createSendToP2wpkhResult);
     });
     test("test_spend_p2wpkh", () {
-      final tx = BtcTransaction(
+      BtcTransaction tx = BtcTransaction(
           inputs: [txinSpend], outputs: [txout2], hasSegwit: true);
       final digit = tx.getTransactionSegwitDigit(
           txInIndex: 0, script: p2pkhRedeemScript, amount: txinSpendAmount);
       final sig = sk.signInput(digit);
-      tx.addWitnesses(TxWitnessInput(stack: [sig, sk.getPublic().toHex()]));
+      // tx.addWitnesses();
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
+      ]);
       // txin1.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), spendP2pkhResult);
     });
     test("test_p2pkh_and_p2wpkh_to_p2pkh", () {
-      final tx = BtcTransaction(
+      BtcTransaction tx = BtcTransaction(
           inputs: [txinSpendP2pkh, txinSpendP2wpkh],
           outputs: [txout3],
           hasSegwit: true);
@@ -166,17 +161,21 @@ void main() {
           txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
       final sig = sk.signInput(digit);
       txinSpendP2pkh.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
-      tx.addWitnesses(TxWitnessInput(stack: []));
+      // tx.addWitnesses(TxWitnessInput(stack: []));
       final segwitDigit = tx.getTransactionSegwitDigit(
           amount: txinSpendP2wpkhAmount,
           script: p2pkhRedeemScript,
           txInIndex: 1);
       final sig2 = sk.signInput(segwitDigit);
-      tx.addWitnesses(TxWitnessInput(stack: [sig2, sk.getPublic().toHex()]));
+      // tx.addWitnesses(TxWitnessInput(stack: [sig2, sk.getPublic().toHex()]));
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: []),
+        TxWitnessInput(stack: [sig2, sk.getPublic().toHex()])
+      ]);
       expect(tx.serialize(), p2pkhAndP2wpkhToP2pkhResult);
     });
     test("test_signone_send", () {
-      final tx = BtcTransaction(
+      BtcTransaction tx = BtcTransaction(
           inputs: [txin1Signone], outputs: [txout1Signone], hasSegwit: true);
       final digit = tx.getTransactionSegwitDigit(
           txInIndex: 0,
@@ -184,12 +183,16 @@ void main() {
           amount: txin1SignoneAmount,
           sighash: BitcoinOpCodeConst.SIGHASH_NONE);
       final sig = sk.signInput(digit, sigHash: BitcoinOpCodeConst.SIGHASH_NONE);
-      tx.addWitnesses(TxWitnessInput(stack: [sig, sk.getPublic().toHex()]));
-      tx.outputs.add(txout2Signone);
+      // tx.addWitnesses();
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
+      ]);
+      tx = tx.copyWith(outputs: [...tx.outputs, txout2Signone]);
+
       expect(tx.serialize(), testSignoneSendResult);
     });
     test("test_sigsingle_send", () {
-      final tx = BtcTransaction(
+      BtcTransaction tx = BtcTransaction(
           inputs: [txin1Sigsingle],
           outputs: [txout1Sigsingle],
           hasSegwit: true);
@@ -200,12 +203,15 @@ void main() {
           sighash: BitcoinOpCodeConst.SIGHASH_SINGLE);
       final sig =
           sk.signInput(digit, sigHash: BitcoinOpCodeConst.SIGHASH_SINGLE);
-      tx.addWitnesses(TxWitnessInput(stack: [sig, sk.getPublic().toHex()]));
-      tx.outputs.add(txout2Sigsingle);
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
+      ]);
+      tx = tx.copyWith(outputs: [...tx.outputs, txout2Sigsingle]);
+
       expect(tx.serialize(), testSigsingleSendResult);
     });
     test("test_siganyonecanpay_all_send", () {
-      final tx = BtcTransaction(
+      BtcTransaction tx = BtcTransaction(
           inputs: [txin1SiganyonecanpayAll],
           outputs: [txout1SiganyonecanpayAll, txout2SiganyonecanpayAll],
           hasSegwit: true);
@@ -218,8 +224,10 @@ void main() {
       final sig = sk.signInput(digit,
           sigHash: BitcoinOpCodeConst.SIGHASH_ALL |
               BitcoinOpCodeConst.SIGHASH_ANYONECANPAY);
-      tx.addWitnesses(TxWitnessInput(stack: [sig, sk.getPublic().toHex()]));
-      tx.inputs.add(txin2SiganyonecanpayAll);
+
+      // tx.addWitnesses(TxWitnessInput(stack: [sig, sk.getPublic().toHex()]));
+      tx = tx.copyWith(inputs: [...tx.inputs, txin2SiganyonecanpayAll]);
+      // tx.inputs.add(txin2SiganyonecanpayAll);
       final digit2 = tx.getTransactionSegwitDigit(
           txInIndex: 1,
           script: p2pkhRedeemScript,
@@ -227,12 +235,17 @@ void main() {
           sighash: BitcoinOpCodeConst.SIGHASH_ALL);
       final sig2 =
           sk.signInput(digit2, sigHash: BitcoinOpCodeConst.SIGHASH_ALL);
-      tx.addWitnesses(TxWitnessInput(stack: [sig2, sk.getPublic().toHex()]));
+      // tx.addWitnesses();
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
+        TxWitnessInput(stack: [sig2, sk.getPublic().toHex()])
+      ]);
+
       expect(tx.serialize(), testSiganyonecanpayAllSendResult);
     });
 
     test("test_siganyonecanpay_none_send", () {
-      final tx = BtcTransaction(
+      BtcTransaction tx = BtcTransaction(
           inputs: [txin1SiganyonecanpayNone],
           outputs: [txout1SiganyonecanpayNone],
           hasSegwit: true);
@@ -245,9 +258,10 @@ void main() {
       final sig = sk.signInput(digit,
           sigHash: BitcoinOpCodeConst.SIGHASH_NONE |
               BitcoinOpCodeConst.SIGHASH_ANYONECANPAY);
-      tx.addWitnesses(TxWitnessInput(stack: [sig, sk.getPublic().toHex()]));
-      tx.inputs.add(txin2SiganyonecanpayNone);
-      tx.outputs.add(txout2SiganyonecanpayNone);
+      // tx.addWitnesses();
+      tx = tx.copyWith(inputs: [...tx.inputs, txin2SiganyonecanpayNone]);
+      // tx.inputs.add(txin2SiganyonecanpayNone);
+      tx = tx.copyWith(outputs: [...tx.outputs, txout2SiganyonecanpayNone]);
       final digit2 = tx.getTransactionSegwitDigit(
           txInIndex: 1,
           script: p2pkhRedeemScript,
@@ -255,13 +269,17 @@ void main() {
           sighash: BitcoinOpCodeConst.SIGHASH_ALL);
       final sig2 =
           sk.signInput(digit2, sigHash: BitcoinOpCodeConst.SIGHASH_ALL);
-      tx.addWitnesses(TxWitnessInput(stack: [sig2, sk.getPublic().toHex()]));
+      // tx.addWitnesses();
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
+        TxWitnessInput(stack: [sig2, sk.getPublic().toHex()])
+      ]);
       expect(tx.serialize(), testSiganyonecanpayNoneSendResult);
       final fromRaw = BtcTransaction.fromRaw(tx.serialize());
       expect(fromRaw.serialize(), tx.serialize());
     });
     test("test_siganyonecanpay_single_send", () {
-      final tx = BtcTransaction(
+      BtcTransaction tx = BtcTransaction(
           inputs: [txin1SiganyonecanpaySingle],
           outputs: [txout1SiganyonecanpaySingle],
           hasSegwit: true);
@@ -274,8 +292,11 @@ void main() {
       final sig = sk.signInput(digit,
           sigHash: BitcoinOpCodeConst.SIGHASH_SINGLE |
               BitcoinOpCodeConst.SIGHASH_ANYONECANPAY);
-      tx.addWitnesses(TxWitnessInput(stack: [sig, sk.getPublic().toHex()]));
-      tx.outputs.add(txout2SiganyonecanpaySingle);
+      // tx.addWitnesses();
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
+      ]);
+      tx = tx.copyWith(outputs: [...tx.outputs, txout2SiganyonecanpaySingle]);
       expect(tx.serialize(), testSiganyonecanpaySingleSendResult);
       final fromRaw = BtcTransaction.fromRaw(tx.serialize());
       expect(fromRaw.serialize(), tx.serialize());

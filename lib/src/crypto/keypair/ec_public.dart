@@ -79,19 +79,33 @@ class ECPublic {
   /// toP2pkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
   /// wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
-  P2shAddress toP2pkhInP2sh({bool compressed = true}) {
+  P2shAddress toP2pkhInP2sh({bool compressed = true, useBCHP2sh32 = false}) {
     final addr = toAddress(compressed: compressed);
-
+    final script = addr.toScriptPubKey();
+    if (useBCHP2sh32) {
+      return P2shAddress.fromHash160(
+          addrHash: BytesUtils.toHexString(
+              QuickCrypto.sha256DoubleHash(script.toBytes())),
+          type: P2shAddressType.p2pkhInP2sh32);
+    }
     return P2shAddress.fromScript(
-        script: addr.toScriptPubKey(), type: BitcoinAddressType.p2pkhInP2sh);
+        script: script, type: P2shAddressType.p2pkhInP2sh);
   }
 
   /// toP2pkInP2sh generates a P2SH (Pay-to-Script-Hash) address
   /// wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
-  P2shAddress toP2pkInP2sh({bool compressed = true}) {
+  P2shAddress toP2pkInP2sh(
+      {bool compressed = true, bool useBCHP2sh32 = false}) {
+    final script = toRedeemScript(compressed: compressed);
+    if (useBCHP2sh32) {
+      return P2shAddress.fromHash160(
+          addrHash: BytesUtils.toHexString(
+              QuickCrypto.sha256DoubleHash(script.toBytes())),
+          type: P2shAddressType.p2pkInP2sh32);
+    }
     return P2shAddress.fromScript(
-        script: toRedeemScript(compressed: compressed));
+        script: script, type: P2shAddressType.p2pkInP2sh);
   }
 
   /// ToTaprootAddress generates a P2TR(Taproot) address from the ECPublic key
@@ -108,7 +122,7 @@ class ECPublic {
   P2shAddress toP2wpkhInP2sh({bool compressed = true}) {
     final addr = toSegwitAddress(compressed: compressed);
     return P2shAddress.fromScript(
-        script: addr.toScriptPubKey(), type: BitcoinAddressType.p2wpkhInP2sh);
+        script: addr.toScriptPubKey(), type: P2shAddressType.p2wpkhInP2sh);
   }
 
   /// toP2wshScript generates a P2WSH (Pay-to-Witness-Script-Hash) script
@@ -135,7 +149,7 @@ class ECPublic {
   P2shAddress toP2wshInP2sh({bool compressed = true}) {
     final p2sh = toP2wshAddress(compressed: compressed);
     return P2shAddress.fromScript(
-        script: p2sh.toScriptPubKey(), type: BitcoinAddressType.p2wshInP2sh);
+        script: p2sh.toScriptPubKey(), type: P2shAddressType.p2wshInP2sh);
   }
 
   /// toBytes returns the uncompressed byte representation of the ECPublic key.

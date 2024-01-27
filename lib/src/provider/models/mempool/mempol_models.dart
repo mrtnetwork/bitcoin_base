@@ -1,3 +1,4 @@
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
 
 class MempoolPrevOut {
@@ -150,7 +151,7 @@ class MempoolTransaction {
   }
 }
 
-class MempolUtxo {
+class MempolUtxo implements UTXO {
   final String txid;
   final int vout;
   final MempoolStatus status;
@@ -170,6 +171,16 @@ class MempolUtxo {
       status: MempoolStatus.fromJson(json['status']),
       value: BigInt.parse(json['value'].toString()),
     );
+  }
+
+  @override
+  BitcoinUtxo toUtxo(BitcoinAddressType addressType) {
+    throw BitcoinUtxo(
+        txHash: txid,
+        value: value,
+        vout: vout,
+        scriptType: addressType,
+        blockHeight: 1);
   }
 }
 

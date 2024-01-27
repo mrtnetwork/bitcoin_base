@@ -43,12 +43,59 @@ abstract class BasedUtxoNetwork implements Enumerate {
     DogecoinNetwork.mainnet,
     DogecoinNetwork.testnet,
     BitcoinCashNetwork.mainnet,
-    BitcoinCashNetwork.testnet
+    BitcoinCashNetwork.testnet,
+    BitcoinSVNetwork.mainnet,
+    BitcoinSVNetwork.testnet
   ];
 
   static BasedUtxoNetwork fromName(String name) {
     return values.firstWhere((element) => element.value == name);
   }
+}
+
+/// Class representing a Bitcoin network, implementing the `BasedUtxoNetwork` abstract class.
+class BitcoinSVNetwork implements BasedUtxoNetwork {
+  /// Mainnet configuration with associated `CoinConf`.
+  static const BitcoinSVNetwork mainnet =
+      BitcoinSVNetwork._("BitcoinSVMainnet", CoinsConf.bitcoinSvMainNet);
+
+  /// Testnet configuration with associated `CoinConf`.
+  static const BitcoinSVNetwork testnet =
+      BitcoinSVNetwork._("BitcoinSVTestnet", CoinsConf.bitcoinSvTestNet);
+
+  /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
+  @override
+  final CoinConf conf;
+
+  @override
+  final String value;
+
+  /// Constructor for creating a Bitcoin network with a specific configuration.
+  const BitcoinSVNetwork._(this.value, this.conf);
+
+  /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get wifNetVer => conf.params.wifNetVer!;
+
+  /// Retrieves the Pay-to-Public-Key-Hash (P2PKH) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get p2pkhNetVer => conf.params.p2pkhNetVer!;
+
+  /// Retrieves the Pay-to-Script-Hash (P2SH) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get p2shNetVer => conf.params.p2shNetVer!;
+
+  /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses
+  /// from the associated `CoinConf`.
+  @override
+  String get p2wpkhHrp => conf.params.p2wpkhHrp!;
+
+  /// Checks if the current network is the mainnet.
+  bool get isMainnet => this == BitcoinSVNetwork.mainnet;
+
+  @override
+  List<BitcoinAddressType> get supportedAddress =>
+      [P2pkhAddressType.p2pkh, PubKeyAddressType.p2pk];
 }
 
 /// Class representing a Bitcoin network, implementing the `BasedUtxoNetwork` abstract class.
@@ -92,7 +139,17 @@ class BitcoinNetwork implements BasedUtxoNetwork {
   bool get isMainnet => this == BitcoinNetwork.mainnet;
 
   @override
-  List<BitcoinAddressType> get supportedAddress => BitcoinAddressType.values;
+  List<BitcoinAddressType> get supportedAddress => [
+        P2pkhAddressType.p2pkh,
+        SegwitAddresType.p2wpkh,
+        PubKeyAddressType.p2pk,
+        SegwitAddresType.p2tr,
+        SegwitAddresType.p2wsh,
+        P2shAddressType.p2wshInP2sh,
+        P2shAddressType.p2wpkhInP2sh,
+        P2shAddressType.p2pkhInP2sh,
+        P2shAddressType.p2pkInP2sh,
+      ];
 }
 
 /// Class representing a Litecoin network, implementing the `BasedUtxoNetwork` abstract class.
@@ -136,14 +193,14 @@ class LitecoinNetwork implements BasedUtxoNetwork {
 
   @override
   final List<BitcoinAddressType> supportedAddress = const [
-    BitcoinAddressType.p2pkh,
-    BitcoinAddressType.p2wpkh,
-    BitcoinAddressType.p2pk,
-    BitcoinAddressType.p2wsh,
-    BitcoinAddressType.p2wshInP2sh,
-    BitcoinAddressType.p2wpkhInP2sh,
-    BitcoinAddressType.p2pkhInP2sh,
-    BitcoinAddressType.p2pkInP2sh,
+    P2pkhAddressType.p2pkh,
+    SegwitAddresType.p2wpkh,
+    PubKeyAddressType.p2pk,
+    SegwitAddresType.p2wsh,
+    P2shAddressType.p2wshInP2sh,
+    P2shAddressType.p2wpkhInP2sh,
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2pkInP2sh,
   ];
 }
 
@@ -186,10 +243,10 @@ class DashNetwork implements BasedUtxoNetwork {
 
   @override
   final List<BitcoinAddressType> supportedAddress = const [
-    BitcoinAddressType.p2pk,
-    BitcoinAddressType.p2pkh,
-    BitcoinAddressType.p2pkhInP2sh,
-    BitcoinAddressType.p2pkInP2sh
+    PubKeyAddressType.p2pk,
+    P2pkhAddressType.p2pkh,
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2pkInP2sh
   ];
 
   @override
@@ -238,10 +295,10 @@ class DogecoinNetwork implements BasedUtxoNetwork {
 
   @override
   final List<BitcoinAddressType> supportedAddress = const [
-    BitcoinAddressType.p2pk,
-    BitcoinAddressType.p2pkh,
-    BitcoinAddressType.p2pkhInP2sh,
-    BitcoinAddressType.p2pkInP2sh
+    PubKeyAddressType.p2pk,
+    P2pkhAddressType.p2pkh,
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2pkInP2sh
   ];
 }
 
@@ -272,23 +329,45 @@ class BitcoinCashNetwork implements BasedUtxoNetwork {
   @override
   List<int> get p2pkhNetVer => conf.params.p2pkhStdNetVer!;
 
-  /// Retrieves the Pay-to-Script-Hash (P2SH) version bytes from the associated `CoinConf`.
+  /// Retrieves the Pay-to-Public-Key-Hash-With-Token (P2PKHWT) version byte
+  final List<int> p2pkhWtNetVer = const [0x10];
+
+  /// Retrieves the Pay-to-Script-Hash (P2SH20) version bytes from the associated `CoinConf`.
   @override
-  List<int> get p2shNetVer => conf.params.p2shNetVer!;
+  List<int> get p2shNetVer => conf.params.p2shStdNetVer!;
+
+  /// Retrieves the Pay-to-Script-Hash (P2SH32) version bytes from the associated `CoinConf`.
+  final List<int> p2sh32NetVer = const [0x0b];
+
+  /// Retrieves the Pay-to-Script-Hash (P2SH20) version bytes from the associated `CoinConf`.
+  final List<int> p2shwt20NetVer = const [0x18];
+
+  /// Retrieves the Pay-to-Script-Hash (P2SH32) version bytes from the associated `CoinConf`.
+  final List<int> p2shwt32NetVer = const [0x1b];
 
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses
   /// from the associated `CoinConf`.
   @override
-  String get p2wpkhHrp => conf.params.p2wpkhHrp!;
+  String get p2wpkhHrp =>
+      throw UnimplementedError("network does not support p2wpkh HRP");
+
+  String get networkHRP => conf.params.p2pkhStdHrp!;
 
   /// Checks if the current network is the mainnet.
   bool get isMainnet => this == BitcoinCashNetwork.mainnet;
 
   @override
   final List<BitcoinAddressType> supportedAddress = const [
-    BitcoinAddressType.p2pk,
-    BitcoinAddressType.p2pkh,
-    BitcoinAddressType.p2pkhInP2sh,
-    BitcoinAddressType.p2pkInP2sh
+    PubKeyAddressType.p2pk,
+    P2pkhAddressType.p2pkh,
+    P2pkhAddressType.p2pkhwt,
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2pkInP2sh,
+    P2shAddressType.p2pkhInP2sh32,
+    P2shAddressType.p2pkInP2sh32,
+    P2shAddressType.p2pkhInP2sh32wt,
+    P2shAddressType.p2pkInP2sh32wt,
+    P2shAddressType.p2pkhInP2shwt,
+    P2shAddressType.p2pkInP2shwt,
   ];
 }

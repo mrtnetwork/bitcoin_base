@@ -5,8 +5,9 @@ import 'package:blockchain_utils/binary/utils.dart';
 import 'script.dart';
 
 class ControlBlock {
-  ControlBlock({required this.public, this.scriptToSpend, this.scripts});
-  late final ECPublic public;
+  ControlBlock({required this.public, this.scriptToSpend, List<int>? scripts})
+      : scripts = BytesUtils.tryToBytes(scripts, unmodifiable: true);
+  final ECPublic public;
   final Script? scriptToSpend;
   final List<int>? scripts;
 

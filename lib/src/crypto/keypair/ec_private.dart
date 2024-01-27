@@ -6,6 +6,11 @@ class ECPrivate {
   final Bip32PrivateKey prive;
   ECPrivate(this.prive);
 
+  /// creates an object from hex
+  factory ECPrivate.fromHex(String keyHex) {
+    return ECPrivate.fromBytes(BytesUtils.fromHexString(keyHex));
+  }
+
   /// creates an object from raw 32 bytes
   factory ECPrivate.fromBytes(List<int> prive) {
     final key = Bip32PrivateKey.fromBytes(prive, Bip32KeyData(),

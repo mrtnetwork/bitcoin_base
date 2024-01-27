@@ -1,10 +1,7 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:bitcoin_base/src/provider/constant/constant.dart';
 
-enum APIType {
-  mempool,
-  blockCypher,
-}
+enum APIType { mempool, blockCypher }
 
 class APIConfig {
   final String url;

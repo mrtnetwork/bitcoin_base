@@ -78,18 +78,21 @@ void main() {
       expect(tx.serialize(), createSendToP2pkhResult);
     });
     test("test2", () {
-      final tx = BtcTransaction(
+      BtcTransaction tx = BtcTransaction(
           inputs: [txinSpend], outputs: [txout2], hasSegwit: true);
       final digit1 = tx.getTransactionSegwitDigit(
           txInIndex: 0, script: p2wshRedeemScript, amount: txinSpendAmount);
       final sig1 = sk1.signInput(digit1);
       final sig2 = sk2.signInput(digit1);
       final pk = p2wshRedeemScript.toHex();
-      tx.addWitnesses(TxWitnessInput(stack: ['', sig1, sig2, pk]));
+      // tx.addWitnesses(TxWitnessInput(stack: ['', sig1, sig2, pk]));
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: ['', sig1, sig2, pk])
+      ]);
       expect(tx.serialize(), spendP2pkhResult);
     });
     test("test3", () {
-      final tx = BtcTransaction(
+      BtcTransaction tx = BtcTransaction(
           inputs: [txin1Multiple, txin2Multiple, txin3Multiple],
           outputs: [output1Multiple, output2Multiple, output3Multiple],
           hasSegwit: true);
@@ -97,20 +100,26 @@ void main() {
           txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
       final sig1 = sk1.signInput(digit1);
       txin1Multiple.scriptSig = Script(script: [sig1, sk1.getPublic().toHex()]);
-      tx.addWitnesses(TxWitnessInput(stack: []));
+      // tx.addWitnesses(TxWitnessInput(stack: []));
       final seqwitDigit = tx.getTransactionSegwitDigit(
           txInIndex: 1, script: p2wshRedeemScript, amount: txin2MultipleAmount);
       final sigP2sh1 = sk1.signInput(seqwitDigit);
       final sigP2sh2 = sk2.signInput(seqwitDigit);
 
-      tx.addWitnesses(TxWitnessInput(
-          stack: ['', sigP2sh1, sigP2sh2, p2wshRedeemScript.toHex()]));
+      // tx.addWitnesses(TxWitnessInput(
+      //     stack: ['', sigP2sh1, sigP2sh2, p2wshRedeemScript.toHex()]));
       final segwitDigitIndex2 = tx.getTransactionSegwitDigit(
           txInIndex: 2,
           script: p2pkhAddr.toScriptPubKey(),
           amount: txin3MultipleAmount);
       final sig3 = sk1.signInput(segwitDigitIndex2);
-      tx.addWitnesses(TxWitnessInput(stack: [sig3, sk1.getPublic().toHex()]));
+      // tx.addWitnesses(TxWitnessInput(stack: [sig3, sk1.getPublic().toHex()]));
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: []),
+        TxWitnessInput(
+            stack: ['', sigP2sh1, sigP2sh2, p2wshRedeemScript.toHex()]),
+        TxWitnessInput(stack: [sig3, sk1.getPublic().toHex()])
+      ]);
       expect(tx.serialize(), multipleInputMultipleOuputResult);
     });
   });

@@ -20,6 +20,15 @@ class TxInput {
       : sequence = List.unmodifiable(
             sequance ?? BitcoinOpCodeConst.DEFAULT_TX_SEQUENCE),
         scriptSig = scriptSig ?? Script(script: []);
+  TxInput copyWith(
+      {String? txId, int? txIndex, Script? scriptSig, List<int>? sequence}) {
+    return TxInput(
+        txId: txId ?? this.txId,
+        txIndex: txIndex ?? this.txIndex,
+        scriptSig: scriptSig ?? this.scriptSig,
+        sequance: sequence ?? this.sequence);
+  }
+
   final String txId;
   final int txIndex;
   Script scriptSig;
@@ -77,5 +86,10 @@ class TxInput {
                 hasSegwit: hasSegwit),
             sequance: sequenceNumberData),
         cursor);
+  }
+
+  @override
+  String toString() {
+    return "TxInput{txId: $txId, txIndex: $txIndex, scriptSig: $scriptSig, sequence: ${BytesUtils.toHexString(sequence)}}";
   }
 }

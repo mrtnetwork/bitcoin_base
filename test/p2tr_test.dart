@@ -1,16 +1,4 @@
-import 'dart:typed_data';
-
-import 'package:bitcoin_base/src/models/network.dart';
-import 'package:bitcoin_base/src/bitcoin/address/segwit_address.dart';
-import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
-import 'package:bitcoin_base/src/bitcoin/script/control_block.dart';
-import 'package:bitcoin_base/src/bitcoin/script/input.dart';
-import 'package:bitcoin_base/src/bitcoin/script/output.dart';
-import 'package:bitcoin_base/src/bitcoin/script/script.dart';
-import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
-import 'package:bitcoin_base/src/bitcoin/script/witness.dart';
-import 'package:bitcoin_base/src/crypto/keypair/ec_private.dart';
-import 'package:bitcoin_base/src/crypto/keypair/ec_public.dart';
+import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -98,7 +86,9 @@ void main() {
             [trScriptP2pk1]
           ],
           sighash: signHash);
-      tx.addWitnesses(TxWitnessInput(stack: [signatur]));
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(stack: [signatur])
+      ]);
       expect(tx.serialize(), signedTx2);
     });
 
@@ -120,8 +110,10 @@ void main() {
           sighash: BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL, tweak: false);
       final controlBlock = ControlBlock(public: fromPub2);
 
-      tx.addWitnesses(TxWitnessInput(
-          stack: [sig, trScriptP2pk1.toHex(), controlBlock.toHex()]));
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(
+            stack: [sig, trScriptP2pk1.toHex(), controlBlock.toHex()])
+      ]);
       expect(tx.serialize(), signedTx3);
     });
   });
@@ -170,7 +162,7 @@ void main() {
 
     // 1-spend taproot from first script path (A) of two (A,B)
     test("test_spend_script_path_A_from_AB", () {
-      final tx =
+      BtcTransaction tx =
           BtcTransaction(inputs: [txIn], outputs: [txOut], hasSegwit: true);
 
       final txDigit = tx.getTransactionTaprootDigset(
@@ -184,11 +176,14 @@ void main() {
         txDigit,
         tweak: false,
       );
-      final leafB = trScriptP2pkB.toTapleafTaggedHash();
+      final leafB = toTapleafTaggedHash(trScriptP2pkB.toBytes());
 
       final controlBlock = ControlBlock(public: fromPub, scripts: leafB);
-      tx.addWitnesses(TxWitnessInput(
-          stack: [sign, trScriptP2pkA.toHex(), controlBlock.toHex()]));
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(
+            stack: [sign, trScriptP2pkA.toHex(), controlBlock.toHex()])
+      ]);
+
       expect(tx.serialize(), signedTx3);
     });
   });
@@ -248,7 +243,7 @@ void main() {
         '02000000000101d387dafa20087c38044f3cbc2e93e1e0141e64265d304d0d44b233f3d0018a9b0000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50340644e392f5fd88d812bad30e73ff9900cdcf7f260ecbc862819542fd4683fa9879546613be4e2fc762203e45715df1a42c65497a63edce5f1dfe5caea5170273f2220e808f1396f12a253cf00efdf841e01c8376b616fb785c39595285c30f2817e71ac61c01036a7ed8d24eac9057e114f22342ebf20c16d37f0d25cfd2c900bf401ec09c9ed9f1b2b0090138e31e11a31c1aea790928b7ce89112a706e5caa703ff7e0ab928109f92c2781611bb5de791137cbd40a5482a4a23fd0ffe50ee4de9d5790dd100000000';
 
     test("test_spend_script_path_A_from_AB", () {
-      final tx =
+      BtcTransaction tx =
           BtcTransaction(inputs: [txIn], outputs: [txOut], hasSegwit: true);
       final digit = tx.getTransactionTaprootDigset(
           txIndex: 0,
@@ -261,14 +256,14 @@ void main() {
         tweak: false,
       );
 
-      final leafA = trScriptP2pkA.toTapleafTaggedHash();
-      final leafC = trScriptP2pkC.toTapleafTaggedHash();
+      final leafA = toTapleafTaggedHash(trScriptP2pkA.toBytes());
+      final leafC = toTapleafTaggedHash(trScriptP2pkC.toBytes());
       final controlBlock = ControlBlock(
-          public: fromPub, scripts: Uint8List.fromList([...leafA, ...leafC]));
-
-      tx.addWitnesses(TxWitnessInput(
-          stack: [sig, trScriptP2pkB.toHex(), controlBlock.toHex()]));
-
+          public: fromPub, scripts: List<int>.from([...leafA, ...leafC]));
+      tx = tx.copyWith(witnesses: [
+        TxWitnessInput(
+            stack: [sig, trScriptP2pkB.toHex(), controlBlock.toHex()])
+      ]);
       expect(tx.serialize(), signedTx);
     });
   });

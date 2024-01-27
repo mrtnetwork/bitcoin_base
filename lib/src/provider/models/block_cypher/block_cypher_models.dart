@@ -1,6 +1,7 @@
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
 
-class TxRef {
+class TxRef implements UTXO {
   final String txHash;
   final int blockHeight;
   final int txInputN;
@@ -38,6 +39,16 @@ class TxRef {
       confirmed: DateTime.parse(json['confirmed']),
       script: json['script'],
     );
+  }
+
+  @override
+  BitcoinUtxo toUtxo(BitcoinAddressType addressType) {
+    return BitcoinUtxo(
+        txHash: txHash,
+        value: value,
+        vout: txOutputN,
+        scriptType: addressType,
+        blockHeight: blockHeight);
   }
 }
 
@@ -90,13 +101,7 @@ class BlockCypherUtxo {
   List<UtxoWithAddress> toUtxoWithOwner(UtxoAddressDetails owner) {
     List<UtxoWithAddress> utxos = txRefs.map((ref) {
       return UtxoWithAddress(
-        utxo: BitcoinUtxo(
-          txHash: ref.txHash,
-          value: ref.value,
-          vout: ref.txOutputN,
-          scriptType: owner.address.type,
-          blockHeight: 1,
-        ),
+        utxo: ref.toUtxo(owner.address.type),
         ownerDetails: owner,
       );
     }).toList();

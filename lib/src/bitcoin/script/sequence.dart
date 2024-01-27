@@ -53,4 +53,9 @@ class Sequence {
     }
     return scriptIntiger;
   }
+
+  @override
+  String toString() {
+    return "Sequence{seqType: $seqType, value: $value, isTypeBlock: $isTypeBlock}";
+  }
 }

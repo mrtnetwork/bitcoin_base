@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:bitcoin_base/src/cash_token/cash_token.dart';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:bitcoin_base/src/bytes_utils/dynamic_byte.dart';
@@ -22,8 +23,8 @@ import 'witness.dart';
 /// [witnesses] The witness structure that corresponds to the inputs
 class BtcTransaction {
   BtcTransaction(
-      {required this.inputs,
-      required this.outputs,
+      {required List<TxInput> inputs,
+      required List<TxOutput> outputs,
       List<TxWitnessInput> witnesses = const [],
       this.hasSegwit = false,
       List<int>? lock,
@@ -31,22 +32,40 @@ class BtcTransaction {
       : locktime = List<int>.unmodifiable(
             lock ?? BitcoinOpCodeConst.DEFAULT_TX_LOCKTIME),
         version = List<int>.unmodifiable(
-            version ?? BitcoinOpCodeConst.DEFAULT_TX_VERSION) {
-    _witnesses.addAll(witnesses);
-  }
+            version ?? BitcoinOpCodeConst.DEFAULT_TX_VERSION),
+        inputs = List<TxInput>.unmodifiable(inputs),
+        outputs = List<TxOutput>.unmodifiable(outputs),
+        witnesses = List.unmodifiable(witnesses);
   final List<TxInput> inputs;
   final List<TxOutput> outputs;
   final List<int> locktime;
-  late final List<int> version;
+  final List<int> version;
   final bool hasSegwit;
-  final List<TxWitnessInput> _witnesses = [];
+  final List<TxWitnessInput> witnesses;
 
-  List<TxWitnessInput> get witnesses =>
-      List.unmodifiable(_witnesses.map((e) => e.copy()).toList());
-
-  void addWitnesses(TxWitnessInput witness) {
-    _witnesses.add(witness);
+  // List<TxWitnessInput> get witnesses =>
+  //     List.unmodifiable(_witnesses.map((e) => e.copy()).toList());
+  BtcTransaction copyWith({
+    List<TxInput>? inputs,
+    List<TxOutput>? outputs,
+    List<TxWitnessInput>? witnesses,
+    bool? hasSegwit,
+    List<int>? lock,
+    List<int>? version,
+  }) {
+    return BtcTransaction(
+      inputs: inputs ?? this.inputs,
+      outputs: outputs ?? this.outputs,
+      witnesses: witnesses ?? this.witnesses,
+      hasSegwit: hasSegwit ?? this.hasSegwit,
+      lock: lock ?? List<int>.from(locktime),
+      version: version ?? List<int>.from(this.version),
+    );
   }
+
+  // void addWitnesses(TxWitnessInput witness) {
+  //   _witnesses.add(witness);
+  // }
 
   /// creates a copy of the object (classmethod)
   static BtcTransaction copy(BtcTransaction tx) {
@@ -54,7 +73,7 @@ class BtcTransaction {
         hasSegwit: tx.hasSegwit,
         inputs: tx.inputs.map((e) => e.copy()).toList(),
         outputs: tx.outputs.map((e) => e.copy()).toList(),
-        witnesses: tx._witnesses.map((e) => e.copy()).toList(),
+        witnesses: tx.witnesses.map((e) => e.copy()).toList(),
         lock: tx.locktime,
         version: tx.version);
   }
@@ -62,6 +81,7 @@ class BtcTransaction {
   /// Instantiates a Transaction from serialized raw hexadacimal data (classmethod)
   static BtcTransaction fromRaw(String raw) {
     final rawtx = BytesUtils.fromHexString(raw);
+    final List<int> version = rawtx.sublist(0, 4);
     int cursor = 4;
     List<int>? flag;
     bool hasSegwit = false;
@@ -113,11 +133,14 @@ class BtcTransaction {
         witnesses.add(TxWitnessInput(stack: witnessesTmp));
       }
     }
+    List<int> lock = rawtx.sublist(cursor, cursor + 4);
     return BtcTransaction(
         inputs: inputs,
         outputs: outputs,
         witnesses: witnesses,
-        hasSegwit: hasSegwit);
+        hasSegwit: hasSegwit,
+        version: version,
+        lock: lock);
   }
 
   /// returns the transaction input's digest that is to be signed according.
@@ -129,13 +152,14 @@ class BtcTransaction {
       {required int txInIndex,
       required Script script,
       int sighash = BitcoinOpCodeConst.SIGHASH_ALL}) {
-    final tx = copy(this);
+    BtcTransaction tx = copy(this);
     for (final i in tx.inputs) {
       i.scriptSig = Script(script: []);
     }
     tx.inputs[txInIndex].scriptSig = script;
     if ((sighash & 0x1f) == BitcoinOpCodeConst.SIGHASH_NONE) {
-      tx.outputs.clear();
+      // tx.outputs.clear();
+      tx = tx.copyWith(outputs: []);
       for (int i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
           tx.inputs[i].sequence =
@@ -147,14 +171,20 @@ class BtcTransaction {
         throw ArgumentError(
             "Transaction index is greater than theavailable outputs");
       }
-      final txout = tx.outputs[txInIndex];
-      tx.outputs.clear();
+      // final txout = tx.outputs[txInIndex];
+      // tx.outputs.clear();
+      // tx = tx.copyWith(outputs: []);
+      List<TxOutput> outputs = [];
       for (int i = 0; i < txInIndex; i++) {
-        tx.outputs.add(TxOutput(
+        outputs.add(TxOutput(
             amount: BigInt.from(BitcoinOpCodeConst.NEGATIVE_SATOSHI),
             scriptPubKey: Script(script: [])));
+        // tx.outputs.add(TxOutput(
+        //     amount: BigInt.from(BitcoinOpCodeConst.NEGATIVE_SATOSHI),
+        //     scriptPubKey: Script(script: [])));
       }
-      tx.outputs.add(txout);
+      // outputs.add(txout);
+      tx = tx.copyWith(outputs: [...outputs, tx.outputs[txInIndex]]);
       for (int i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
           tx.inputs[i].sequence =
@@ -163,9 +193,10 @@ class BtcTransaction {
       }
     }
     if ((sighash & BitcoinOpCodeConst.SIGHASH_ANYONECANPAY) != 0) {
-      final inp = tx.inputs[txInIndex];
-      tx.inputs.clear();
-      tx.inputs.add(inp);
+      // final inp = tx.inputs[txInIndex];
+      tx = tx.copyWith(inputs: [tx.inputs[txInIndex]]);
+      // tx.inputs.clear();
+      // tx.inputs.add(inp);
     }
     List<int> txForSign = tx.toBytes(segwit: false);
 
@@ -195,7 +226,7 @@ class BtcTransaction {
       data.add(txOut.toBytes());
     }
     if (segwit) {
-      for (final wit in _witnesses) {
+      for (final wit in witnesses) {
         final witnessesCountBytes = List<int>.from([wit.stack.length]);
         data.add(witnessesCountBytes);
         data.add(wit.toBytes());
@@ -215,7 +246,8 @@ class BtcTransaction {
       {required int txInIndex,
       required Script script,
       int sighash = BitcoinOpCodeConst.SIGHASH_ALL,
-      required BigInt amount}) {
+      required BigInt amount,
+      CashToken? token}) {
     final tx = copy(this);
     List<int> hashPrevouts = List<int>.filled(32, 0);
     List<int> hashSequence = List<int>.filled(32, 0);
@@ -249,15 +281,7 @@ class BtcTransaction {
     if (signAll) {
       hashOutputs = <int>[];
       for (final i in tx.outputs) {
-        List<int> amountBytes =
-            BigintUtils.toBytes(i.amount, length: 8, order: Endian.little);
-        List<int> scriptBytes = i.scriptPubKey.toBytes();
-        hashOutputs = List<int>.from([
-          ...hashOutputs,
-          ...amountBytes,
-          scriptBytes.length,
-          ...scriptBytes
-        ]);
+        hashOutputs = List<int>.from([...hashOutputs, ...i.toBytes()]);
       }
       hashOutputs = QuickCrypto.sha256DoubleHash(hashOutputs);
     } else if (basicSigHashType == BitcoinOpCodeConst.SIGHASH_SINGLE &&
@@ -284,10 +308,14 @@ class BtcTransaction {
       ...txidBytes,
       ...IntUtils.toBytes(txIn.txIndex, length: 4, byteOrder: Endian.little)
     ]));
+    if (token != null) {
+      txForSigning.add(token.toBytes());
+    }
     txForSigning.add(List<int>.from([script.toBytes().length]));
     txForSigning.add(script.toBytes());
     List<int> packedAmount =
         BigintUtils.toBytes(amount, length: 8, order: Endian.little);
+
     txForSigning.add(packedAmount);
     txForSigning.add(txIn.sequence);
     txForSigning.add(hashOutputs);
@@ -460,7 +488,7 @@ class BtcTransaction {
     int markerSize = 2;
     int witSize = 0;
     List<int> data = <int>[];
-    for (final w in _witnesses) {
+    for (final w in witnesses) {
       final countBytes = List<int>.from([w.stack.length]);
       data = List<int>.from([...data, ...countBytes, ...w.toBytes()]);
     }
@@ -475,5 +503,10 @@ class BtcTransaction {
     final bytes = toBytes(segwit: false);
     final reversedHash = QuickCrypto.sha256DoubleHash(bytes).reversed.toList();
     return BytesUtils.toHexString(reversedHash);
+  }
+
+  @override
+  String toString() {
+    return "BtcTransaction{inputs: ${inputs.join(", ")}, outputs: ${outputs.join(", ")}, locktime: ${BytesUtils.toHexString(locktime)}}, version: ${BytesUtils.toHexString(version)}, hasSegwit: $hasSegwit, witnesses:${witnesses.join(",")} ";
   }
 }

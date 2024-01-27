@@ -15,7 +15,7 @@ void main() {
         scriptPubKey: Script(script: [
           'OP_DUP',
           'OP_HASH160',
-          addr.getH160,
+          addr.addressProgram,
           'OP_EQUALVERIFY',
           'OP_CHECKSIG'
         ]));
@@ -77,7 +77,7 @@ void main() {
         scriptPubKey: Script(script: [
           'OP_DUP',
           'OP_HASH160',
-          sigToAddr1.getH160,
+          sigToAddr1.addressProgram,
           'OP_EQUALVERIFY',
           'OP_CHECKSIG'
         ]));
@@ -89,7 +89,7 @@ void main() {
         scriptPubKey: Script(script: [
           'OP_DUP',
           'OP_HASH160',
-          sigToAddr2.getH160,
+          sigToAddr2.addressProgram,
           'OP_EQUALVERIFY',
           'OP_CHECKSIG'
         ]));
@@ -114,7 +114,7 @@ void main() {
           script: Script(script: [
             'OP_DUP',
             'OP_HASH160',
-            fromAddr.getH160,
+            fromAddr.addressProgram,
             'OP_EQUALVERIFY',
             'OP_CHECKSIG'
           ]));

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:bitcoin_base/src/provider/models/models.dart';
-import 'package:bitcoin_base/src/provider/service/service.dart';
+import 'package:bitcoin_base/src/provider/service/http/http_service.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 
 class ApiProvider {

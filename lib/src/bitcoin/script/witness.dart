@@ -26,4 +26,9 @@ class TxWitnessInput {
 
     return stackBytes;
   }
+
+  @override
+  String toString() {
+    return "TxWitnessInput{stack: ${stack.join(", ")}}";
+  }
 }

@@ -1,12 +1,4 @@
-import 'package:bitcoin_base/src/bitcoin/address/legacy_address.dart';
-import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
-import 'package:bitcoin_base/src/bitcoin/script/input.dart';
-import 'package:bitcoin_base/src/bitcoin/script/output.dart';
-import 'package:bitcoin_base/src/bitcoin/script/script.dart';
-import 'package:bitcoin_base/src/bitcoin/script/sequence.dart';
-import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
-import 'package:bitcoin_base/src/crypto/keypair/ec_private.dart';
-import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -24,7 +16,9 @@ void main() {
         Script(script: [p2pkSk.getPublic().toHex(), 'OP_CHECKSIG']);
     final txout = TxOutput(
         amount: BigInt.from(9000000),
-        scriptPubKey: p2pkRedeemScript.toP2shScriptPubKey());
+        scriptPubKey: P2shAddress.fromScript(
+                script: p2pkRedeemScript, type: P2shAddressType.p2pkInP2sh)
+            .toScriptPubKey());
     const createP2shAndSendResult =
         '02000000010f798b60b145361aebb95cfcdedd29e6773b4b96778af33ed6f42a9e2b4c4676000000006a47304402206f4027d0a1720ea4cc68e1aa3cc2e0ca5996806971c0cd7d40d3aa4309d4761802206c5d9c0c26dec8edab91c1c3d64e46e4dd80d8da1787a9965ade2299b41c3803012102d82c9860e36f15d7b72aa59e29347f951277c21cd4d34822acdeeadbcff8a546ffffffff01405489000000000017a9142910fc0b1b7ab6c9789c5a67c22c5bcde5b903908700000000';
 

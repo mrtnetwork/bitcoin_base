@@ -1,4 +1,5 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// MultiSignatureSigner is an interface that defines methods required for representing
 /// signers in a multi-signature scheme. A multi-signature signer typically includes
@@ -26,6 +27,13 @@ class MultiSignatureSigner {
 /// information about the required signers, threshold, the address itself,
 /// and the script details used for multi-signature transactions.
 class MultiSignatureAddress {
+  static const List<P2shAddressType> legacySupportP2shTypes = [
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2pkhInP2sh32,
+    P2shAddressType.p2pkhInP2shwt,
+    P2shAddressType.p2pkhInP2sh32wt
+  ];
+
   /// Signers is a collection of signers participating in the multi-signature scheme.
   final List<MultiSignatureSigner> signers;
 
@@ -40,7 +48,7 @@ class MultiSignatureAddress {
   /// including "OP_M", compressed public keys, "OP_N", and "OP_CHECKMULTISIG."
   final Script multiSigScript;
 
-  BitcoinAddress toP2wshAddress({required BasedUtxoNetwork network}) {
+  BitcoinBaseAddress toP2wshAddress({required BasedUtxoNetwork network}) {
     if (network is! LitecoinNetwork && network is! BitcoinNetwork) {
       throw ArgumentError(
           "${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress");
@@ -48,27 +56,42 @@ class MultiSignatureAddress {
     return P2wshAddress.fromScript(script: multiSigScript);
   }
 
-  BitcoinAddress toP2wshInP2shAddress({required BasedUtxoNetwork network}) {
+  BitcoinBaseAddress toP2wshInP2shAddress({required BasedUtxoNetwork network}) {
     final p2wsh = toP2wshAddress(network: network);
     return P2shAddress.fromScript(
-        script: p2wsh.toScriptPubKey(), type: BitcoinAddressType.p2wshInP2sh);
+        script: p2wsh.toScriptPubKey(), type: P2shAddressType.p2wshInP2sh);
   }
 
-  BitcoinAddress toP2shAddress() {
-    return P2shAddress.fromScript(
-        script: multiSigScript, type: BitcoinAddressType.p2pkhInP2sh);
+  BitcoinBaseAddress toP2shAddress(
+      [P2shAddressType addressType = P2shAddressType.p2pkhInP2sh]) {
+    if (!legacySupportP2shTypes.contains(addressType)) {
+      throw MessageException(
+          "invalid p2sh type please use one of them ${legacySupportP2shTypes.map((e) => "$e").join(", ")}");
+    }
+
+    if (addressType.hashLength == 32) {
+      return P2shAddress.fromHash160(
+          addrHash: BytesUtils.toHexString(
+              QuickCrypto.sha256DoubleHash(multiSigScript.toBytes())),
+          type: addressType);
+    }
+    return P2shAddress.fromScript(script: multiSigScript, type: addressType);
   }
 
-  BitcoinAddress fromType(
-      {required BasedUtxoNetwork network,
-      required BitcoinAddressType addressType}) {
+  BitcoinBaseAddress fromType({
+    required BasedUtxoNetwork network,
+    required BitcoinAddressType addressType,
+  }) {
     switch (addressType) {
-      case BitcoinAddressType.p2wsh:
+      case SegwitAddresType.p2wsh:
         return toP2wshAddress(network: network);
-      case BitcoinAddressType.p2wshInP2sh:
+      case P2shAddressType.p2wshInP2sh:
         return toP2wshInP2shAddress(network: network);
-      case BitcoinAddressType.p2pkhInP2sh:
-        return toP2shAddress();
+      case P2shAddressType.p2pkhInP2sh:
+      case P2shAddressType.p2pkhInP2sh32:
+      case P2shAddressType.p2pkhInP2shwt:
+      case P2shAddressType.p2pkhInP2sh32wt:
+        return toP2shAddress(addressType as P2shAddressType);
       default:
         throw ArgumentError(
             "invalid multisig address type. use of of them [BitcoinAddressType.p2wsh, BitcoinAddressType.p2wshInP2sh, BitcoinAddressType.p2pkhInP2sh]");
@@ -102,7 +125,7 @@ class MultiSignatureAddress {
       throw ArgumentError(
           'The total weight of the signatories should reach the threshold');
     }
-    final multiSigScript = <Object>['OP_$threshold'];
+    final multiSigScript = <String>['OP_$threshold'];
     for (final signer in signers) {
       for (var w = 0; w < signer.weight; w++) {
         multiSigScript.add(signer.publicKey);

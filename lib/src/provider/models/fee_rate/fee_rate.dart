@@ -1,8 +1,7 @@
 enum BitcoinFeeRateType { low, medium, high }
 
 class BitcoinFeeRate {
-  BitcoinFeeRate._(
-      {required this.high, required this.medium, required this.low});
+  BitcoinFeeRate({required this.high, required this.medium, required this.low});
 
   /// High fee rate in satoshis per kilobyte
   final BigInt high;
@@ -42,7 +41,7 @@ class BitcoinFeeRate {
       }
     }
     final trSizeBigInt = BigInt.from(trSize);
-    return (trSizeBigInt * feeRate) ~/ BigInt.from(1024);
+    return (trSizeBigInt * feeRate) ~/ BigInt.from(1000);
   }
 
   @override
@@ -54,7 +53,7 @@ class BitcoinFeeRate {
   /// from a mempool API response. The function parses the JSON map and extracts fee rate
   /// information for high, medium, and low fee levels.
   factory BitcoinFeeRate.fromMempool(Map<String, dynamic> json) {
-    return BitcoinFeeRate._(
+    return BitcoinFeeRate(
         high: _parseMempoolFees(json['fastestFee']),
         medium: _parseMempoolFees(json['halfHourFee']),
         low: _parseMempoolFees(json['minimumFee']));
@@ -64,7 +63,7 @@ class BitcoinFeeRate {
   /// from a BlockCypher API response. The function parses the JSON map and extracts fee rate
   /// information for high, medium, and low fee levels.
   factory BitcoinFeeRate.fromBlockCypher(Map<String, dynamic> json) {
-    return BitcoinFeeRate._(
+    return BitcoinFeeRate(
         high: BigInt.from((json['high_fee_per_kb'] as int)),
         medium: BigInt.from((json['medium_fee_per_kb'] as int)),
         low: BigInt.from((json['low_fee_per_kb'] as int)));

@@ -229,6 +229,7 @@ class BitcoinOpCodeConst {
   static const int SIGHASH_ANYONECANPAY = 0x80;
   static const int SIGHASH_ALL = 0x01;
   static const int SIGHASH_FORKED = 0x40;
+  static const int SIGHASH_Test = 0x00000041;
   static const int SIGHASH_NONE = 0x02;
   static const int TAPROOT_SIGHASH_ALL = 0x00;
 
