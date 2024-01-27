@@ -530,7 +530,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
           /// all conceivable token-bearing UTXOs (1000 satoshi)
           value: BtcUtils.toSatoshi("0.00001"),
 
-          /// clone the token with new token amount for output1 (15 amount of category)
+          /// clone the token with new token amount for change output
           token: token.copyWith(amount: sumofTokenUtxos - BigInt.from(15))),
     ],
     fee: BtcUtils.toSatoshi("0.00003"),
