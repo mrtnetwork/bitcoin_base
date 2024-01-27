@@ -101,9 +101,7 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
     enhances privacy.
 
 ### Node Provider
-We have integrated two APIs, Mempool and BlockCypher, into the plugin to facilitate network access. These APIs enable seamless retrieval of information such as unspent transactions (UTXO), network fees, sending transactions, receiving transaction details, and fetching account transactions.
-
-As of now, supports Bitcoin on both the testnet and mainnet, as well as Dogecoin, Litecoin, and Dash on the mainnet. However, for Bitcoin Cash, please note that we are currently exploring options for a free provider to implement support.
+We have integrated three APIs—Mempool, BlockCypher, and Electrum—into the plugin to facilitate network access. These APIs enable seamless retrieval of information such as unspent transactions (UTXO), network fees, sending transactions, receiving transaction details, and fetching account transactions.
 
 ## EXAMPLES
 
@@ -256,52 +254,70 @@ As of now, supports Bitcoin on both the testnet and mainnet, as well as Dogecoin
   
 ### Transaction
 
-In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) folder, you'll find various examples tailored for each supported network, including Bitcoin, Dogecoin, Litecoin, Bitcoin Cash, and Dash.
+In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib) folder, you'll find various examples tailored for each supported network, including Bitcoin, Dogecoin, Litecoin, Bitcoin Cash, and Dash.
 
 - With TransactionBuilder
-  BitcoinTransactionBuilder supports the Bitcoin, Dogecoin, Dash, and Litecoin networks, allowing for easy creation and signing of various address types.
+  BitcoinTransactionBuilder 
+  supports the Bitcoin, Dogecoin, Dash, and Litecoin networks, allowing for easy creation and signing of various address types.
 
   ```
   /// connect to electrum service with websocket
-  /// please see [services_examples](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) folder for how to 
-  /// create electrum websocket service
-  final service = await ElectrumWebSocketService.connect("....");
+  /// please see `services_examples` folder for how to create electrum websocket service
+   final service =
+      await ElectrumWebSocketService.connect("184....");
 
   /// create provider with service
   final provider = ElectrumApiProvider(service);
 
   /// spender details
-  /// Define private key from wif
-  final ECPrivate examplePrivateKey2 = ECPrivate.fromWif(
-      'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
-      netVersion: BitcoinNetwork.testnet.wifNetVer);
-  final examplePublicKey2 = examplePrivateKey2.getPublic();
-  final p2pkhAddress = examplePublicKey2.toAddress();
-
-  /// receiver addresses i use public key for generate address
-  final examplePublicKey = ECPublic.fromHex(
-      "032a4f8be9ebffb46e2c6a1c240702553b9c9c8ad9638650833d07d5d22f618621");
+  final privateKey = ECPrivate.fromHex(
+      "76257aafc9b954351c7f6445b2d07277f681a5e83d515a1f32ebf54989c2af4f");
+  final examplePublicKey = privateKey.getPublic();
+  final spender1 = examplePublicKey.toAddress();
+  final spender2 = examplePublicKey.toSegwitAddress();
+  final spender3 = examplePublicKey.toTaprootAddress();
+  final spender4 = examplePublicKey.toP2pkhInP2sh();
+  final spender5 = examplePublicKey.toP2pkInP2sh();
+  final spender6 = examplePublicKey.toP2wshAddress();
+  final spender7 = examplePublicKey.toP2wpkhInP2sh();
+  final List<BitcoinBaseAddress> spenders = [
+    spender1,
+    spender2,
+    spender3,
+    spender4,
+    spender5,
+    spender6,
+    spender7,
+  ];
 
   const network = BitcoinNetwork.testnet;
+  final List<UtxoWithAddress> accountsUtxos = [];
 
-  /// Reads all UTXOs (Unspent Transaction Outputs) associated with the account
-  final elctrumUtxos = await provider.request(ElectrumScriptHashListUnspent(
-      scriptHash: examplePublicKey2.toAddress().pubKeyHash()));
+  /// loop each spenders address and get utxos and add to accountsUtxos
+  for (final i in spenders) {
+    /// Reads all UTXOs (Unspent Transaction Outputs) associated with the account
+    final elctrumUtxos = await provider
+        .request(ElectrumScriptHashListUnspent(scriptHash: i.pubKeyHash()));
 
-  /// Converts all UTXOs to a list of UtxoWithAddress, containing UTXO information along with address details.
-  /// read spender utxos
-  final List<UtxoWithAddress> utxos = elctrumUtxos
-      .map((e) => UtxoWithAddress(
-          utxo: e.toUtxo(p2pkhAddress.type),
-          ownerDetails: UtxoAddressDetails(
-              publicKey: examplePublicKey2.toHex(), address: p2pkhAddress)))
-      .toList();
+    /// Converts all UTXOs to a list of UtxoWithAddress, containing UTXO information along with address details.
+    /// read spender utxos
+    final List<UtxoWithAddress> utxos = elctrumUtxos
+        .map((e) => UtxoWithAddress(
+            utxo: e.toUtxo(i.type),
+            ownerDetails: UtxoAddressDetails(
+                publicKey: examplePublicKey.toHex(), address: i)))
+        .toList();
+    accountsUtxos.addAll(utxos);
+  }
 
   /// get sum of values
-  final sumOfUtxo = utxos.sumOfUtxosValue();
+  final sumOfUtxo = accountsUtxos.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     return;
   }
+
+  final examplePublicKey2 = ECPublic.fromHex(
+      "02d82c9860e36f15d7b72aa59e29347f951277c21cd4d34822acdeeadbcff8a546");
 
   /// When creating outputs with an address, I utilize the public key. Alternatively, an address class, such as
   /// P2pkhAddress.fromAddress(address: ".....", network: network);
@@ -309,25 +325,19 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) f
   /// ....
   final List<BitcoinOutput> outPuts = [
     BitcoinOutput(
-        address: examplePublicKey.toAddress(),
+        address: examplePublicKey2.toSegwitAddress(),
         value: BtcUtils.toSatoshi("0.00001")),
     BitcoinOutput(
-        address: examplePublicKey.toSegwitAddress(),
+        address: examplePublicKey2.toTaprootAddress(),
         value: BtcUtils.toSatoshi("0.00001")),
     BitcoinOutput(
-        address: examplePublicKey.toTaprootAddress(),
+        address: examplePublicKey2.toP2pkhInP2sh(),
         value: BtcUtils.toSatoshi("0.00001")),
     BitcoinOutput(
-        address: examplePublicKey.toP2pkhInP2sh(),
+        address: examplePublicKey2.toP2pkInP2sh(),
         value: BtcUtils.toSatoshi("0.00001")),
     BitcoinOutput(
-        address: examplePublicKey.toP2pkInP2sh(),
-        value: BtcUtils.toSatoshi("0.00001")),
-    BitcoinOutput(
-        address: examplePublicKey.toP2wshAddress(),
-        value: BtcUtils.toSatoshi("0.00001")),
-    BitcoinOutput(
-        address: examplePublicKey.toP2wpkhInP2sh(),
+        address: examplePublicKey2.toP2wshAddress(),
         value: BtcUtils.toSatoshi("0.00001")),
   ];
 
@@ -338,9 +348,9 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) f
   final sumOfOutputs = outPuts.fold(
       BigInt.zero, (previousValue, element) => previousValue + element.value);
 
-  /// ESTIMATE TRANSACTION SIZE
-  int estimateSize = BitcoinTransactionBuilder.estimateTransactionSize(
-      utxos: utxos,
+  /// Estimate transaction size
+  int transactionSize = BitcoinTransactionBuilder.estimateTransactionSize(
+      utxos: accountsUtxos,
       outputs: [
         ...outPuts,
 
@@ -358,22 +368,23 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) f
       /// rbf
       enableRBF: true);
 
-  /// get network fee esmtimate (kb/s)
+  /// get network fee esmtimate (fee per kilobyte)
   final networkEstimate = await provider.request(ElectrumEstimateFee());
 
-  /// kb to bytes and mul with transaction size and now we have fee
+  /// Convert kilobytes to bytes, multiply by the transaction size, and the result yields the transaction fees.
   final fee =
-      BigInt.from(estimateSize) * (networkEstimate ~/ BigInt.from(1000));
+      BigInt.from(transactionSize) * (networkEstimate ~/ BigInt.from(1000));
 
   /// change value
   final changeValue = sumOfUtxo - (sumOfOutputs + fee);
 
-  if (changeValue.isNegative) return;
+  if (changeValue.isNegative) {
+    return;
+  }
   //// if we have change value we back amount to account
   if (changeValue > BigInt.zero) {
-    final changeOutput = BitcoinOutput(
-        address: examplePublicKey2.toAddress(), value: changeValue);
-    outPuts.add(changeOutput);
+    outPuts.add(BitcoinOutput(
+        address: examplePublicKey2.toAddress(), value: changeValue));
   }
 
   /// create transaction builder
@@ -381,7 +392,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) f
       outPuts: outPuts,
       fee: fee,
       network: network,
-      utxos: utxos,
+      utxos: accountsUtxos,
       memo: memo,
       inputOrdering: BitcoinOrdering.bip69,
       outputOrdering: BitcoinOrdering.bip69,
@@ -391,9 +402,9 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) f
   final transaction =
       builder.buildTransaction((trDigest, utxo, publicKey, sighash) {
     if (utxo.utxo.isP2tr()) {
-      return examplePrivateKey2.signTapRoot(trDigest, sighash: sighash);
+      return privateKey.signTapRoot(trDigest, sighash: sighash);
     }
-    return examplePrivateKey2.signInput(trDigest, sigHash: sighash);
+    return privateKey.signInput(trDigest, sigHash: sighash);
   });
 
   /// get tx id
@@ -406,10 +417,11 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) f
   await provider.request(ElectrumBroadCastTransaction(transactionRaw: raw));
 
   /// Once completed, we verify the status by checking the mempool or using another explorer to review the transaction details.
-  /// https://mempool.space/testnet/tx/abab018f3d2b92bf30c63b4aca419cf6d6571692b3620f06311c7e5a21a88b56
+  /// https://mempool.space/testnet/tx/70cf664bba4b5ac9edc6133e9c6891ffaf8a55eaea9d2ac99aceead1c3db8899
 
   ```
 - With ForkedTransactionBuilder
+
   ForkedTransactionBuilder supports the BitcoinCash and bitcoinSV for easy creation and signing of various address types.
   For spending network amounts, it functions similarly to TransactionBuilder. However, in this example, the focus is on spending CashToken (BCH Feature). For minting, burning, and creating FTs (Fungible Tokens) and NFTs (Non-Fungible Tokens), you can refer to the example folders
   
@@ -549,6 +561,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) f
   ```
 - With BtcTransaction
   - Spend P2TR UTXO
+
     ```
       // We define transaction inputs by specifying the transaction ID and index.
     final txin = utxo
@@ -661,7 +674,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) f
     ```
   
 ### Node provider
-I haven't implemented any specific HTTP service or socket service within this plugin. The reason is that different applications may use various plugins or methods to interact with network protocols. However, I have included numerous examples to demonstrate how Electrum and HTTP services can be utilized. You can leverage these examples as a reference to easily create services tailored to your application's specific needs. [examples](https://github.com/mrtnetwork/bitcoin_base/tree/main/example)
+I haven't implemented any specific HTTP service or socket service within this plugin. The reason is that different applications may use various plugins or methods to interact with network protocols. However, I have included numerous examples to demonstrate how Electrum and HTTP services can be utilized. You can leverage these examples as a reference to easily create services tailored to your application's specific needs. [examples](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/services_examples)
 
 - Electrum API (Websocket, TCP, SSL)
 ```
