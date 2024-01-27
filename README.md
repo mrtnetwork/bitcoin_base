@@ -258,6 +258,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
 
 - With TransactionBuilder
   BitcoinTransactionBuilder 
+  
   supports the Bitcoin, Dogecoin, Dash, and Litecoin networks, allowing for easy creation and signing of various address types.
 
   ```
@@ -460,7 +461,6 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
     scriptHash: p2pkhAddress.baseAddress.pubKeyHash(),
     includeTokens: true,
   ));
-  // return;
 
   /// Converts all UTXOs to a list of UtxoWithAddress, containing UTXO information along with address details.
   final List<UtxoWithAddress> utxos = elctrumUtxos
