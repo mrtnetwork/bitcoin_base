@@ -258,7 +258,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
 
 - With TransactionBuilder
   BitcoinTransactionBuilder 
-  
+
   supports the Bitcoin, Dogecoin, Dash, and Litecoin networks, allowing for easy creation and signing of various address types.
 
   ```
@@ -424,7 +424,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
 - With ForkedTransactionBuilder
 
   ForkedTransactionBuilder supports the BitcoinCash and bitcoinSV for easy creation and signing of various address types.
-  For spending network amounts, it functions similarly to TransactionBuilder. However, in this example, the focus is on spending CashToken (BCH Feature). For minting, burning, and creating FTs (Fungible Tokens) and NFTs (Non-Fungible Tokens), you can refer to the example folders
+  For spending network amounts, it functions similarly to TransactionBuilder. However, in this example, the focus is on spending CashToken (BCH Feature). For minting, burning, and creating FTs (Fungible Tokens) and NFTs (Non-Fungible Tokens), you can refer to the [example folders](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/bitcoin_cash)
   
   ```
   /// connect to electrum service with websocket
