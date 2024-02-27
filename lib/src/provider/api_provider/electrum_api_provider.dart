@@ -22,7 +22,8 @@ class ElectrumApiProvider {
   dynamic _findResult(
       Map<String, dynamic> data, ElectrumRequestDetails request) {
     if (data["error"] != null) {
-      final code = int.parse(((data["error"]?['code']?.toString()) ?? "0"));
+      final code =
+          int.tryParse(((data["error"]?['code']?.toString()) ?? "0")) ?? 0;
       final message = data["error"]?['message'] ?? "";
       throw RPCError(
         errorCode: code,
