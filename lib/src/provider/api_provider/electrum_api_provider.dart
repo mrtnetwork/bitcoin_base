@@ -1,6 +1,8 @@
 import 'package:bitcoin_base/src/provider/api_provider.dart';
 import 'dart:async';
 
+import 'package:blockchain_utils/exception/exceptions.dart';
+
 class ElectrumApiProvider {
   final BitcoinBaseElectrumRPCService rpc;
   ElectrumApiProvider(this.rpc);
@@ -22,8 +24,8 @@ class ElectrumApiProvider {
     if (data["error"] != null) {
       final code = int.parse(((data["error"]?['code']?.toString()) ?? "0"));
       final message = data["error"]?['message'] ?? "";
-      throw ElectrumRPCException(
-        code: code,
+      throw RPCError(
+        errorCode: code,
         message: message,
         data: data["error"]?["data"],
         request: data["request"] ?? request.params,

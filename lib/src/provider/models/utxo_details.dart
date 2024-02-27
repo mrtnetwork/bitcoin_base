@@ -1,6 +1,3 @@
-/// UtxoAddressDetails represents ownership details associated with a Bitcoin unspent transaction output (UTXO).
-/// It includes information such as the public key, Bitcoin address, and multi-signature address (if applicable)
-/// of the UTXO owner.
 import 'package:bitcoin_base/bitcoin_base.dart';
 
 abstract class UTXO {

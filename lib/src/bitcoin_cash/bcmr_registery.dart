@@ -1,5 +1,3 @@
-/// https://github.com/bitjson/chip-bcmr
-
 /// A mapping of identifiers to URIs associated with an entity. URI identifiers
 /// may be widely-standardized or registry-specific. Values must be valid URIs,
 /// including a protocol prefix – e.g. `https://` or `ipfs://`., Clients are only
@@ -117,7 +115,7 @@ class Tag {
   final URIs? uris;
 
   /// A mapping of `Tag` extension identifiers to extension definitions.
-  /// {@link Extensions} may be widely standardized or application-specific.
+  /// Extensions may be widely standardized or application-specific.
   final Extensions? extensions;
 
   const Tag({required this.name, this.description, this.uris, this.extensions});
@@ -243,7 +241,7 @@ class NftCategoryFieldType {
   final String? description;
 
   /// The expected encoding of this field when read from the parsing altstack
-  /// (see {@link ParsableNftCollection}). All encoding definitions must have a
+  /// (see [ParsableNftCollection]). All encoding definitions must have a
   /// `type`, and some encoding definitions allow for additional hinting about
   /// display strategies in clients.
   ///
@@ -279,7 +277,7 @@ class NftCategoryFieldType {
   final URIs? uris;
 
   /// A mapping of NFT field extension identifiers to extension definitions.
-  /// {@link Extensions} may be widely standardized or application-specific.
+  /// [Extensions] may be widely standardized or application-specific.
   final Extensions? extensions;
 
   factory NftCategoryFieldType.fromJson(Map<String, dynamic> json) {
@@ -340,8 +338,8 @@ abstract class Parse {
 
 /// Interpretation information for a collection of sequential NFTs, a collection
 /// in which each NFT includes only a sequential identifier within its on-chain
-/// commitment. Note that {@link SequentialNftCollection}s differ from
-/// {@link ParsableNftCollection}s in that sequential collections lack a
+/// commitment. Note that [SequentialNftCollection]s differ from
+/// [ParsableNftCollection]s in that sequential collections lack a
 /// parsing `bytecode` with which to inspect each NFT commitment: the type of
 /// each NFT is indexed by the full contents its commitment (interpreted as a
 /// positive VM integer in user interfaces).
@@ -366,7 +364,7 @@ class SequentialNftCollection implements Parse {
 /// Interpretation information for a collection of parsable NFTs, a collection
 /// in which each NFT may include additional metadata fields beyond a sequential
 /// identifier within its on-chain commitment. Note that
-/// {@link ParsableNftCollection}s differ from {@link SequentialNftCollection}s
+/// [ParsableNftCollection]s differ from [SequentialNftCollection]s
 /// in that parsable collections require a parsing `bytecode` with which to
 /// inspect each NFT commitment: the type of each NFT is indexed by the
 /// hex-encoded contents the bottom item on the altstack following the evaluation
@@ -409,7 +407,7 @@ class ParsableNftCollection implements Parse {
   /// pushing the first byte to the altstack as an NFT type identifier and the
   /// remaining segment of the commitment as the first NFT field value.
   ///
-  /// If undefined (in a {@link SequentialNftCollection}), this field could be
+  /// If undefined (in a [SequentialNftCollection]), this field could be
   /// considered to have a default value of `00d26b` (OP_0 OP_UTXOTOKENCOMMITMENT
   /// OP_TOALTSTACK), which takes the full contents of the commitment as a fixed
   /// type index. As such, each index of the NFT category's `types` maps a
@@ -594,7 +592,7 @@ class IdentitySnapshot {
 
   /// The split ID of this identity's chain of record.
   ///
-  /// If undefined, defaults to {@link Registry.defaultChain}.
+  /// If undefined, defaults to [Registry.defaultChain].
   final String? splitId;
 
   /// A mapping of identifiers to URIs associated with this identity. URI
@@ -632,7 +630,7 @@ class IdentitySnapshot {
   final URIs? uris;
 
   /// A mapping of `IdentitySnapshot` extension identifiers to extension
-  /// definitions. {@link Extensions} may be widely standardized or
+  /// definitions. [Extensions] may be widely standardized or
   /// application-specific.
   ///
   /// Standardized extensions for `IdentitySnapshot`s include the `authchain`
@@ -881,9 +879,9 @@ class Registry {
   final Map<String, Tag>? tags;
 
   /// The split ID of the chain/network considered the "default" chain for this
-  /// registry. Identities that do not specify a {@link IdentitySnapshot.splitId}
+  /// registry. Identities that do not specify a [IdentitySnapshot.splitId]
   /// are assumed to be set to this split ID. For a description of split IDs,
-  /// see {@link Registry.chains}.
+  /// see [Registry.chains].
   ///
   /// If not provided, the `defaultChain` is
   /// `0000000000000000029e471c41818d24b8b74c911071c4ef0b4a0509f9b5a8ce`, the BCH
@@ -894,7 +892,7 @@ class Registry {
   /// (chipnet)
   final String? defaultChain;
 
-  /// A map of split IDs tracked by this registry to the {@link ChainHistory} for
+  /// A map of split IDs tracked by this registry to the [ChainHistory] for
   /// that chain/network.
   ///
   /// The split ID of a chain is the block header hash (A.K.A. block ID) of the
@@ -911,12 +909,12 @@ class Registry {
   /// (losing claimable value if the receivers of their transactions don't
   /// acknowledge transfers on both chains). When a registry trusted by the
   /// wallet notes the split in it's `chains` map, the wallet can represent the
-  /// split in the user interface using the the latest {@link ChainSnapshot} for
+  /// split in the user interface using the the latest [ChainSnapshot] for
   /// each chain and splitting coins prior to spending (by introducing post-split
   /// coins in each transaction).
   ///
   /// This map may exclude the following well-known split IDs (all clients
-  /// supporting any of these chains should build-in {@link ChainHistory} for
+  /// supporting any of these chains should build-in [ChainHistory] for
   /// those chains):
   ///
   /// - `0000000000000000029e471c41818d24b8b74c911071c4ef0b4a0509f9b5a8ce`:
@@ -942,7 +940,7 @@ class Registry {
   final String? license;
 
   /// A mapping of `Registry` extension identifiers to extension definitions.
-  /// {@link Extensions} may be widely standardized or application-specific.
+  /// [Extensions] may be widely standardized or application-specific.
   ///
   /// Standardized extensions for `Registry`s include the `locale` extension. See
   /// https://github.com/bitjson/chip-bcmr#locales-extension for details.

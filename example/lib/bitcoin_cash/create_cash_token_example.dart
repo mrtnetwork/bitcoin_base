@@ -56,6 +56,7 @@ void main() async {
   /// by identifying the transaction that spent the 0th output of the transaction referenced by the category ID.
   String? vout0Hash;
   try {
+    // Retrieve the transaction hash of the 0th output UTXO
     vout0Hash =
         utxos.firstWhere((element) => element.utxo.vout == 0).utxo.txHash;
   } on StateError {

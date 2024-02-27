@@ -1,4 +1,8 @@
-# 4.0.0
+## 4.1.0
+
+* Update dependencies
+
+## 4.0.0
 
 * Added support for BitcoinSV network
 * Introduced classes for improved network address handling
