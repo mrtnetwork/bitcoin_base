@@ -42,5 +42,5 @@ jobs:
         run: dart test ./test
         
       - name: Run tests web
-        run: dart test -p web ./test
+        run: dart test -p chrome ./test
 
