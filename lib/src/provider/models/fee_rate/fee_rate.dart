@@ -1,7 +1,12 @@
 enum BitcoinFeeRateType { low, medium, high }
 
 class BitcoinFeeRate {
-  BitcoinFeeRate({required this.high, required this.medium, required this.low});
+  BitcoinFeeRate(
+      {required this.high,
+      required this.medium,
+      required this.low,
+      this.economyFee,
+      this.hourFee});
 
   /// High fee rate in satoshis per kilobyte
   final BigInt high;
@@ -11,6 +16,23 @@ class BitcoinFeeRate {
 
   /// low fee rate in satoshis per kilobyte
   final BigInt low;
+
+  /// only mnenpool api
+  final BigInt? economyFee;
+
+  /// only mnenpool api
+  final BigInt? hourFee;
+
+  BigInt _feeRatrete(BitcoinFeeRateType feeRateType) {
+    switch (feeRateType) {
+      case BitcoinFeeRateType.low:
+        return low;
+      case BitcoinFeeRateType.medium:
+        return medium;
+      default:
+        return high;
+    }
+  }
 
   /// GetEstimate calculates the estimated fee in satoshis for a given transaction size
   /// and fee rate (in satoshis per kilobyte) using the formula:
@@ -26,27 +48,14 @@ class BitcoinFeeRate {
   BigInt getEstimate(int trSize,
       {BigInt? customFeeRatePerKb,
       BitcoinFeeRateType feeRateType = BitcoinFeeRateType.medium}) {
-    BigInt? feeRate = customFeeRatePerKb;
-    if (feeRate == null) {
-      switch (feeRateType) {
-        case BitcoinFeeRateType.low:
-          feeRate = low;
-          break;
-        case BitcoinFeeRateType.medium:
-          feeRate = medium;
-          break;
-        default:
-          feeRate = high;
-          break;
-      }
-    }
+    BigInt feeRate = customFeeRatePerKb ?? _feeRatrete(feeRateType);
     final trSizeBigInt = BigInt.from(trSize);
     return (trSizeBigInt * feeRate) ~/ BigInt.from(1000);
   }
 
   @override
   String toString() {
-    return 'high: ${high.toString()} medium: ${medium.toString()} low: ${low.toString()}';
+    return 'high: ${high.toString()} medium: ${medium.toString()} low: ${low.toString()}, economyFee: $economyFee hourFee: $hourFee';
   }
 
   /// NewBitcoinFeeRateFromMempool creates a BitcoinFeeRate structure from JSON data retrieved
@@ -54,9 +63,15 @@ class BitcoinFeeRate {
   /// information for high, medium, and low fee levels.
   factory BitcoinFeeRate.fromMempool(Map<String, dynamic> json) {
     return BitcoinFeeRate(
-        high: _parseMempoolFees(json['fastestFee']),
-        medium: _parseMempoolFees(json['halfHourFee']),
-        low: _parseMempoolFees(json['minimumFee']));
+      high: _parseMempoolFees(json['fastestFee']),
+      medium: _parseMempoolFees(json['halfHourFee']),
+      low: _parseMempoolFees(json['minimumFee']),
+      economyFee: json['economyFee'] == null
+          ? null
+          : _parseMempoolFees(json['economyFee']),
+      hourFee:
+          json['hourFee'] == null ? null : _parseMempoolFees(json['hourFee']),
+    );
   }
 
   /// NewBitcoinFeeRateFromBlockCypher creates a BitcoinFeeRate structure from JSON data retrieved

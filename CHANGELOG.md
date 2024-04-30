@@ -1,3 +1,7 @@
+## 4.2.2 
+
+* Added hourFee and economyFee to mempool api getNetworkFeeRate method
+
 ## 4.2.1
 
 * Update dependencies
