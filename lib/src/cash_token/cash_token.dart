@@ -304,7 +304,7 @@ class CashToken {
   static Tuple<CashToken?, int> fromRaw(List<int> scriptBytes) {
     if (scriptBytes.isEmpty ||
         scriptBytes[0] != CashTokenUtils.cashTokenPrefix) {
-      return Tuple(null, 0);
+      return const Tuple(null, 0);
     }
     int cursor = 1;
     List<int> id =
