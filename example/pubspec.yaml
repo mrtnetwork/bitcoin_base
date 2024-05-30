@@ -39,7 +39,7 @@ dependencies:
     path: ../
   # blockchain_utils: 
   #   path: ../../blockchain_utils
-  blockchain_utils: ^2.1.2
+  blockchain_utils: ^3.0.0
   http: ^1.2.0
 
 dev_dependencies:
