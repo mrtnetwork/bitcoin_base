@@ -1,8 +1,6 @@
 import 'dart:typed_data';
-
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
-import 'package:blockchain_utils/binary/binary_operation.dart';
-import 'package:blockchain_utils/numbers/int_utils.dart';
+import 'package:blockchain_utils/utils/utils.dart';
 
 /// Helps setting up appropriate sequence. Used to provide the sequence to transaction inputs and to scripts.
 ///
