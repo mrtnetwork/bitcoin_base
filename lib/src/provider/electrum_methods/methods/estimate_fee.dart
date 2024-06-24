@@ -21,6 +21,6 @@ class ElectrumEstimateFee extends ElectrumRequest<BigInt, dynamic> {
   /// The estimated transaction fee in Bigint(satoshi)
   @override
   BigInt onResonse(result) {
-    return BtcUtils.toSatoshi(result.toString());
+    return BtcUtils.toSatoshi(result.toString()).abs();
   }
 }

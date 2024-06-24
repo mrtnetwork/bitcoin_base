@@ -1,3 +1,8 @@
+## 4.5.0
+
+* Added support for Pepecoin network
+* Update dependencies
+
 ## 4.4.0
 
 * Update dependencies

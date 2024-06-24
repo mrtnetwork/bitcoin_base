@@ -1,9 +1,6 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:bitcoin_base/src/utils/enumerate.dart';
-import 'package:blockchain_utils/bip/bip/conf/bip44/bip44_coins.dart';
-import 'package:blockchain_utils/bip/bip/conf/bip49/bip49_coins.dart';
-import 'package:blockchain_utils/bip/bip/conf/bip84/bip84_coins.dart';
-import 'package:blockchain_utils/bip/bip/conf/bip86/bip86_coins.dart';
+import 'package:blockchain_utils/bip/bip/bip.dart';
 import 'package:blockchain_utils/bip/bip/conf/bip_coins.dart';
 import 'package:blockchain_utils/bip/coin_conf/coin_conf.dart';
 import 'package:blockchain_utils/bip/coin_conf/coins_conf.dart';
@@ -50,7 +47,8 @@ abstract class BasedUtxoNetwork implements Enumerate {
     BitcoinCashNetwork.mainnet,
     BitcoinCashNetwork.testnet,
     BitcoinSVNetwork.mainnet,
-    BitcoinSVNetwork.testnet
+    BitcoinSVNetwork.testnet,
+    PepeNetwork.mainnet
   ];
 
   static BasedUtxoNetwork fromName(String name) {
@@ -439,5 +437,59 @@ class BitcoinCashNetwork implements BasedUtxoNetwork {
   List<CryptoCoins> get coins {
     if (isMainnet) return [Bip44Coins.bitcoinCash, Bip49Coins.bitcoinCash];
     return [Bip44Coins.bitcoinCashTestnet, Bip49Coins.bitcoinCashTestnet];
+  }
+}
+
+/// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
+class PepeNetwork implements BasedUtxoNetwork {
+  /// Mainnet configuration with associated `CoinConf`.
+  static const PepeNetwork mainnet =
+      PepeNetwork._("pepecoinMainnet", CoinsConf.pepeMainnet);
+
+  /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
+  @override
+  final CoinConf conf;
+
+  /// Constructor for creating a Dogecoin network with a specific configuration.
+  const PepeNetwork._(this.value, this.conf);
+
+  @override
+  final String value;
+
+  /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get wifNetVer => conf.params.wifNetVer!;
+
+  /// Retrieves the Pay-to-Public-Key-Hash (P2PKH) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get p2pkhNetVer => conf.params.p2pkhNetVer!;
+
+  /// Retrieves the Pay-to-Script-Hash (P2SH) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get p2shNetVer => conf.params.p2shNetVer!;
+
+  /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
+  @override
+  String get p2wpkhHrp => throw UnimplementedError(
+      "DogecoinNetwork network does not support P2WPKH/P2WSH");
+
+  /// Checks if the current network is the mainnet.
+  @override
+  bool get isMainnet => true;
+
+  @override
+  final List<BitcoinAddressType> supportedAddress = const [
+    PubKeyAddressType.p2pk,
+    P2pkhAddressType.p2pkh,
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2pkInP2sh
+  ];
+
+  @override
+  List<CryptoCoins> get coins {
+    if (isMainnet) {
+      return [Bip44Coins.pepecoin, Bip49Coins.pepecoin];
+    }
+    return [Bip44Coins.pepecoinTestnet, Bip49Coins.pepecoinTestnet];
   }
 }
