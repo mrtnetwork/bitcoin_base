@@ -1,3 +1,7 @@
+## 4.6.0
+
+* add asyncTransactionBuilder method to support building transactions asynchronously.
+
 ## 4.5.0
 
 * Added support for Pepecoin network

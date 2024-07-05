@@ -1,3 +1,5 @@
+import 'package:bitcoin_base/src/exception/exception.dart';
+
 enum BitcoinFeeRateType { low, medium, high }
 
 class BitcoinFeeRate {
@@ -97,7 +99,7 @@ BigInt _parseMempoolFees(dynamic data) {
   } else if (data is int) {
     return BigInt.from((data * kb));
   } else {
-    throw StateError(
+    throw BitcoinBasePluginException(
         "cannot parse mempool fees excepted double, string got ${data.runtimeType}");
   }
 }

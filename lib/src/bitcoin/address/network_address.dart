@@ -107,7 +107,7 @@ class BitcoinCashAddress extends BitcoinNetworkAddress<BitcoinCashNetwork> {
         address, network,
         validateNetworkHRP: validateNetworkPrefix);
     if (decodeAddress == null) {
-      throw MessageException("Invalid ${network.value} address.");
+      throw BitcoinBasePluginException("Invalid ${network.value} address.");
     }
     return BitcoinCashAddress._(decodeAddress, address);
   }

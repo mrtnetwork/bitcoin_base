@@ -89,7 +89,7 @@ class _BitcoinAddressUtils {
     final convert = SegwitBech32Decoder.decode(network.p2wpkhHrp, address);
     final witnessVersion = convert.item1;
     if (witnessVersion != version) {
-      throw const MessageException("Invalid segwit version");
+      throw const BitcoinBasePluginException("Invalid segwit version");
     }
     return BytesUtils.toHexString(convert.item2);
   }
@@ -137,7 +137,7 @@ class _BitcoinAddressUtils {
     if (network.supportedAddress.contains(address.type)) {
       return address;
     }
-    throw MessageException(
+    throw BitcoinBasePluginException(
         "${network.value} does not support ${address.type.value} address");
   }
 
@@ -158,7 +158,7 @@ class _BitcoinAddressUtils {
     }
     baseAddress ??= toLegacy(address, network);
     if (baseAddress == null) {
-      throw const MessageException("Invalid Bitcoin address");
+      throw const BitcoinBasePluginException("Invalid Bitcoin address");
     }
     return validateAddress(baseAddress, network);
   }
@@ -180,7 +180,7 @@ class _BitcoinAddressUtils {
       }
       // ignore: empty_catches
     } catch (e) {}
-    throw const MessageException(
+    throw const BitcoinBasePluginException(
         "Invalid Bitcoin address program length (program length should be 32 or 20 bytes)");
   }
 
@@ -276,7 +276,7 @@ class _BitcoinAddressUtils {
       required BitcoinAddressType type,
       required BasedUtxoNetwork network}) {
     if (!network.supportedAddress.contains(type)) {
-      throw MessageException(
+      throw BitcoinBasePluginException(
           "${network.value} does not support ${type.value} address type");
     }
     if (network is BitcoinCashNetwork) {

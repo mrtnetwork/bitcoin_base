@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:bitcoin_base/src/cash_token/cash_token.dart';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/utils/utils.dart';
 import 'package:blockchain_utils/crypto/quick_crypto.dart';
 import 'input.dart';
@@ -39,8 +40,6 @@ class BtcTransaction {
   final bool hasSegwit;
   final List<TxWitnessInput> witnesses;
 
-  // List<TxWitnessInput> get witnesses =>
-  //     List.unmodifiable(_witnesses.map((e) => e.copy()).toList());
   BtcTransaction copyWith({
     List<TxInput>? inputs,
     List<TxOutput>? outputs,
@@ -58,10 +57,6 @@ class BtcTransaction {
       version: version ?? List<int>.from(this.version),
     );
   }
-
-  // void addWitnesses(TxWitnessInput witness) {
-  //   _witnesses.add(witness);
-  // }
 
   /// creates a copy of the object (classmethod)
   static BtcTransaction copy(BtcTransaction tx) {
@@ -164,22 +159,16 @@ class BtcTransaction {
       }
     } else if ((sighash & 0x1f) == BitcoinOpCodeConst.SIGHASH_SINGLE) {
       if (txInIndex >= tx.outputs.length) {
-        throw ArgumentError(
-            "Transaction index is greater than theavailable outputs");
+        throw const BitcoinBasePluginException(
+            "Transaction index is greater than the available outputs");
       }
-      // final txout = tx.outputs[txInIndex];
-      // tx.outputs.clear();
-      // tx = tx.copyWith(outputs: []);
+
       List<TxOutput> outputs = [];
       for (int i = 0; i < txInIndex; i++) {
         outputs.add(TxOutput(
             amount: BigInt.from(BitcoinOpCodeConst.NEGATIVE_SATOSHI),
             scriptPubKey: Script(script: [])));
-        // tx.outputs.add(TxOutput(
-        //     amount: BigInt.from(BitcoinOpCodeConst.NEGATIVE_SATOSHI),
-        //     scriptPubKey: Script(script: [])));
       }
-      // outputs.add(txout);
       tx = tx.copyWith(outputs: [...outputs, tx.outputs[txInIndex]]);
       for (int i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
@@ -189,10 +178,7 @@ class BtcTransaction {
       }
     }
     if ((sighash & BitcoinOpCodeConst.SIGHASH_ANYONECANPAY) != 0) {
-      // final inp = tx.inputs[txInIndex];
       tx = tx.copyWith(inputs: [tx.inputs[txInIndex]]);
-      // tx.inputs.clear();
-      // tx.inputs.add(inp);
     }
     List<int> txForSign = tx.toBytes(segwit: false);
 

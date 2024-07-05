@@ -1,4 +1,5 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/provider/constant/constant.dart';
 
 enum APIType { mempool, blockCypher }
@@ -59,7 +60,7 @@ class APIConfig {
         baseUrl = BtcApiConst.blockCypherLitecoinBaseUri;
         break;
       default:
-        throw UnimplementedError(
+        throw BitcoinBasePluginException(
             "blockcypher does not support ${network.conf.coinName.name}, u must use your own provider");
     }
 
@@ -84,7 +85,7 @@ class APIConfig {
         baseUrl = BtcApiConst.mempoolBaseURL;
         break;
       default:
-        throw UnimplementedError(
+        throw BitcoinBasePluginException(
             "mempool does not support ${network.conf.coinName.name}");
     }
 

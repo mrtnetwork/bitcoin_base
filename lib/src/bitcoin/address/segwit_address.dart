@@ -6,7 +6,8 @@ abstract class SegwitAddress implements BitcoinBaseAddress {
       required BasedUtxoNetwork network,
       required this.segwitVersion}) {
     if (!network.supportedAddress.contains(type)) {
-      throw MessageException("network does not support ${type.value} address");
+      throw BitcoinBasePluginException(
+          "network does not support ${type.value} address");
     }
     addressProgram = _BitcoinAddressUtils.toSegwitProgramWithVersionAndNetwork(
         address: address, version: segwitVersion, network: network);
@@ -29,7 +30,8 @@ abstract class SegwitAddress implements BitcoinBaseAddress {
   @override
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
-      throw MessageException("network does not support ${type.value} address");
+      throw BitcoinBasePluginException(
+          "network does not support ${type.value} address");
     }
     return _BitcoinAddressUtils.segwitToAddress(
         addressProgram: addressProgram,

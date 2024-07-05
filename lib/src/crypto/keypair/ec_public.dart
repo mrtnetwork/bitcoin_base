@@ -1,20 +1,25 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 class ECPublic {
   final Bip32PublicKey publicKey;
-  ECPublic(this.publicKey) {
+  const ECPublic._(this.publicKey);
+
+  factory ECPublic.fromBip32(Bip32PublicKey publicKey) {
     if (publicKey.curveType != EllipticCurveTypes.secp256k1) {
-      throw ArgumentError("invalid public key curve for bitcoin");
+      throw const BitcoinBasePluginException(
+          "invalid public key curve for bitcoin");
     }
+    return ECPublic._(publicKey);
   }
 
   /// Constructs an ECPublic key from a byte representation.
   factory ECPublic.fromBytes(List<int> public) {
     final publicKey = Bip32PublicKey.fromBytes(public, Bip32KeyData(),
         Bip32Const.mainNetKeyNetVersions, EllipticCurveTypes.secp256k1);
-    return ECPublic(publicKey);
+    return ECPublic._(publicKey);
   }
 
   /// Constructs an ECPublic key from hex representation.

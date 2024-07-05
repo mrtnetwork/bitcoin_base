@@ -3,7 +3,6 @@
 
 import 'package:bitcoin_base/bitcoin_base.dart';
 
-import 'package:blockchain_utils/bip/mnemonic/mnemonic.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:example/services_examples/explorer_service/explorer_service.dart';
 

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/utils/utils.dart';
 
 /// Helps setting up appropriate sequence. Used to provide the sequence to transaction inputs and to scripts.
@@ -12,7 +13,8 @@ class Sequence {
       {required this.seqType, required this.value, this.isTypeBlock = true}) {
     if (seqType == BitcoinOpCodeConst.TYPE_RELATIVE_TIMELOCK &&
         (value < 1 || value > mask16)) {
-      throw ArgumentError('Sequence should be between 1 and 65535');
+      throw const BitcoinBasePluginException(
+          'Sequence should be between 1 and 65535');
     }
   }
   final int seqType;
@@ -37,13 +39,14 @@ class Sequence {
       return IntUtils.toBytes(seq, length: 4, byteOrder: Endian.little);
     }
 
-    throw ArgumentError("Invalid seqType");
+    throw const BitcoinBasePluginException("Invalid seqType");
   }
 
   /// Returns the appropriate integer for a script; e.g. for relative timelocks
   int forScript() {
     if (seqType == BitcoinOpCodeConst.TYPE_REPLACE_BY_FEE) {
-      throw const FormatException("RBF is not to be included in a script.");
+      throw const BitcoinBasePluginException(
+          "RBF is not to be included in a script.");
     }
     int scriptIntiger = value;
     if (seqType == BitcoinOpCodeConst.TYPE_RELATIVE_TIMELOCK && !isTypeBlock) {
