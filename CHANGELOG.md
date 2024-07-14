@@ -1,3 +1,7 @@
+## 4.7.0
+
+* Update dependencies
+
 ## 4.6.0
 
 * add asyncTransactionBuilder method to support building transactions asynchronously.

@@ -10,6 +10,7 @@ class APIConfig {
   final String transaction;
   final String transactions;
   final String sendTransaction;
+  final String blockHeight;
   final APIType apiType;
   final BasedUtxoNetwork network;
 
@@ -41,6 +42,11 @@ class APIConfig {
     return baseUrl.replaceAll("###", address);
   }
 
+  String getBlockHeight(int blockHaight) {
+    String baseUrl = blockHeight;
+    return baseUrl.replaceAll("###", "$blockHaight");
+  }
+
   factory APIConfig.fromBlockCypher(BasedUtxoNetwork network) {
     String baseUrl;
     switch (network) {
@@ -65,14 +71,15 @@ class APIConfig {
     }
 
     return APIConfig(
-      url: "$baseUrl/addrs/###/?unspentOnly=true&includeScript=true&limit=2000",
-      feeRate: baseUrl,
-      transaction: "$baseUrl/txs/###",
-      sendTransaction: "$baseUrl/txs/push",
-      apiType: APIType.blockCypher,
-      transactions: "$baseUrl/addrs/###/full?limit=200",
-      network: network,
-    );
+        url:
+            "$baseUrl/addrs/###/?unspentOnly=true&includeScript=true&limit=2000",
+        feeRate: baseUrl,
+        transaction: "$baseUrl/txs/###",
+        sendTransaction: "$baseUrl/txs/push",
+        apiType: APIType.blockCypher,
+        transactions: "$baseUrl/addrs/###/full?limit=200",
+        network: network,
+        blockHeight: "$baseUrl/blocks/###");
   }
 
   factory APIConfig.mempool(BasedUtxoNetwork network) {
@@ -90,23 +97,23 @@ class APIConfig {
     }
 
     return APIConfig(
-      url: "$baseUrl/address/###/utxo",
-      feeRate: "$baseUrl/v1/fees/recommended",
-      transaction: "$baseUrl/tx/###",
-      sendTransaction: "$baseUrl/tx",
-      apiType: APIType.mempool,
-      transactions: "$baseUrl/address/###/txs",
-      network: network,
-    );
+        url: "$baseUrl/address/###/utxo",
+        feeRate: "$baseUrl/v1/fees/recommended",
+        transaction: "$baseUrl/tx/###",
+        sendTransaction: "$baseUrl/tx",
+        apiType: APIType.mempool,
+        transactions: "$baseUrl/address/###/txs",
+        network: network,
+        blockHeight: "$baseUrl/block-height/###");
   }
 
-  APIConfig({
-    required this.url,
-    required this.feeRate,
-    required this.transaction,
-    required this.transactions,
-    required this.sendTransaction,
-    required this.apiType,
-    required this.network,
-  });
+  APIConfig(
+      {required this.url,
+      required this.feeRate,
+      required this.transaction,
+      required this.transactions,
+      required this.sendTransaction,
+      required this.apiType,
+      required this.network,
+      required this.blockHeight});
 }

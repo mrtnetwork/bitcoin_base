@@ -2,7 +2,6 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/utils/enumerate.dart';
 import 'package:blockchain_utils/bip/bip/bip.dart';
-import 'package:blockchain_utils/bip/bip/conf/bip_coins.dart';
 import 'package:blockchain_utils/bip/coin_conf/coin_conf.dart';
 import 'package:blockchain_utils/bip/coin_conf/coins_conf.dart';
 
@@ -56,7 +55,7 @@ abstract class BasedUtxoNetwork implements Enumerate {
     return values.firstWhere((element) => element.value == name);
   }
 
-  List<CryptoCoins> get coins;
+  List<BipCoins> get coins;
 
   /// Checks if the current network is the mainnet.
   bool get isMainnet => this == BitcoinNetwork.mainnet;
@@ -108,7 +107,7 @@ class BitcoinSVNetwork implements BasedUtxoNetwork {
       [P2pkhAddressType.p2pkh, PubKeyAddressType.p2pk];
 
   @override
-  List<CryptoCoins> get coins {
+  List<BipCoins> get coins {
     if (isMainnet) return [Bip44Coins.bitcoinSv];
     return [Bip44Coins.bitcoinSvTestnet];
   }
@@ -169,7 +168,7 @@ class BitcoinNetwork implements BasedUtxoNetwork {
       ];
 
   @override
-  List<CryptoCoins> get coins {
+  List<BipCoins> get coins {
     if (isMainnet) {
       return [
         Bip44Coins.bitcoin,
@@ -240,7 +239,7 @@ class LitecoinNetwork implements BasedUtxoNetwork {
   ];
 
   @override
-  List<CryptoCoins> get coins {
+  List<BipCoins> get coins {
     if (isMainnet) {
       return [Bip44Coins.litecoin, Bip49Coins.litecoin, Bip84Coins.litecoin];
     }
@@ -302,7 +301,7 @@ class DashNetwork implements BasedUtxoNetwork {
   final String value;
 
   @override
-  List<CryptoCoins> get coins {
+  List<BipCoins> get coins {
     if (isMainnet) return [Bip44Coins.dash, Bip49Coins.dash];
     return [Bip44Coins.dashTestnet, Bip49Coins.dashTestnet];
   }
@@ -358,7 +357,7 @@ class DogecoinNetwork implements BasedUtxoNetwork {
   ];
 
   @override
-  List<CryptoCoins> get coins {
+  List<BipCoins> get coins {
     if (isMainnet) return [Bip44Coins.dogecoin, Bip49Coins.dogecoin];
     return [Bip44Coins.dogecoinTestnet, Bip49Coins.dogecoinTestnet];
   }
@@ -435,7 +434,7 @@ class BitcoinCashNetwork implements BasedUtxoNetwork {
   ];
 
   @override
-  List<CryptoCoins> get coins {
+  List<BipCoins> get coins {
     if (isMainnet) return [Bip44Coins.bitcoinCash, Bip49Coins.bitcoinCash];
     return [Bip44Coins.bitcoinCashTestnet, Bip49Coins.bitcoinCashTestnet];
   }
@@ -487,7 +486,7 @@ class PepeNetwork implements BasedUtxoNetwork {
   ];
 
   @override
-  List<CryptoCoins> get coins {
+  List<BipCoins> get coins {
     if (isMainnet) {
       return [Bip44Coins.pepecoin, Bip49Coins.pepecoin];
     }
