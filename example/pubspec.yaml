@@ -37,9 +37,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   bitcoin_base: 
     path: ../
-  blockchain_utils: 
-    path: ../../blockchain_utils
-  # blockchain_utils: ^3.3.0
+  # blockchain_utils: 
+  #   path: ../../blockchain_utils
+  blockchain_utils: ^3.3.0
   http: ^1.2.0
 
 dev_dependencies:

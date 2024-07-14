@@ -16,10 +16,10 @@ environment:
 
 
 dependencies:
-  # blockchain_utils: ^3.3.0
+  blockchain_utils: ^3.3.0
   
-  blockchain_utils:
-    path: ../blockchain_utils
+  # blockchain_utils:
+  #   path: ../blockchain_utils
     
 
 dev_dependencies:
