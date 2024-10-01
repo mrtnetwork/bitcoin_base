@@ -19,14 +19,14 @@ List<int> opPushData(String hexData) {
     writeUint32LE(lengthBytes.length, lengthBytes);
     return List<int>.from([0x4e, ...lengthBytes, ...dataBytes]);
   } else {
-    throw const BitcoinBasePluginException(
+    throw const DartBitcoinPluginException(
         "Data too large. Cannot push into script");
   }
 }
 
 List<int> pushInteger(int integer) {
   if (integer < 0) {
-    throw const BitcoinBasePluginException(
+    throw const DartBitcoinPluginException(
         'Integer is currently required to be positive.');
   }
 

@@ -46,7 +46,7 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
 
   void _validateBuilder() {
     if (network is! BitcoinCashNetwork && network is! BitcoinSVNetwork) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           "invalid network. use ForkedTransactionBuilder for BitcoinCashNetwork and BSVNetwork otherwise use BitcoinTransactionBuilder");
     }
     for (final i in utxosInfo) {
@@ -125,7 +125,7 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
         case P2shAddressType.p2pkhInP2sh32wt:
           return script;
         default:
-          throw BitcoinBasePluginException(
+          throw DartBitcoinPluginException(
               "unsuported multi-sig type ${utxo.utxo.scriptType} for ${network.conf.coinName.name}");
       }
     }
@@ -146,7 +146,7 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
       case P2shAddressType.p2pkhInP2sh32wt:
         return senderPub.toAddress().toScriptPubKey();
       default:
-        throw BitcoinBasePluginException(
+        throw DartBitcoinPluginException(
             "${utxo.utxo.scriptType} does not sudpport on ${network.conf.coinName.name}");
     }
   }
@@ -225,7 +225,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
         final script = senderPub.toRedeemScript();
         return [signedDigest, script.toHex()];
       default:
-        throw BitcoinBasePluginException(
+        throw DartBitcoinPluginException(
             'Cannot send from this type of address ${utx.utxo.scriptType}');
     }
   }
@@ -328,7 +328,7 @@ be retrieved by anyone who examines the blockchain's history.
       required BigInt sumUtxoAmount,
       required BigInt sumOutputAmounts}) {
     if (!isFakeTransaction && sumAmountsWithFee != sumUtxoAmount) {
-      throw BitcoinBasePluginException('Sum value of utxo not spending',
+      throw DartBitcoinPluginException('Sum value of utxo not spending',
           details: {
             "inputAmount": sumUtxoAmount,
             "fee": fee,
@@ -353,7 +353,7 @@ be retrieved by anyone who examines the blockchain's history.
                       previousValue + (element.value ?? BigInt.zero));
 
           if (amount != i.value) {
-            throw BitcoinBasePluginException(
+            throw DartBitcoinPluginException(
                 'Sum token value of UTXOs not spending. use BitcoinBurnableOutput if you want to burn tokens.',
                 details: {
                   "token": i.key,
@@ -379,7 +379,7 @@ be retrieved by anyone who examines the blockchain's history.
                   element.utxoHash == i.utxo.txHash &&
                   element.categoryID == token.category);
           if (hasBurnableOutput) continue;
-          throw BitcoinBasePluginException(
+          throw DartBitcoinPluginException(
               'Some NFTs in the inputs lack the corresponding spending in the outputs. If you intend to burn tokens, consider utilizing the BitcoinBurnableOutput.',
               details: {"category id": token.category});
         }
@@ -420,7 +420,7 @@ be retrieved by anyone who examines the blockchain's history.
           }
         }
         if (sumMultiSigWeight != multiSigAddress.threshold) {
-          throw const BitcoinBasePluginException(
+          throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
         continue;
@@ -503,7 +503,7 @@ be retrieved by anyone who examines the blockchain's history.
           }
         }
         if (sumMultiSigWeight != multiSigAddress.threshold) {
-          throw const BitcoinBasePluginException(
+          throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
 
@@ -593,7 +593,7 @@ be retrieved by anyone who examines the blockchain's history.
           }
         }
         if (sumMultiSigWeight != multiSigAddress.threshold) {
-          throw const BitcoinBasePluginException(
+          throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
 

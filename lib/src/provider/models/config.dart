@@ -66,7 +66,7 @@ class APIConfig {
         baseUrl = BtcApiConst.blockCypherLitecoinBaseUri;
         break;
       default:
-        throw BitcoinBasePluginException(
+        throw DartBitcoinPluginException(
             "blockcypher does not support ${network.conf.coinName.name}, u must use your own provider");
     }
 
@@ -92,7 +92,7 @@ class APIConfig {
         baseUrl = BtcApiConst.mempoolBaseURL;
         break;
       default:
-        throw BitcoinBasePluginException(
+        throw DartBitcoinPluginException(
             "mempool does not support ${network.conf.coinName.name}");
     }
 

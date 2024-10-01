@@ -1,3 +1,7 @@
+## 4.8.0
+
+* Update dependencies
+
 ## 4.7.0
 
 * Update dependencies

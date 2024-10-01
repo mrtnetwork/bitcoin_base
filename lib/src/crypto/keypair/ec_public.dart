@@ -9,7 +9,7 @@ class ECPublic {
 
   factory ECPublic.fromBip32(Bip32PublicKey publicKey) {
     if (publicKey.curveType != EllipticCurveTypes.secp256k1) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           "invalid public key curve for bitcoin");
     }
     return ECPublic._(publicKey);

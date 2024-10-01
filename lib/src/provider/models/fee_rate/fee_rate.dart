@@ -99,7 +99,7 @@ BigInt _parseMempoolFees(dynamic data) {
   } else if (data is int) {
     return BigInt.from((data * kb));
   } else {
-    throw BitcoinBasePluginException(
+    throw DartBitcoinPluginException(
         "cannot parse mempool fees excepted double, string got ${data.runtimeType}");
   }
 }

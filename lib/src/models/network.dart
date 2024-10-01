@@ -282,7 +282,7 @@ class DashNetwork implements BasedUtxoNetwork {
 
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
   @override
-  String get p2wpkhHrp => throw const BitcoinBasePluginException(
+  String get p2wpkhHrp => throw const DartBitcoinPluginException(
       "DashNetwork network does not support P2WPKH/P2WSH");
 
   /// Checks if the current network is the mainnet.
@@ -341,7 +341,7 @@ class DogecoinNetwork implements BasedUtxoNetwork {
 
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
   @override
-  String get p2wpkhHrp => throw const BitcoinBasePluginException(
+  String get p2wpkhHrp => throw const DartBitcoinPluginException(
       "DogecoinNetwork network does not support P2WPKH/P2WSH");
 
   /// Checks if the current network is the mainnet.
@@ -409,7 +409,7 @@ class BitcoinCashNetwork implements BasedUtxoNetwork {
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses
   /// from the associated `CoinConf`.
   @override
-  String get p2wpkhHrp => throw const BitcoinBasePluginException(
+  String get p2wpkhHrp => throw const DartBitcoinPluginException(
       "network does not support p2wpkh HRP");
 
   String get networkHRP => conf.params.p2pkhStdHrp!;
@@ -470,7 +470,7 @@ class PepeNetwork implements BasedUtxoNetwork {
 
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
   @override
-  String get p2wpkhHrp => throw const BitcoinBasePluginException(
+  String get p2wpkhHrp => throw const DartBitcoinPluginException(
       "DogecoinNetwork network does not support P2WPKH/P2WSH");
 
   /// Checks if the current network is the mainnet.

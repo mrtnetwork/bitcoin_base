@@ -48,14 +48,14 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// validate network and address suport before create transaction
   void _validateBuilder() {
     if (network is BitcoinCashNetwork || network is BitcoinSVNetwork) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           "invalid network for BitcoinCashNetwork and BSVNetwork use ForkedTransactionBuilder");
     }
     final token = utxosInfo.any((element) => element.utxo.token != null);
     final tokenInput = outPuts.whereType<BitcoinTokenOutput>();
     final burn = outPuts.whereType<BitcoinBurnableOutput>();
     if (token || tokenInput.isNotEmpty || burn.isNotEmpty) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           "Cash Token only work on Bitcoin cash network");
     }
     for (final i in utxosInfo) {
@@ -193,7 +193,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
           }
           return script;
         default:
-          throw BitcoinBasePluginException(
+          throw DartBitcoinPluginException(
               "unsuported multi-sig type ${utxo.utxo.scriptType}");
       }
     }
@@ -237,7 +237,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
         }
         return senderPub.toRedeemScript();
     }
-    throw const BitcoinBasePluginException("invalid bitcoin address type");
+    throw const DartBitcoinPluginException("invalid bitcoin address type");
   }
 
   /// generateTransactionDigest generates and returns a transaction digest for a given input in the context of a Bitcoin
@@ -314,7 +314,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
           final p2wsh = P2wshAddress.fromScript(script: script);
           return [p2wsh.toScriptPubKey().toHex()];
         default:
-          throw BitcoinBasePluginException(
+          throw DartBitcoinPluginException(
               "Invalid p2sh nested segwit type ${utxo.utxo.scriptType.value}");
       }
     }
@@ -327,7 +327,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
         final script = senderPub.toSegwitAddress().toScriptPubKey();
         return [script.toHex()];
       default:
-        throw BitcoinBasePluginException(
+        throw DartBitcoinPluginException(
             "Invalid p2sh nested segwit type ${utxo.utxo.scriptType.value}");
     }
   }
@@ -353,7 +353,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
         case P2shAddressType.p2wpkhInP2sh:
           return [signedDigest, senderPub.toHex()];
         default:
-          throw BitcoinBasePluginException(
+          throw DartBitcoinPluginException(
               "invalid segwit address type ${utx.utxo.scriptType.value}");
       }
     } else {
@@ -369,7 +369,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           final script = senderPub.toRedeemScript();
           return [signedDigest, script.toHex()];
         default:
-          throw BitcoinBasePluginException(
+          throw DartBitcoinPluginException(
               "invalid address type ${utx.utxo.scriptType.value}");
       }
     }
@@ -494,7 +494,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
 
     /// We will check whether you have spent the correct amounts or not
     if (!isFakeTransaction && sumAmountsWithFee != sumUtxoAmount) {
-      throw const BitcoinBasePluginException('Sum value of utxo not spending');
+      throw const DartBitcoinPluginException('Sum value of utxo not spending');
     }
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
@@ -552,7 +552,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           }
         }
         if (sumMultiSigWeight != multiSigAddress.threshold) {
-          throw const BitcoinBasePluginException(
+          throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
         _addUnlockScriptScript(
@@ -615,7 +615,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           }
         }
         if (sumMultiSigWeight != multiSigAddress.threshold) {
-          throw const BitcoinBasePluginException(
+          throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
         continue;
@@ -656,7 +656,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
 
     /// We will check whether you have spent the correct amounts or not
     if (!isFakeTransaction && sumAmountsWithFee != sumUtxoAmount) {
-      throw const BitcoinBasePluginException('Sum value of utxo not spending');
+      throw const DartBitcoinPluginException('Sum value of utxo not spending');
     }
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
@@ -714,7 +714,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           }
         }
         if (sumMultiSigWeight != multiSigAddress.threshold) {
-          throw const BitcoinBasePluginException(
+          throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
         _addUnlockScriptScript(

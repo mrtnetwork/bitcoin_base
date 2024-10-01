@@ -51,7 +51,7 @@ class MultiSignatureAddress {
 
   BitcoinBaseAddress toP2wshAddress({required BasedUtxoNetwork network}) {
     if (network is! LitecoinNetwork && network is! BitcoinNetwork) {
-      throw BitcoinBasePluginException(
+      throw DartBitcoinPluginException(
           "${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress");
     }
     return P2wshAddress.fromScript(script: multiSigScript);
@@ -66,7 +66,7 @@ class MultiSignatureAddress {
   BitcoinBaseAddress toP2shAddress(
       [P2shAddressType addressType = P2shAddressType.p2pkhInP2sh]) {
     if (!legacySupportP2shTypes.contains(addressType)) {
-      throw BitcoinBasePluginException(
+      throw DartBitcoinPluginException(
           "invalid p2sh type please use one of them ${legacySupportP2shTypes.map((e) => "$e").join(", ")}");
     }
 
@@ -94,7 +94,7 @@ class MultiSignatureAddress {
       case P2shAddressType.p2pkhInP2sh32wt:
         return toP2shAddress(addressType as P2shAddressType);
       default:
-        throw const BitcoinBasePluginException(
+        throw const DartBitcoinPluginException(
             "invalid multisig address type. use of of them [BitcoinAddressType.p2wsh, BitcoinAddressType.p2wshInP2sh, BitcoinAddressType.p2pkhInP2sh]");
     }
   }
@@ -116,15 +116,15 @@ class MultiSignatureAddress {
     final sumWeight =
         signers.fold<int>(0, (sum, signer) => sum + signer.weight);
     if (threshold > 16 || threshold < 1) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           'The threshold should be between 1 and 16');
     }
     if (sumWeight > 16) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           'The total weight of the owners should not exceed 16');
     }
     if (sumWeight < threshold) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           'The total weight of the signatories should reach the threshold');
     }
     final multiSigScript = <String>['OP_$threshold'];

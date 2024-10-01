@@ -48,11 +48,11 @@ class UtxoWithAddress {
 
   ECPublic public() {
     if (isMultiSig()) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           "Cannot access public key in multi-signature address");
     }
     if (ownerDetails._publicKey == null) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           "Cannot access public key in watch only address; use UtxoAddressDetails constractor instead `UtxoAddressDetails.watchOnly`");
     }
     return ECPublic.fromHex(ownerDetails._publicKey!);
@@ -64,7 +64,7 @@ class UtxoWithAddress {
 
   MultiSignatureAddress get multiSigAddress => isMultiSig()
       ? ownerDetails._multiSigAddress!
-      : throw const BitcoinBasePluginException(
+      : throw const DartBitcoinPluginException(
           "The address is not associated with a multi-signature setup");
 }
 

@@ -63,7 +63,7 @@ class TxInput {
     List<int> inpHash =
         txInputRaw.sublist(cursor, cursor + 32).reversed.toList();
     if (inpHash.isEmpty) {
-      throw const BitcoinBasePluginException(
+      throw const DartBitcoinPluginException(
           "Input transaction hash not found. Probably malformed raw transaction");
     }
     List<int> outputN =

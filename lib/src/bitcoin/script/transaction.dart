@@ -159,7 +159,7 @@ class BtcTransaction {
       }
     } else if ((sighash & 0x1f) == BitcoinOpCodeConst.SIGHASH_SINGLE) {
       if (txInIndex >= tx.outputs.length) {
-        throw const BitcoinBasePluginException(
+        throw const DartBitcoinPluginException(
             "Transaction index is greater than the available outputs");
       }
 
