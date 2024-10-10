@@ -123,6 +123,11 @@ void main() async {
   /// get network fee esmtimate (fee per kilobyte)
   final networkEstimate = await provider.request(ElectrumEstimateFee());
 
+  /// the daemon does not have enough information to make an estimate
+  if (networkEstimate == null) {
+    return;
+  }
+
   /// Convert kilobytes to bytes, multiply by the transaction size, and the result yields the transaction fees.
   final fee =
       BigInt.from(transactionSize) * (networkEstimate ~/ BigInt.from(1000));
