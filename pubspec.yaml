@@ -11,15 +11,17 @@ topics:
   - bitcoincash
   - dash
   
+publish_to: 'none'
+
 environment:
   sdk: '>=2.15.0 <4.0.0'
 
 
 dependencies:
-  blockchain_utils: ^3.4.0
-  
-  # blockchain_utils:
-  #   path: ../blockchain_utils
+  # blockchain_utils: ^3.4.0
+
+  blockchain_utils:
+    path: ../blockchain_utils
     
 
 dev_dependencies:
