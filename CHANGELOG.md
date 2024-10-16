@@ -1,3 +1,7 @@
+## 4.9.1
+
+* Resolved issue with transaction deserialization (Issue #9)
+
 ## 4.9.0
 
 * Correct Bitcoin address network configuration.
