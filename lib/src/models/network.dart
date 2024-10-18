@@ -525,8 +525,7 @@ class OmniXepNetwork implements BasedUtxoNetwork {
 
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
   @override
-  String get p2wpkhHrp => throw const DartBitcoinPluginException(
-      "Omni XEP network does not support P2WPKH/P2WSH");
+  String get p2wpkhHrp => conf.params.p2wpkhHrp!;
 
   /// Checks if the current network is the mainnet.
   @override
@@ -534,6 +533,7 @@ class OmniXepNetwork implements BasedUtxoNetwork {
 
   @override
   final List<BitcoinAddressType> supportedAddress = const [
+    SegwitAddresType.p2wpkh,
     P2shAddressType.p2wpkhInP2sh,
   ];
 
