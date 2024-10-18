@@ -1,6 +1,6 @@
 name: bitcoin_base
 description: A versatile library for Bitcoin, Dogecoin, Litecoin, Dash, BSV, and BCH. Supports P2PKH, P2SH, P2WPKH, P2WSH, P2TR, with advanced creation, signing, and spending capabilities.
-version: 4.9.0
+version: 4.9.1
 homepage: "https://github.com/mrtnetwork/bitcoin_base"
 repository: "https://github.com/mrtnetwork/bitcoin_base"
 Author: mrhaydari.t@gmail.com
@@ -25,7 +25,7 @@ dependencies:
     
 
 dev_dependencies:
-  test: ^1.25.8
+  test: ^1.25.5
   lints: ^4.0.0
   flutter_lints: ^4.0.0
  
