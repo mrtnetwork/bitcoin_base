@@ -2,12 +2,6 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final sx =
-      "020000000001019361bb41042ba1b84bfd0adf549fd71d0100d523c96f235c0303a820ebe97b6f00000000000100000002f3e0010000000000225120eeef21c790e883138874de40105c2900e95d03b5f2964f6164afde5dfacec01d33e4e902000000001600142d8db3142cf97e996977fed9aec74021395c036900000000";
-  final tx = BtcTransaction.fromRaw(sx);
-  print(tx.inputs.length);
-  print(tx.serialize() == sx);
-  return;
   group("P2WSH", () {
     final sk1 = ECPrivate.fromWif(
         "cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo",

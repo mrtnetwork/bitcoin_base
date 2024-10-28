@@ -131,7 +131,6 @@ class BtcTransaction {
     if ((rawtx.length - cursor) >= 4) {
       lock = rawtx.sublist(cursor, cursor + 4);
     }
-    print("lock $lock");
     return BtcTransaction(
         inputs: inputs,
         outputs: outputs,
