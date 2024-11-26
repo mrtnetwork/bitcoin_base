@@ -43,7 +43,7 @@ class _BitcoinAddressUtils {
       /// Verify the checksum.
       List<int> hash = QuickCrypto.sha256DoubleHash(data)
           .sublist(0, Base58Const.checksumByteLen);
-      if (!bytesEqual(checksum, hash)) {
+      if (!BytesUtils.bytesEqual(checksum, hash)) {
         return null;
       }
 
@@ -65,9 +65,9 @@ class _BitcoinAddressUtils {
       return null;
     }
     final decodedHex = BytesUtils.toHexString(decode.item1);
-    if (bytesEqual(decode.item2, networks.p2pkhNetVer)) {
+    if (BytesUtils.bytesEqual(decode.item2, networks.p2pkhNetVer)) {
       return P2pkhAddress.fromHash160(addrHash: decodedHex);
-    } else if (bytesEqual(decode.item2, networks.p2shNetVer)) {
+    } else if (BytesUtils.bytesEqual(decode.item2, networks.p2shNetVer)) {
       return P2shAddress.fromHash160(addrHash: decodedHex);
     }
     return null;
@@ -89,7 +89,7 @@ class _BitcoinAddressUtils {
     final convert = SegwitBech32Decoder.decode(network.p2wpkhHrp, address);
     final witnessVersion = convert.item1;
     if (witnessVersion != version) {
-      throw const MessageException("Invalid segwit version");
+      throw const DartBitcoinPluginException("Invalid segwit version");
     }
     return BytesUtils.toHexString(convert.item2);
   }
@@ -137,7 +137,7 @@ class _BitcoinAddressUtils {
     if (network.supportedAddress.contains(address.type)) {
       return address;
     }
-    throw MessageException(
+    throw DartBitcoinPluginException(
         "${network.value} does not support ${address.type.value} address");
   }
 
@@ -158,7 +158,7 @@ class _BitcoinAddressUtils {
     }
     baseAddress ??= toLegacy(address, network);
     if (baseAddress == null) {
-      throw const MessageException("Invalid Bitcoin address");
+      throw const DartBitcoinPluginException("Invalid Bitcoin address");
     }
     return validateAddress(baseAddress, network);
   }
@@ -180,7 +180,7 @@ class _BitcoinAddressUtils {
       }
       // ignore: empty_catches
     } catch (e) {}
-    throw const MessageException(
+    throw const DartBitcoinPluginException(
         "Invalid Bitcoin address program length (program length should be 32 or 20 bytes)");
   }
 
@@ -229,18 +229,18 @@ class _BitcoinAddressUtils {
       return null;
     }
     if (scriptLength == hash160DigestLength) {
-      final legacyP2pk = bytesEqual(network.p2pkhNetVer, version);
+      final legacyP2pk = BytesUtils.bytesEqual(network.p2pkhNetVer, version);
 
-      if (bytesEqual(network.p2pkhNetVer, version) ||
-          bytesEqual(network.p2pkhWtNetVer, version)) {
+      if (BytesUtils.bytesEqual(network.p2pkhNetVer, version) ||
+          BytesUtils.bytesEqual(network.p2pkhWtNetVer, version)) {
         return P2pkhAddress.fromHash160(
             addrHash: scriptHex,
             type:
                 legacyP2pk ? P2pkhAddressType.p2pkh : P2pkhAddressType.p2pkhwt);
       }
-      final legacyP2sh = bytesEqual(network.p2shNetVer, version);
-      if (bytesEqual(network.p2shNetVer, version) ||
-          bytesEqual(network.p2shwt20NetVer, version)) {
+      final legacyP2sh = BytesUtils.bytesEqual(network.p2shNetVer, version);
+      if (BytesUtils.bytesEqual(network.p2shNetVer, version) ||
+          BytesUtils.bytesEqual(network.p2shwt20NetVer, version)) {
         return P2shAddress.fromHash160(
             addrHash: scriptHex,
             type: legacyP2sh
@@ -248,9 +248,9 @@ class _BitcoinAddressUtils {
                 : P2shAddressType.p2pkhInP2shwt);
       }
     } else {
-      final legacyP2sh = bytesEqual(network.p2sh32NetVer, version);
-      if (bytesEqual(network.p2sh32NetVer, version) ||
-          bytesEqual(network.p2shwt32NetVer, version)) {
+      final legacyP2sh = BytesUtils.bytesEqual(network.p2sh32NetVer, version);
+      if (BytesUtils.bytesEqual(network.p2sh32NetVer, version) ||
+          BytesUtils.bytesEqual(network.p2shwt32NetVer, version)) {
         return P2shAddress.fromHash160(
             addrHash: scriptHex,
             type: legacyP2sh
@@ -276,7 +276,7 @@ class _BitcoinAddressUtils {
       required BitcoinAddressType type,
       required BasedUtxoNetwork network}) {
     if (!network.supportedAddress.contains(type)) {
-      throw MessageException(
+      throw DartBitcoinPluginException(
           "${network.value} does not support ${type.value} address type");
     }
     if (network is BitcoinCashNetwork) {
@@ -296,7 +296,7 @@ class _BitcoinAddressUtils {
 
     switch (type) {
       case P2pkhAddressType.p2pkh:
-        if (bytesEqual(version, network.p2pkhNetVer)) {
+        if (BytesUtils.bytesEqual(version, network.p2pkhNetVer)) {
           return scriptHex;
         }
         return null;
@@ -304,7 +304,7 @@ class _BitcoinAddressUtils {
       case P2shAddressType.p2pkInP2sh:
       case P2shAddressType.p2wshInP2sh:
       case P2shAddressType.p2wpkhInP2sh:
-        if (bytesEqual(version, network.p2shNetVer)) {
+        if (BytesUtils.bytesEqual(version, network.p2shNetVer)) {
           return scriptHex;
         }
         return null;

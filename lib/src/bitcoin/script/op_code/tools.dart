@@ -1,5 +1,5 @@
-import 'package:blockchain_utils/binary/binary_operation.dart';
-import 'package:blockchain_utils/binary/utils.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
+import 'package:blockchain_utils/utils/utils.dart';
 
 List<int> opPushData(String hexData) {
   final List<int> dataBytes = BytesUtils.fromHexString(hexData);
@@ -19,13 +19,15 @@ List<int> opPushData(String hexData) {
     writeUint32LE(lengthBytes.length, lengthBytes);
     return List<int>.from([0x4e, ...lengthBytes, ...dataBytes]);
   } else {
-    throw ArgumentError("Data too large. Cannot push into script");
+    throw const DartBitcoinPluginException(
+        "Data too large. Cannot push into script");
   }
 }
 
 List<int> pushInteger(int integer) {
   if (integer < 0) {
-    throw ArgumentError('Integer is currently required to be positive.');
+    throw const DartBitcoinPluginException(
+        'Integer is currently required to be positive.');
   }
 
   /// Calculate the number of bytes required to represent the integer

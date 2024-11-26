@@ -9,8 +9,8 @@ abstract class BitcoinAddressType implements Enumerate {
   /// Factory method to create a BitcoinAddressType enum value from a name or value.
   static BitcoinAddressType fromValue(String value) {
     return values.firstWhere((element) => element.value == value,
-        orElse: () =>
-            throw MessageException('Invalid BitcoinAddressType: $value'));
+        orElse: () => throw DartBitcoinPluginException(
+            'Invalid BitcoinAddressType: $value'));
   }
 
   /// Check if the address type is Pay-to-Script-Hash (P2SH).

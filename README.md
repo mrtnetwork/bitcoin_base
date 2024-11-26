@@ -1,4 +1,5 @@
 # BITCOIN Dart Package
+
 a comprehensive and versatile Dart library that provides robust support for various cryptocurrency transaction types. It is designed to meet your transaction needs for Bitcoin, Dogecoin, Litecoin, Dash, Bitcoin Cash and Bitcoin SV. The library offers features such as spending transactions, address management, Schnorr signatures for Bitcoin, BIP-39 mnemonic phrase generation, hierarchical deterministic (HD) wallet derivation, and Web3 Secret Storage Definition..
 
 For BIP32 HD wallet, BIP39, and Secret storage definitions, please refer to the [blockchain_utils](https://github.com/mrtnetwork/blockchain_utils) package.
@@ -22,8 +23,9 @@ This package was inspired by the [python-bitcoin-utils](https://github.com/karas
 - **Bitcoin SV**
   - P2PK, P2PKH
 
-
 ### Transaction Types
+
+ss
 This comprehensive package provides robust support for a wide array of Bitcoin transaction types, encompassing the full spectrum of Bitcoin transaction capabilities. Whether you need to execute standard payments, facilitate complex multi-signature wallets, leverage Segregated Witness (SegWit) transactions for lower fees and enhanced scalability, or embrace the privacy and flexibility of Pay-to-Taproot (P2TR) transactions, this package has you covered. Additionally, it empowers users to engage in legacy transactions, create time-locked transactions, and harness the security of multisignature (multisig) transactions. With this package, you can seamlessly navigate the diverse landscape of Bitcoin transactions, ensuring your interactions with the Bitcoin network are secure, efficient, and tailored to your specific needs.
 
 - P2PKH (Pay-to-Public-Key-Hash): The most common transaction type, it sends funds to a recipient's public key hash. Provides security and anonymity.
@@ -47,6 +49,7 @@ This comprehensive package provides robust support for a wide array of Bitcoin t
 - Coinbase Transactions: The first transaction in each block, generating new Bitcoins as a block reward for miners. It includes the miner's payout address.
 
 ### Tokens on Bitcoin Cash
+
 CashTokens are digital assets that can be created and used on the global, decentralized Bitcoin Cash (BCH) network. These tokens can be issued by any person, organization, or decentralized application.
 
 - Fungible tokens: Create, sign, spend, and burn.
@@ -56,7 +59,9 @@ CashTokens are digital assets that can be created and used on the global, decent
 - BCMR: Metadata Registries CHIP
 
 ### Create Transaction
+
 Using this package, you can create a Bitcoin transaction in two ways: either through the `BtcTransaction` or the `BitcoinTransactionBuilder` class
+
 - BtcTransaction: To use the `BtcTransaction` class, you should have a general understanding of how Bitcoin transactions work, including knowledge of UTXOs, scripts, various types of scripts, Bitcoin addresses, signatures, and more. We created examples and tests to enhance your understanding. An example of this transaction type is explained below, and you can also find numerous examples in the [`test`](https://github.com/mrtnetwork/bitcoin_base/tree/main/test) folder.
 
 - BitcoinTransactionBuilder: Even with limited prior knowledge, you can utilize this class to send various types of transactions. Below, I've provided an example in which a transaction features 8 distinct input addresses with different types and private keys, as well as 10 different output addresses. Furthermore, additional examples have been prepared, which you can find in the [`example`](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) folder.
@@ -83,31 +88,34 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
 
 - P2PKHWT: Pay to Public Key Hash With Token
 
-
 ### Sign
+
 - Sign message: ECDSA Signature Algorithm
   
 - Sign Segwit(v0) and legacy transaction: ECDSA Signature Algorithm
   
 - Sign Taproot transaction
   
-  - Script Path and TapTweak: Taproot allows for multiple script paths (smart contract conditions) to be included in a single transaction. The "taptweak" ensures that the correct 	 
+  - Script Path and TapTweak: Taproot allows for multiple script paths (smart contract conditions) to be included in a single transaction. The "taptweak" ensures that the correct
     script path is used when spending. This enhances privacy by making it difficult to determine the spending conditions from the transaction.
-    
-  - Schnorr Signatures: While ECDSA is still used for Taproot, it also provides support for Schnorr signatures. Schnorr signatures offer benefits such as smaller signature sizes and 	 
+
+  - Schnorr Signatures: While ECDSA is still used for Taproot, it also provides support for Schnorr signatures. Schnorr signatures offer benefits such as smaller signature sizes and
     signature aggregation, contributing to improved scalability and privacy.
-    
-  - Schnorr-Musig: Taproot can leverage Schnorr-Musig, a technique for securely aggregating multiple signatures into a single signature. This feature enables collaborative spending and 
+
+  - Schnorr-Musig: Taproot can leverage Schnorr-Musig, a technique for securely aggregating multiple signatures into a single signature. This feature enables collaborative spending and
     enhances privacy.
 
 ### Node Provider
+
 We have integrated three APIs—Mempool, BlockCypher, and Electrum—into the plugin to facilitate network access. These APIs enable seamless retrieval of information such as unspent transactions (UTXO), network fees, sending transactions, receiving transaction details, and fetching account transactions.
 
 ## EXAMPLES
 
 ### Key and addresses
-  - Private key
-    ```
+
+- Private key
+
+    ```dart
     // Create an EC private key instance from a WIF (Wallet Import Format) encoded string.
     final privateKey =
       ECPrivate.fromWif("cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR", netVersion: BitcoinNetwork.mainnet.wifNetVer);
@@ -128,8 +136,10 @@ We have integrated three APIs—Mempool, BlockCypher, and Electrum—into the pl
     // Convert the private key to its hexadecimal representation.
     final toHex = privateKey.toHex();
     ```
+
 - Public key
-  ```
+
+  ```dart
   // Create an instance of an EC public key from a hexadecimal representation.
   final publicKey = ECPublic.fromHex('.....');
 
@@ -173,8 +183,10 @@ We have integrated three APIs—Mempool, BlockCypher, and Electrum—into the pl
   // Verify verifies a signature against a message
   final verify = publicKey.verify();
   ```
+
 - Addresses
-  ```
+
+  ```dart
   final p2pkh = P2pkhAddress.fromAddress(
       address: "1Q5odQtVCc4PDmP5ncrp7DSuVbh2ML4Gnb",
       network: BitcoinNetwork.mainnet);
@@ -257,11 +269,11 @@ We have integrated three APIs—Mempool, BlockCypher, and Electrum—into the pl
 In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib) folder, you'll find various examples tailored for each supported network, including Bitcoin, Dogecoin, Litecoin, Bitcoin Cash, and Dash.
 
 - With TransactionBuilder
-  BitcoinTransactionBuilder 
+  BitcoinTransactionBuilder
 
   supports the Bitcoin, Dogecoin, Dash, and Litecoin networks, allowing for easy creation and signing of various address types.
 
-  ```
+  ```dart
   /// connect to electrum service with websocket
   /// please see `services_examples` folder for how to create electrum websocket service
    final service =
@@ -421,12 +433,13 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
   /// https://mempool.space/testnet/tx/70cf664bba4b5ac9edc6133e9c6891ffaf8a55eaea9d2ac99aceead1c3db8899
 
   ```
+
 - With ForkedTransactionBuilder
 
   ForkedTransactionBuilder supports the BitcoinCash and bitcoinSV for easy creation and signing of various address types.
   For spending network amounts, it functions similarly to TransactionBuilder. However, in this example, the focus is on spending CashToken (BCH Feature). For minting, burning, and creating FTs (Fungible Tokens) and NFTs (Non-Fungible Tokens), you can refer to the [example folders](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/bitcoin_cash)
   
-  ```
+  ```dart
   /// connect to electrum service with websocket
   /// please see `services_examples` folder for how to create electrum websocket service
   final service = await ElectrumWebSocketService.connect(
@@ -559,10 +572,11 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
   ///  https://chipnet.imaginary.cash/tx/97030c1236a024de7cad7ceadf8571833029c508e016bcc8173146317e367ae6
 
   ```
+
 - With BtcTransaction
   - Spend P2TR UTXO
 
-    ```
+    ```dart
       // We define transaction inputs by specifying the transaction ID and index.
     final txin = utxo
         .map((e) => TxInput(txId: e.utxo.txHash, txIndex: e.utxo.vout))
@@ -632,8 +646,10 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
     tx.Serialize()
     
     ```
+
   - Spend P2PKH UTXO
-    ```
+
+    ```dart
       // We define transaction inputs by specifying the transaction ID and index.
     final txin = utxo
         .map((e) => TxInput(txId: e.utxo.txHash, txIndex: e.utxo.vout))
@@ -674,10 +690,12 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
     ```
   
 ### Node provider
+
 I haven't implemented any specific HTTP service or socket service within this plugin. The reason is that different applications may use various plugins or methods to interact with network protocols. However, I have included numerous examples to demonstrate how Electrum and HTTP services can be utilized. You can leverage these examples as a reference to easily create services tailored to your application's specific needs. [examples](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/services_examples)
 
 - Electrum API (Websocket, TCP, SSL)
-```
+
+```dart
   const network = BitcoinNetwork.mainnet;
 
   /// connect to electrum service with websocket
@@ -710,7 +728,8 @@ I haven't implemented any specific HTTP service or socket service within this pl
 ```
 
 - Explorer API (blockCypher, mempool)
-```
+
+```dart
   /// Define the blockchain network you want to work with, in this case, it's Bitcoin.
   const network = BitcoinNetwork.mainnet;
 
@@ -743,12 +762,11 @@ I haven't implemented any specific HTTP service or socket service within this pl
 ## Contributing
 
 Contributions are welcome! Please follow these guidelines:
- - Fork the repository and create a new branch.
- - Make your changes and ensure tests pass.
- - Submit a pull request with a detailed description of your changes.
 
-## Feature requests and bugs #
+- Fork the repository and create a new branch.
+- Make your changes and ensure tests pass.
+- Submit a pull request with a detailed description of your changes.
+
+## Feature requests and bugs
 
 Please file feature requests and bugs in the issue tracker.
-
-

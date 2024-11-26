@@ -3,7 +3,7 @@ import 'package:bitcoin_base/src/utils/btc_utils.dart';
 
 /// Return the estimated transaction fee per kilobyte for a transaction to be confirmed within a certain number of blocks.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumEstimateFee extends ElectrumRequest<BigInt, dynamic> {
+class ElectrumEstimateFee extends ElectrumRequest<BigInt?, dynamic> {
   ElectrumEstimateFee({this.numberOfBlock = 2});
 
   /// The number of blocks to target for confirmation.
@@ -20,7 +20,9 @@ class ElectrumEstimateFee extends ElectrumRequest<BigInt, dynamic> {
 
   /// The estimated transaction fee in Bigint(satoshi)
   @override
-  BigInt onResonse(result) {
-    return BtcUtils.toSatoshi(result.toString());
+  BigInt? onResonse(result) {
+    final fee = BtcUtils.toSatoshi(result.toString());
+    if (fee.isNegative) return null;
+    return fee;
   }
 }

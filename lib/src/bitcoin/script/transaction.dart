@@ -2,12 +2,9 @@ import 'dart:typed_data';
 import 'package:bitcoin_base/src/cash_token/cash_token.dart';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/bytes_utils/dynamic_byte.dart';
-import 'package:blockchain_utils/binary/binary_operation.dart';
-import 'package:blockchain_utils/binary/utils.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
+import 'package:blockchain_utils/utils/utils.dart';
 import 'package:blockchain_utils/crypto/quick_crypto.dart';
-import 'package:blockchain_utils/numbers/bigint_utils.dart';
-import 'package:blockchain_utils/numbers/int_utils.dart';
 import 'input.dart';
 import 'output.dart';
 import 'script.dart';
@@ -43,8 +40,6 @@ class BtcTransaction {
   final bool hasSegwit;
   final List<TxWitnessInput> witnesses;
 
-  // List<TxWitnessInput> get witnesses =>
-  //     List.unmodifiable(_witnesses.map((e) => e.copy()).toList());
   BtcTransaction copyWith({
     List<TxInput>? inputs,
     List<TxOutput>? outputs,
@@ -62,10 +57,6 @@ class BtcTransaction {
       version: version ?? List<int>.from(this.version),
     );
   }
-
-  // void addWitnesses(TxWitnessInput witness) {
-  //   _witnesses.add(witness);
-  // }
 
   /// creates a copy of the object (classmethod)
   static BtcTransaction copy(BtcTransaction tx) {
@@ -92,7 +83,7 @@ class BtcTransaction {
       }
       cursor += 2;
     }
-    final vi = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
+    final vi = IntUtils.decodeVarint(rawtx.sublist(cursor));
     cursor += vi.item2;
 
     List<TxInput> inputs = [];
@@ -105,7 +96,7 @@ class BtcTransaction {
     }
 
     List<TxOutput> outputs = [];
-    final viOut = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
+    final viOut = IntUtils.decodeVarint(rawtx.sublist(cursor));
     cursor += viOut.item2;
     for (int index = 0; index < viOut.item1; index++) {
       final inp =
@@ -115,25 +106,31 @@ class BtcTransaction {
     }
     List<TxWitnessInput> witnesses = [];
     if (hasSegwit) {
-      for (int n = 0; n < inputs.length; n++) {
-        final wVi = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
-        cursor += wVi.item2;
-        List<String> witnessesTmp = [];
-        for (int n = 0; n < wVi.item1; n++) {
-          List<int> witness = <int>[];
-          final wtVi = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
-          if (wtVi.item1 != 0) {
-            witness = rawtx.sublist(
-                cursor + wtVi.item2, cursor + wtVi.item1 + wtVi.item2);
+      if (cursor + 4 < rawtx.length) {
+        // in this case the tx contains wintness data.
+        for (int n = 0; n < inputs.length; n++) {
+          final wVi = IntUtils.decodeVarint(rawtx.sublist(cursor));
+          cursor += wVi.item2;
+          List<String> witnessesTmp = [];
+          for (int n = 0; n < wVi.item1; n++) {
+            List<int> witness = <int>[];
+            final wtVi = IntUtils.decodeVarint(rawtx.sublist(cursor));
+            if (wtVi.item1 != 0) {
+              witness = rawtx.sublist(
+                  cursor + wtVi.item2, cursor + wtVi.item1 + wtVi.item2);
+            }
+            cursor += wtVi.item1 + wtVi.item2;
+            witnessesTmp.add(BytesUtils.toHexString(witness));
           }
-          cursor += wtVi.item1 + wtVi.item2;
-          witnessesTmp.add(BytesUtils.toHexString(witness));
-        }
 
-        witnesses.add(TxWitnessInput(stack: witnessesTmp));
+          witnesses.add(TxWitnessInput(stack: witnessesTmp));
+        }
       }
     }
-    List<int> lock = rawtx.sublist(cursor, cursor + 4);
+    List<int>? lock;
+    if ((rawtx.length - cursor) >= 4) {
+      lock = rawtx.sublist(cursor, cursor + 4);
+    }
     return BtcTransaction(
         inputs: inputs,
         outputs: outputs,
@@ -168,22 +165,16 @@ class BtcTransaction {
       }
     } else if ((sighash & 0x1f) == BitcoinOpCodeConst.SIGHASH_SINGLE) {
       if (txInIndex >= tx.outputs.length) {
-        throw ArgumentError(
-            "Transaction index is greater than theavailable outputs");
+        throw const DartBitcoinPluginException(
+            "Transaction index is greater than the available outputs");
       }
-      // final txout = tx.outputs[txInIndex];
-      // tx.outputs.clear();
-      // tx = tx.copyWith(outputs: []);
+
       List<TxOutput> outputs = [];
       for (int i = 0; i < txInIndex; i++) {
         outputs.add(TxOutput(
             amount: BigInt.from(BitcoinOpCodeConst.NEGATIVE_SATOSHI),
             scriptPubKey: Script(script: [])));
-        // tx.outputs.add(TxOutput(
-        //     amount: BigInt.from(BitcoinOpCodeConst.NEGATIVE_SATOSHI),
-        //     scriptPubKey: Script(script: [])));
       }
-      // outputs.add(txout);
       tx = tx.copyWith(outputs: [...outputs, tx.outputs[txInIndex]]);
       for (int i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
@@ -193,10 +184,7 @@ class BtcTransaction {
       }
     }
     if ((sighash & BitcoinOpCodeConst.SIGHASH_ANYONECANPAY) != 0) {
-      // final inp = tx.inputs[txInIndex];
       tx = tx.copyWith(inputs: [tx.inputs[txInIndex]]);
-      // tx.inputs.clear();
-      // tx.inputs.add(inp);
     }
     List<int> txForSign = tx.toBytes(segwit: false);
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:bitcoin_base/src/provider/models/models.dart';
 import 'package:bitcoin_base/src/provider/service/http/http_service.dart';
 import 'package:bitcoin_base/src/models/network.dart';
+import 'package:blockchain_utils/utils/string/string.dart';
 
 class ApiProvider {
   ApiProvider(
@@ -137,5 +138,21 @@ class ApiProvider {
             .toList();
         return transactions;
     }
+  }
+
+  Future<String> getBlockHeight(int height) async {
+    final url = api.getBlockHeight(height);
+    final response = await _getRequest<String>(url);
+    switch (api.apiType) {
+      case APIType.mempool:
+        return response;
+      default:
+        final toJson = StringUtils.toJson<Map<String, dynamic>>(response);
+        return toJson["hash"];
+    }
+  }
+
+  Future<String> genesis() async {
+    return getBlockHeight(0);
   }
 }

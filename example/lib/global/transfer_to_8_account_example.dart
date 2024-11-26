@@ -102,6 +102,11 @@ void main() async {
   /// get network fee esmtimate (kb/s)
   final networkEstimate = await provider.request(ElectrumEstimateFee());
 
+  /// the daemon does not have enough information to make an estimate
+  if (networkEstimate == null) {
+    return;
+  }
+
   /// kb to bytes and mul with transaction size and now we have fee
   final fee =
       BigInt.from(estimateSize) * (networkEstimate ~/ BigInt.from(1000));

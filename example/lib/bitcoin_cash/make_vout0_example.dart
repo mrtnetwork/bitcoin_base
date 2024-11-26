@@ -1,5 +1,5 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:blockchain_utils/binary/utils.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:example/services_examples/electrum/electrum_ssl_service.dart';
 
 /// make vout 0 for account for create token hash

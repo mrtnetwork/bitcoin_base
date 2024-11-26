@@ -1,4 +1,5 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// MultiSignatureSigner is an interface that defines methods required for representing
@@ -50,7 +51,7 @@ class MultiSignatureAddress {
 
   BitcoinBaseAddress toP2wshAddress({required BasedUtxoNetwork network}) {
     if (network is! LitecoinNetwork && network is! BitcoinNetwork) {
-      throw ArgumentError(
+      throw DartBitcoinPluginException(
           "${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress");
     }
     return P2wshAddress.fromScript(script: multiSigScript);
@@ -65,7 +66,7 @@ class MultiSignatureAddress {
   BitcoinBaseAddress toP2shAddress(
       [P2shAddressType addressType = P2shAddressType.p2pkhInP2sh]) {
     if (!legacySupportP2shTypes.contains(addressType)) {
-      throw MessageException(
+      throw DartBitcoinPluginException(
           "invalid p2sh type please use one of them ${legacySupportP2shTypes.map((e) => "$e").join(", ")}");
     }
 
@@ -93,7 +94,7 @@ class MultiSignatureAddress {
       case P2shAddressType.p2pkhInP2sh32wt:
         return toP2shAddress(addressType as P2shAddressType);
       default:
-        throw ArgumentError(
+        throw const DartBitcoinPluginException(
             "invalid multisig address type. use of of them [BitcoinAddressType.p2wsh, BitcoinAddressType.p2wshInP2sh, BitcoinAddressType.p2pkhInP2sh]");
     }
   }
@@ -115,14 +116,15 @@ class MultiSignatureAddress {
     final sumWeight =
         signers.fold<int>(0, (sum, signer) => sum + signer.weight);
     if (threshold > 16 || threshold < 1) {
-      throw ArgumentError('The threshold should be between 1 and 16');
+      throw const DartBitcoinPluginException(
+          'The threshold should be between 1 and 16');
     }
     if (sumWeight > 16) {
-      throw ArgumentError(
+      throw const DartBitcoinPluginException(
           'The total weight of the owners should not exceed 16');
     }
     if (sumWeight < threshold) {
-      throw ArgumentError(
+      throw const DartBitcoinPluginException(
           'The total weight of the signatories should reach the threshold');
     }
     final multiSigScript = <String>['OP_$threshold'];

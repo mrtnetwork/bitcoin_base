@@ -14,7 +14,8 @@ abstract class LegacyAddress implements BitcoinBaseAddress {
     final decode = _BitcoinAddressUtils.decodeLagacyAddressWithNetworkAndType(
         address: address, type: type, network: network);
     if (decode == null) {
-      throw MessageException("Invalid ${network.conf.coinName} address");
+      throw DartBitcoinPluginException(
+          "Invalid ${network.conf.coinName} address");
     }
     _addressProgram = decode;
   }
@@ -62,7 +63,8 @@ class P2shAddress extends LegacyAddress {
   @override
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
-      throw MessageException("network does not support ${type.value} address");
+      throw DartBitcoinPluginException(
+          "network does not support ${type.value} address");
     }
     return super.toAddress(network);
   }
@@ -109,7 +111,7 @@ class P2pkAddress extends LegacyAddress {
   P2pkAddress({required String publicKey}) : super._() {
     final toBytes = BytesUtils.fromHexString(publicKey);
     if (!Secp256k1PublicKeyEcdsa.isValidBytes(toBytes)) {
-      throw const MessageException("Invalid secp256k1 public key");
+      throw const DartBitcoinPluginException("Invalid secp256k1 public key");
     }
     publicHex = publicKey;
   }

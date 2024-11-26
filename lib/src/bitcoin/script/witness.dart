@@ -1,5 +1,4 @@
-import 'package:blockchain_utils/binary/utils.dart';
-import 'package:blockchain_utils/numbers/int_utils.dart';
+import 'package:blockchain_utils/utils/utils.dart';
 
 /// A list of the witness items required to satisfy the locking conditions of a segwit input (aka witness stack).
 ///

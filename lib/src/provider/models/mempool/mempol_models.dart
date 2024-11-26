@@ -175,7 +175,7 @@ class MempolUtxo implements UTXO {
 
   @override
   BitcoinUtxo toUtxo(BitcoinAddressType addressType) {
-    throw BitcoinUtxo(
+    return BitcoinUtxo(
         txHash: txid,
         value: value,
         vout: vout,

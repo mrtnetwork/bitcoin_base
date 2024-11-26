@@ -1,5 +1,7 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/utils/enumerate.dart';
+import 'package:blockchain_utils/bip/bip/bip.dart';
 import 'package:blockchain_utils/bip/coin_conf/coin_conf.dart';
 import 'package:blockchain_utils/bip/coin_conf/coins_conf.dart';
 
@@ -45,12 +47,18 @@ abstract class BasedUtxoNetwork implements Enumerate {
     BitcoinCashNetwork.mainnet,
     BitcoinCashNetwork.testnet,
     BitcoinSVNetwork.mainnet,
-    BitcoinSVNetwork.testnet
+    BitcoinSVNetwork.testnet,
+    PepeNetwork.mainnet
   ];
 
   static BasedUtxoNetwork fromName(String name) {
     return values.firstWhere((element) => element.value == name);
   }
+
+  List<BipCoins> get coins;
+
+  /// Checks if the current network is the mainnet.
+  bool get isMainnet => this == BitcoinNetwork.mainnet;
 }
 
 /// Class representing a Bitcoin network, implementing the `BasedUtxoNetwork` abstract class.
@@ -91,11 +99,18 @@ class BitcoinSVNetwork implements BasedUtxoNetwork {
   String get p2wpkhHrp => conf.params.p2wpkhHrp!;
 
   /// Checks if the current network is the mainnet.
+  @override
   bool get isMainnet => this == BitcoinSVNetwork.mainnet;
 
   @override
   List<BitcoinAddressType> get supportedAddress =>
       [P2pkhAddressType.p2pkh, PubKeyAddressType.p2pk];
+
+  @override
+  List<BipCoins> get coins {
+    if (isMainnet) return [Bip44Coins.bitcoinSv];
+    return [Bip44Coins.bitcoinSvTestnet];
+  }
 }
 
 /// Class representing a Bitcoin network, implementing the `BasedUtxoNetwork` abstract class.
@@ -136,6 +151,7 @@ class BitcoinNetwork implements BasedUtxoNetwork {
   String get p2wpkhHrp => conf.params.p2wpkhHrp!;
 
   /// Checks if the current network is the mainnet.
+  @override
   bool get isMainnet => this == BitcoinNetwork.mainnet;
 
   @override
@@ -150,6 +166,24 @@ class BitcoinNetwork implements BasedUtxoNetwork {
         P2shAddressType.p2pkhInP2sh,
         P2shAddressType.p2pkInP2sh,
       ];
+
+  @override
+  List<BipCoins> get coins {
+    if (isMainnet) {
+      return [
+        Bip44Coins.bitcoin,
+        Bip49Coins.bitcoin,
+        Bip84Coins.bitcoin,
+        Bip86Coins.bitcoin,
+      ];
+    }
+    return [
+      Bip44Coins.bitcoinTestnet,
+      Bip49Coins.bitcoinTestnet,
+      Bip84Coins.bitcoinTestnet,
+      Bip86Coins.bitcoinTestnet,
+    ];
+  }
 }
 
 /// Class representing a Litecoin network, implementing the `BasedUtxoNetwork` abstract class.
@@ -189,6 +223,7 @@ class LitecoinNetwork implements BasedUtxoNetwork {
   String get p2wpkhHrp => conf.params.p2wpkhHrp!;
 
   /// Checks if the current network is the mainnet.
+  @override
   bool get isMainnet => this == LitecoinNetwork.mainnet;
 
   @override
@@ -202,6 +237,18 @@ class LitecoinNetwork implements BasedUtxoNetwork {
     P2shAddressType.p2pkhInP2sh,
     P2shAddressType.p2pkInP2sh,
   ];
+
+  @override
+  List<BipCoins> get coins {
+    if (isMainnet) {
+      return [Bip44Coins.litecoin, Bip49Coins.litecoin, Bip84Coins.litecoin];
+    }
+    return [
+      Bip44Coins.litecoinTestnet,
+      Bip49Coins.litecoinTestnet,
+      Bip84Coins.litecoinTestnet
+    ];
+  }
 }
 
 /// Class representing a Dash network, implementing the `BasedUtxoNetwork` abstract class.
@@ -235,10 +282,11 @@ class DashNetwork implements BasedUtxoNetwork {
 
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
   @override
-  String get p2wpkhHrp => throw UnimplementedError(
+  String get p2wpkhHrp => throw const DartBitcoinPluginException(
       "DashNetwork network does not support P2WPKH/P2WSH");
 
   /// Checks if the current network is the mainnet.
+  @override
   bool get isMainnet => this == DashNetwork.mainnet;
 
   @override
@@ -251,6 +299,12 @@ class DashNetwork implements BasedUtxoNetwork {
 
   @override
   final String value;
+
+  @override
+  List<BipCoins> get coins {
+    if (isMainnet) return [Bip44Coins.dash, Bip49Coins.dash];
+    return [Bip44Coins.dashTestnet, Bip49Coins.dashTestnet];
+  }
 }
 
 /// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
@@ -287,10 +341,11 @@ class DogecoinNetwork implements BasedUtxoNetwork {
 
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
   @override
-  String get p2wpkhHrp => throw UnimplementedError(
+  String get p2wpkhHrp => throw const DartBitcoinPluginException(
       "DogecoinNetwork network does not support P2WPKH/P2WSH");
 
   /// Checks if the current network is the mainnet.
+  @override
   bool get isMainnet => this == DogecoinNetwork.mainnet;
 
   @override
@@ -300,6 +355,12 @@ class DogecoinNetwork implements BasedUtxoNetwork {
     P2shAddressType.p2pkhInP2sh,
     P2shAddressType.p2pkInP2sh
   ];
+
+  @override
+  List<BipCoins> get coins {
+    if (isMainnet) return [Bip44Coins.dogecoin, Bip49Coins.dogecoin];
+    return [Bip44Coins.dogecoinTestnet, Bip49Coins.dogecoinTestnet];
+  }
 }
 
 /// Class representing a Bitcoin Cash network, implementing the `BasedUtxoNetwork` abstract class.
@@ -348,12 +409,13 @@ class BitcoinCashNetwork implements BasedUtxoNetwork {
   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses
   /// from the associated `CoinConf`.
   @override
-  String get p2wpkhHrp =>
-      throw UnimplementedError("network does not support p2wpkh HRP");
+  String get p2wpkhHrp => throw const DartBitcoinPluginException(
+      "network does not support p2wpkh HRP");
 
   String get networkHRP => conf.params.p2pkhStdHrp!;
 
   /// Checks if the current network is the mainnet.
+  @override
   bool get isMainnet => this == BitcoinCashNetwork.mainnet;
 
   @override
@@ -370,4 +432,64 @@ class BitcoinCashNetwork implements BasedUtxoNetwork {
     P2shAddressType.p2pkhInP2shwt,
     P2shAddressType.p2pkInP2shwt,
   ];
+
+  @override
+  List<BipCoins> get coins {
+    if (isMainnet) return [Bip44Coins.bitcoinCash, Bip49Coins.bitcoinCash];
+    return [Bip44Coins.bitcoinCashTestnet, Bip49Coins.bitcoinCashTestnet];
+  }
+}
+
+/// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
+class PepeNetwork implements BasedUtxoNetwork {
+  /// Mainnet configuration with associated `CoinConf`.
+  static const PepeNetwork mainnet =
+      PepeNetwork._("pepecoinMainnet", CoinsConf.pepeMainnet);
+
+  /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
+  @override
+  final CoinConf conf;
+
+  /// Constructor for creating a Dogecoin network with a specific configuration.
+  const PepeNetwork._(this.value, this.conf);
+
+  @override
+  final String value;
+
+  /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get wifNetVer => conf.params.wifNetVer!;
+
+  /// Retrieves the Pay-to-Public-Key-Hash (P2PKH) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get p2pkhNetVer => conf.params.p2pkhNetVer!;
+
+  /// Retrieves the Pay-to-Script-Hash (P2SH) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get p2shNetVer => conf.params.p2shNetVer!;
+
+  /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
+  @override
+  String get p2wpkhHrp => throw const DartBitcoinPluginException(
+      "DogecoinNetwork network does not support P2WPKH/P2WSH");
+
+  /// Checks if the current network is the mainnet.
+  @override
+  bool get isMainnet => true;
+
+  @override
+  final List<BitcoinAddressType> supportedAddress = const [
+    PubKeyAddressType.p2pk,
+    P2pkhAddressType.p2pkh,
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2pkInP2sh
+  ];
+
+  @override
+  List<BipCoins> get coins {
+    if (isMainnet) {
+      return [Bip44Coins.pepecoin, Bip49Coins.pepecoin];
+    }
+    return [Bip44Coins.pepecoinTestnet, Bip49Coins.pepecoinTestnet];
+  }
 }
