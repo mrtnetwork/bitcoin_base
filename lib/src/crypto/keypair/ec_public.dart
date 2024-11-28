@@ -5,7 +5,8 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 
 class ECPublic {
   final Bip32PublicKey publicKey;
-  const ECPublic._(this.publicKey);
+  final bool? compressed;
+  const ECPublic._(this.publicKey, {this.compressed = true});
 
   factory ECPublic.fromBip32(Bip32PublicKey publicKey) {
     if (publicKey.curveType != EllipticCurveTypes.secp256k1) {
@@ -19,7 +20,8 @@ class ECPublic {
   factory ECPublic.fromBytes(List<int> public) {
     final publicKey = Bip32PublicKey.fromBytes(public, Bip32KeyData(),
         Bip32Const.mainNetKeyNetVersions, EllipticCurveTypes.secp256k1);
-    return ECPublic._(publicKey);
+    return ECPublic._(publicKey,
+        compressed: public.length == 65 ? false : true);
   }
 
   /// Constructs an ECPublic key from hex representation.

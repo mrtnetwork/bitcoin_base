@@ -208,7 +208,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
         }
         return senderPub.toP2wshScript();
       case P2pkhAddressType.p2pkh:
-        return senderPub.toAddress().toScriptPubKey();
+        return senderPub.toAddress(compressed: senderPub.compressed??true).toScriptPubKey();
       case SegwitAddresType.p2wpkh:
         if (isTaproot) {
           return senderPub.toSegwitAddress().toScriptPubKey();
@@ -361,7 +361,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
         case PubKeyAddressType.p2pk:
           return [signedDigest];
         case P2pkhAddressType.p2pkh:
-          return [signedDigest, senderPub.toHex()];
+          return [signedDigest, senderPub.toHex(compressed: senderPub.compressed??true)];
         case P2shAddressType.p2pkhInP2sh:
           final script = senderPub.toAddress().toScriptPubKey();
           return [signedDigest, senderPub.toHex(), script.toHex()];
