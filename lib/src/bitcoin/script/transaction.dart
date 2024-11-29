@@ -83,7 +83,7 @@ class BtcTransaction {
       }
       cursor += 2;
     }
-    final vi = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
+    final vi = IntUtils.decodeVarint(rawtx.sublist(cursor));
     cursor += vi.item2;
 
     List<TxInput> inputs = [];
@@ -96,7 +96,7 @@ class BtcTransaction {
     }
 
     List<TxOutput> outputs = [];
-    final viOut = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
+    final viOut = IntUtils.decodeVarint(rawtx.sublist(cursor));
     cursor += viOut.item2;
     for (int index = 0; index < viOut.item1; index++) {
       final inp =
@@ -106,25 +106,31 @@ class BtcTransaction {
     }
     List<TxWitnessInput> witnesses = [];
     if (hasSegwit) {
-      for (int n = 0; n < inputs.length; n++) {
-        final wVi = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
-        cursor += wVi.item2;
-        List<String> witnessesTmp = [];
-        for (int n = 0; n < wVi.item1; n++) {
-          List<int> witness = <int>[];
-          final wtVi = IntUtils.decodeVarint(rawtx.sublist(cursor, cursor + 9));
-          if (wtVi.item1 != 0) {
-            witness = rawtx.sublist(
-                cursor + wtVi.item2, cursor + wtVi.item1 + wtVi.item2);
+      if (cursor + 4 < rawtx.length) {
+        // in this case the tx contains wintness data.
+        for (int n = 0; n < inputs.length; n++) {
+          final wVi = IntUtils.decodeVarint(rawtx.sublist(cursor));
+          cursor += wVi.item2;
+          List<String> witnessesTmp = [];
+          for (int n = 0; n < wVi.item1; n++) {
+            List<int> witness = <int>[];
+            final wtVi = IntUtils.decodeVarint(rawtx.sublist(cursor));
+            if (wtVi.item1 != 0) {
+              witness = rawtx.sublist(
+                  cursor + wtVi.item2, cursor + wtVi.item1 + wtVi.item2);
+            }
+            cursor += wtVi.item1 + wtVi.item2;
+            witnessesTmp.add(BytesUtils.toHexString(witness));
           }
-          cursor += wtVi.item1 + wtVi.item2;
-          witnessesTmp.add(BytesUtils.toHexString(witness));
-        }
 
-        witnesses.add(TxWitnessInput(stack: witnessesTmp));
+          witnesses.add(TxWitnessInput(stack: witnessesTmp));
+        }
       }
     }
-    List<int> lock = rawtx.sublist(cursor, cursor + 4);
+    List<int>? lock;
+    if ((rawtx.length - cursor) >= 4) {
+      lock = rawtx.sublist(cursor, cursor + 4);
+    }
     return BtcTransaction(
         inputs: inputs,
         outputs: outputs,

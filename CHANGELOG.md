@@ -1,3 +1,8 @@
+## 4.9.2
+
+* Update dependencies
+* Resolved issue with transaction deserialization (unsigned tx)
+
 ## 4.9.1
 
 * Resolved issue with transaction deserialization (Issue #9)
