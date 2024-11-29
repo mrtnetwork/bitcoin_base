@@ -11,8 +11,6 @@ topics:
   - bitcoincash
   - dash
   
-publish_to: 'none'
-
 environment:
   sdk: '>=2.15.0 <4.0.0'
 
