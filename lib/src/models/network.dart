@@ -495,7 +495,7 @@ class PepeNetwork implements BasedUtxoNetwork {
   }
 }
 
-/// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
+/// Class representing a OmniXEP network, implementing the `BasedUtxoNetwork` abstract class.
 class OmniXepNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
   static const OmniXepNetwork mainnet =
@@ -505,7 +505,7 @@ class OmniXepNetwork implements BasedUtxoNetwork {
   @override
   final CoinConf conf;
 
-  /// Constructor for creating a Dogecoin network with a specific configuration.
+  /// Constructor for creating a OmniXEP network with a specific configuration.
   const OmniXepNetwork._(this.value, this.conf);
 
   @override
