@@ -82,9 +82,6 @@ class Script {
         if (token is int) {
           scriptBytes.add(pushInteger(token));
         } else {
-          final pl = opPushData(token);
-          print("Large ${pl.length}");
-
           scriptBytes.add(opPushData(token));
         }
       }

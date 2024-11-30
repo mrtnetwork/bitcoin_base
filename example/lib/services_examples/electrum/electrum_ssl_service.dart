@@ -68,7 +68,6 @@ class ElectrumSSLService with BitcoinBaseElectrumRPCService {
   }
 
   void _onMessge(List<int> event) {
-    print("Event ${utf8.decode(event)}");
     final Map<String, dynamic> decode = json.decode(utf8.decode(event));
     if (decode.containsKey("id")) {
       final int id = int.parse(decode["id"]!.toString());
