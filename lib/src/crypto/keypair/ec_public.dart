@@ -60,8 +60,8 @@ class ECPublic {
 
   /// toSegwitAddress generates a P2WPKH (Pay-to-Witness-Public-Key-Hash) SegWit address
   /// from the ECPublic key. If 'compressed' is true, the key is in compressed format.
-  P2wpkhAddress toSegwitAddress({bool compressed = true}) {
-    final h16 = _toHash160(compressed: compressed);
+  P2wpkhAddress toSegwitAddress() {
+    final h16 = _toHash160();
     final toHex = BytesUtils.toHexString(h16);
 
     return P2wpkhAddress.fromProgram(program: toHex);
@@ -124,35 +124,29 @@ class ECPublic {
   /// toP2wpkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
   /// wrapping a P2WPKH (Pay-to-Witness-Public-Key-Hash) script derived from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
-  P2shAddress toP2wpkhInP2sh({bool compressed = true}) {
-    final addr = toSegwitAddress(compressed: compressed);
+  P2shAddress toP2wpkhInP2sh() {
+    final addr = toSegwitAddress();
     return P2shAddress.fromScript(
         script: addr.toScriptPubKey(), type: P2shAddressType.p2wpkhInP2sh);
   }
 
   /// toP2wshScript generates a P2WSH (Pay-to-Witness-Script-Hash) script
   /// derived from the ECPublic key. If 'compressed' is true, the key is in compressed format.
-  Script toP2wshScript({bool compressed = true}) {
-    return Script(script: [
-      'OP_1',
-      toHex(compressed: compressed),
-      "OP_1",
-      "OP_CHECKMULTISIG"
-    ]);
+  Script toP2wshScript() {
+    return Script(script: ['OP_1', toHex(), "OP_1", "OP_CHECKMULTISIG"]);
   }
 
   /// toP2wshAddress generates a P2WSH (Pay-to-Witness-Script-Hash) address
   /// from the ECPublic key. If 'compressed' is true, the key is in compressed format.
-  P2wshAddress toP2wshAddress({bool compressed = true}) {
-    return P2wshAddress.fromScript(
-        script: toP2wshScript(compressed: compressed));
+  P2wshAddress toP2wshAddress() {
+    return P2wshAddress.fromScript(script: toP2wshScript());
   }
 
   /// toP2wshInP2sh generates a P2SH (Pay-to-Script-Hash) address
   /// wrapping a P2WSH (Pay-to-Witness-Script-Hash) script derived from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
-  P2shAddress toP2wshInP2sh({bool compressed = true}) {
-    final p2sh = toP2wshAddress(compressed: compressed);
+  P2shAddress toP2wshInP2sh() {
+    final p2sh = toP2wshAddress();
     return P2shAddress.fromScript(
         script: p2sh.toScriptPubKey(), type: P2shAddressType.p2wshInP2sh);
   }

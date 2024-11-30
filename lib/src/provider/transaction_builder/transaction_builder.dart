@@ -122,7 +122,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
 
     final transaction = transactionBuilder
         .buildTransaction((trDigest, utxo, multiSigPublicKey, int sighash) {
-      if (utxo.utxo.isP2tr()) {
+      if (utxo.utxo.isP2tr) {
         return fakeSchnorSignaturBytes;
       } else {
         return fakeECDSASignatureBytes;
@@ -145,7 +145,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// - bool: True if at least one UTXO in the list is a SegWit UTXO, false otherwise.
   bool _hasSegwit() {
     for (final element in utxosInfo) {
-      if (element.utxo.isSegwit()) {
+      if (element.utxo.isSegwit) {
         return true;
       }
     }
@@ -160,7 +160,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// - bool: True if at least one UTXO in the list is a P2TR UTXO, false otherwise.
   bool _hasTaproot() {
     for (final element in utxosInfo) {
-      if (element.utxo.isP2tr()) {
+      if (element.utxo.isP2tr) {
         return true;
       }
     }
@@ -201,14 +201,16 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
     final senderPub = utxo.public();
     switch (utxo.utxo.scriptType) {
       case PubKeyAddressType.p2pk:
-        return senderPub.toRedeemScript();
+        return senderPub.toRedeemScript(compressed: utxo.isCompressed);
       case SegwitAddresType.p2wsh:
         if (isTaproot) {
           return senderPub.toP2wshAddress().toScriptPubKey();
         }
         return senderPub.toP2wshScript();
       case P2pkhAddressType.p2pkh:
-        return senderPub.toAddress().toScriptPubKey();
+        return senderPub
+            .toAddress(compressed: utxo.isCompressed)
+            .toScriptPubKey();
       case SegwitAddresType.p2wpkh:
         if (isTaproot) {
           return senderPub.toSegwitAddress().toScriptPubKey();
@@ -218,9 +220,13 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
         return senderPub.toTaprootAddress().toScriptPubKey();
       case P2shAddressType.p2pkhInP2sh:
         if (isTaproot) {
-          return senderPub.toP2pkhInP2sh().toScriptPubKey();
+          return senderPub
+              .toP2pkhInP2sh(compressed: utxo.isCompressed)
+              .toScriptPubKey();
         }
-        return senderPub.toAddress().toScriptPubKey();
+        return senderPub
+            .toAddress(compressed: utxo.isCompressed)
+            .toScriptPubKey();
       case P2shAddressType.p2wpkhInP2sh:
         if (isTaproot) {
           return senderPub.toP2wpkhInP2sh().toScriptPubKey();
@@ -233,9 +239,11 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
         return senderPub.toP2wshScript();
       case P2shAddressType.p2pkInP2sh:
         if (isTaproot) {
-          return senderPub.toP2pkInP2sh().toScriptPubKey();
+          return senderPub
+              .toP2pkInP2sh(compressed: utxo.isCompressed)
+              .toScriptPubKey();
         }
-        return senderPub.toRedeemScript();
+        return senderPub.toRedeemScript(compressed: utxo.isCompressed);
     }
     throw const DartBitcoinPluginException("invalid bitcoin address type");
   }
@@ -262,8 +270,8 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
       BtcTransaction transaction,
       List<BigInt> taprootAmounts,
       List<Script> tapRootPubKeys) {
-    if (utox.utxo.isSegwit()) {
-      if (utox.utxo.isP2tr()) {
+    if (utox.utxo.isSegwit) {
+      if (utox.utxo.isP2tr) {
         return transaction.getTransactionTaprootDigset(
           txIndex: input,
           scriptPubKeys: tapRootPubKeys,
@@ -308,8 +316,8 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
     if (utxo.isMultiSig()) {
       switch (utxo.utxo.scriptType) {
         case P2shAddressType.p2wshInP2sh:
-          final script = Script.fromRaw(
-              hexData: utxo.multiSigAddress.multiSigScript.toHex(),
+          final script = Script.deserialize(
+              bytes: utxo.multiSigAddress.multiSigScript.toBytes(),
               hasSegwit: true);
           final p2wsh = P2wshAddress.fromScript(script: script);
           return [p2wsh.toScriptPubKey().toHex()];
@@ -340,8 +348,8 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
 */
   List<String> _buildUnlockingScript(String signedDigest, UtxoWithAddress utx) {
     final senderPub = utx.public();
-    if (utx.utxo.isSegwit()) {
-      if (utx.utxo.isP2tr()) {
+    if (utx.utxo.isSegwit) {
+      if (utx.utxo.isP2tr) {
         return [signedDigest];
       }
       switch (utx.utxo.scriptType) {
@@ -357,16 +365,22 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
               "invalid segwit address type ${utx.utxo.scriptType.value}");
       }
     } else {
+      final bool isCompressed = utx.isCompressed;
       switch (utx.utxo.scriptType) {
         case PubKeyAddressType.p2pk:
           return [signedDigest];
         case P2pkhAddressType.p2pkh:
-          return [signedDigest, senderPub.toHex()];
+          return [signedDigest, senderPub.toHex(compressed: isCompressed)];
         case P2shAddressType.p2pkhInP2sh:
-          final script = senderPub.toAddress().toScriptPubKey();
-          return [signedDigest, senderPub.toHex(), script.toHex()];
+          final script =
+              senderPub.toAddress(compressed: isCompressed).toScriptPubKey();
+          return [
+            signedDigest,
+            senderPub.toHex(compressed: isCompressed),
+            script.toHex()
+          ];
         case P2shAddressType.p2pkInP2sh:
-          final script = senderPub.toRedeemScript();
+          final script = senderPub.toRedeemScript(compressed: isCompressed);
           return [signedDigest, script.toHex()];
         default:
           throw DartBitcoinPluginException(
@@ -400,28 +414,6 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
     return Tuple(List<TxInput>.unmodifiable(inputs),
         List<UtxoWithAddress>.unmodifiable(sortedUtxos));
   }
-  // List<TxInput> _buildInputs() {
-  //   List<TxInput> inputs = utxos.map((e) => e.utxo.toInput()).toList();
-  //   if (enableRBF && inputs.isNotEmpty) {
-  //     inputs[0] = inputs[0]
-  //         .copyWith(sequence: BitcoinOpCodeConst.REPLACE_BY_FEE_SEQUENCE);
-  //   }
-  //   if (inputOrdering == BitcoinOrdering.shuffle) {
-  //     inputs = inputs..shuffle();
-  //   } else if (inputOrdering == BitcoinOrdering.bip69) {
-  //     inputs = inputs
-  //       ..sort(
-  //         (a, b) {
-  //           final txidComparison = a.txId.compareTo(b.txId);
-  //           if (txidComparison == 0) {
-  //             return a.txIndex - b.txIndex;
-  //           }
-  //           return txidComparison;
-  //         },
-  //       );
-  //   }
-  //   return List<TxInput>.unmodifiable(inputs);
-  // }
 
   List<TxOutput> _buildOutputs() {
     List<TxOutput> outputs = outPuts.map((e) => e.toOutput).toList();
@@ -443,6 +435,12 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
             return valueComparison;
           },
         );
+    }
+    for (final i in outputs) {
+      if (i.amount.isNegative) {
+        throw DartBitcoinPluginException("Some output has negative amount.",
+            details: {"output": i.amount});
+      }
     }
     return List<TxOutput>.unmodifiable(outputs);
   }
@@ -522,7 +520,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
       /// We generate transaction digest for current input
       final digest = _generateTransactionDigest(
           script, i, utxos[i], transaction, taprootAmounts, taprootScripts);
-      final int sighash = utxos[i].utxo.isP2tr()
+      final int sighash = utxos[i].utxo.isP2tr
           ? BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL
           : BitcoinOpCodeConst.SIGHASH_ALL;
 
@@ -551,7 +549,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
             break;
           }
         }
-        if (sumMultiSigWeight != multiSigAddress.threshold) {
+        if (sumMultiSigWeight < multiSigAddress.threshold) {
           throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
@@ -614,7 +612,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
             break;
           }
         }
-        if (sumMultiSigWeight != multiSigAddress.threshold) {
+        if (sumMultiSigWeight < multiSigAddress.threshold) {
           throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
@@ -684,7 +682,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
       /// We generate transaction digest for current input
       final digest = _generateTransactionDigest(
           script, i, utxos[i], transaction, taprootAmounts, taprootScripts);
-      final int sighash = utxos[i].utxo.isP2tr()
+      final int sighash = utxos[i].utxo.isP2tr
           ? BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL
           : BitcoinOpCodeConst.SIGHASH_ALL;
 
@@ -760,9 +758,9 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
 
     /// Now we need to add it to the transaction
     /// check if current utxo is segwit or not
-    if (utxo.utxo.isSegwit()) {
+    if (utxo.utxo.isSegwit) {
       witnesses.add(TxWitnessInput(stack: scriptSig));
-      if (utxo.utxo.isP2shSegwit()) {
+      if (utxo.utxo.isP2shSegwit) {
         /// check if we need redeemScriptSig or not
         /// In a Pay-to-Script-Hash (P2SH) Segregated Witness (SegWit) input,
         /// the redeemScriptSig is needed for historical and compatibility reasons,

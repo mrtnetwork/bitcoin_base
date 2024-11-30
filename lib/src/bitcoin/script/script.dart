@@ -16,44 +16,54 @@ class Script {
         script = List.unmodifiable(script);
   final List<dynamic> script;
 
-  static Script fromRaw({required String hexData, bool hasSegwit = false}) {
+  static Script deserialize(
+      {required List<int> bytes, bool hasSegwit = false}) {
     List<String> commands = [];
     int index = 0;
-    final scriptBytes = BytesUtils.fromHexString(hexData);
-    while (index < scriptBytes.length) {
-      int byte = scriptBytes[index];
+    // final scriptBytes = BytesUtils.fromHexString(hexData);
+    while (index < bytes.length) {
+      int byte = bytes[index];
       if (BitcoinOpCodeConst.CODE_OPS.containsKey(byte)) {
-        commands.add(BitcoinOpCodeConst.CODE_OPS[byte]!);
-        index = index + 1;
-      } else if (!hasSegwit && byte == 0x4c) {
-        int bytesToRead = scriptBytes[index + 1];
-        index = index + 1;
-        commands.add(BytesUtils.toHexString(
-            scriptBytes.sublist(index, index + bytesToRead)));
-        index = index + bytesToRead;
-      } else if (!hasSegwit && byte == 0x4d) {
-        int bytesToRead = readUint16LE(scriptBytes, index + 1);
+        if (!BitcoinOpCodeConst.isOpPushData(byte)) {
+          commands.add(BitcoinOpCodeConst.CODE_OPS[byte]!);
+        }
 
-        index = index + 3;
-        commands.add(BytesUtils.toHexString(
-            scriptBytes.sublist(index, index + bytesToRead)));
-        index = index + bytesToRead;
-      } else if (!hasSegwit && byte == 0x4e) {
-        int bytesToRead = readUint32LE(scriptBytes, index + 1);
+        /// skip op
+        index = index + 1;
+        if (byte == BitcoinOpCodeConst.opPushData1) {
+          // get len
+          int bytesToRead = bytes[index];
+          // skip len
+          index = index + 1;
+          commands.add(BytesUtils.toHexString(
+              bytes.sublist(index, index + bytesToRead)));
 
-        index = index + 5;
-        commands.add(BytesUtils.toHexString(
-            scriptBytes.sublist(index, index + bytesToRead)));
-        index = index + bytesToRead;
+          /// add length
+          index = index + bytesToRead;
+        } else if (byte == BitcoinOpCodeConst.opPushData2) {
+          /// get len
+          int bytesToRead = readUint16LE(bytes, index);
+          index = index + 2;
+          commands.add(BytesUtils.toHexString(
+              bytes.sublist(index, index + bytesToRead)));
+          index = index + bytesToRead;
+        } else if (byte == BitcoinOpCodeConst.opPushData4) {
+          int bytesToRead = readUint32LE(bytes, index);
+
+          index = index + 4;
+          commands.add(BytesUtils.toHexString(
+              bytes.sublist(index, index + bytesToRead)));
+          index = index + bytesToRead;
+        }
       } else {
-        final viAndSize = IntUtils.decodeVarint(scriptBytes.sublist(index));
+        final viAndSize = IntUtils.decodeVarint(bytes.sublist(index));
         int dataSize = viAndSize.item1;
         int size = viAndSize.item2;
-        final lastIndex = (index + size + dataSize) > scriptBytes.length
-            ? scriptBytes.length
+        final lastIndex = (index + size + dataSize) > bytes.length
+            ? bytes.length
             : (index + size + dataSize);
-        commands.add(BytesUtils.toHexString(
-            scriptBytes.sublist(index + size, lastIndex)));
+        commands.add(
+            BytesUtils.toHexString(bytes.sublist(index + size, lastIndex)));
         index = index + dataSize + size;
       }
     }
@@ -72,6 +82,9 @@ class Script {
         if (token is int) {
           scriptBytes.add(pushInteger(token));
         } else {
+          final pl = opPushData(token);
+          print("Large ${pl.length}");
+
           scriptBytes.add(opPushData(token));
         }
       }

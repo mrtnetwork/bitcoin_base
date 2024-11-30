@@ -19,7 +19,7 @@ dependencies:
   blockchain_utils: ^3.5.0
   
   # blockchain_utils:
-  #   path: ../blockchain_utils
+  #   path: ../../blockchain_utils
     
 
 dev_dependencies:

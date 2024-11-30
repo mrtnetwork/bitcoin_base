@@ -90,6 +90,8 @@ void main() {
         TxWitnessInput(stack: [signatur])
       ]);
       expect(tx.serialize(), signedTx2);
+      final decode = BtcTransaction.fromRaw(tx.serialize());
+      expect(decode.serialize(), tx.serialize());
     });
 
     // // 3-spend taproot from script path (has single tapleaf script for spending)
@@ -115,6 +117,8 @@ void main() {
             stack: [sig, trScriptP2pk1.toHex(), controlBlock.toHex()])
       ]);
       expect(tx.serialize(), signedTx3);
+      final decode = BtcTransaction.fromRaw(tx.serialize());
+      expect(decode.serialize(), tx.serialize());
     });
   });
 
@@ -185,6 +189,8 @@ void main() {
       ]);
 
       expect(tx.serialize(), signedTx3);
+      final decode = BtcTransaction.fromRaw(tx.serialize());
+      expect(decode.serialize(), tx.serialize());
     });
   });
 
@@ -265,6 +271,8 @@ void main() {
             stack: [sig, trScriptP2pkB.toHex(), controlBlock.toHex()])
       ]);
       expect(tx.serialize(), signedTx);
+      final decode = BtcTransaction.fromRaw(tx.serialize());
+      expect(decode.serialize(), tx.serialize());
     });
   });
 }

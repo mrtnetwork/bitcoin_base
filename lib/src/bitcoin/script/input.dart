@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/utils/utils.dart';
@@ -42,48 +44,51 @@ class TxInput {
   List<int> toBytes() {
     final txidBytes = BytesUtils.fromHexString(txId).reversed.toList();
 
-    final txoutBytes = List<int>.filled(4, 0);
-    writeUint32LE(txIndex, txoutBytes);
+    final txoutBytes =
+        IntUtils.toBytes(txIndex, length: 4, byteOrder: Endian.little);
+    // writeUint32LE(txIndex, txoutBytes);
     final scriptSigBytes = scriptSig.toBytes();
-
     final scriptSigLengthVarint = IntUtils.encodeVarint(scriptSigBytes.length);
     final data = List<int>.from([
       ...txidBytes,
       ...txoutBytes,
       ...scriptSigLengthVarint,
       ...scriptSigBytes,
-      ...sequence,
+      ...sequence
     ]);
     return data;
   }
 
-  static Tuple<TxInput, int> fromRaw(
-      {required String raw, int cursor = 0, bool hasSegwit = false}) {
-    final txInputRaw = BytesUtils.fromHexString(raw);
-    List<int> inpHash =
-        txInputRaw.sublist(cursor, cursor + 32).reversed.toList();
-    if (inpHash.isEmpty) {
-      throw const DartBitcoinPluginException(
-          "Input transaction hash not found. Probably malformed raw transaction");
-    }
-    List<int> outputN =
-        txInputRaw.sublist(cursor + 32, cursor + 36).reversed.toList();
-    cursor += 36;
-    final vi = IntUtils.decodeVarint(txInputRaw.sublist(cursor, cursor + 9));
+  static Tuple<TxInput, int> deserialize(
+      {required List<int> bytes, int cursor = 0, bool hasSegwit = false}) {
+    List<int> inpHash = bytes.sublist(cursor, cursor + 32).reversed.toList();
+    cursor += 32;
+    int outputN = IntUtils.fromBytes(bytes.sublist(cursor, cursor + 4),
+        byteOrder: Endian.little);
+    cursor += 4;
+    final vi = IntUtils.decodeVarint(bytes.sublist(cursor));
     cursor += vi.item2;
-    List<int> unlockingScript = txInputRaw.sublist(cursor, cursor + vi.item1);
+    List<int> unlockingScript = bytes.sublist(cursor, cursor + vi.item1);
     cursor += vi.item1;
-    List<int> sequenceNumberData = txInputRaw.sublist(cursor, cursor + 4);
+    List<int> sequenceNumberData = bytes.sublist(cursor, cursor + 4);
     cursor += 4;
     return Tuple(
         TxInput(
             txId: BytesUtils.toHexString(inpHash),
-            txIndex: int.parse(BytesUtils.toHexString(outputN), radix: 16),
-            scriptSig: Script.fromRaw(
-                hexData: BytesUtils.toHexString(unlockingScript),
-                hasSegwit: hasSegwit),
+            txIndex: outputN,
+            scriptSig: Script.deserialize(
+                bytes: unlockingScript, hasSegwit: hasSegwit),
             sequance: sequenceNumberData),
         cursor);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "txid": txId,
+      "txIndex": txIndex,
+      "scriptSig": scriptSig.script,
+      "sequance": BytesUtils.toHexString(sequence),
+    };
   }
 
   @override

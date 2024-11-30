@@ -49,6 +49,9 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
       throw const DartBitcoinPluginException(
           "invalid network. use ForkedTransactionBuilder for BitcoinCashNetwork and BSVNetwork otherwise use BitcoinTransactionBuilder");
     }
+
+    /// validate every address is related to network
+    /// exception if failed.
     for (final i in utxosInfo) {
       i.ownerDetails.address.toAddress(network);
     }
@@ -131,20 +134,21 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
     }
 
     final senderPub = utxo.public();
+    final bool isCompressed = utxo.isCompressed;
     switch (utxo.utxo.scriptType) {
       case PubKeyAddressType.p2pk:
       case P2shAddressType.p2pkInP2sh:
       case P2shAddressType.p2pkInP2shwt:
       case P2shAddressType.p2pkInP2sh32:
       case P2shAddressType.p2pkInP2sh32wt:
-        return senderPub.toRedeemScript();
+        return senderPub.toRedeemScript(compressed: isCompressed);
       case P2pkhAddressType.p2pkh:
       case P2shAddressType.p2pkhInP2sh:
       case P2shAddressType.p2pkhInP2sh32:
       case P2pkhAddressType.p2pkhwt:
       case P2shAddressType.p2pkhInP2shwt:
       case P2shAddressType.p2pkhInP2sh32wt:
-        return senderPub.toAddress().toScriptPubKey();
+        return senderPub.toAddress(compressed: isCompressed).toScriptPubKey();
       default:
         throw DartBitcoinPluginException(
             "${utxo.utxo.scriptType} does not sudpport on ${network.conf.coinName.name}");
@@ -172,13 +176,14 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
     UtxoWithAddress utox,
     BtcTransaction transaction,
   ) {
+    const sighash =
+        BitcoinOpCodeConst.SIGHASH_ALL | BitcoinOpCodeConst.SIGHASH_FORKED;
     return transaction.getTransactionSegwitDigit(
         txInIndex: input,
         script: scriptPubKeys,
         amount: utox.utxo.value,
         token: utox.utxo.token,
-        sighash:
-            BitcoinOpCodeConst.SIGHASH_ALL | BitcoinOpCodeConst.SIGHASH_FORKED);
+        sighash: sighash);
   }
 
   /// buildP2wshOrP2shScriptSig constructs and returns a script signature (represented as a List of strings)
@@ -206,23 +211,29 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
 */
   List<String> _buildUnlockingScript(String signedDigest, UtxoWithAddress utx) {
     final senderPub = utx.public();
+    final bool isCompressed = utx.isCompressed;
     switch (utx.utxo.scriptType) {
       case PubKeyAddressType.p2pk:
         return [signedDigest];
       case P2pkhAddressType.p2pkh:
       case P2pkhAddressType.p2pkhwt:
-        return [signedDigest, senderPub.toHex()];
+        return [signedDigest, senderPub.toHex(compressed: isCompressed)];
       case P2shAddressType.p2pkhInP2sh:
       case P2shAddressType.p2pkhInP2shwt:
       case P2shAddressType.p2pkhInP2sh32:
       case P2shAddressType.p2pkhInP2sh32wt:
-        final script = senderPub.toAddress().toScriptPubKey();
-        return [signedDigest, senderPub.toHex(), script.toHex()];
+        final script =
+            senderPub.toAddress(compressed: isCompressed).toScriptPubKey();
+        return [
+          signedDigest,
+          senderPub.toHex(compressed: isCompressed),
+          script.toHex()
+        ];
       case P2shAddressType.p2pkInP2sh:
       case P2shAddressType.p2pkInP2shwt:
       case P2shAddressType.p2pkInP2sh32:
       case P2shAddressType.p2pkInP2sh32wt:
-        final script = senderPub.toRedeemScript();
+        final script = senderPub.toRedeemScript(compressed: isCompressed);
         return [signedDigest, script.toHex()];
       default:
         throw DartBitcoinPluginException(
@@ -327,7 +338,8 @@ be retrieved by anyone who examines the blockchain's history.
       required BigInt sumAmountsWithFee,
       required BigInt sumUtxoAmount,
       required BigInt sumOutputAmounts}) {
-    if (!isFakeTransaction && sumAmountsWithFee != sumUtxoAmount) {
+    if (isFakeTransaction) return;
+    if (sumAmountsWithFee != sumUtxoAmount) {
       throw DartBitcoinPluginException('Sum value of utxo not spending',
           details: {
             "inputAmount": sumUtxoAmount,
@@ -335,54 +347,52 @@ be retrieved by anyone who examines the blockchain's history.
             "outputAmount": sumOutputAmounts
           });
     }
-    if (!isFakeTransaction) {
-      /// sum of token amounts
-      final sumOfTokenUtxos = utxos.sumOfTokenUtxos();
 
-      /// sum of token output amounts
-      final sumTokenOutputAmouts = _sumTokenOutputAmounts(outputs);
-      for (final i in sumOfTokenUtxos.entries) {
-        if (sumTokenOutputAmouts[i.key] != i.value) {
-          BigInt amount = sumTokenOutputAmouts[i.key] ?? BigInt.zero;
-          amount += outPuts
-              .whereType<BitcoinBurnableOutput>()
-              .where((element) => element.categoryID == i.key)
-              .fold(
-                  BigInt.zero,
-                  (previousValue, element) =>
-                      previousValue + (element.value ?? BigInt.zero));
+    /// sum of token amounts
+    final sumOfTokenUtxos = utxos.sumOfTokenUtxos();
 
-          if (amount != i.value) {
-            throw DartBitcoinPluginException(
-                'Sum token value of UTXOs not spending. use BitcoinBurnableOutput if you want to burn tokens.',
-                details: {
-                  "token": i.key,
-                  "inputValue": i.value,
-                  "outputValue": amount
-                });
-          }
+    /// sum of token output amounts
+    final sumTokenOutputAmouts = _sumTokenOutputAmounts(outputs);
+    for (final i in sumOfTokenUtxos.entries) {
+      if (sumTokenOutputAmouts[i.key] != i.value) {
+        BigInt amount = sumTokenOutputAmouts[i.key] ?? BigInt.zero;
+        amount += outPuts
+            .whereType<BitcoinBurnableOutput>()
+            .where((element) => element.categoryID == i.key)
+            .fold(
+                BigInt.zero,
+                (previousValue, element) =>
+                    previousValue + (element.value ?? BigInt.zero));
+
+        if (amount != i.value) {
+          throw DartBitcoinPluginException(
+              'Sum token value of UTXOs not spending. use BitcoinBurnableOutput if you want to burn tokens.',
+              details: {
+                "token": i.key,
+                "inputValue": i.value,
+                "outputValue": amount
+              });
         }
       }
-      for (final i in utxos) {
-        if (i.utxo.token != null) {
-          final token = i.utxo.token!;
-          if (token.hasAmount) continue;
-          if (!token.hasNFT) continue;
-          final hasOneoutput = outPuts.whereType<BitcoinTokenOutput>().any(
-              (element) =>
-                  element.utxoHash == i.utxo.txHash &&
-                  element.token.category == token.category);
-          if (hasOneoutput) continue;
-          final hasBurnableOutput = outPuts
-              .whereType<BitcoinBurnableOutput>()
-              .any((element) =>
-                  element.utxoHash == i.utxo.txHash &&
-                  element.categoryID == token.category);
-          if (hasBurnableOutput) continue;
-          throw DartBitcoinPluginException(
-              'Some NFTs in the inputs lack the corresponding spending in the outputs. If you intend to burn tokens, consider utilizing the BitcoinBurnableOutput.',
-              details: {"category id": token.category});
-        }
+    }
+    for (final i in utxos) {
+      final token = i.utxo.token;
+      if (token != null && token.hasNFT) {
+        if (token.hasAmount) continue;
+        final hasOneoutput = outPuts.whereType<BitcoinTokenOutput>().any(
+            (element) =>
+                element.utxoHash == i.utxo.txHash &&
+                element.token.category == token.category);
+        if (hasOneoutput) continue;
+        final hasBurnableOutput = outPuts
+            .whereType<BitcoinBurnableOutput>()
+            .any((element) =>
+                element.utxoHash == i.utxo.txHash &&
+                element.categoryID == token.category);
+        if (hasBurnableOutput) continue;
+        throw DartBitcoinPluginException(
+            'Some NFTs in the inputs lack the corresponding spending in the outputs. If you intend to burn tokens, consider utilizing the BitcoinBurnableOutput.',
+            details: {"category id": token.category});
       }
     }
   }
@@ -419,7 +429,7 @@ be retrieved by anyone who examines the blockchain's history.
             break;
           }
         }
-        if (sumMultiSigWeight != multiSigAddress.threshold) {
+        if (sumMultiSigWeight < multiSigAddress.threshold) {
           throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
@@ -502,7 +512,7 @@ be retrieved by anyone who examines the blockchain's history.
             break;
           }
         }
-        if (sumMultiSigWeight != multiSigAddress.threshold) {
+        if (sumMultiSigWeight < multiSigAddress.threshold) {
           throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
@@ -516,7 +526,8 @@ be retrieved by anyone who examines the blockchain's history.
       final sig = sign(digest, indexUtxo, indexUtxo.public().toHex(), sighash);
       _addScripts(input: inputs[i], signatures: [sig], utxo: indexUtxo);
     }
-
+    final ea = BtcTransaction.fromRaw(transaction.serialize());
+    assert(ea.serialize() == transaction.serialize(), transaction.serialize());
     return transaction;
   }
 
@@ -578,6 +589,7 @@ be retrieved by anyone who examines the blockchain's history.
           /// now we need sign the transaction digest
           final sig = await sign(digest, indexUtxo,
               multiSigAddress.signers[ownerIndex].publicKey, sighash);
+
           if (sig.isEmpty) continue;
           for (int weight = 0;
               weight < multiSigAddress.signers[ownerIndex].weight;
@@ -587,12 +599,13 @@ be retrieved by anyone who examines the blockchain's history.
             }
             mutlsiSigSignatures.add(sig);
           }
+
           sumMultiSigWeight += multiSigAddress.signers[ownerIndex].weight;
           if (sumMultiSigWeight >= multiSigAddress.threshold) {
             break;
           }
         }
-        if (sumMultiSigWeight != multiSigAddress.threshold) {
+        if (sumMultiSigWeight < multiSigAddress.threshold) {
           throw const DartBitcoinPluginException(
               "some multisig signature does not exist");
         }
@@ -607,20 +620,17 @@ be retrieved by anyone who examines the blockchain's history.
           await sign(digest, indexUtxo, indexUtxo.public().toHex(), sighash);
       _addScripts(input: inputs[i], signatures: [sig], utxo: indexUtxo);
     }
-
     return transaction;
   }
 
-  void _addScripts({
-    required UtxoWithAddress utxo,
-    required TxInput input,
-    required List<String> signatures,
-  }) {
+  void _addScripts(
+      {required UtxoWithAddress utxo,
+      required TxInput input,
+      required List<String> signatures}) {
     /// ok we signed, now we need unlocking script for this input
     final scriptSig = utxo.isMultiSig()
         ? _buildMiltisigUnlockingScript(signatures, utxo)
         : _buildUnlockingScript(signatures.first, utxo);
-
     input.scriptSig = Script(script: scriptSig);
   }
 }

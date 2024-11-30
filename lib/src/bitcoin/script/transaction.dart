@@ -49,13 +49,12 @@ class BtcTransaction {
     List<int>? version,
   }) {
     return BtcTransaction(
-      inputs: inputs ?? this.inputs,
-      outputs: outputs ?? this.outputs,
-      witnesses: witnesses ?? this.witnesses,
-      hasSegwit: hasSegwit ?? this.hasSegwit,
-      lock: lock ?? List<int>.from(locktime),
-      version: version ?? List<int>.from(this.version),
-    );
+        inputs: inputs ?? this.inputs,
+        outputs: outputs ?? this.outputs,
+        witnesses: witnesses ?? this.witnesses,
+        hasSegwit: hasSegwit ?? this.hasSegwit,
+        lock: lock ?? List<int>.from(locktime),
+        version: version ?? List<int>.from(this.version));
   }
 
   /// creates a copy of the object (classmethod)
@@ -88,19 +87,17 @@ class BtcTransaction {
 
     List<TxInput> inputs = [];
     for (int index = 0; index < vi.item1; index++) {
-      final inp =
-          TxInput.fromRaw(raw: raw, hasSegwit: hasSegwit, cursor: cursor);
-
+      final inp = TxInput.deserialize(
+          bytes: rawtx, hasSegwit: hasSegwit, cursor: cursor);
       inputs.add(inp.item1);
       cursor = inp.item2;
     }
-
     List<TxOutput> outputs = [];
     final viOut = IntUtils.decodeVarint(rawtx.sublist(cursor));
     cursor += viOut.item2;
     for (int index = 0; index < viOut.item1; index++) {
-      final inp =
-          TxOutput.fromRaw(raw: raw, hasSegwit: hasSegwit, cursor: cursor);
+      final inp = TxOutput.deserialize(
+          bytes: rawtx, hasSegwit: hasSegwit, cursor: cursor);
       outputs.add(inp.item1);
       cursor = inp.item2;
     }
@@ -491,6 +488,16 @@ class BtcTransaction {
     final bytes = toBytes(segwit: false);
     final reversedHash = QuickCrypto.sha256DoubleHash(bytes).reversed.toList();
     return BytesUtils.toHexString(reversedHash);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "inputs": inputs.map((e) => e.toJson()).toList(),
+      "outputs": outputs.map((e) => e.toJson()).toList(),
+      "locktime": BytesUtils.toHexString(locktime),
+      "version": BytesUtils.toHexString(version),
+      "witnesses": witnesses.map((e) => e.toJson()).toList()
+    };
   }
 
   @override

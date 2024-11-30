@@ -261,6 +261,7 @@ class CashToken {
   /// The commitment contents of the NFT held in this output (0 to 40 bytes). This field is omitted if no NFT is present.
   final List<int> commitment;
   final int bitfield;
+
   CashToken.noValidate(
       {required this.category,
       required this.amount,
@@ -412,6 +413,14 @@ class CashToken {
   /// Initialized only if the Cash Token has a commitment length.
   late final String? commitmentInHex =
       hasCommitment ? BytesUtils.toHexString(commitment) : null;
+  Map<String, dynamic> toJson() {
+    return {
+      "category": category,
+      "amount": amount.toString(),
+      "bitfield": bitfield,
+      "commitment": BytesUtils.toHexString(commitment),
+    };
+  }
 
   @override
   String toString() {

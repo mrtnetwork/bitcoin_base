@@ -22,13 +22,12 @@ void main() async {
   //   MultiSignatureSigner(publicKey: eight.getPublic().toHex(), weight: 1),
   // ]);
   // final addr = account.toP2shAddress();
-  // // print(account.multiSigScript.script);
   // // return;
 
   // /// connect to electrum service with websocket
   // /// please see `services_examples` folder for how to create electrum websocket service
-  // final service = await ElectrumWebSocketService.connect(
-  //     "wss://chipnet.imaginary.cash:50004");
+  // final service = await ElectrumSSLService.connect(
+  //     "testnet4-electrumx.wakiyamap.dev:51002");
 
   // /// create provider with service
   // final provider = ElectrumApiProvider(service);
@@ -48,35 +47,57 @@ void main() async {
   // if (sumOfUtxo == BigInt.zero) {
   //   return;
   // }
-  // final bchTransaction = ForkedTransactionBuilder(
+  // final addrOne = one.getPublic().toP2pkAddress(compressed: false);
+  // final addrTwo = two.getPublic().toAddress(compressed: false);
+  // final addrThree = three.getPublic().toP2pkInP2sh(compressed: false);
+  // final addrFour = four.getPublic().toP2pkhInP2sh(compressed: false);
+  // final addrFive = four.getPublic().toSegwitAddress();
+  // final addrSix = four.getPublic().toP2wshInP2sh();
+  // // print(sumOfUtxo);
+  // // return;
+  // final bchTransaction = BitcoinTransactionBuilder(
   //   outPuts: [
   //     /// change input (sumofutxos - spend)
   //     BitcoinOutput(
   //       address: addr,
   //       value: sumOfUtxo -
-  //           (BtcUtils.toSatoshi("0.0001") + BtcUtils.toSatoshi("0.00003")),
+  //           (BigInt.from(1000) * BigInt.from(7) + BigInt.from(2200)),
   //     ),
   //     BitcoinOutput(
-  //       address: BitcoinCashAddress(
-  //               "bchtest:pw054wtjjc70rrvx4ftl4p63gluedyt0qmpgz705f8x3gxygrzarzls7vp2sj",
-  //               network: BitcoinCashNetwork.testnet)
-  //           .baseAddress,
-  //       value: BtcUtils.toSatoshi("0.0001"),
+  //       address: addrOne,
+  //       value: BigInt.from(1000),
+  //     ),
+  //     BitcoinOutput(
+  //       address: addrTwo,
+  //       value: BigInt.from(1000),
+  //     ),
+  //     BitcoinOutput(
+  //       address: addrThree,
+  //       value: BigInt.from(1000),
+  //     ),
+  //     BitcoinOutput(
+  //       address: addrFour,
+  //       value: BigInt.from(1000),
+  //     ),
+  //     BitcoinOutput(
+  //       address: addrFour,
+  //       value: BigInt.from(1000),
+  //     ),
+  //     BitcoinOutput(
+  //       address: addrFive,
+  //       value: BigInt.from(1000),
+  //     ),
+  //     BitcoinOutput(
+  //       address: addrSix,
+  //       value: BigInt.from(1000),
   //     ),
   //   ],
-  //   fee: BtcUtils.toSatoshi("0.00003"),
-  //   network: BitcoinCashNetwork.testnet,
+  //   fee: BigInt.from(2200),
+  //   network: BitcoinNetwork.testnet,
   //   utxos: utxos,
   // );
   // final transaaction =
   //     bchTransaction.buildTransaction((trDigest, utxo, publicKey, sighash) {
-  //   final sing = keys[publicKey]!.signInput(trDigest, sigHash: sighash);
-  //   print("=====================");
-  //   print("key ${keys[publicKey]?.prive.toHex()}");
-  //   print("diget ${BytesUtils.toHexString(trDigest)}");
-  //   print("sign ${sing}");
-  //   print("Sighash $sighash");
-
   //   return keys[publicKey]!.signInput(trDigest, sigHash: sighash);
   // });
 
@@ -84,12 +105,12 @@ void main() async {
   // transaaction.txId();
 
   // /// for calculation fee
-  // transaaction.getSize();
+  // print(transaaction.getSize());
+  // // return;
 
   // /// raw of encoded transaction in hex
   // final transactionRaw = transaaction.toHex();
   // print(transactionRaw);
-  // return;
   // // print(elctrumUtxos.length);
   // final d = await provider
   //     .request(ElectrumBroadCastTransaction(transactionRaw: transactionRaw));
