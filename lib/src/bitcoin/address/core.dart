@@ -59,7 +59,7 @@ abstract class BitcoinBaseAddress {
 }
 
 class PubKeyAddressType extends BitcoinAddressType {
-  const PubKeyAddressType._(String value) : super._(value);
+  const PubKeyAddressType._(super.value) : super._();
   static const PubKeyAddressType p2pk = PubKeyAddressType._("P2PK");
   @override
   bool get isP2sh => false;
@@ -75,7 +75,7 @@ class PubKeyAddressType extends BitcoinAddressType {
 }
 
 class P2pkhAddressType extends BitcoinAddressType {
-  const P2pkhAddressType._(String value) : super._(value);
+  const P2pkhAddressType._(super.value) : super._();
   static const P2pkhAddressType p2pkh = P2pkhAddressType._("P2PKH");
   static const P2pkhAddressType p2pkhwt = P2pkhAddressType._("P2PKHWT");
 
@@ -93,8 +93,8 @@ class P2pkhAddressType extends BitcoinAddressType {
 }
 
 class P2shAddressType extends BitcoinAddressType {
-  const P2shAddressType._(String value, this.hashLength, this.withToken)
-      : super._(value);
+  const P2shAddressType._(super.value, this.hashLength, this.withToken)
+      : super._();
   static const P2shAddressType p2wshInP2sh = P2shAddressType._(
       "P2SH/P2WSH", _BitcoinAddressUtils.hash160DigestLength, false);
   static const P2shAddressType p2wpkhInP2sh = P2shAddressType._(
@@ -143,7 +143,7 @@ class P2shAddressType extends BitcoinAddressType {
 }
 
 class SegwitAddresType extends BitcoinAddressType {
-  const SegwitAddresType._(String value) : super._(value);
+  const SegwitAddresType._(super.value) : super._();
   static const SegwitAddresType p2wpkh = SegwitAddresType._("P2WPKH");
   static const SegwitAddresType p2tr = SegwitAddresType._("P2TR");
   static const SegwitAddresType p2wsh = SegwitAddresType._("P2WSH");

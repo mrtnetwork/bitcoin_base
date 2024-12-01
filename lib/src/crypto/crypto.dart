@@ -1,4 +1,4 @@
-library bitcoin_crypto;
+library;
 
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant_lib.dart';
 import 'package:blockchain_utils/crypto/quick_crypto.dart';

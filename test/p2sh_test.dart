@@ -61,6 +61,7 @@ void main() {
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), createP2shAndSendResult);
     });
+
     test("test2", () {
       final tx = BtcTransaction(inputs: [txinSpend], outputs: [txout2]);
       final digit =

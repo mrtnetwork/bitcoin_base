@@ -31,7 +31,7 @@ List<int> pushInteger(int integer) {
   }
 
   /// Calculate the number of bytes required to represent the integer
-  int numberOfBytes = (integer.bitLength + 7) ~/ 8;
+  final int numberOfBytes = (integer.bitLength + 7) ~/ 8;
 
   /// Convert to little-endian bytes
   List<int> integerBytes = List<int>.filled(numberOfBytes, 0);

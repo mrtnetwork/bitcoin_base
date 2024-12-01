@@ -177,7 +177,7 @@ void main() {
     final ECPrivate priv = ECPrivate.fromWif(
         'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
-    ECPublic pub = priv.getPublic();
+    final ECPublic pub = priv.getPublic();
     const String p2shaddress = '2NDkr9uD2MSY5em3rsjkff8fLZcJzCfY3W1';
     test("test create", () {
       final script = Script(script: [pub.toHex(), 'OP_CHECKSIG']);
@@ -191,7 +191,7 @@ void main() {
     final ECPrivate priv = ECPrivate.fromWif(
         'cVdte9ei2xsVjmZSPtyucG43YZgNkmKTqhwiUA8M4Fc3LdPJxPmZ',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
-    ECPublic pub = priv.getPublic();
+    final ECPublic pub = priv.getPublic();
     const String correctP2wpkhAddress =
         'tb1qxmt9xgewg6mxc4mvnzvrzu4f2v0gy782fydg0w';
     const String correctP2shP2wpkhAddress =

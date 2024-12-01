@@ -1,9 +1,9 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/utils/enumerate.dart';
-import 'package:blockchain_utils/bip/bip/bip.dart';
 import 'package:blockchain_utils/bip/coin_conf/coin_conf.dart';
 import 'package:blockchain_utils/bip/coin_conf/coins_conf.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// Abstract class representing a base for UTXO-based cryptocurrency networks.
 abstract class BasedUtxoNetwork implements Enumerate {

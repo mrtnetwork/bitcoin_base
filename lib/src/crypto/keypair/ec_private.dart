@@ -67,6 +67,17 @@ class ECPrivate {
     return BytesUtils.toHexString(signature);
   }
 
+  String signSchnorr(List<int> txDigest,
+      {int sighash = BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL}) {
+    final btcSigner = BitcoinSigner.fromKeyBytes(toBytes());
+    List<int> signatur = btcSigner.signSchnorrTransaction(txDigest,
+        tapScripts: [], tweak: false);
+    if (sighash != BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL) {
+      signatur = <int>[...signatur, sighash];
+    }
+    return BytesUtils.toHexString(signatur);
+  }
+
   /// sign taproot transaction digest and returns the signature.
   String signTapRoot(List<int> txDigest,
       {int sighash = BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL,

@@ -33,7 +33,7 @@ class TxOutput {
   List<int> toBytes() {
     final amountBytes =
         BigintUtils.toBytes(amount, length: 8, order: Endian.little);
-    List<int> scriptBytes = [
+    final List<int> scriptBytes = [
       ...cashToken?.toBytes() ?? <int>[],
       ...scriptPubKey.toBytes()
     ];
@@ -55,7 +55,8 @@ class TxOutput {
     final vi = IntUtils.decodeVarint(bytes.sublist(cursor));
     cursor += vi.item2;
     final token = CashToken.fromRaw(bytes.sublist(cursor));
-    List<int> lockScript =
+
+    final List<int> lockScript =
         bytes.sublist(cursor + token.item2, cursor + vi.item1);
     cursor += vi.item1;
     return Tuple(

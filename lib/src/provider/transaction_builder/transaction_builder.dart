@@ -116,9 +116,9 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
     const String fakeSchnorSignaturBytes =
         "01010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101";
 
-    /// 71 bytes (64 byte signature, 6-7 byte Der encoding length)
+    /// 72 bytes (64 byte signature, 6-7 byte Der encoding length)
     const String fakeECDSASignatureBytes =
-        "0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101";
+        "010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101";
 
     final transaction = transactionBuilder
         .buildTransaction((trDigest, utxo, multiSigPublicKey, int sighash) {
@@ -406,7 +406,8 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           },
         );
     }
-    List<TxInput> inputs = sortedUtxos.map((e) => e.utxo.toInput()).toList();
+    final List<TxInput> inputs =
+        sortedUtxos.map((e) => e.utxo.toInput()).toList();
     if (enableRBF && inputs.isNotEmpty) {
       inputs[0] = inputs[0]
           .copyWith(sequence: BitcoinOpCodeConst.REPLACE_BY_FEE_SEQUENCE);

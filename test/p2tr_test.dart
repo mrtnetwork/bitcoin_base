@@ -62,7 +62,7 @@ void main() {
 
     // 1-create address with single script spending path
     test('address_with_script_path', () {
-      var toAddress = toPub1.toTaprootAddress(scripts: [
+      final toAddress = toPub1.toTaprootAddress(scripts: [
         [trScriptP2pk1]
       ]);
 

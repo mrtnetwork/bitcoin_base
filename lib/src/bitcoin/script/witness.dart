@@ -17,8 +17,8 @@ class TxWitnessInput {
   List<int> toBytes() {
     List<int> stackBytes = [];
 
-    for (String item in stack) {
-      List<int> itemBytes =
+    for (final item in stack) {
+      final List<int> itemBytes =
           IntUtils.prependVarint(BytesUtils.fromHexString(item));
       stackBytes = [...stackBytes, ...itemBytes];
     }

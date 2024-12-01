@@ -56,7 +56,7 @@ class UtxoWithAddress {
         utxo: utxo,
         ownerDetails: ownerDetails,
         isCompressed: ownerDetails._publicKey != null && !utxo.isSegwit
-            ? BtcUtils.isCompressedPubKey(ownerDetails._publicKey!)
+            ? BtcUtils.isCompressedPubKey(ownerDetails._publicKey)
             : true);
   }
 
@@ -255,7 +255,7 @@ extension Calculate on List<UtxoWithAddress> {
   /// sum of utxos network values
   BigInt sumOfUtxosValue() {
     BigInt sum = BigInt.zero;
-    for (var utxo in this) {
+    for (final utxo in this) {
       sum += utxo.utxo.value;
     }
     return sum;
@@ -264,7 +264,7 @@ extension Calculate on List<UtxoWithAddress> {
   /// sum of utxos cash token (FToken) amounts
   Map<String, BigInt> sumOfTokenUtxos() {
     final Map<String, BigInt> tokens = {};
-    for (var utxo in this) {
+    for (final utxo in this) {
       if (utxo.utxo.token == null) continue;
       final token = utxo.utxo.token!;
       if (!token.hasAmount) continue;

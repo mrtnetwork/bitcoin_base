@@ -60,16 +60,17 @@ class TxInput {
 
   static Tuple<TxInput, int> deserialize(
       {required List<int> bytes, int cursor = 0, bool hasSegwit = false}) {
-    List<int> inpHash = bytes.sublist(cursor, cursor + 32).reversed.toList();
+    final List<int> inpHash =
+        bytes.sublist(cursor, cursor + 32).reversed.toList();
     cursor += 32;
-    int outputN = IntUtils.fromBytes(bytes.sublist(cursor, cursor + 4),
+    final int outputN = IntUtils.fromBytes(bytes.sublist(cursor, cursor + 4),
         byteOrder: Endian.little);
     cursor += 4;
     final vi = IntUtils.decodeVarint(bytes.sublist(cursor));
     cursor += vi.item2;
-    List<int> unlockingScript = bytes.sublist(cursor, cursor + vi.item1);
+    final List<int> unlockingScript = bytes.sublist(cursor, cursor + vi.item1);
     cursor += vi.item1;
-    List<int> sequenceNumberData = bytes.sublist(cursor, cursor + 4);
+    final List<int> sequenceNumberData = bytes.sublist(cursor, cursor + 4);
     cursor += 4;
     return Tuple(
         TxInput(

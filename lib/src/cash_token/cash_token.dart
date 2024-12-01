@@ -160,7 +160,7 @@ class CashTokenUtils {
   }
 
   static Tuple<BigInt, int> _decodeVarintBigInt(List<int> byteint) {
-    int ni = byteint[0];
+    final int ni = byteint[0];
     int size = 0;
 
     if (ni < 253) {
@@ -174,7 +174,7 @@ class CashTokenUtils {
     } else {
       size = 8;
     }
-    BigInt value = BigintUtils.fromBytes(byteint.sublist(1, 1 + size),
+    final value = BigintUtils.fromBytes(byteint.sublist(1, 1 + size),
         byteOrder: Endian.little);
     return Tuple(value, size + 1);
   }
@@ -240,7 +240,7 @@ class CashToken {
           ? null
           : BytesUtils.fromHexString(json["nft"]["commitment"]);
     }
-    int bitfield = CashTokenUtils.buildBitfield(
+    final int bitfield = CashTokenUtils.buildBitfield(
         hasNFT: capability != null,
         capability: capability ?? CashTokenCapability.noCapability,
         hasAmount: amount > BigInt.zero,
@@ -312,7 +312,7 @@ class CashToken {
       return const Tuple(null, 0);
     }
     int cursor = 1;
-    List<int> id =
+    final List<int> id =
         scriptBytes.sublist(cursor, cursor + CashTokenUtils.idBytesLength);
 
     cursor += CashTokenUtils.idBytesLength;
@@ -352,7 +352,7 @@ class CashToken {
   ///
   /// Returns a list of integers representing the serialized byte representation of the [CashToken].
   List<int> toBytes() {
-    DynamicByteTracker bytes = DynamicByteTracker();
+    final DynamicByteTracker bytes = DynamicByteTracker();
     bytes.add([CashTokenUtils.cashTokenPrefix]);
     bytes.add(BytesUtils.fromHexString(category).reversed.toList());
     bytes.add([bitfield]);

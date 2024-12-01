@@ -186,7 +186,7 @@ class MempolUtxo implements UTXO {
 
 extension MempoolUtxoExtentions on List<MempolUtxo> {
   List<UtxoWithAddress> toUtxoWithOwnerList(UtxoAddressDetails owner) {
-    List<UtxoWithAddress> utxos = map((e) => UtxoWithAddress(
+    final List<UtxoWithAddress> utxos = map((e) => UtxoWithAddress(
           utxo: BitcoinUtxo(
             txHash: e.txid,
             value: e.value,
