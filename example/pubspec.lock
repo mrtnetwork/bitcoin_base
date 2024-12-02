@@ -22,7 +22,7 @@ packages:
       path: "../../blockchain_utils"
       relative: true
     source: path
-    version: "3.5.0"
+    version: "3.6.0"
   boolean_selector:
     dependency: transitive
     description:

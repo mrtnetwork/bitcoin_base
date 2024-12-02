@@ -162,3 +162,5 @@ class BitcoinSVAddress extends BitcoinNetworkAddress<BitcoinSVNetwork> {
         baseAddress, baseAddress.toAddress(network), network);
   }
 }
+
+// 

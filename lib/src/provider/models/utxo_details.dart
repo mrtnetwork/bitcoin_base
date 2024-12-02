@@ -56,7 +56,7 @@ class UtxoWithAddress {
         utxo: utxo,
         ownerDetails: ownerDetails,
         isCompressed: ownerDetails._publicKey != null && !utxo.isSegwit
-            ? BtcUtils.isCompressedPubKey(ownerDetails._publicKey)
+            ? BtcUtils.isCompressedPubKey(ownerDetails._publicKey!)
             : true);
   }
 
@@ -225,7 +225,7 @@ class BitcoinUtxo {
         token: token,
         vout: vout,
         scriptType: scriptType,
-        isP2tr: scriptType == SegwitAddresType.p2tr,
+        isP2tr: scriptType == SegwitAddressType.p2tr,
         isP2shSegwit: isP2shSegwit,
         isSegwit: isP2shSegwit || scriptType.isSegwit);
   }

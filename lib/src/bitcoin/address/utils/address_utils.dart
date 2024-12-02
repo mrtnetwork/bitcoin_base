@@ -153,7 +153,7 @@ class _BitcoinAddressUtils {
   static BitcoinBaseAddress decodeAddress(
       String address, BasedUtxoNetwork network) {
     BitcoinBaseAddress? baseAddress;
-    if (network.supportedAddress.contains(SegwitAddresType.p2wpkh)) {
+    if (network.supportedAddress.contains(SegwitAddressType.p2wpkh)) {
       baseAddress = toSegwitAddress(address, network);
     }
     baseAddress ??= toLegacy(address, network);

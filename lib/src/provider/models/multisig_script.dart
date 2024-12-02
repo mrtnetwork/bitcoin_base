@@ -91,7 +91,7 @@ class MultiSignatureAddress {
       {required BasedUtxoNetwork network,
       required BitcoinAddressType addressType}) {
     switch (addressType) {
-      case SegwitAddresType.p2wsh:
+      case SegwitAddressType.p2wsh:
         return toP2wshAddress(network: network);
       case P2shAddressType.p2wshInP2sh:
         return toP2wshInP2shAddress(network: network);

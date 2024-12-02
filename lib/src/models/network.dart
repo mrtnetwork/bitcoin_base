@@ -157,10 +157,10 @@ class BitcoinNetwork implements BasedUtxoNetwork {
   @override
   List<BitcoinAddressType> get supportedAddress => [
         P2pkhAddressType.p2pkh,
-        SegwitAddresType.p2wpkh,
+        SegwitAddressType.p2wpkh,
         PubKeyAddressType.p2pk,
-        SegwitAddresType.p2tr,
-        SegwitAddresType.p2wsh,
+        SegwitAddressType.p2tr,
+        SegwitAddressType.p2wsh,
         P2shAddressType.p2wshInP2sh,
         P2shAddressType.p2wpkhInP2sh,
         P2shAddressType.p2pkhInP2sh,
@@ -229,9 +229,9 @@ class LitecoinNetwork implements BasedUtxoNetwork {
   @override
   final List<BitcoinAddressType> supportedAddress = const [
     P2pkhAddressType.p2pkh,
-    SegwitAddresType.p2wpkh,
+    SegwitAddressType.p2wpkh,
     PubKeyAddressType.p2pk,
-    SegwitAddresType.p2wsh,
+    SegwitAddressType.p2wsh,
     P2shAddressType.p2wshInP2sh,
     P2shAddressType.p2wpkhInP2sh,
     P2shAddressType.p2pkhInP2sh,

@@ -180,7 +180,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
                 .toScriptPubKey();
           }
           return script;
-        case SegwitAddresType.p2wsh:
+        case SegwitAddressType.p2wsh:
           if (isTaproot) {
             return multiSigAAddr
                 .toP2wshAddress(network: network)
@@ -202,7 +202,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
     switch (utxo.utxo.scriptType) {
       case PubKeyAddressType.p2pk:
         return senderPub.toRedeemScript(compressed: utxo.isCompressed);
-      case SegwitAddresType.p2wsh:
+      case SegwitAddressType.p2wsh:
         if (isTaproot) {
           return senderPub.toP2wshAddress().toScriptPubKey();
         }
@@ -211,12 +211,12 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
         return senderPub
             .toAddress(compressed: utxo.isCompressed)
             .toScriptPubKey();
-      case SegwitAddresType.p2wpkh:
+      case SegwitAddressType.p2wpkh:
         if (isTaproot) {
           return senderPub.toSegwitAddress().toScriptPubKey();
         }
         return senderPub.toAddress().toScriptPubKey();
-      case SegwitAddresType.p2tr:
+      case SegwitAddressType.p2tr:
         return senderPub.toTaprootAddress().toScriptPubKey();
       case P2shAddressType.p2pkhInP2sh:
         if (isTaproot) {
@@ -354,10 +354,10 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
       }
       switch (utx.utxo.scriptType) {
         case P2shAddressType.p2wshInP2sh:
-        case SegwitAddresType.p2wsh:
+        case SegwitAddressType.p2wsh:
           final script = senderPub.toP2wshScript();
           return ['', signedDigest, script.toHex()];
-        case SegwitAddresType.p2wpkh:
+        case SegwitAddressType.p2wpkh:
         case P2shAddressType.p2wpkhInP2sh:
           return [signedDigest, senderPub.toHex()];
         default:
