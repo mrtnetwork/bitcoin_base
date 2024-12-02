@@ -49,7 +49,8 @@ abstract class BasedUtxoNetwork implements Enumerate {
     BitcoinSVNetwork.mainnet,
     BitcoinSVNetwork.testnet,
     PepeNetwork.mainnet,
-    OmniXepNetwork.mainnet,
+    ElectraProtocolNetwork.mainnet,
+    ElectraProtocolNetwork.testnet,
   ];
 
   static BasedUtxoNetwork fromName(String name) {
@@ -380,6 +381,7 @@ class BitcoinCashNetwork implements BasedUtxoNetwork {
 
   /// Constructor for creating a Bitcoin Cash network with a specific configuration.
   const BitcoinCashNetwork._(this.value, this.conf);
+
   @override
   final String value;
 
@@ -495,18 +497,26 @@ class PepeNetwork implements BasedUtxoNetwork {
   }
 }
 
-/// Class representing a OmniXEP network, implementing the `BasedUtxoNetwork` abstract class.
-class OmniXepNetwork implements BasedUtxoNetwork {
+/// Class representing a Electra Protocol network, implementing the `BasedUtxoNetwork` abstract class.
+class ElectraProtocolNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  static const OmniXepNetwork mainnet =
-      OmniXepNetwork._("omniXepMainnet", CoinsConf.omniXepMainNet);
+  static const ElectraProtocolNetwork mainnet = ElectraProtocolNetwork._(
+    "electraProtocolMainnet",
+    CoinsConf.electraProtocolMainNet,
+  );
+
+  /// Testnet configuration with associated `CoinConf`.
+  static const ElectraProtocolNetwork testnet = ElectraProtocolNetwork._(
+    "electraProtocolTestnet",
+    CoinsConf.electraProtocolTestNet,
+  );
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a OmniXEP network with a specific configuration.
-  const OmniXepNetwork._(this.value, this.conf);
+  const ElectraProtocolNetwork._(this.value, this.conf);
 
   @override
   final String value;
@@ -529,19 +539,26 @@ class OmniXepNetwork implements BasedUtxoNetwork {
 
   /// Checks if the current network is the mainnet.
   @override
-  bool get isMainnet => true;
+  bool get isMainnet => this == ElectraProtocolNetwork.mainnet;
 
   @override
   final List<BitcoinAddressType> supportedAddress = const [
-    SegwitAddresType.p2wpkh,
+    P2pkhAddressType.p2pkh,
     P2shAddressType.p2wpkhInP2sh,
+    SegwitAddresType.p2wpkh,
   ];
 
   @override
   List<BipCoins> get coins {
     if (isMainnet) {
-      return [Bip49Coins.omniXep];
+      return [
+        Bip44Coins.electraProtocol,
+        Bip49Coins.electraProtocol,
+      ];
     }
-    return [];
+    return [
+      Bip44Coins.electraProtocolTestnet,
+      Bip49Coins.electraProtocolTestnet,
+    ];
   }
 }
