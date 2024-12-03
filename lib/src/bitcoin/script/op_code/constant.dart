@@ -2,6 +2,15 @@
 /// Constants and identifiers used in the Bitcoin-related code.
 // ignore_for_file: constant_identifier_names, non_constant_identifier_names, equal_keys_in_map
 class BitcoinOpCodeConst {
+  static const int opPushData1 = 0x4c;
+  static const int opPushData2 = 0x4d;
+  static const int opPushData4 = 0x4e;
+  static bool isOpPushData(int byte) {
+    return byte == BitcoinOpCodeConst.opPushData1 ||
+        byte == BitcoinOpCodeConst.opPushData2 ||
+        byte == BitcoinOpCodeConst.opPushData4;
+  }
+
   static const Map<String, List<int>> OP_CODES = {
     'OP_0': [0x00],
     'OP_FALSE': [0x00],

@@ -50,7 +50,7 @@ class BitcoinFeeRate {
   BigInt getEstimate(int trSize,
       {BigInt? customFeeRatePerKb,
       BitcoinFeeRateType feeRateType = BitcoinFeeRateType.medium}) {
-    BigInt feeRate = customFeeRatePerKb ?? _feeRatrete(feeRateType);
+    final BigInt feeRate = customFeeRatePerKb ?? _feeRatrete(feeRateType);
     final trSizeBigInt = BigInt.from(trSize);
     return (trSizeBigInt * feeRate) ~/ BigInt.from(1000);
   }

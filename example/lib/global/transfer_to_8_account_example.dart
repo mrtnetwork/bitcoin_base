@@ -136,7 +136,7 @@ void main() async {
   /// create transaction and sign it
   final transaction =
       builder.buildTransaction((trDigest, utxo, publicKey, sighash) {
-    if (utxo.utxo.isP2tr()) {
+    if (utxo.utxo.isP2tr) {
       return examplePrivateKey2.signTapRoot(trDigest, sighash: sighash);
     }
     return examplePrivateKey2.signInput(trDigest, sigHash: sighash);

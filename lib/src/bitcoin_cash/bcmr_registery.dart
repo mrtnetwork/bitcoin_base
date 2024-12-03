@@ -700,26 +700,16 @@ class ChainSnapshot extends IdentitySnapshot {
     );
   }
   const ChainSnapshot({
-    required String name,
-    required TokenCategory token,
-    String? description,
-    List<String>? tags,
-    String? migrated,
-    String? status,
-    String? splitId,
-    URIs? uris,
-    Extensions? extensions,
-  }) : super(
-          name: name,
-          description: description,
-          tags: tags,
-          migrated: migrated,
-          token: token,
-          status: status,
-          splitId: splitId,
-          uris: uris,
-          extensions: extensions,
-        );
+    required super.name,
+    required TokenCategory super.token,
+    super.description,
+    super.tags,
+    super.migrated,
+    super.status,
+    super.splitId,
+    super.uris,
+    super.extensions,
+  });
 }
 
 class RegistryTimestampKeyedValues<T extends IdentitySnapshot> {
@@ -732,8 +722,7 @@ class RegistryTimestampKeyedValues<T extends IdentitySnapshot> {
 }
 
 class ChainHistory extends RegistryTimestampKeyedValues<ChainSnapshot> {
-  const ChainHistory({required Map<String, ChainSnapshot> timestampMap})
-      : super(timestampMap: timestampMap);
+  const ChainHistory({required super.timestampMap});
 
   factory ChainHistory.fromJson(Map<String, dynamic> json) {
     return ChainHistory(
@@ -745,8 +734,7 @@ class ChainHistory extends RegistryTimestampKeyedValues<ChainSnapshot> {
 }
 
 class IdentityHistory extends RegistryTimestampKeyedValues<IdentitySnapshot> {
-  const IdentityHistory({required Map<String, IdentitySnapshot> timestampMap})
-      : super(timestampMap: timestampMap);
+  const IdentityHistory({required super.timestampMap});
 
   factory IdentityHistory.fromJson(Map<String, dynamic> json) {
     return IdentityHistory(

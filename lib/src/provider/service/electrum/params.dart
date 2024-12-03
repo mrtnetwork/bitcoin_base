@@ -40,7 +40,7 @@ abstract class ElectrumRequest<RESULT, RESPONSE>
   }
 
   ElectrumRequestDetails toRequest(int requestId) {
-    List<dynamic> inJson = toJson();
+    final List<dynamic> inJson = toJson();
     inJson.removeWhere((v) => v == null);
     final params = {
       "jsonrpc": "2.0",

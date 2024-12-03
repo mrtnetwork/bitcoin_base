@@ -6,7 +6,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// signers in a multi-signature scheme. A multi-signature signer typically includes
 /// information about their public key and weight within the scheme.
 class MultiSignatureSigner {
-  MultiSignatureSigner._(this.publicKey, this.weight);
+  MultiSignatureSigner._(this.publicKey, this.weight, this.isCompressed);
 
   /// PublicKey returns the public key associated with the signer.
   final String publicKey;
@@ -15,12 +15,15 @@ class MultiSignatureSigner {
   /// The weight is used to determine the number of signatures required for a valid transaction.
   final int weight;
 
+  final bool isCompressed;
+
   /// creates a new instance of a multi-signature signer with the
   /// specified public key and weight.
   factory MultiSignatureSigner(
       {required String publicKey, required int weight}) {
     ECPublic.fromHex(publicKey);
-    return MultiSignatureSigner._(publicKey, weight);
+    return MultiSignatureSigner._(
+        publicKey, weight, BtcUtils.isCompressedPubKey(publicKey));
   }
 }
 
@@ -34,6 +37,7 @@ class MultiSignatureAddress {
     P2shAddressType.p2pkhInP2shwt,
     P2shAddressType.p2pkhInP2sh32wt
   ];
+  final bool canSelectSegwit;
 
   /// Signers is a collection of signers participating in the multi-signature scheme.
   final List<MultiSignatureSigner> signers;
@@ -53,6 +57,10 @@ class MultiSignatureAddress {
     if (network is! LitecoinNetwork && network is! BitcoinNetwork) {
       throw DartBitcoinPluginException(
           "${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress");
+    }
+    if (!canSelectSegwit) {
+      throw const DartBitcoinPluginException(
+          "One of the signer's accounts used an uncompressed public key.");
     }
     return P2wshAddress.fromScript(script: multiSigScript);
   }
@@ -79,10 +87,9 @@ class MultiSignatureAddress {
     return P2shAddress.fromScript(script: multiSigScript, type: addressType);
   }
 
-  BitcoinBaseAddress fromType({
-    required BasedUtxoNetwork network,
-    required BitcoinAddressType addressType,
-  }) {
+  BitcoinBaseAddress fromType(
+      {required BasedUtxoNetwork network,
+      required BitcoinAddressType addressType}) {
     switch (addressType) {
       case SegwitAddresType.p2wsh:
         return toP2wshAddress(network: network);
@@ -102,17 +109,15 @@ class MultiSignatureAddress {
   MultiSignatureAddress._(
       {required this.signers,
       required this.threshold,
-      // required this.address,
-      required this.multiSigScript});
+      required this.multiSigScript,
+      required this.canSelectSegwit});
 
   /// CreateMultiSignatureAddress creates a new instance of a MultiSignatureAddress, representing
   /// a multi-signature Bitcoin address configuration. It allows you to specify the minimum number
   /// of required signatures (threshold), provide the collection of signers participating in the
   /// multi-signature scheme, and specify the address type.
-  factory MultiSignatureAddress({
-    required int threshold,
-    required List<MultiSignatureSigner> signers,
-  }) {
+  factory MultiSignatureAddress(
+      {required int threshold, required List<MultiSignatureSigner> signers}) {
     final sumWeight =
         signers.fold<int>(0, (sum, signer) => sum + signer.weight);
     if (threshold > 16 || threshold < 1) {
@@ -136,6 +141,9 @@ class MultiSignatureAddress {
     multiSigScript.addAll(['OP_$sumWeight', 'OP_CHECKMULTISIG']);
     final script = Script(script: multiSigScript);
     return MultiSignatureAddress._(
-        signers: signers, threshold: threshold, multiSigScript: script);
+        signers: signers,
+        threshold: threshold,
+        multiSigScript: script,
+        canSelectSegwit: signers.every((e) => e.isCompressed));
   }
 }

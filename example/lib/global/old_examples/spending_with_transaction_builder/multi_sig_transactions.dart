@@ -265,7 +265,7 @@ void main() async {
 
     // Ok, now we have the private key, we need to check which method to use for signing
     // We check whether the UTX corresponds to the P2TR address or not.
-    if (utxo.utxo.isP2tr()) {
+    if (utxo.utxo.isP2tr) {
       // yes is p2tr utxo and now we use SignTaprootTransaction(Schnorr sign)
       // for now this transaction builder support only tweak transaction
       // If you want to spend a Taproot script-path spending, you must create your own transaction builder.

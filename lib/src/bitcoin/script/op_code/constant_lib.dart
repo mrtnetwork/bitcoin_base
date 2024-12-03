@@ -1,4 +1,4 @@
-library bitcoin_constants;
+library;
 
 export 'constant.dart';
 export 'tools.dart';

@@ -24,7 +24,7 @@ class APIConfig {
   }
 
   String getUtxoUrl(String address) {
-    String baseUrl = url;
+    final String baseUrl = url;
     return baseUrl.replaceAll("###", address);
   }
 
@@ -33,17 +33,17 @@ class APIConfig {
   }
 
   String getTransactionUrl(String transactionId) {
-    String baseUrl = transaction;
+    final String baseUrl = transaction;
     return baseUrl.replaceAll("###", transactionId);
   }
 
   String getTransactionsUrl(String address) {
-    String baseUrl = transactions;
+    final String baseUrl = transactions;
     return baseUrl.replaceAll("###", address);
   }
 
   String getBlockHeight(int blockHaight) {
-    String baseUrl = blockHeight;
+    final String baseUrl = blockHeight;
     return baseUrl.replaceAll("###", "$blockHaight");
   }
 

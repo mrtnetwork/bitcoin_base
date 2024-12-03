@@ -14,6 +14,14 @@ class TxOutput {
   final BigInt amount;
   final Script scriptPubKey;
 
+  Map<String, dynamic> toJson() {
+    return {
+      "cashToken": cashToken?.toJson(),
+      "amount": amount.toString(),
+      "scriptPubKey": scriptPubKey.script
+    };
+  }
+
   ///  creates a copy of the object
   TxOutput copy() {
     return TxOutput(
@@ -25,7 +33,7 @@ class TxOutput {
   List<int> toBytes() {
     final amountBytes =
         BigintUtils.toBytes(amount, length: 8, order: Endian.little);
-    List<int> scriptBytes = [
+    final List<int> scriptBytes = [
       ...cashToken?.toBytes() ?? <int>[],
       ...scriptPubKey.toBytes()
     ];
@@ -37,27 +45,26 @@ class TxOutput {
     return data;
   }
 
-  static Tuple<TxOutput, int> fromRaw(
-      {required String raw, required int cursor, bool hasSegwit = false}) {
-    final txBytes = BytesUtils.fromHexString(raw);
-    final value = BigintUtils.fromBytes(txBytes.sublist(cursor, cursor + 8),
+  static Tuple<TxOutput, int> deserialize(
+      {required List<int> bytes, required int cursor, bool hasSegwit = false}) {
+    final value = BigintUtils.fromBytes(bytes.sublist(cursor, cursor + 8),
             byteOrder: Endian.little)
         .toSigned(64);
     cursor += 8;
 
-    final vi = IntUtils.decodeVarint(txBytes.sublist(cursor, cursor + 9));
+    final vi = IntUtils.decodeVarint(bytes.sublist(cursor));
     cursor += vi.item2;
-    final token = CashToken.fromRaw(txBytes.sublist(cursor));
-    List<int> lockScript =
-        txBytes.sublist(cursor + token.item2, cursor + vi.item1);
+    final token = CashToken.fromRaw(bytes.sublist(cursor));
+
+    final List<int> lockScript =
+        bytes.sublist(cursor + token.item2, cursor + vi.item1);
     cursor += vi.item1;
     return Tuple(
         TxOutput(
             amount: value,
             cashToken: token.item1,
-            scriptPubKey: Script.fromRaw(
-                hexData: BytesUtils.toHexString(lockScript),
-                hasSegwit: hasSegwit)),
+            scriptPubKey:
+                Script.deserialize(bytes: lockScript, hasSegwit: hasSegwit)),
         cursor);
   }
 

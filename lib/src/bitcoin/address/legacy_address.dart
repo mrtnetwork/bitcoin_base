@@ -45,14 +45,14 @@ abstract class LegacyAddress implements BitcoinBaseAddress {
 
 class P2shAddress extends LegacyAddress {
   P2shAddress.fromScript(
-      {required Script script, this.type = P2shAddressType.p2pkInP2sh})
-      : super.fromScript(script: script);
+      {required super.script, this.type = P2shAddressType.p2pkInP2sh})
+      : super.fromScript();
 
   P2shAddress.fromAddress(
-      {required String address,
-      required BasedUtxoNetwork network,
+      {required super.address,
+      required super.network,
       this.type = P2shAddressType.p2pkInP2sh})
-      : super.fromAddress(address: address, network: network);
+      : super.fromAddress();
   P2shAddress.fromHash160(
       {required String addrHash, this.type = P2shAddressType.p2pkInP2sh})
       : super.fromHash160(addrHash, type);
@@ -81,13 +81,13 @@ class P2shAddress extends LegacyAddress {
 
 class P2pkhAddress extends LegacyAddress {
   P2pkhAddress.fromScript(
-      {required Script script, this.type = P2pkhAddressType.p2pkh})
-      : super.fromScript(script: script);
+      {required super.script, this.type = P2pkhAddressType.p2pkh})
+      : super.fromScript();
   P2pkhAddress.fromAddress(
-      {required String address,
-      required BasedUtxoNetwork network,
+      {required super.address,
+      required super.network,
       this.type = P2pkhAddressType.p2pkh})
-      : super.fromAddress(address: address, network: network);
+      : super.fromAddress();
   P2pkhAddress.fromHash160(
       {required String addrHash, this.type = P2pkhAddressType.p2pkh})
       : super.fromHash160(addrHash, type);

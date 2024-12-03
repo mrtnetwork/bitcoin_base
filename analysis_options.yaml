@@ -2,3 +2,10 @@
 include: package:flutter_lints/flutter.yaml
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+# Uncomment the following section to specify additional rules.
+linter:
+  rules:
+    - unnecessary_const
+    - prefer_const_declarations
+    - prefer_final_locals      # Warns when a local variable could be final
+    - prefer_final_in_for_each # Warns when a forEach variable could be final

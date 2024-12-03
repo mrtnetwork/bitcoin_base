@@ -166,7 +166,7 @@ void _spendFromP2pkhTo10DifferentType() async {
     /// and sign the transaction digest to construct the unlocking script.
 
     if (publicKey == examplePublicKey2.toHex()) {
-      if (utxo.utxo.isP2tr()) {
+      if (utxo.utxo.isP2tr) {
         return examplePrivateKey.signTapRoot(trDigest);
       }
       return examplePrivateKey.signInput(trDigest, sigHash: sighash);
@@ -400,19 +400,19 @@ void _spendFrom10DifferentTypeToP2pkh() async {
     /// For each input in the transaction, locate the corresponding private key
     /// and sign the transaction digest to construct the unlocking script.
     if (publicKey == childKey1PublicKey.toHex()) {
-      if (utxo.utxo.isP2tr()) {
+      if (utxo.utxo.isP2tr) {
         return childKey1PrivateKey.signTapRoot(trDigest, sighash: sighash);
       }
       return childKey1PrivateKey.signInput(trDigest, sigHash: sighash);
     }
     if (publicKey == examplePublicKey.toHex()) {
-      if (utxo.utxo.isP2tr()) {
+      if (utxo.utxo.isP2tr) {
         return childKey2PrivateKey.signTapRoot(trDigest, sighash: sighash);
       }
       return childKey2PrivateKey.signInput(trDigest, sigHash: sighash);
     }
     if (publicKey == examplePublicKey2.toHex()) {
-      if (utxo.utxo.isP2tr()) {
+      if (utxo.utxo.isP2tr) {
         return examplePrivateKey.signTapRoot(trDigest, sighash: sighash);
       }
       return examplePrivateKey.signInput(trDigest, sigHash: sighash);
