@@ -543,9 +543,14 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
 
   @override
   final List<BitcoinAddressType> supportedAddress = const [
+    PubKeyAddressType.p2pk,
     P2pkhAddressType.p2pkh,
-    P2shAddressType.p2wpkhInP2sh,
     SegwitAddresType.p2wpkh,
+    SegwitAddresType.p2wsh,
+    P2shAddressType.p2pkInP2sh,
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2wpkhInP2sh,
+    P2shAddressType.p2wshInP2sh,
   ];
 
   @override
@@ -554,11 +559,13 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
       return [
         Bip44Coins.electraProtocol,
         Bip49Coins.electraProtocol,
+        Bip84Coins.electraProtocol,
       ];
     }
     return [
       Bip44Coins.electraProtocolTestnet,
       Bip49Coins.electraProtocolTestnet,
+      Bip84Coins.electraProtocolTestnet,
     ];
   }
 }
