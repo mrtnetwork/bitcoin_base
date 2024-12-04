@@ -1,6 +1,8 @@
-## 4.9.2
+## 4.9.3
 * Improved serialization process for large transaction scripts.
 * Added support for the Electra network.
+
+## 4.9.2
 * Update dependencies
 * Resolved issue with transaction deserialization (unsigned tx)
 
