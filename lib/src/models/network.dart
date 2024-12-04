@@ -508,7 +508,7 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
   @override
   final String value;
 
-  /// Constructor for creating a Litecoin network with a specific configuration.
+  /// Constructor for creating a Electra Protocol network with a specific configuration.
   const ElectraProtocolNetwork._(this.value, this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
