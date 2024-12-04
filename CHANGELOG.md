@@ -1,5 +1,11 @@
-## 4.9.2
+## 4.9.4
+* Improved serialization process for large transaction scripts.
+* Added support for the Electra network.
+* Create and spent from uncomprossed public key format.
+* Important Notice: This is the final version supporting Dart v2. The next release will require Dart v3.3 or higher.
 
+
+## 4.9.2
 * Update dependencies
 * Resolved issue with transaction deserialization (unsigned tx)
 

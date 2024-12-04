@@ -21,6 +21,9 @@ class UtxoAddressDetails {
     required this.address,
   })  : _multiSigAddress = null,
         _publicKey = publicKey;
+
+  /// The public key format (compressed or uncompressed) is crucial for non-SegWit addresses.
+  /// If your address is non-SegWit, ensure you use the correct public key format.
   factory UtxoAddressDetails(
       {required String publicKey, required BitcoinBaseAddress address}) {
     ECPublic.fromHex(publicKey);
@@ -56,7 +59,7 @@ class UtxoWithAddress {
         utxo: utxo,
         ownerDetails: ownerDetails,
         isCompressed: ownerDetails._publicKey != null && !utxo.isSegwit
-            ? BtcUtils.isCompressedPubKey(ownerDetails._publicKey)
+            ? BtcUtils.hasCompressedPubKeyLength(ownerDetails._publicKey!)
             : true);
   }
 
@@ -225,7 +228,7 @@ class BitcoinUtxo {
         token: token,
         vout: vout,
         scriptType: scriptType,
-        isP2tr: scriptType == SegwitAddresType.p2tr,
+        isP2tr: scriptType == SegwitAddressType.p2tr,
         isP2shSegwit: isP2shSegwit,
         isSegwit: isP2shSegwit || scriptType.isSegwit);
   }

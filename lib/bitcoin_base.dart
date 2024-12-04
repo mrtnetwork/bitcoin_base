@@ -4,7 +4,7 @@
 /// including spending transactions, Bitcoin address management,
 ///  Bitcoin Schnorr signatures, BIP-39 mnemonic phrase generation,
 /// hierarchical deterministic (HD) wallet derivation, and Web3 Secret Storage Definition.
-library;
+library bitcoin_base;
 
 export 'package:bitcoin_base/src/bitcoin/address/address.dart';
 

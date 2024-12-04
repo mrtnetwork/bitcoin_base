@@ -1,6 +1,6 @@
 name: bitcoin_base
 description: A versatile library for Bitcoin, Dogecoin, Litecoin, Dash, BSV, and BCH. Supports P2PKH, P2SH, P2WPKH, P2WSH, P2TR, with advanced creation, signing, and spending capabilities.
-version: 4.9.2
+version: 4.9.4
 homepage: "https://github.com/mrtnetwork/bitcoin_base"
 repository: "https://github.com/mrtnetwork/bitcoin_base"
 Author: mrhaydari.t@gmail.com
@@ -12,14 +12,14 @@ topics:
   - dash
   
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=2.15.0 <4.0.0'
 
 
 dependencies:
-  blockchain_utils: ^3.5.0
+  blockchain_utils: ^3.6.0
   
   # blockchain_utils:
-  #   path: ../../blockchain_utils
+  #   path: ../blockchain_utils
     
 
 dev_dependencies:

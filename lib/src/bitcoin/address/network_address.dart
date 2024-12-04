@@ -162,3 +162,22 @@ class BitcoinSVAddress extends BitcoinNetworkAddress<BitcoinSVNetwork> {
         baseAddress, baseAddress.toAddress(network), network);
   }
 }
+
+/// A concrete implementation of [BitcoinNetworkAddress] for Electra protocol network.
+class ElectraProtocolAddress
+    extends BitcoinNetworkAddress<ElectraProtocolNetwork> {
+  const ElectraProtocolAddress._(BitcoinBaseAddress baseAddress, String address,
+      ElectraProtocolNetwork network)
+      : super._(address: address, baseAddress: baseAddress, network: network);
+  factory ElectraProtocolAddress(String address,
+      {ElectraProtocolNetwork network = ElectraProtocolNetwork.mainnet}) {
+    return ElectraProtocolAddress._(
+        _BitcoinAddressUtils.decodeAddress(address, network), address, network);
+  }
+  factory ElectraProtocolAddress.fromBaseAddress(BitcoinBaseAddress address,
+      {ElectraProtocolNetwork network = ElectraProtocolNetwork.mainnet}) {
+    final baseAddress = _BitcoinAddressUtils.validateAddress(address, network);
+    return ElectraProtocolAddress._(
+        baseAddress, baseAddress.toAddress(network), network);
+  }
+}

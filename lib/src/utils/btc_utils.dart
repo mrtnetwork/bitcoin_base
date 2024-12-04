@@ -2,7 +2,7 @@ import 'package:blockchain_utils/utils/numbers/rational/big_rational.dart';
 import 'package:blockchain_utils/utils/string/string.dart';
 
 class BtcUtils {
-  static bool isCompressedPubKey(String publicKey) {
+  static bool hasCompressedPubKeyLength(String publicKey) {
     return StringUtils.strip0x(publicKey.toLowerCase()).length == 66;
   }
 

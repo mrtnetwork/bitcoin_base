@@ -1,8 +1,6 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/utils/enumerate.dart';
-import 'package:blockchain_utils/bip/coin_conf/coin_conf.dart';
-import 'package:blockchain_utils/bip/coin_conf/coins_conf.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// Abstract class representing a base for UTXO-based cryptocurrency networks.
@@ -159,10 +157,10 @@ class BitcoinNetwork implements BasedUtxoNetwork {
   @override
   List<BitcoinAddressType> get supportedAddress => [
         P2pkhAddressType.p2pkh,
-        SegwitAddresType.p2wpkh,
+        SegwitAddressType.p2wpkh,
         PubKeyAddressType.p2pk,
-        SegwitAddresType.p2tr,
-        SegwitAddresType.p2wsh,
+        SegwitAddressType.p2tr,
+        SegwitAddressType.p2wsh,
         P2shAddressType.p2wshInP2sh,
         P2shAddressType.p2wpkhInP2sh,
         P2shAddressType.p2pkhInP2sh,
@@ -231,9 +229,9 @@ class LitecoinNetwork implements BasedUtxoNetwork {
   @override
   final List<BitcoinAddressType> supportedAddress = const [
     P2pkhAddressType.p2pkh,
-    SegwitAddresType.p2wpkh,
+    SegwitAddressType.p2wpkh,
     PubKeyAddressType.p2pk,
-    SegwitAddresType.p2wsh,
+    SegwitAddressType.p2wsh,
     P2shAddressType.p2wshInP2sh,
     P2shAddressType.p2wpkhInP2sh,
     P2shAddressType.p2pkhInP2sh,
@@ -501,25 +499,20 @@ class PepeNetwork implements BasedUtxoNetwork {
 class ElectraProtocolNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
   static const ElectraProtocolNetwork mainnet = ElectraProtocolNetwork._(
-    "electraProtocolMainnet",
-    CoinsConf.electraProtocolMainNet,
-  );
+      "electraProtocolMainnet", CoinsConf.electraProtocolMainNet);
 
   /// Testnet configuration with associated `CoinConf`.
   static const ElectraProtocolNetwork testnet = ElectraProtocolNetwork._(
-    "electraProtocolTestnet",
-    CoinsConf.electraProtocolTestNet,
-  );
+      "electraProtocolTestnet", CoinsConf.electraProtocolTestNet);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
-
-  /// Constructor for creating a OmniXEP network with a specific configuration.
-  const ElectraProtocolNetwork._(this.value, this.conf);
-
   @override
   final String value;
+
+  /// Constructor for creating a Electra Protocol network with a specific configuration.
+  const ElectraProtocolNetwork._(this.value, this.conf);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -533,7 +526,8 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
   @override
   List<int> get p2shNetVer => conf.params.p2shNetVer!;
 
-  /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
+  /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses
+  /// from the associated `CoinConf`.
   @override
   String get p2wpkhHrp => conf.params.p2wpkhHrp!;
 
@@ -543,14 +537,14 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
 
   @override
   final List<BitcoinAddressType> supportedAddress = const [
-    PubKeyAddressType.p2pk,
     P2pkhAddressType.p2pkh,
-    SegwitAddresType.p2wpkh,
-    SegwitAddresType.p2wsh,
-    P2shAddressType.p2pkInP2sh,
-    P2shAddressType.p2pkhInP2sh,
-    P2shAddressType.p2wpkhInP2sh,
+    SegwitAddressType.p2wpkh,
+    PubKeyAddressType.p2pk,
+    SegwitAddressType.p2wsh,
     P2shAddressType.p2wshInP2sh,
+    P2shAddressType.p2wpkhInP2sh,
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2pkInP2sh,
   ];
 
   @override
@@ -559,13 +553,13 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
       return [
         Bip44Coins.electraProtocol,
         Bip49Coins.electraProtocol,
-        Bip84Coins.electraProtocol,
+        Bip84Coins.electraProtocol
       ];
     }
     return [
       Bip44Coins.electraProtocolTestnet,
       Bip49Coins.electraProtocolTestnet,
-      Bip84Coins.electraProtocolTestnet,
+      Bip84Coins.electraProtocolTestnet
     ];
   }
 }

@@ -23,7 +23,7 @@ class MultiSignatureSigner {
       {required String publicKey, required int weight}) {
     ECPublic.fromHex(publicKey);
     return MultiSignatureSigner._(
-        publicKey, weight, BtcUtils.isCompressedPubKey(publicKey));
+        publicKey, weight, BtcUtils.hasCompressedPubKeyLength(publicKey));
   }
 }
 
@@ -91,7 +91,7 @@ class MultiSignatureAddress {
       {required BasedUtxoNetwork network,
       required BitcoinAddressType addressType}) {
     switch (addressType) {
-      case SegwitAddresType.p2wsh:
+      case SegwitAddressType.p2wsh:
         return toP2wshAddress(network: network);
       case P2shAddressType.p2wshInP2sh:
         return toP2wshInP2shAddress(network: network);
