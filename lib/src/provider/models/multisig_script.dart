@@ -23,7 +23,7 @@ class MultiSignatureSigner {
       {required String publicKey, required int weight}) {
     ECPublic.fromHex(publicKey);
     return MultiSignatureSigner._(
-        publicKey, weight, BtcUtils.isCompressedPubKey(publicKey));
+        publicKey, weight, BtcUtils.hasCompressedPubKeyLength(publicKey));
   }
 }
 
