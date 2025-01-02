@@ -257,7 +257,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// - tapRootPubKeys: A List of of Script representing taproot public keys for P2TR inputs (ignored for non-P2TR inputs).
 //
   /// Returns:
-  /// - List<int>: representing the transaction digest to be used for signing the input.
+  /// - `List<int>`: representing the transaction digest to be used for signing the input.
   List<int> _generateTransactionDigest(
       Script scriptPubKeys,
       int input,
@@ -289,7 +289,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// - utx: A UtxoWithAddress instance representing the unspent transaction output (UTXO) and its owner details.
   //
   /// Returns:
-  /// - List<String>: A List of strings representing the script signature for the P2WSH or P2SH input.
+  /// - `List<String>`: A List of strings representing the script signature for the P2WSH or P2SH input.
   List<String> _buildMiltisigUnlockingScript(
       List<String> signedDigest, UtxoWithAddress utx) {
     /// The constructed script signature consists of the signed digest elements followed by
@@ -306,7 +306,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// - utxo: A UtxoWithAddress instance representing the unspent transaction output (UTXO) and its owner details.
   //
   /// Returns:
-  /// - List<string>: A List of strings representing the script signature for the P2SH SegWit input.
+  /// - `List<string>`: A List of strings representing the script signature for the P2SH SegWit input.
   List<String> _buildNestedSegwitReedemScript(UtxoWithAddress utxo) {
     if (utxo.isMultiSig()) {
       switch (utxo.utxo.scriptType) {

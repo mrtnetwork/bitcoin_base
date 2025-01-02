@@ -168,7 +168,7 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// - tapRootPubKeys: A List of of Script representing taproot public keys for P2TR inputs (ignored for non-P2TR inputs).
 //
   /// Returns:
-  /// - List<int>: representing the transaction digest to be used for signing the input.
+  /// - `List<int>`: representing the transaction digest to be used for signing the input.
   List<int> _generateTransactionDigest(
       {required Script scriptPubKeys,
       required int input,
@@ -193,7 +193,7 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// - utx: A UtxoWithAddress instance representing the unspent transaction output (UTXO) and its owner details.
   //
   /// Returns:
-  /// - List<String>: A List of strings representing the script signature for the P2WSH or P2SH input.
+  /// - `List<String>`: A List of strings representing the script signature for the P2WSH or P2SH input.
   List<String> _buildMiltisigUnlockingScript(
       List<String> signedDigest, UtxoWithAddress utx) {
     /// The constructed script signature consists of the signed digest elements followed by
