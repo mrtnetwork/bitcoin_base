@@ -1,8 +1,9 @@
-import 'package:bitcoin_base/src/provider/service/electrum/electrum.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Subscribe to receive block headers when a new block is found.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumHeaderSubscribe
+class ElectrumRequestHeaderSubscribe
     extends ElectrumRequest<Map<String, dynamic>, Map<String, dynamic>> {
   /// blockchain.headers.subscribe
   @override

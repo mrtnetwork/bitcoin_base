@@ -4,7 +4,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// Represents an ECDSA private key.
 class ECPrivate {
   final Bip32PrivateKey prive;
-  ECPrivate(this.prive);
+  const ECPrivate(this.prive);
 
   /// creates an object from hex
   factory ECPrivate.fromHex(String keyHex) {
@@ -30,15 +30,11 @@ class ECPrivate {
   }
 
   /// returns as WIFC (compressed) or WIF format (string)
-  String toWif({bool compressed = true, BitcoinNetwork? network}) {
-    List<int> bytes = <int>[
-      ...(network ?? BitcoinNetwork.mainnet).wifNetVer,
-      ...toBytes()
-    ];
-    if (compressed) {
-      bytes = <int>[...bytes, 0x01];
-    }
-    return Base58Encoder.checkEncode(bytes);
+  String toWif(
+      {PubKeyModes pubKeyMode = PubKeyModes.compressed,
+      BitcoinNetwork network = BitcoinNetwork.mainnet}) {
+    return WifEncoder.encode(toBytes(),
+        netVer: network.wifNetVer, pubKeyMode: pubKeyMode);
   }
 
   /// returns the key's raw bytes
@@ -62,7 +58,7 @@ class ECPrivate {
   String signInput(List<int> txDigest,
       {int sigHash = BitcoinOpCodeConst.SIGHASH_ALL}) {
     final btcSigner = BitcoinSigner.fromKeyBytes(toBytes());
-    List<int> signature = btcSigner.signTransaction(txDigest);
+    var signature = btcSigner.signTransaction(txDigest);
     signature = <int>[...signature, sigHash];
     return BytesUtils.toHexString(signature);
   }
@@ -70,7 +66,7 @@ class ECPrivate {
   String signSchnorr(List<int> txDigest,
       {int sighash = BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL}) {
     final btcSigner = BitcoinSigner.fromKeyBytes(toBytes());
-    List<int> signatur = btcSigner.signSchnorrTransaction(txDigest,
+    var signatur = btcSigner.signSchnorrTransaction(txDigest,
         tapScripts: [], tweak: false);
     if (sighash != BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL) {
       signatur = <int>[...signatur, sighash];
@@ -89,12 +85,12 @@ class ECPrivate {
       }
       return true;
     }(),
-        "When the tweak is false, the `tapScripts` are ignored, to use the tap script path, you need to consider the tweak value to be true.");
+        'When the tweak is false, the `tapScripts` are ignored, to use the tap script path, you need to consider the tweak value to be true.');
     final tapScriptBytes = !tweak
         ? []
         : tapScripts.map((e) => e.map((e) => e.toBytes()).toList()).toList();
     final btcSigner = BitcoinSigner.fromKeyBytes(toBytes());
-    List<int> signatur = btcSigner.signSchnorrTransaction(txDigest,
+    var signatur = btcSigner.signSchnorrTransaction(txDigest,
         tapScripts: tapScriptBytes, tweak: tweak);
     if (sighash != BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL) {
       signatur = <int>[...signatur, sighash];

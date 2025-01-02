@@ -15,11 +15,10 @@ class TxWitnessInput {
 
   /// returns a serialized byte version of the witness items list
   List<int> toBytes() {
-    List<int> stackBytes = [];
+    var stackBytes = <int>[];
 
     for (final item in stack) {
-      final List<int> itemBytes =
-          IntUtils.prependVarint(BytesUtils.fromHexString(item));
+      final itemBytes = IntUtils.prependVarint(BytesUtils.fromHexString(item));
       stackBytes = [...stackBytes, ...itemBytes];
     }
 
@@ -27,7 +26,7 @@ class TxWitnessInput {
   }
 
   Map<String, dynamic> toJson() {
-    return {"stack": stack};
+    return {'stack': stack};
   }
 
   @override

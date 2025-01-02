@@ -70,10 +70,10 @@ class BtcTransaction {
   /// Instantiates a Transaction from serialized raw hexadacimal data (classmethod)
   static BtcTransaction fromRaw(String raw) {
     final rawtx = BytesUtils.fromHexString(raw);
-    final List<int> version = rawtx.sublist(0, 4);
-    int cursor = 4;
+    final version = rawtx.sublist(0, 4);
+    var cursor = 4;
     List<int>? flag;
-    bool hasSegwit = false;
+    var hasSegwit = false;
     if (rawtx[4] == 0) {
       flag = List<int>.from(rawtx.sublist(5, 6));
       if (flag[0] == 1) {
@@ -83,32 +83,32 @@ class BtcTransaction {
     }
     final vi = IntUtils.decodeVarint(rawtx.sublist(cursor));
     cursor += vi.item2;
-    final List<TxInput> inputs = [];
-    for (int index = 0; index < vi.item1; index++) {
+    final inputs = <TxInput>[];
+    for (var index = 0; index < vi.item1; index++) {
       final inp = TxInput.deserialize(
           bytes: rawtx, hasSegwit: hasSegwit, cursor: cursor);
       inputs.add(inp.item1);
       cursor = inp.item2;
     }
-    final List<TxOutput> outputs = [];
+    final outputs = <TxOutput>[];
     final viOut = IntUtils.decodeVarint(rawtx.sublist(cursor));
     cursor += viOut.item2;
-    for (int index = 0; index < viOut.item1; index++) {
+    for (var index = 0; index < viOut.item1; index++) {
       final inp = TxOutput.deserialize(
           bytes: rawtx, hasSegwit: hasSegwit, cursor: cursor);
       outputs.add(inp.item1);
       cursor = inp.item2;
     }
-    final List<TxWitnessInput> witnesses = [];
+    final witnesses = <TxWitnessInput>[];
     if (hasSegwit) {
       if (cursor + 4 < rawtx.length) {
         // in this case the tx contains wintness data.
-        for (int n = 0; n < inputs.length; n++) {
+        for (var n = 0; n < inputs.length; n++) {
           final wVi = IntUtils.decodeVarint(rawtx.sublist(cursor));
           cursor += wVi.item2;
-          final List<String> witnessesTmp = [];
-          for (int n = 0; n < wVi.item1; n++) {
-            List<int> witness = <int>[];
+          final witnessesTmp = <String>[];
+          for (var n = 0; n < wVi.item1; n++) {
+            var witness = <int>[];
             final wtVi = IntUtils.decodeVarint(rawtx.sublist(cursor));
             if (wtVi.item1 != 0) {
               witness = rawtx.sublist(
@@ -144,14 +144,14 @@ class BtcTransaction {
       {required int txInIndex,
       required Script script,
       int sighash = BitcoinOpCodeConst.SIGHASH_ALL}) {
-    BtcTransaction tx = copy(this);
+    var tx = copy(this);
     for (final i in tx.inputs) {
       i.scriptSig = Script(script: []);
     }
     tx.inputs[txInIndex].scriptSig = script;
     if ((sighash & 0x1f) == BitcoinOpCodeConst.SIGHASH_NONE) {
       tx = tx.copyWith(outputs: []);
-      for (int i = 0; i < tx.inputs.length; i++) {
+      for (var i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
           tx.inputs[i].sequence = BitcoinOpCodeConst.EMPTY_TX_SEQUENCE;
         }
@@ -159,17 +159,17 @@ class BtcTransaction {
     } else if ((sighash & 0x1f) == BitcoinOpCodeConst.SIGHASH_SINGLE) {
       if (txInIndex >= tx.outputs.length) {
         throw const DartBitcoinPluginException(
-            "Transaction index is greater than the available outputs");
+            'Transaction index is greater than the available outputs');
       }
 
-      final List<TxOutput> outputs = [];
-      for (int i = 0; i < txInIndex; i++) {
+      final outputs = <TxOutput>[];
+      for (var i = 0; i < txInIndex; i++) {
         outputs.add(TxOutput(
             amount: BigInt.from(BitcoinOpCodeConst.NEGATIVE_SATOSHI),
             scriptPubKey: Script(script: [])));
       }
       tx = tx.copyWith(outputs: [...outputs, tx.outputs[txInIndex]]);
-      for (int i = 0; i < tx.inputs.length; i++) {
+      for (var i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
           tx.inputs[i].sequence = BitcoinOpCodeConst.EMPTY_TX_SEQUENCE;
         }
@@ -178,7 +178,7 @@ class BtcTransaction {
     if ((sighash & BitcoinOpCodeConst.SIGHASH_ANYONECANPAY) != 0) {
       tx = tx.copyWith(inputs: [tx.inputs[txInIndex]]);
     }
-    List<int> txForSign = tx.toBytes(segwit: false);
+    var txForSign = tx.toBytes(segwit: false);
 
     txForSign = [
       ...txForSign,
@@ -189,7 +189,7 @@ class BtcTransaction {
 
   /// Serializes Transaction to bytes
   List<int> toBytes({bool segwit = false}) {
-    final DynamicByteTracker data = DynamicByteTracker();
+    final data = DynamicByteTracker();
     data.add(version);
     if (segwit) {
       data.add([0x00, 0x01]);
@@ -229,19 +229,18 @@ class BtcTransaction {
       required BigInt amount,
       CashToken? token}) {
     final tx = copy(this);
-    List<int> hashPrevouts = List<int>.filled(32, 0);
-    List<int> hashSequence = List<int>.filled(32, 0);
-    List<int> hashOutputs = List<int>.filled(32, 0);
-    final int basicSigHashType = sighash & 0x1F;
-    final bool anyoneCanPay =
+    var hashPrevouts = List<int>.filled(32, 0);
+    var hashSequence = List<int>.filled(32, 0);
+    var hashOutputs = List<int>.filled(32, 0);
+    final basicSigHashType = sighash & 0x1F;
+    final anyoneCanPay =
         (sighash & 0xF0) == BitcoinOpCodeConst.SIGHASH_ANYONECANPAY;
-    final bool signAll =
-        (basicSigHashType != BitcoinOpCodeConst.SIGHASH_SINGLE) &&
-            (basicSigHashType != BitcoinOpCodeConst.SIGHASH_NONE);
+    final signAll = (basicSigHashType != BitcoinOpCodeConst.SIGHASH_SINGLE) &&
+        (basicSigHashType != BitcoinOpCodeConst.SIGHASH_NONE);
     if (!anyoneCanPay) {
       hashPrevouts = <int>[];
       for (final txin in tx.inputs) {
-        final List<int> txidBytes = List<int>.from(
+        final txidBytes = List<int>.from(
             BytesUtils.fromHexString(txin.txId).reversed.toList());
         hashPrevouts = [
           ...hashPrevouts,
@@ -268,21 +267,20 @@ class BtcTransaction {
     } else if (basicSigHashType == BitcoinOpCodeConst.SIGHASH_SINGLE &&
         txInIndex < tx.outputs.length) {
       final out = tx.outputs[txInIndex];
-      final List<int> packedAmount =
+      final packedAmount =
           BigintUtils.toBytes(out.amount, length: 8, order: Endian.little);
       final scriptBytes = IntUtils.prependVarint(out.scriptPubKey.toBytes());
       hashOutputs = [...packedAmount, ...scriptBytes];
       hashOutputs = QuickCrypto.sha256DoubleHash(hashOutputs);
     }
 
-    final DynamicByteTracker txForSigning = DynamicByteTracker();
+    final txForSigning = DynamicByteTracker();
     txForSigning.add(version);
     txForSigning.add(hashPrevouts);
     txForSigning.add(hashSequence);
     final txIn = inputs[txInIndex];
 
-    final List<int> txidBytes =
-        BytesUtils.fromHexString(txIn.txId).reversed.toList();
+    final txidBytes = BytesUtils.fromHexString(txIn.txId).reversed.toList();
     txForSigning.add([
       ...txidBytes,
       ...IntUtils.toBytes(txIn.txIndex, length: 4, byteOrder: Endian.little)
@@ -293,7 +291,7 @@ class BtcTransaction {
     final varintBytes = IntUtils.prependVarint(script.toBytes());
 
     txForSigning.add(varintBytes);
-    final List<int> packedAmount =
+    final packedAmount =
         BigintUtils.toBytes(amount, length: 8, order: Endian.little);
     txForSigning.add(packedAmount);
     txForSigning.add(txIn.sequence);
@@ -322,26 +320,23 @@ class BtcTransaction {
       int leafVar = BitcoinOpCodeConst.LEAF_VERSION_TAPSCRIPT,
       int sighash = BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL}) {
     final newTx = copy(this);
-    final bool sighashNone =
-        (sighash & 0x03) == BitcoinOpCodeConst.SIGHASH_NONE;
-    final bool sighashSingle =
-        (sighash & 0x03) == BitcoinOpCodeConst.SIGHASH_SINGLE;
-    final bool anyoneCanPay =
+    final sighashNone = (sighash & 0x03) == BitcoinOpCodeConst.SIGHASH_NONE;
+    final sighashSingle = (sighash & 0x03) == BitcoinOpCodeConst.SIGHASH_SINGLE;
+    final anyoneCanPay =
         (sighash & 0x80) == BitcoinOpCodeConst.SIGHASH_ANYONECANPAY;
-    final DynamicByteTracker txForSign = DynamicByteTracker();
+    final txForSign = DynamicByteTracker();
     txForSign.add([0]);
     txForSign.add([sighash]);
     txForSign.add(version);
     txForSign.add(locktime);
-    List<int> hashPrevouts = <int>[];
-    List<int> hashAmounts = <int>[];
-    List<int> hashScriptPubkeys = <int>[];
-    List<int> hashSequences = <int>[];
-    List<int> hashOutputs = <int>[];
+    var hashPrevouts = <int>[];
+    var hashAmounts = <int>[];
+    var hashScriptPubkeys = <int>[];
+    var hashSequences = <int>[];
+    var hashOutputs = <int>[];
     if (!anyoneCanPay) {
       for (final txin in newTx.inputs) {
-        final List<int> txidBytes =
-            BytesUtils.fromHexString(txin.txId).reversed.toList();
+        final txidBytes = BytesUtils.fromHexString(txin.txId).reversed.toList();
         hashPrevouts = [
           ...hashPrevouts,
           ...txidBytes,
@@ -373,7 +368,7 @@ class BtcTransaction {
     }
     if (!(sighashNone || sighashSingle)) {
       for (final txOut in newTx.outputs) {
-        final List<int> packedAmount =
+        final packedAmount =
             BigintUtils.toBytes(txOut.amount, length: 8, order: Endian.little);
         final scriptBytes =
             IntUtils.prependVarint(txOut.scriptPubKey.toBytes());
@@ -383,7 +378,7 @@ class BtcTransaction {
       txForSign.add(hashOutputs);
     }
 
-    final int spendType = extFlags * 2 + 0;
+    final spendType = extFlags * 2 + 0;
     txForSign.add([spendType]);
 
     if (anyoneCanPay) {
@@ -418,12 +413,12 @@ class BtcTransaction {
         leafVar,
         ...IntUtils.prependVarint(script?.toBytes() ?? <int>[])
       ];
-      txForSign.add(taggedHash(leafVarBytes, "TapLeaf"));
+      txForSign.add(taggedHash(leafVarBytes, 'TapLeaf'));
       txForSign.add([0]);
       txForSign.add(List<int>.filled(4, mask8));
     }
     final bytes = txForSign.toBytes();
-    return taggedHash(bytes, "TapSighash");
+    return taggedHash(bytes, 'TapSighash');
   }
 
   /// converts result of to_bytes to hexadecimal string
@@ -445,16 +440,16 @@ class BtcTransaction {
   /// Calculates the tx segwit size
   int getVSize() {
     if (!hasSegwit) return getSize();
-    const int markerSize = 2;
-    int witSize = 0;
-    List<int> data = <int>[];
+    const markerSize = 2;
+    var witSize = 0;
+    var data = <int>[];
     for (final w in witnesses) {
       final countBytes = List<int>.from([w.stack.length]);
       data = List<int>.from([...data, ...countBytes, ...w.toBytes()]);
     }
     witSize = data.length;
-    final int size = getSize() - (markerSize + witSize);
-    final double vSize = size + (markerSize + witSize) / 4;
+    final size = getSize() - (markerSize + witSize);
+    final vSize = size + (markerSize + witSize) / 4;
     return vSize.ceil();
   }
 
@@ -467,11 +462,11 @@ class BtcTransaction {
 
   Map<String, dynamic> toJson() {
     return {
-      "inputs": inputs.map((e) => e.toJson()).toList(),
-      "outputs": outputs.map((e) => e.toJson()).toList(),
-      "locktime": BytesUtils.toHexString(locktime),
-      "version": BytesUtils.toHexString(version),
-      "witnesses": witnesses.map((e) => e.toJson()).toList()
+      'inputs': inputs.map((e) => e.toJson()).toList(),
+      'outputs': outputs.map((e) => e.toJson()).toList(),
+      'locktime': BytesUtils.toHexString(locktime),
+      'version': BytesUtils.toHexString(version),
+      'witnesses': witnesses.map((e) => e.toJson()).toList()
     };
   }
 

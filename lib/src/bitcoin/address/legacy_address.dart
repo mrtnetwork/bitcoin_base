@@ -15,7 +15,7 @@ abstract class LegacyAddress implements BitcoinBaseAddress {
         address: address, type: type, network: network);
     if (decode == null) {
       throw DartBitcoinPluginException(
-          "Invalid ${network.conf.coinName} address");
+          'Invalid ${network.conf.coinName} address');
     }
     _addressProgram = decode;
   }
@@ -45,14 +45,14 @@ abstract class LegacyAddress implements BitcoinBaseAddress {
 
 class P2shAddress extends LegacyAddress {
   P2shAddress.fromScript(
-      {required Script script, this.type = P2shAddressType.p2pkInP2sh})
-      : super.fromScript(script: script);
+      {required super.script, this.type = P2shAddressType.p2pkInP2sh})
+      : super.fromScript();
 
   P2shAddress.fromAddress(
-      {required String address,
-      required BasedUtxoNetwork network,
+      {required super.address,
+      required super.network,
       this.type = P2shAddressType.p2pkInP2sh})
-      : super.fromAddress(address: address, network: network);
+      : super.fromAddress();
   P2shAddress.fromHash160(
       {required String addrHash, this.type = P2shAddressType.p2pkInP2sh})
       : super.fromHash160(addrHash, type);
@@ -64,7 +64,7 @@ class P2shAddress extends LegacyAddress {
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
       throw DartBitcoinPluginException(
-          "network does not support ${type.value} address");
+          'network does not support ${type.value} address');
     }
     return super.toAddress(network);
   }
@@ -81,13 +81,13 @@ class P2shAddress extends LegacyAddress {
 
 class P2pkhAddress extends LegacyAddress {
   P2pkhAddress.fromScript(
-      {required Script script, this.type = P2pkhAddressType.p2pkh})
-      : super.fromScript(script: script);
+      {required super.script, this.type = P2pkhAddressType.p2pkh})
+      : super.fromScript();
   P2pkhAddress.fromAddress(
-      {required String address,
-      required BasedUtxoNetwork network,
+      {required super.address,
+      required super.network,
       this.type = P2pkhAddressType.p2pkh})
-      : super.fromAddress(address: address, network: network);
+      : super.fromAddress();
   P2pkhAddress.fromHash160(
       {required String addrHash, this.type = P2pkhAddressType.p2pkh})
       : super.fromHash160(addrHash, type);
@@ -111,7 +111,7 @@ class P2pkAddress extends LegacyAddress {
   P2pkAddress({required String publicKey}) : super._() {
     final toBytes = BytesUtils.fromHexString(publicKey);
     if (!Secp256k1PublicKeyEcdsa.isValidBytes(toBytes)) {
-      throw const DartBitcoinPluginException("Invalid secp256k1 public key");
+      throw const DartBitcoinPluginException('Invalid secp256k1 public key');
     }
     publicHex = publicKey;
   }

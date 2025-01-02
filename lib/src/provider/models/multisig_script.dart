@@ -6,7 +6,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// signers in a multi-signature scheme. A multi-signature signer typically includes
 /// information about their public key and weight within the scheme.
 class MultiSignatureSigner {
-  MultiSignatureSigner._(this.publicKey, this.weight, this.isCompressed);
+  MultiSignatureSigner._(this.publicKey, this.weight, this.keyType);
 
   /// PublicKey returns the public key associated with the signer.
   final String publicKey;
@@ -15,7 +15,7 @@ class MultiSignatureSigner {
   /// The weight is used to determine the number of signatures required for a valid transaction.
   final int weight;
 
-  final bool isCompressed;
+  final PublicKeyType keyType;
 
   /// creates a new instance of a multi-signature signer with the
   /// specified public key and weight.
@@ -23,7 +23,7 @@ class MultiSignatureSigner {
       {required String publicKey, required int weight}) {
     ECPublic.fromHex(publicKey);
     return MultiSignatureSigner._(
-        publicKey, weight, BtcUtils.hasCompressedPubKeyLength(publicKey));
+        publicKey, weight, BtcUtils.isCompressedPubKey(publicKey));
   }
 }
 
@@ -56,7 +56,7 @@ class MultiSignatureAddress {
   BitcoinBaseAddress toP2wshAddress({required BasedUtxoNetwork network}) {
     if (network is! LitecoinNetwork && network is! BitcoinNetwork) {
       throw DartBitcoinPluginException(
-          "${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress");
+          '${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress');
     }
     if (!canSelectSegwit) {
       throw const DartBitcoinPluginException(
@@ -102,7 +102,7 @@ class MultiSignatureAddress {
         return toP2shAddress(addressType as P2shAddressType);
       default:
         throw const DartBitcoinPluginException(
-            "invalid multisig address type. use of of them [BitcoinAddressType.p2wsh, BitcoinAddressType.p2wshInP2sh, BitcoinAddressType.p2pkhInP2sh]");
+            'invalid multisig address type. use of of them [BitcoinAddressType.p2wsh, BitcoinAddressType.p2wshInP2sh, BitcoinAddressType.p2pkhInP2sh]');
     }
   }
 
@@ -144,6 +144,6 @@ class MultiSignatureAddress {
         signers: signers,
         threshold: threshold,
         multiSigScript: script,
-        canSelectSegwit: signers.every((e) => e.isCompressed));
+        canSelectSegwit: signers.every((e) => e.keyType.isCompressed));
   }
 }

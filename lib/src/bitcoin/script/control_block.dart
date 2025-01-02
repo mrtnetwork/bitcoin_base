@@ -12,10 +12,10 @@ class ControlBlock {
   final List<int>? scripts;
 
   List<int> toBytes() {
-    final List<int> version = [BitcoinOpCodeConst.LEAF_VERSION_TAPSCRIPT];
+    final version = <int>[BitcoinOpCodeConst.LEAF_VERSION_TAPSCRIPT];
 
-    final List<int> pubKey = BytesUtils.fromHexString(public.toXOnlyHex());
-    final List<int> marklePath = scripts ?? [];
+    final pubKey = BytesUtils.fromHexString(public.toXOnlyHex());
+    final marklePath = scripts ?? [];
     return [...version, ...pubKey, ...marklePath];
   }
 

@@ -1,8 +1,9 @@
-import 'package:bitcoin_base/src/provider/service/electrum/electrum.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Return a banner to be shown in the Electrum console.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumServerBanner extends ElectrumRequest<String, dynamic> {
+class ElectrumRequestServerBanner extends ElectrumRequest<String, dynamic> {
   @override
   String get method => ElectrumRequestMethods.serverBanner.method;
 

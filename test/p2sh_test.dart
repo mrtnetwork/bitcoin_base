@@ -2,7 +2,7 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group("P2Sh", () {
+  group('P2Sh', () {
     final fromAddr = P2pkhAddress.fromAddress(
         address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR',
         network: BitcoinNetwork.testnet);
@@ -49,10 +49,10 @@ void main() {
     const spendP2shCsvP2pkhResult =
         '0200000001951bc57b24230947ede095c3aac44223df70076342b796c6ff0a5fe523c657f5000000008947304402205c2e23d8ad7825cf44b998045cb19b49cf6447cbc1cb76a254cda43f7939982002202d8f88ab6afd2e8e1d03f70e5edc2a277c713018225d5b18889c5ad8fd6677b4012103a2fef1829e0742b89c218c51898d9e7cb9d51201ba2bf9d9e9214ebb6af327081e02c800b27576a914c3f8e5b0f8455a2b02c29c4488a550278209b66988acc80000000100ab9041000000001976a914fd337ad3bf81e086d96a68e1f8d6a0a510f8c24a88ac00000000';
 
-    test("test1", () {
+    test('test1', () {
       final txin = TxInput(
           txId:
-              "76464c2b9e2af4d63ef38a77964b3b77e629dddefc5cb9eb1a3645b1608b790f",
+              '76464c2b9e2af4d63ef38a77964b3b77e629dddefc5cb9eb1a3645b1608b790f',
           txIndex: 0);
       final tx = BtcTransaction(inputs: [txin], outputs: [txout]);
       final digit = tx.getTransactionDigest(
@@ -62,7 +62,7 @@ void main() {
       expect(tx.serialize(), createP2shAndSendResult);
     });
 
-    test("test2", () {
+    test('test2', () {
       final tx = BtcTransaction(inputs: [txinSpend], outputs: [txout2]);
       final digit =
           tx.getTransactionDigest(txInIndex: 0, script: p2pkRedeemScript);
@@ -70,7 +70,7 @@ void main() {
       txinSpend.scriptSig = Script(script: [sig, p2pkRedeemScript.toHex()]);
       expect(tx.serialize(), spendP2shResult);
     });
-    test("test3", () {
+    test('test3', () {
       final redeemScript = Script(script: [
         seq.forScript(),
         'OP_CHECKSEQUENCEVERIFY',

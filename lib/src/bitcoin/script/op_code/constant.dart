@@ -261,9 +261,9 @@ class BitcoinOpCodeConst {
   static const int NEGATIVE_SATOSHI = -1;
 
   /// Bitcoin address types
-  static const String P2PKH_ADDRESS = "p2pkh";
-  static const String P2SH_ADDRESS = "p2sh";
-  static const String P2WPKH_ADDRESS_V0 = "p2wpkhv0";
-  static const String P2WSH_ADDRESS_V0 = "p2wshv0";
-  static const String P2TR_ADDRESS_V1 = "p2trv1";
+  static const String P2PKH_ADDRESS = 'p2pkh';
+  static const String P2SH_ADDRESS = 'p2sh';
+  static const String P2WPKH_ADDRESS_V0 = 'p2wpkhv0';
+  static const String P2WSH_ADDRESS_V0 = 'p2wshv0';
+  static const String P2TR_ADDRESS_V1 = 'p2trv1';
 }

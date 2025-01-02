@@ -1,10 +1,12 @@
-import 'package:bitcoin_base/src/provider/service/electrum/electrum.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Returns a name resolution proof, suitable for low-latency (single round-trip) resolution.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumGetValueProof
+class ElectrumRequestGetValueProof
     extends ElectrumRequest<Map<String, dynamic>, dynamic> {
-  ElectrumGetValueProof({required this.scriptHash, required this.cpHeight});
+  ElectrumRequestGetValueProof(
+      {required this.scriptHash, required this.cpHeight});
 
   /// Script hash of the name being resolved.
   final String scriptHash;

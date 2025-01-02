@@ -50,7 +50,7 @@ class BitcoinFeeRate {
   BigInt getEstimate(int trSize,
       {BigInt? customFeeRatePerKb,
       BitcoinFeeRateType feeRateType = BitcoinFeeRateType.medium}) {
-    final BigInt feeRate = customFeeRatePerKb ?? _feeRatrete(feeRateType);
+    final feeRate = customFeeRatePerKb ?? _feeRatrete(feeRateType);
     final trSizeBigInt = BigInt.from(trSize);
     return (trSizeBigInt * feeRate) ~/ BigInt.from(1000);
   }
@@ -100,6 +100,6 @@ BigInt _parseMempoolFees(dynamic data) {
     return BigInt.from((data * kb));
   } else {
     throw DartBitcoinPluginException(
-        "cannot parse mempool fees excepted double, string got ${data.runtimeType}");
+        'cannot parse mempool fees excepted double, string got ${data.runtimeType}');
   }
 }

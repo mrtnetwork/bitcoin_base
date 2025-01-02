@@ -7,7 +7,7 @@ abstract class UTXO {
 
 class UtxoAddressDetails {
   /// PublicKey is the public key associated with the UTXO owner.
-  final String? _publicKey;
+  final String? publicKey;
 
   /// Address is the Bitcoin address associated with the UTXO owner.
   final BitcoinBaseAddress address;
@@ -17,13 +17,9 @@ class UtxoAddressDetails {
   final MultiSignatureAddress? _multiSigAddress;
 
   UtxoAddressDetails._({
-    required String publicKey,
+    required String this.publicKey,
     required this.address,
-  })  : _multiSigAddress = null,
-        _publicKey = publicKey;
-
-  /// The public key format (compressed or uncompressed) is crucial for non-SegWit addresses.
-  /// If your address is non-SegWit, ensure you use the correct public key format.
+  }) : _multiSigAddress = null;
   factory UtxoAddressDetails(
       {required String publicKey, required BitcoinBaseAddress address}) {
     ECPublic.fromHex(publicKey);
@@ -32,11 +28,11 @@ class UtxoAddressDetails {
 
   UtxoAddressDetails.multiSigAddress(
       {required MultiSignatureAddress multiSigAddress, required this.address})
-      : _publicKey = null,
+      : publicKey = null,
         _multiSigAddress = multiSigAddress;
 
   UtxoAddressDetails.watchOnly(this.address)
-      : _publicKey = null,
+      : publicKey = null,
         _multiSigAddress = null;
 }
 
@@ -50,32 +46,30 @@ class UtxoWithAddress {
   final UtxoAddressDetails ownerDetails;
 
   const UtxoWithAddress._(
-      {required this.utxo,
-      required this.ownerDetails,
-      required this.isCompressed});
+      {required this.utxo, required this.ownerDetails, required this.keyType});
   factory UtxoWithAddress(
       {required BitcoinUtxo utxo, required UtxoAddressDetails ownerDetails}) {
     return UtxoWithAddress._(
         utxo: utxo,
         ownerDetails: ownerDetails,
-        isCompressed: ownerDetails._publicKey != null && !utxo.isSegwit
-            ? BtcUtils.hasCompressedPubKeyLength(ownerDetails._publicKey!)
-            : true);
+        keyType: ownerDetails.publicKey != null && !utxo.isSegwit
+            ? BtcUtils.isCompressedPubKey(ownerDetails.publicKey!)
+            : PublicKeyType.compressed);
   }
 
   ECPublic public() {
     if (isMultiSig()) {
       throw const DartBitcoinPluginException(
-          "Cannot access public key in multi-signature address");
+          'Cannot access public key in multi-signature address');
     }
-    if (ownerDetails._publicKey == null) {
+    if (ownerDetails.publicKey == null) {
       throw const DartBitcoinPluginException(
-          "Cannot access public key in watch only address; use UtxoAddressDetails constractor instead `UtxoAddressDetails.watchOnly`");
+          'Cannot access public key in watch only address; use UtxoAddressDetails constractor instead `UtxoAddressDetails.watchOnly`');
     }
-    return ECPublic.fromHex(ownerDetails._publicKey!);
+    return ECPublic.fromHex(ownerDetails.publicKey!);
   }
 
-  final bool isCompressed;
+  final PublicKeyType keyType;
 
   bool isMultiSig() {
     return ownerDetails._multiSigAddress != null;
@@ -84,7 +78,7 @@ class UtxoWithAddress {
   MultiSignatureAddress get multiSigAddress => isMultiSig()
       ? ownerDetails._multiSigAddress!
       : throw const DartBitcoinPluginException(
-          "The address is not associated with a multi-signature setup");
+          'The address is not associated with a multi-signature setup');
 }
 
 /// Abstract base class representing a generic Bitcoin output.
@@ -219,7 +213,7 @@ class BitcoinUtxo {
       required BitcoinAddressType scriptType,
       int? blockHeight,
       CashToken? token}) {
-    final bool isP2shSegwit = scriptType == P2shAddressType.p2wpkhInP2sh ||
+    final isP2shSegwit = scriptType == P2shAddressType.p2wpkhInP2sh ||
         scriptType == P2shAddressType.p2wshInP2sh;
     return BitcoinUtxo._(
         txHash: txHash,
@@ -249,7 +243,7 @@ class BitcoinUtxo {
 
   @override
   String toString() {
-    return "txid: $txHash vout: $vout script: ${scriptType.value} value: $value blockHeight: $blockHeight";
+    return 'txid: $txHash vout: $vout script: ${scriptType.value} value: $value blockHeight: $blockHeight';
   }
 }
 
@@ -257,7 +251,7 @@ class BitcoinUtxo {
 extension Calculate on List<UtxoWithAddress> {
   /// sum of utxos network values
   BigInt sumOfUtxosValue() {
-    BigInt sum = BigInt.zero;
+    var sum = BigInt.zero;
     for (final utxo in this) {
       sum += utxo.utxo.value;
     }
@@ -266,7 +260,7 @@ extension Calculate on List<UtxoWithAddress> {
 
   /// sum of utxos cash token (FToken) amounts
   Map<String, BigInt> sumOfTokenUtxos() {
-    final Map<String, BigInt> tokens = {};
+    final tokens = <String, BigInt>{};
     for (final utxo in this) {
       if (utxo.utxo.token == null) continue;
       final token = utxo.utxo.token!;

@@ -5,14 +5,14 @@ import 'package:bitcoin_base/src/provider/api_provider.dart';
 class ElectrumUtxo implements UTXO {
   factory ElectrumUtxo.fromJson(Map<String, dynamic> json) {
     CashToken? token;
-    if (json.containsKey("token_data")) {
-      token = CashToken.fromJson(json["token_data"]);
+    if (json.containsKey('token_data')) {
+      token = CashToken.fromJson(json['token_data']);
     }
     return ElectrumUtxo._(
-        height: json["height"],
-        txId: json["tx_hash"],
-        vout: json["tx_pos"],
-        value: BigInt.parse((json["value"].toString())),
+        height: json['height'],
+        txId: json['tx_hash'],
+        vout: json['tx_pos'],
+        value: BigInt.parse((json['value'].toString())),
         token: token);
   }
   const ElectrumUtxo._(

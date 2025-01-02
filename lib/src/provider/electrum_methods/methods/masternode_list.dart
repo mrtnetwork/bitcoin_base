@@ -1,10 +1,11 @@
-import 'package:bitcoin_base/src/provider/service/electrum/electrum.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Returns the list of masternodes.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumMasternodeList
+class ElectrumRequestMasternodeList
     extends ElectrumRequest<List<String>, List<dynamic>> {
-  ElectrumMasternodeList({required this.payees});
+  ElectrumRequestMasternodeList({required this.payees});
 
   /// An array of masternode payee addresses.
   final List<String> payees;

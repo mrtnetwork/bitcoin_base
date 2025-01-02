@@ -16,15 +16,18 @@ void main() async {
   };
   final account = MultiSignatureAddress(threshold: 8, signers: [
     MultiSignatureSigner(
-        publicKey: one.getPublic().toHex(compressed: false), weight: 1),
+        publicKey: one.getPublic().toHex(mode: PublicKeyType.uncompressed),
+        weight: 1),
     MultiSignatureSigner(publicKey: two.getPublic().toHex(), weight: 1),
     MultiSignatureSigner(publicKey: three.getPublic().toHex(), weight: 1),
     MultiSignatureSigner(
-        publicKey: four.getPublic().toHex(compressed: false), weight: 1),
+        publicKey: four.getPublic().toHex(mode: PublicKeyType.uncompressed),
+        weight: 1),
     MultiSignatureSigner(publicKey: five.getPublic().toHex(), weight: 1),
     MultiSignatureSigner(publicKey: six.getPublic().toHex(), weight: 1),
     MultiSignatureSigner(
-        publicKey: seven.getPublic().toHex(compressed: false), weight: 1),
+        publicKey: seven.getPublic().toHex(mode: PublicKeyType.uncompressed),
+        weight: 1),
     MultiSignatureSigner(publicKey: eight.getPublic().toHex(), weight: 1),
   ]);
 
@@ -34,24 +37,27 @@ void main() async {
       "testnet4-electrumx.wakiyamap.dev:51002");
 
   /// create provider with service
-  final provider = ElectrumApiProvider(service);
+  final provider = ElectrumProvider(service);
 
-  final addrOne = one.getPublic().toP2pkAddress(compressed: false);
+  final addrOne =
+      one.getPublic().toP2pkAddress(mode: PublicKeyType.uncompressed);
 
-  final addrTwo = two.getPublic().toAddress(compressed: false);
+  final addrTwo = two.getPublic().toAddress(mode: PublicKeyType.uncompressed);
 
-  final addrThree = three.getPublic().toP2pkInP2sh(compressed: false);
-  final addrFour = four.getPublic().toP2pkhInP2sh(compressed: false);
+  final addrThree =
+      three.getPublic().toP2pkInP2sh(mode: PublicKeyType.uncompressed);
+  final addrFour =
+      four.getPublic().toP2pkhInP2sh(mode: PublicKeyType.uncompressed);
   final addrFive = four.getPublic().toSegwitAddress();
   final addrSix = account.toP2shAddress();
   final addr7 = eight.getPublic().toTaprootAddress();
   final addr8 = eight.getPublic().toP2wshAddress();
   final addr9 = eight.getPublic().toP2wshInP2sh();
   final List<String> pubkys = [
-    one.getPublic().toHex(compressed: false),
-    two.getPublic().toHex(compressed: false),
-    three.getPublic().toHex(compressed: false),
-    four.getPublic().toHex(compressed: false),
+    one.getPublic().toHex(mode: PublicKeyType.uncompressed),
+    two.getPublic().toHex(mode: PublicKeyType.uncompressed),
+    three.getPublic().toHex(mode: PublicKeyType.uncompressed),
+    four.getPublic().toHex(mode: PublicKeyType.uncompressed),
     four.getPublic().toHex(),
     four.getPublic().toHex(),
     eight.getPublic().toHex(),
@@ -60,10 +66,10 @@ void main() async {
     eight.getPublic().toHex(),
   ];
   final addresses = [
-    one.getPublic().toP2pkAddress(compressed: false),
-    two.getPublic().toAddress(compressed: false),
-    three.getPublic().toP2pkInP2sh(compressed: false),
-    four.getPublic().toP2pkhInP2sh(compressed: false),
+    one.getPublic().toP2pkAddress(mode: PublicKeyType.uncompressed),
+    two.getPublic().toAddress(mode: PublicKeyType.uncompressed),
+    three.getPublic().toP2pkInP2sh(mode: PublicKeyType.uncompressed),
+    four.getPublic().toP2pkhInP2sh(mode: PublicKeyType.uncompressed),
     four.getPublic().toSegwitAddress(),
     four.getPublic().toP2wshInP2sh(),
     addrSix,
@@ -74,8 +80,9 @@ void main() async {
   List<UtxoWithAddress> utxos = [];
   for (int i = 0; i < addresses.length; i++) {
     final address = addresses[i];
-    final elctrumUtxos = await provider.request(ElectrumScriptHashListUnspent(
-        scriptHash: address.pubKeyHash(), includeTokens: false));
+    final elctrumUtxos = await provider.request(
+        ElectrumRequestScriptHashListUnspent(
+            scriptHash: address.pubKeyHash(), includeTokens: false));
     if (elctrumUtxos.isEmpty) continue;
     if (i == 6) {
       utxos.addAll(elctrumUtxos.map((e) => UtxoWithAddress(
@@ -124,8 +131,8 @@ void main() async {
   });
 
   final transactionRaw = transaaction.toHex();
-  await provider
-      .request(ElectrumBroadCastTransaction(transactionRaw: transactionRaw));
+  await provider.request(
+      ElectrumRequestBroadCastTransaction(transactionRaw: transactionRaw));
 }
 
 /// https://mempool.space/testnet4/tx/a7f08f07739de45a6a4f8871f8e6ad79e0aefbc940086df76571354ba22263fa

@@ -1,10 +1,11 @@
-import 'package:bitcoin_base/src/provider/api_provider.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// A newly-started server uses this call to get itself into other servers’ peers lists.
 /// It should not be used by wallet clients.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumAddPeer extends ElectrumRequest<bool, bool> {
-  ElectrumAddPeer({required this.features});
+class ElectrumRequestAddPeer extends ElectrumRequest<bool, bool> {
+  ElectrumRequestAddPeer({required this.features});
 
   /// The same information that a call to the sender’s server.features() RPC call would return.
   final Map<String, dynamic> features;

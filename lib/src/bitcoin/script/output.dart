@@ -16,9 +16,9 @@ class TxOutput {
 
   Map<String, dynamic> toJson() {
     return {
-      "cashToken": cashToken?.toJson(),
-      "amount": amount.toString(),
-      "scriptPubKey": scriptPubKey.script
+      'cashToken': cashToken?.toJson(),
+      'amount': amount.toString(),
+      'scriptPubKey': scriptPubKey.script
     };
   }
 
@@ -33,7 +33,7 @@ class TxOutput {
   List<int> toBytes() {
     final amountBytes =
         BigintUtils.toBytes(amount, length: 8, order: Endian.little);
-    final List<int> scriptBytes = [
+    final scriptBytes = <int>[
       ...cashToken?.toBytes() ?? <int>[],
       ...scriptPubKey.toBytes()
     ];
@@ -56,8 +56,7 @@ class TxOutput {
     cursor += vi.item2;
     final token = CashToken.fromRaw(bytes.sublist(cursor));
 
-    final List<int> lockScript =
-        bytes.sublist(cursor + token.item2, cursor + vi.item1);
+    final lockScript = bytes.sublist(cursor + token.item2, cursor + vi.item1);
     cursor += vi.item1;
     return Tuple(
         TxOutput(
@@ -70,6 +69,6 @@ class TxOutput {
 
   @override
   String toString() {
-    return "TxOutput{cashToken: ${cashToken?.toString()}}, amount: $amount, script: ${scriptPubKey.toString()}}";
+    return 'TxOutput{cashToken: ${cashToken?.toString()}}, amount: $amount, script: ${scriptPubKey.toString()}}';
   }
 }

@@ -38,8 +38,8 @@ dependencies:
   bitcoin_base: 
     path: ../
   # blockchain_utils:
-  #   path: ../../blockchain_utils
-  blockchain_utils: ^3.6.0
+  #   path: ../../../blockchain_utils
+  blockchain_utils: ^4.0.0
   http: ^1.2.0
 
 dev_dependencies:

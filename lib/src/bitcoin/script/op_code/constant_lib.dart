@@ -1,4 +1,4 @@
-library op_code;
+library;
 
 export 'constant.dart';
 export 'tools.dart';

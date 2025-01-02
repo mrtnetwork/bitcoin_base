@@ -1,9 +1,11 @@
-import 'package:bitcoin_base/src/provider/service/electrum/electrum.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Returns detailed information about a deterministic masternode.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumProtXInfo extends ElectrumRequest<Map<String, dynamic>, dynamic> {
-  ElectrumProtXInfo({required this.protxHash});
+class ElectrumRequestProtXInfo
+    extends ElectrumRequest<Map<String, dynamic>, dynamic> {
+  ElectrumRequestProtXInfo({required this.protxHash});
 
   /// The hash of the initial ProRegTx
   final String protxHash;

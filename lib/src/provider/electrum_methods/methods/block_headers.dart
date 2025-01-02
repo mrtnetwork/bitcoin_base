@@ -1,10 +1,11 @@
-import 'package:bitcoin_base/src/provider/service/electrum/electrum.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Return a concatenated chunk of block headers from the main chain.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumBlockHeaders
+class ElectrumRequestBlockHeaders
     extends ElectrumRequest<Map<String, dynamic>, Map<String, dynamic>> {
-  ElectrumBlockHeaders(
+  ElectrumRequestBlockHeaders(
       {required this.startHeight, required this.count, required this.cpHeight});
 
   /// The height of the first header requested, a non-negative integer.

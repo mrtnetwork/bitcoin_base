@@ -1,10 +1,10 @@
-import 'package:bitcoin_base/src/provider/service/electrum/methods.dart';
-import 'package:bitcoin_base/src/provider/service/electrum/params.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Return a transaction hash and optionally a merkle proof, given a block height and a position in the block.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumIdFromPos extends ElectrumRequest<dynamic, dynamic> {
-  ElectrumIdFromPos(
+class ElectrumRequestIdFromPos extends ElectrumRequest<dynamic, dynamic> {
+  ElectrumRequestIdFromPos(
       {required this.height, required this.txPos, this.merkle = false});
 
   /// The main chain block height, a non-negative integer.

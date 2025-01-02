@@ -1,4 +1,4 @@
-library crypto;
+library;
 
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant_lib.dart';
 import 'package:blockchain_utils/crypto/quick_crypto.dart';
@@ -30,5 +30,5 @@ List<int> toTapleafTaggedHash(List<int> scriptBytes) {
     BitcoinOpCodeConst.LEAF_VERSION_TAPSCRIPT,
     ...IntUtils.prependVarint(scriptBytes)
   ];
-  return taggedHash(leafVarBytes, "TapLeaf");
+  return taggedHash(leafVarBytes, 'TapLeaf');
 }

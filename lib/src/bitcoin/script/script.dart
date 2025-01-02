@@ -12,17 +12,17 @@ class Script {
           }
           return true;
         }(),
-            "A valid script is a composition of opcodes, hexadecimal strings, and integers arranged in a structured list."),
+            'A valid script is a composition of opcodes, hexadecimal strings, and integers arranged in a structured list.'),
         script = List.unmodifiable(script);
   final List<dynamic> script;
 
   static Script deserialize(
       {required List<int> bytes, bool hasSegwit = false}) {
-    final List<String> commands = [];
-    int index = 0;
+    final commands = <String>[];
+    var index = 0;
     // final scriptBytes = BytesUtils.fromHexString(hexData);
     while (index < bytes.length) {
-      final int byte = bytes[index];
+      final byte = bytes[index];
       if (BitcoinOpCodeConst.CODE_OPS.containsKey(byte)) {
         if (!BitcoinOpCodeConst.isOpPushData(byte)) {
           commands.add(BitcoinOpCodeConst.CODE_OPS[byte]!);
@@ -32,7 +32,7 @@ class Script {
         index = index + 1;
         if (byte == BitcoinOpCodeConst.opPushData1) {
           // get len
-          final int bytesToRead = bytes[index];
+          final bytesToRead = bytes[index];
           // skip len
           index = index + 1;
           commands.add(BytesUtils.toHexString(
@@ -42,13 +42,13 @@ class Script {
           index = index + bytesToRead;
         } else if (byte == BitcoinOpCodeConst.opPushData2) {
           /// get len
-          final int bytesToRead = readUint16LE(bytes, index);
+          final bytesToRead = readUint16LE(bytes, index);
           index = index + 2;
           commands.add(BytesUtils.toHexString(
               bytes.sublist(index, index + bytesToRead)));
           index = index + bytesToRead;
         } else if (byte == BitcoinOpCodeConst.opPushData4) {
-          final int bytesToRead = readUint32LE(bytes, index);
+          final bytesToRead = readUint32LE(bytes, index);
 
           index = index + 4;
           commands.add(BytesUtils.toHexString(
@@ -57,8 +57,8 @@ class Script {
         }
       } else {
         final viAndSize = IntUtils.decodeVarint(bytes.sublist(index));
-        final int dataSize = viAndSize.item1;
-        final int size = viAndSize.item2;
+        final dataSize = viAndSize.item1;
+        final size = viAndSize.item2;
         final lastIndex = (index + size + dataSize) > bytes.length
             ? bytes.length
             : (index + size + dataSize);
@@ -72,7 +72,7 @@ class Script {
 
   List<int> toBytes() {
     if (script.isEmpty) return <int>[];
-    final DynamicByteTracker scriptBytes = DynamicByteTracker();
+    final scriptBytes = DynamicByteTracker();
     for (final token in script) {
       if (BitcoinOpCodeConst.OP_CODES.containsKey(token)) {
         scriptBytes.add(BitcoinOpCodeConst.OP_CODES[token]!);

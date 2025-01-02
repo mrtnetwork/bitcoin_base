@@ -11,7 +11,7 @@ void main() async {
       await ElectrumWebSocketService.connect("wss://tbch4.loping.net:62004");
 
   /// create provider with service
-  final provider = ElectrumApiProvider(service);
+  final provider = ElectrumProvider(service);
 
   /// initialize private key
   final privateKey = ECPrivate.fromBytes(BytesUtils.fromHexString(
@@ -30,7 +30,8 @@ void main() async {
 
   /// Reads all UTXOs (Unspent Transaction Outputs) associated with the account.
   /// We does not need tokens utxo and we set to false.
-  final elctrumUtxos = await provider.request(ElectrumScriptHashListUnspent(
+  final elctrumUtxos =
+      await provider.request(ElectrumRequestScriptHashListUnspent(
     scriptHash: p2pkhAddress.baseAddress.pubKeyHash(),
     includeTokens: true,
   ));
@@ -177,8 +178,8 @@ void main() async {
   final transactionRaw = transaaction.toHex();
 
   /// send transaction to network
-  await provider
-      .request(ElectrumBroadCastTransaction(transactionRaw: transactionRaw));
+  await provider.request(
+      ElectrumRequestBroadCastTransaction(transactionRaw: transactionRaw));
 
   /// done! check the transaction in block explorer
   ///  https://tbch4.loping.net/tx/caa91b0fea2843a99c3cd7375ac4d3102b6b74a25e52cd866ad7ecc486204f0d

@@ -24,8 +24,8 @@ class APIConfig {
   }
 
   String getUtxoUrl(String address) {
-    final String baseUrl = url;
-    return baseUrl.replaceAll("###", address);
+    final baseUrl = url;
+    return baseUrl.replaceAll('###', address);
   }
 
   String getFeeApiUrl() {
@@ -33,18 +33,18 @@ class APIConfig {
   }
 
   String getTransactionUrl(String transactionId) {
-    final String baseUrl = transaction;
-    return baseUrl.replaceAll("###", transactionId);
+    final baseUrl = transaction;
+    return baseUrl.replaceAll('###', transactionId);
   }
 
   String getTransactionsUrl(String address) {
-    final String baseUrl = transactions;
-    return baseUrl.replaceAll("###", address);
+    final baseUrl = transactions;
+    return baseUrl.replaceAll('###', address);
   }
 
   String getBlockHeight(int blockHaight) {
-    final String baseUrl = blockHeight;
-    return baseUrl.replaceAll("###", "$blockHaight");
+    final baseUrl = blockHeight;
+    return baseUrl.replaceAll('###', '$blockHaight');
   }
 
   factory APIConfig.fromBlockCypher(BasedUtxoNetwork network) {
@@ -67,19 +67,19 @@ class APIConfig {
         break;
       default:
         throw DartBitcoinPluginException(
-            "blockcypher does not support ${network.conf.coinName.name}, u must use your own provider");
+            'blockcypher does not support ${network.conf.coinName.name}, u must use your own provider');
     }
 
     return APIConfig(
         url:
-            "$baseUrl/addrs/###/?unspentOnly=true&includeScript=true&limit=2000",
+            '$baseUrl/addrs/###/?unspentOnly=true&includeScript=true&limit=2000',
         feeRate: baseUrl,
-        transaction: "$baseUrl/txs/###",
-        sendTransaction: "$baseUrl/txs/push",
+        transaction: '$baseUrl/txs/###',
+        sendTransaction: '$baseUrl/txs/push',
         apiType: APIType.blockCypher,
-        transactions: "$baseUrl/addrs/###/full?limit=200",
+        transactions: '$baseUrl/addrs/###/full?limit=200',
         network: network,
-        blockHeight: "$baseUrl/blocks/###");
+        blockHeight: '$baseUrl/blocks/###');
   }
 
   factory APIConfig.mempool(BasedUtxoNetwork network) {
@@ -93,18 +93,18 @@ class APIConfig {
         break;
       default:
         throw DartBitcoinPluginException(
-            "mempool does not support ${network.conf.coinName.name}");
+            'mempool does not support ${network.conf.coinName.name}');
     }
 
     return APIConfig(
-        url: "$baseUrl/address/###/utxo",
-        feeRate: "$baseUrl/v1/fees/recommended",
-        transaction: "$baseUrl/tx/###",
-        sendTransaction: "$baseUrl/tx",
+        url: '$baseUrl/address/###/utxo',
+        feeRate: '$baseUrl/v1/fees/recommended',
+        transaction: '$baseUrl/tx/###',
+        sendTransaction: '$baseUrl/tx',
         apiType: APIType.mempool,
-        transactions: "$baseUrl/address/###/txs",
+        transactions: '$baseUrl/address/###/txs',
         network: network,
-        blockHeight: "$baseUrl/block-height/###");
+        blockHeight: '$baseUrl/block-height/###');
   }
 
   APIConfig(

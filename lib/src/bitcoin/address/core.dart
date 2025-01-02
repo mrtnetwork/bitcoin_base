@@ -38,15 +38,15 @@ abstract class BitcoinAddressType implements Enumerate {
   ];
   T cast<T extends BitcoinAddressType>() {
     if (this is! T) {
-      throw DartBitcoinPluginException("BitcoinAddressType casting failed.",
-          details: {"excepted": "$T", "type": value});
+      throw DartBitcoinPluginException('BitcoinAddressType casting failed.',
+          details: {'excepted': '$T', 'type': value});
     }
     return this as T;
   }
 
   @override
   String toString() {
-    return "BitcoinAddressType.$value";
+    return 'BitcoinAddressType.$value';
   }
 }
 
@@ -59,8 +59,8 @@ abstract class BitcoinBaseAddress {
 }
 
 class PubKeyAddressType extends BitcoinAddressType {
-  const PubKeyAddressType._(String value) : super._(value);
-  static const PubKeyAddressType p2pk = PubKeyAddressType._("P2PK");
+  const PubKeyAddressType._(super.value) : super._();
+  static const PubKeyAddressType p2pk = PubKeyAddressType._('P2PK');
   @override
   bool get isP2sh => false;
   @override
@@ -70,14 +70,14 @@ class PubKeyAddressType extends BitcoinAddressType {
   int get hashLength => 20;
   @override
   String toString() {
-    return "PubKeyAddressType.$value";
+    return 'PubKeyAddressType.$value';
   }
 }
 
 class P2pkhAddressType extends BitcoinAddressType {
-  const P2pkhAddressType._(String value) : super._(value);
-  static const P2pkhAddressType p2pkh = P2pkhAddressType._("P2PKH");
-  static const P2pkhAddressType p2pkhwt = P2pkhAddressType._("P2PKHWT");
+  const P2pkhAddressType._(super.value) : super._();
+  static const P2pkhAddressType p2pkh = P2pkhAddressType._('P2PKH');
+  static const P2pkhAddressType p2pkhwt = P2pkhAddressType._('P2PKHWT');
 
   @override
   bool get isP2sh => false;
@@ -88,21 +88,21 @@ class P2pkhAddressType extends BitcoinAddressType {
   int get hashLength => 20;
   @override
   String toString() {
-    return "P2pkhAddressType.$value";
+    return 'P2pkhAddressType.$value';
   }
 }
 
 class P2shAddressType extends BitcoinAddressType {
-  const P2shAddressType._(String value, this.hashLength, this.withToken)
-      : super._(value);
+  const P2shAddressType._(super.value, this.hashLength, this.withToken)
+      : super._();
   static const P2shAddressType p2wshInP2sh = P2shAddressType._(
-      "P2SH/P2WSH", _BitcoinAddressUtils.hash160DigestLength, false);
+      'P2SH/P2WSH', _BitcoinAddressUtils.hash160DigestLength, false);
   static const P2shAddressType p2wpkhInP2sh = P2shAddressType._(
-      "P2SH/P2WPKH", _BitcoinAddressUtils.hash160DigestLength, false);
+      'P2SH/P2WPKH', _BitcoinAddressUtils.hash160DigestLength, false);
   static const P2shAddressType p2pkhInP2sh = P2shAddressType._(
-      "P2SH/P2PKH", _BitcoinAddressUtils.hash160DigestLength, false);
+      'P2SH/P2PKH', _BitcoinAddressUtils.hash160DigestLength, false);
   static const P2shAddressType p2pkInP2sh = P2shAddressType._(
-      "P2SH/P2PK", _BitcoinAddressUtils.hash160DigestLength, false);
+      'P2SH/P2PK', _BitcoinAddressUtils.hash160DigestLength, false);
   @override
   bool get isP2sh => true;
   @override
@@ -115,38 +115,38 @@ class P2shAddressType extends BitcoinAddressType {
   /// specify BCH NETWORK for now!
   /// Pay-to-Script-Hash-32
   static const P2shAddressType p2pkhInP2sh32 = P2shAddressType._(
-      "P2SH32/P2PKH", _BitcoinAddressUtils.scriptHashLenght, false);
+      'P2SH32/P2PKH', _BitcoinAddressUtils.scriptHashLenght, false);
   //// Pay-to-Script-Hash-32
   static const P2shAddressType p2pkInP2sh32 = P2shAddressType._(
-      "P2SH32/P2PK", _BitcoinAddressUtils.scriptHashLenght, false);
+      'P2SH32/P2PK', _BitcoinAddressUtils.scriptHashLenght, false);
 
   /// Pay-to-Script-Hash-32-with-token
   static const P2shAddressType p2pkhInP2sh32wt = P2shAddressType._(
-      "P2SH32WT/P2PKH", _BitcoinAddressUtils.scriptHashLenght, true);
+      'P2SH32WT/P2PKH', _BitcoinAddressUtils.scriptHashLenght, true);
 
   /// Pay-to-Script-Hash-32-with-token
   static const P2shAddressType p2pkInP2sh32wt = P2shAddressType._(
-      "P2SH32WT/P2PK", _BitcoinAddressUtils.scriptHashLenght, true);
+      'P2SH32WT/P2PK', _BitcoinAddressUtils.scriptHashLenght, true);
 
   /// Pay-to-Script-Hash-with-token
   static const P2shAddressType p2pkhInP2shwt = P2shAddressType._(
-      "P2SHWT/P2PKH", _BitcoinAddressUtils.hash160DigestLength, true);
+      'P2SHWT/P2PKH', _BitcoinAddressUtils.hash160DigestLength, true);
 
   /// Pay-to-Script-Hash-with-token
   static const P2shAddressType p2pkInP2shwt = P2shAddressType._(
-      "P2SHWT/P2PK", _BitcoinAddressUtils.hash160DigestLength, true);
+      'P2SHWT/P2PK', _BitcoinAddressUtils.hash160DigestLength, true);
 
   @override
   String toString() {
-    return "P2shAddressType.$value";
+    return 'P2shAddressType.$value';
   }
 }
 
 class SegwitAddressType extends BitcoinAddressType {
-  const SegwitAddressType._(String value) : super._(value);
-  static const SegwitAddressType p2wpkh = SegwitAddressType._("P2WPKH");
-  static const SegwitAddressType p2tr = SegwitAddressType._("P2TR");
-  static const SegwitAddressType p2wsh = SegwitAddressType._("P2WSH");
+  const SegwitAddressType._(super.value) : super._();
+  static const SegwitAddressType p2wpkh = SegwitAddressType._('P2WPKH');
+  static const SegwitAddressType p2tr = SegwitAddressType._('P2TR');
+  static const SegwitAddressType p2wsh = SegwitAddressType._('P2WSH');
   @override
   bool get isP2sh => false;
   @override
@@ -164,6 +164,6 @@ class SegwitAddressType extends BitcoinAddressType {
 
   @override
   String toString() {
-    return "SegwitAddressType.$value";
+    return 'SegwitAddressType.$value';
   }
 }

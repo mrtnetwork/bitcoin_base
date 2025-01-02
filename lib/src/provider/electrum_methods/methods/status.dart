@@ -1,10 +1,11 @@
-import 'package:bitcoin_base/src/provider/api_provider.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Subscribe to a script hash.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumScriptHashSubscribe
+class ElectrumRequestScriptHashSubscribe
     extends ElectrumRequest<Map<String, dynamic>, dynamic> {
-  ElectrumScriptHashSubscribe({required this.scriptHash});
+  ElectrumRequestScriptHashSubscribe({required this.scriptHash});
 
   /// /// The script hash as a hexadecimal string (BitcoinBaseAddress.pubKeyHash())
   final String scriptHash;

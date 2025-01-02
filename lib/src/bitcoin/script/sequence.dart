@@ -31,7 +31,7 @@ class Sequence {
       return List<int>.from(BitcoinOpCodeConst.REPLACE_BY_FEE_SEQUENCE);
     }
     if (seqType == BitcoinOpCodeConst.TYPE_RELATIVE_TIMELOCK) {
-      int seq = 0;
+      var seq = 0;
       if (!isTypeBlock) {
         seq |= 1 << 22;
       }
@@ -39,16 +39,16 @@ class Sequence {
       return IntUtils.toBytes(seq, length: 4, byteOrder: Endian.little);
     }
 
-    throw const DartBitcoinPluginException("Invalid seqType");
+    throw const DartBitcoinPluginException('Invalid seqType');
   }
 
   /// Returns the appropriate integer for a script; e.g. for relative timelocks
   int forScript() {
     if (seqType == BitcoinOpCodeConst.TYPE_REPLACE_BY_FEE) {
       throw const DartBitcoinPluginException(
-          "RBF is not to be included in a script.");
+          'RBF is not to be included in a script.');
     }
-    int scriptIntiger = value;
+    var scriptIntiger = value;
     if (seqType == BitcoinOpCodeConst.TYPE_RELATIVE_TIMELOCK && !isTypeBlock) {
       scriptIntiger |= 1 << 22;
     }
@@ -57,6 +57,6 @@ class Sequence {
 
   @override
   String toString() {
-    return "Sequence{seqType: $seqType, value: $value, isTypeBlock: $isTypeBlock}";
+    return 'Sequence{seqType: $seqType, value: $value, isTypeBlock: $isTypeBlock}';
   }
 }

@@ -1,8 +1,9 @@
-import 'package:bitcoin_base/src/provider/service/electrum/electrum.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Return a list of features and services supported by the server.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumServerFeatures extends ElectrumRequest<dynamic, dynamic> {
+class ElectrumRequestServerFeatures extends ElectrumRequest<dynamic, dynamic> {
   /// server.features
   @override
   String get method => ElectrumRequestMethods.serverFeatures.method;

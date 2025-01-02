@@ -99,7 +99,7 @@ class BlockCypherUtxo {
   }
 
   List<UtxoWithAddress> toUtxoWithOwner(UtxoAddressDetails owner) {
-    final List<UtxoWithAddress> utxos = txRefs.map((ref) {
+    final utxos = txRefs.map((ref) {
       return UtxoWithAddress(
         utxo: ref.toUtxo(owner.address.type),
         ownerDetails: owner,

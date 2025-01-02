@@ -60,17 +60,16 @@ class TxInput {
 
   static Tuple<TxInput, int> deserialize(
       {required List<int> bytes, int cursor = 0, bool hasSegwit = false}) {
-    final List<int> inpHash =
-        bytes.sublist(cursor, cursor + 32).reversed.toList();
+    final inpHash = bytes.sublist(cursor, cursor + 32).reversed.toList();
     cursor += 32;
-    final int outputN = IntUtils.fromBytes(bytes.sublist(cursor, cursor + 4),
+    final outputN = IntUtils.fromBytes(bytes.sublist(cursor, cursor + 4),
         byteOrder: Endian.little);
     cursor += 4;
     final vi = IntUtils.decodeVarint(bytes.sublist(cursor));
     cursor += vi.item2;
-    final List<int> unlockingScript = bytes.sublist(cursor, cursor + vi.item1);
+    final unlockingScript = bytes.sublist(cursor, cursor + vi.item1);
     cursor += vi.item1;
-    final List<int> sequenceNumberData = bytes.sublist(cursor, cursor + 4);
+    final sequenceNumberData = bytes.sublist(cursor, cursor + 4);
     cursor += 4;
     return Tuple(
         TxInput(
@@ -84,15 +83,15 @@ class TxInput {
 
   Map<String, dynamic> toJson() {
     return {
-      "txid": txId,
-      "txIndex": txIndex,
-      "scriptSig": scriptSig.script,
-      "sequance": BytesUtils.toHexString(sequence),
+      'txid': txId,
+      'txIndex': txIndex,
+      'scriptSig': scriptSig.script,
+      'sequance': BytesUtils.toHexString(sequence),
     };
   }
 
   @override
   String toString() {
-    return "TxInput{txId: $txId, txIndex: $txIndex, scriptSig: $scriptSig, sequence: ${BytesUtils.toHexString(sequence)}}";
+    return 'TxInput{txId: $txId, txIndex: $txIndex, scriptSig: $scriptSig, sequence: ${BytesUtils.toHexString(sequence)}}';
   }
 }

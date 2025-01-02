@@ -1,11 +1,11 @@
-import 'package:bitcoin_base/src/provider/service/electrum/methods.dart';
-import 'package:bitcoin_base/src/provider/service/electrum/params.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Return the unconfirmed transactions of a script hash.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumScriptHashGetMempool
+class ElectrumRequestScriptHashGetMempool
     extends ElectrumRequest<List<Map<String, dynamic>>, List<dynamic>> {
-  ElectrumScriptHashGetMempool({required this.scriptHash});
+  ElectrumRequestScriptHashGetMempool({required this.scriptHash});
 
   /// The script hash as a hexadecimal string (BitcoinBaseAddress.pubKeyHash())
   final String scriptHash;

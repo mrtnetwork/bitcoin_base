@@ -280,7 +280,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
       await ElectrumWebSocketService.connect("184....");
 
   /// create provider with service
-  final provider = ElectrumApiProvider(service);
+  final provider = ElectrumProvider(service);
 
   /// spender details
   final privateKey = ECPrivate.fromHex(
@@ -310,7 +310,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
   for (final i in spenders) {
     /// Reads all UTXOs (Unspent Transaction Outputs) associated with the account
     final elctrumUtxos = await provider
-        .request(ElectrumScriptHashListUnspent(scriptHash: i.pubKeyHash()));
+        .request(ElectrumRequestScriptHashListUnspent(scriptHash: i.pubKeyHash()));
 
     /// Converts all UTXOs to a list of UtxoWithAddress, containing UTXO information along with address details.
     /// read spender utxos
@@ -427,7 +427,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
   final raw = transaction.serialize();
 
   /// send to network
-  await provider.request(ElectrumBroadCastTransaction(transactionRaw: raw));
+  await provider.request(ElectrumRequestBroadCastTransaction(transactionRaw: raw));
 
   /// Once completed, we verify the status by checking the mempool or using another explorer to review the transaction details.
   /// https://mempool.space/testnet/tx/70cf664bba4b5ac9edc6133e9c6891ffaf8a55eaea9d2ac99aceead1c3db8899
@@ -446,7 +446,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
       "wss://chipnet.imaginary.cash:50004");
 
   /// create provider with service
-  final provider = ElectrumApiProvider(service);
+  final provider = ElectrumProvider(service);
 
   /// initialize private key
   final privateKey = ECPrivate.fromBytes(BytesUtils.fromHexString(
@@ -470,7 +470,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
 
   /// Reads all UTXOs (Unspent Transaction Outputs) associated with the account.
   /// We does not need tokens utxo and we set to false.
-  final elctrumUtxos = await provider.request(ElectrumScriptHashListUnspent(
+  final elctrumUtxos = await provider.request(ElectrumRequestScriptHashListUnspent(
     scriptHash: p2pkhAddress.baseAddress.pubKeyHash(),
     includeTokens: true,
   ));
@@ -566,7 +566,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
 
   /// send transaction to network
   await provider
-      .request(ElectrumBroadCastTransaction(transactionRaw: transactionRaw));
+      .request(ElectrumRequestBroadCastTransaction(transactionRaw: transactionRaw));
 
   /// done! check the transaction in block explorer
   ///  https://chipnet.imaginary.cash/tx/97030c1236a024de7cad7ceadf8571833029c508e016bcc8173146317e367ae6
@@ -704,7 +704,7 @@ I haven't implemented any specific HTTP service or socket service within this pl
       await ElectrumSSLService.connect("testnet.aranguren.org:51002");
 
   /// create provider with service
-  final provider = ElectrumApiProvider(service);
+  final provider = ElectrumProvider(service);
 
   final address = P2trAddress.fromAddress(address: ".....", network: network);
 
@@ -714,7 +714,7 @@ I haven't implemented any specific HTTP service or socket service within this pl
 
   /// Return an ordered list of UTXOs sent to a script hash.
   final accountUnspend = await provider
-      .request(ElectrumScriptHashListUnspent(scriptHash: address.pubKeyHash()));
+      .request(ElectrumRequestScriptHashListUnspent(scriptHash: address.pubKeyHash()));
 
   /// Return the confirmed and unconfirmed history of a script hash.
   final accountHistory = await provider
@@ -722,7 +722,7 @@ I haven't implemented any specific HTTP service or socket service within this pl
 
   /// Broadcast a transaction to the network.
   final broadcastTransaction = await provider
-      .request(ElectrumBroadCastTransaction(transactionRaw: "txDigest"));
+      .request(ElectrumRequestBroadCastTransaction(transactionRaw: "txDigest"));
 
   /// ....
 ```

@@ -25,7 +25,7 @@ class _BitcoinAddressUtils {
       final decode = List<int>.unmodifiable(Base58Decoder.decode(address));
 
       /// Extract script bytes excluding version and checksum.
-      final List<int> scriptBytes =
+      final scriptBytes =
           decode.sublist(1, decode.length - Base58Const.checksumByteLen);
 
       /// Ensure the script bytes have the expected length.
@@ -34,14 +34,14 @@ class _BitcoinAddressUtils {
       }
 
       /// Extract version, data, and checksum.
-      final List<int> version = [decode[0]];
-      final List<int> data =
+      final version = <int>[decode[0]];
+      final data =
           decode.sublist(0, decode.length - Base58Const.checksumByteLen);
-      final List<int> checksum =
+      final checksum =
           decode.sublist(decode.length - Base58Const.checksumByteLen);
 
       /// Verify the checksum.
-      final List<int> hash = QuickCrypto.sha256DoubleHash(data)
+      final hash = QuickCrypto.sha256DoubleHash(data)
           .sublist(0, Base58Const.checksumByteLen);
       if (!BytesUtils.bytesEqual(checksum, hash)) {
         return null;
@@ -89,7 +89,7 @@ class _BitcoinAddressUtils {
     final convert = SegwitBech32Decoder.decode(network.p2wpkhHrp, address);
     final witnessVersion = convert.item1;
     if (witnessVersion != version) {
-      throw const DartBitcoinPluginException("Invalid segwit version");
+      throw const DartBitcoinPluginException('Invalid segwit version');
     }
     return BytesUtils.toHexString(convert.item2);
   }
@@ -138,7 +138,7 @@ class _BitcoinAddressUtils {
       return address;
     }
     throw DartBitcoinPluginException(
-        "${network.value} does not support ${address.type.value} address");
+        '${network.value} does not support ${address.type.value} address');
   }
 
   /// Decodes a Bitcoin address and returns a corresponding BitcoinBaseAddress instance
@@ -158,7 +158,7 @@ class _BitcoinAddressUtils {
     }
     baseAddress ??= toLegacy(address, network);
     if (baseAddress == null) {
-      throw const DartBitcoinPluginException("Invalid Bitcoin address");
+      throw const DartBitcoinPluginException('Invalid Bitcoin address');
     }
     return validateAddress(baseAddress, network);
   }
@@ -181,7 +181,7 @@ class _BitcoinAddressUtils {
       // ignore: empty_catches
     } catch (e) {}
     throw const DartBitcoinPluginException(
-        "Invalid Bitcoin address program length (program length should be 32 or 20 bytes)");
+        'Invalid Bitcoin address program length (program length should be 32 or 20 bytes)');
   }
 
   /// Decodes a Bitcoin Cash (BCH) address and returns a corresponding LegacyAddress instance
@@ -197,9 +197,9 @@ class _BitcoinAddressUtils {
       String address, BitcoinCashNetwork network,
       {bool validateNetworkHRP = false}) {
     try {
-      final String hrp = validateNetworkHRP
+      final hrp = validateNetworkHRP
           ? network.networkHRP
-          : address.substring(0, address.indexOf(":"));
+          : address.substring(0, address.indexOf(':'));
       final decode = BchBech32Decoder.decode(hrp, address);
       final scriptBytes = decode.item2;
       final version = decode.item1;
@@ -277,7 +277,7 @@ class _BitcoinAddressUtils {
       required BasedUtxoNetwork network}) {
     if (!network.supportedAddress.contains(type)) {
       throw DartBitcoinPluginException(
-          "${network.value} does not support ${type.value} address type");
+          '${network.value} does not support ${type.value} address type');
     }
     if (network is BitcoinCashNetwork) {
       final decode = _BitcoinAddressUtils.decodeBchAddress(address, network);
@@ -292,7 +292,7 @@ class _BitcoinAddressUtils {
     if (decode == null) return null;
     final version = decode.item2;
     final addrBytes = decode.item1;
-    final String scriptHex = BytesUtils.toHexString(addrBytes);
+    final scriptHex = BytesUtils.toHexString(addrBytes);
 
     switch (type) {
       case P2pkhAddressType.p2pkh:
@@ -351,8 +351,8 @@ class _BitcoinAddressUtils {
       {required BitcoinCashNetwork network,
       required String addressProgram,
       required BitcoinAddressType type}) {
-    final List<int> programBytes = BytesUtils.fromHexString(addressProgram);
-    final List<int> netVersion = _getBchNetVersion(
+    final programBytes = BytesUtils.fromHexString(addressProgram);
+    final netVersion = _getBchNetVersion(
         network: network, type: type, secriptLength: programBytes.length);
 
     return BchBech32Encoder.encode(
@@ -370,7 +370,7 @@ class _BitcoinAddressUtils {
       {required BitcoinCashNetwork network,
       required BitcoinAddressType type,
       int secriptLength = hash160DigestLength}) {
-    final bool isToken = type.value.contains("WT");
+    final isToken = type.value.contains('WT');
     if (!type.isP2sh) {
       if (!isToken) return network.p2pkhNetVer;
       return network.p2pkhWtNetVer;
@@ -406,7 +406,7 @@ class _BitcoinAddressUtils {
       return legacyToBchAddress(
           addressProgram: addressProgram, network: network, type: type);
     }
-    List<int> programBytes = BytesUtils.fromHexString(addressProgram);
+    var programBytes = BytesUtils.fromHexString(addressProgram);
     switch (type) {
       case P2shAddressType.p2wpkhInP2sh:
       case P2shAddressType.p2wshInP2sh:
@@ -431,7 +431,7 @@ class _BitcoinAddressUtils {
   /// Returns the RIPEMD-160 hash of the public key as a hexadecimal string.
   static String pubkeyToHash160(String publicKey) {
     final bytes = BytesUtils.fromHexString(publicKey);
-    final List<int> ripemd160Hash = QuickCrypto.hash160(bytes);
+    final ripemd160Hash = QuickCrypto.hash160(bytes);
     return BytesUtils.toHexString(ripemd160Hash);
   }
 

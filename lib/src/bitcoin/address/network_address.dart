@@ -108,7 +108,7 @@ class BitcoinCashAddress extends BitcoinNetworkAddress<BitcoinCashNetwork> {
         address, network,
         validateNetworkHRP: validateNetworkPrefix);
     if (decodeAddress == null) {
-      throw DartBitcoinPluginException("Invalid ${network.value} address.");
+      throw DartBitcoinPluginException('Invalid ${network.value} address.');
     }
     return BitcoinCashAddress._(decodeAddress, address, network);
   }

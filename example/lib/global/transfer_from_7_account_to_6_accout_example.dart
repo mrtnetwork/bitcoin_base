@@ -19,7 +19,7 @@ void main() async {
       await ElectrumSSLService.connect("testnet.aranguren.org:51002");
 
   /// create provider with service
-  final provider = ElectrumApiProvider(service);
+  final provider = ElectrumProvider(service);
 
   /// spender details
   final privateKey = ECPrivate.fromHex(
@@ -48,8 +48,8 @@ void main() async {
   /// loop each spenders address and get utxos and add to accountsUtxos
   for (final i in spenders) {
     /// Reads all UTXOs (Unspent Transaction Outputs) associated with the account
-    final elctrumUtxos = await provider
-        .request(ElectrumScriptHashListUnspent(scriptHash: i.pubKeyHash()));
+    final elctrumUtxos = await provider.request(
+        ElectrumRequestScriptHashListUnspent(scriptHash: i.pubKeyHash()));
 
     /// Converts all UTXOs to a list of UtxoWithAddress, containing UTXO information along with address details.
     /// read spender utxos
@@ -121,7 +121,7 @@ void main() async {
       enableRBF: true);
 
   /// get network fee esmtimate (fee per kilobyte)
-  final networkEstimate = await provider.request(ElectrumEstimateFee());
+  final networkEstimate = await provider.request(ElectrumRequestEstimateFee());
 
   /// the daemon does not have enough information to make an estimate
   if (networkEstimate == null) {
@@ -171,7 +171,8 @@ void main() async {
   final raw = transaction.serialize();
 
   /// send to network
-  await provider.request(ElectrumBroadCastTransaction(transactionRaw: raw));
+  await provider
+      .request(ElectrumRequestBroadCastTransaction(transactionRaw: raw));
 
   /// Once completed, we verify the status by checking the mempool or using another explorer to review the transaction details.
   /// https://mempool.space/testnet/tx/70cf664bba4b5ac9edc6133e9c6891ffaf8a55eaea9d2ac99aceead1c3db8899

@@ -12,7 +12,7 @@ void main() async {
       "wss://chipnet.imaginary.cash:50004");
 
   /// create provider with service
-  final provider = ElectrumApiProvider(service);
+  final provider = ElectrumProvider(service);
 
   /// initialize private key
   final privateKey = ECPrivate.fromBytes(BytesUtils.fromHexString(
@@ -39,7 +39,8 @@ void main() async {
 
   /// Reads all UTXOs (Unspent Transaction Outputs) associated with the account.
   /// We does not need tokens utxo and we set to false.
-  final elctrumUtxos = await provider.request(ElectrumScriptHashListUnspent(
+  final elctrumUtxos =
+      await provider.request(ElectrumRequestScriptHashListUnspent(
     scriptHash: p2pkhAddress.baseAddress.pubKeyHash(),
     includeTokens: false,
   ));
@@ -96,8 +97,8 @@ void main() async {
   final transactionRaw = transaaction.toHex();
 
   /// send transaction to network
-  await provider
-      .request(ElectrumBroadCastTransaction(transactionRaw: transactionRaw));
+  await provider.request(
+      ElectrumRequestBroadCastTransaction(transactionRaw: transactionRaw));
 
   /// done! check the transaction in block explorer
   ///  https://chipnet.imaginary.cash/tx/9e534f8a64f76b1af5ccf2522392697f2242fd215206a458cfe286bca4a3ec0a

@@ -1,9 +1,11 @@
-import 'package:bitcoin_base/src/provider/service/electrum/electrum.dart';
+import 'package:bitcoin_base/src/provider/core/methods.dart';
+import 'package:bitcoin_base/src/provider/core/params.dart';
 
 /// Returns a diff between two deterministic masternode lists. The result also contains proof data..
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumProtXDiff extends ElectrumRequest<Map<String, dynamic>, dynamic> {
-  ElectrumProtXDiff({required this.baseHeight, required this.height});
+class ElectrumRequestProtXDiff
+    extends ElectrumRequest<Map<String, dynamic>, dynamic> {
+  ElectrumRequestProtXDiff({required this.baseHeight, required this.height});
 
   /// The starting block height
   final int baseHeight;

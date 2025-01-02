@@ -5,7 +5,7 @@ import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/utils/utils.dart';
 
 List<int> opPushData(String hexData) {
-  final List<int> dataBytes = BytesUtils.fromHexString(hexData);
+  final dataBytes = BytesUtils.fromHexString(hexData);
   if (dataBytes.length < BitcoinOpCodeConst.opPushData1) {
     return [dataBytes.length, ...dataBytes];
   } else if (dataBytes.length < mask8) {
@@ -20,7 +20,7 @@ List<int> opPushData(String hexData) {
     return [BitcoinOpCodeConst.opPushData4, ...lengthBytes, ...dataBytes];
   } else {
     throw const DartBitcoinPluginException(
-        "Data too large. Cannot push into script");
+        'Data too large. Cannot push into script');
   }
 }
 
@@ -31,11 +31,11 @@ List<int> pushInteger(int integer) {
   }
 
   /// Calculate the number of bytes required to represent the integer
-  final int numberOfBytes = (integer.bitLength + 7) ~/ 8;
+  final numberOfBytes = (integer.bitLength + 7) ~/ 8;
 
   /// Convert to little-endian bytes
-  List<int> integerBytes = List<int>.filled(numberOfBytes, 0);
-  for (int i = 0; i < numberOfBytes; i++) {
+  var integerBytes = List<int>.filled(numberOfBytes, 0);
+  for (var i = 0; i < numberOfBytes; i++) {
     integerBytes[i] = (integer >> (i * 8)) & mask8;
   }
 

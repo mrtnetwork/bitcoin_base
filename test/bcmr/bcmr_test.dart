@@ -8,7 +8,7 @@ import 'payouts_or_dividends.dart';
 
 /// https://github.com/bitjson/chip-bcmr/tree/master/examples
 void main() {
-  test("pcmr test", () {
+  test('pcmr test', () {
     final registry = Registry.fromJson(payoutsOrDividends);
     expect(json.encode(registry.toJson()), json.encode(payoutsOrDividends));
     final registry2 = Registry.fromJson(artCollection);
