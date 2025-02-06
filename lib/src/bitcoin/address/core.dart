@@ -39,7 +39,7 @@ abstract class BitcoinAddressType implements Enumerate {
   T cast<T extends BitcoinAddressType>() {
     if (this is! T) {
       throw DartBitcoinPluginException('BitcoinAddressType casting failed.',
-          details: {'excepted': '$T', 'type': value});
+          details: {'expected': '$T', 'type': value});
     }
     return this as T;
   }
