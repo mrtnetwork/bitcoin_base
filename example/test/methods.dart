@@ -15,11 +15,10 @@ Future<ElectrumProvider> getProvider(
 }
 
 Future<void> callBitcoinRpc(String method, [List<dynamic>? params]) async {
-  const rpcUser = 'mohsen';
-  const rpcPassword = 'mohsen';
-  const rpcUrl = 'http://127.0.0.1:48332/'; // Adjust for Testnet/Regtest
+  const rpcUser = 'n';
+  const rpcPassword = 'n';
+  const rpcUrl = 'http://127.0.0.1:48332/';
 
-  // Create the request payload
   final body = StringUtils.fromJson({
     "jsonrpc": "1.0",
     "id": "dart-client",
