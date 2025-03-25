@@ -80,15 +80,15 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
   
 - P2SH(SEGWIT): A P2SH (Pay-to-Script-Hash) Segregated Witness (SegWit) address in Bitcoin combines the benefits of P2SH and SegWit technologies, allowing for enhanced transaction security, reduced fees, and improved scalability.
 
-### MuSig2 BIP-327: MuSig2 for BIP340-compatible Multi-Signatures
-  You can find the examples here.
+### MuSig2 (BIP-327):
+  Find example implementations [here](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/musig)
 
  - Sign/Verify: Supports signing and verifying multisignature transactions using MuSig2
  - NonceAgg: Aggregates nonces from multiple participants for secure signature generation.
  - KeyAgg: Combines multiple public keys into a single aggregated public key for efficient multisignature verification
 
 ### PSBT
-  You can find the examples here.
+  Find example implementations [here](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/psbt)
 
 - BIP-0174: Partially Signed Bitcoin Transaction Format
 - BIP-0370: PSBT Version 2
