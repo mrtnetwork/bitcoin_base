@@ -1,3 +1,11 @@
+## 6.0.0
+
+- Added support for BIP-327: MuSig2 for BIP340-compatible multi-signatures
+- Implemented BIP-174: Partially Signed Bitcoin Transaction (PSBT) format
+- Integrated BIP-370: PSBT Version 2 enhancements
+- Included BIP-371: Taproot fields for PSBT
+- Extended support for BIP-373: MuSig2-related PSBT fields
+
 ## 5.3.0
 
 * Update dependencies

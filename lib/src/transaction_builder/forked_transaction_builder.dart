@@ -1,5 +1,9 @@
-import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
+import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
+import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
+import 'package:bitcoin_base/src/transaction_builder/builder.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// A transaction builder specifically designed for the Bitcoin Cash (BCH) and Bitcoin SV (BSV) networks.
@@ -175,7 +179,7 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
       required UtxoWithAddress utox,
       required BtcTransaction transaction,
       int sighash =
-          BitcoinOpCodeConst.SIGHASH_ALL | BitcoinOpCodeConst.SIGHASH_FORKED}) {
+          BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked}) {
     return transaction.getTransactionSegwitDigit(
         txInIndex: input,
         script: scriptPubKeys,
@@ -256,8 +260,8 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
     }
     final inputs = sortedUtxos.map((e) => e.utxo.toInput()).toList();
     if (enableRBF && inputs.isNotEmpty) {
-      inputs[0] = inputs[0]
-          .copyWith(sequence: BitcoinOpCodeConst.REPLACE_BY_FEE_SEQUENCE);
+      inputs[0] =
+          inputs[0].copyWith(sequence: BitcoinOpCodeConst.replaceByFeeSequence);
     }
     return Tuple(List<TxInput>.unmodifiable(inputs),
         List<UtxoWithAddress>.unmodifiable(sortedUtxos));
@@ -466,13 +470,9 @@ be retrieved by anyone who examines the blockchain's history.
         sumOutputAmounts: sumOutputAmounts);
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
-    // BtcTransaction transaction = BtcTransaction.fromRaw(
-    //     "0200000001b8249c5a6cf8f24815377222e4c2bab32154151c367111134ef7ce11c651e4c600000000fd5b0300483045022100b4e774511598efbdf256aaa127f2104c5f25e29311936a75034857901c72fa180220232410ec31b9809b0293a7a2c8c0ade53ca4bdde064ac1baaa27d545678891b84147304402203014d1beaa73fc289d0201bff61a40d1e853103d624fb8520cc6b4afea00d3c10220643eed02e2830b7f751b7355a889e4ab4c02d01df0ca71621d4f5affe5cb3a5d41483045022100bf73bd48dcef332924c7578ff7a5b9d3817ecdb2ad2a4148f56069705365427c022044ce67ca87c3e1309ba43fcb3c23a3618ba0dbd44a802c22efab78b42b9a8e3e41483045022100a3d90b8f959850f9e2655b38e61a8e5323a363803bd62ab0560509e9cd675dae022064ba98f689c21f66e0839660bf15c7a0c44e0e65384d82996a4f3b73a55daef141473044022033128a7572b0bc7d22c6cd2080a882b7e03b15167b1d88b6405fa0131ab6254602207d960421e8a1a2e85431b6398a9af742fb492c967c3acac9fd38d82d7c54756e41483045022100c00232655b098d529deea53dcfffa5b25dc4a2015a52b1b587ae73c813a8d4a502201d100762ddb4779d1c484790a1b38cf369f634ee33541d8ec0ec45c2470141ba4147304402201503e2e7bab40cd5a083c0e03506ad1c260d17b821a142be2591e05fa5bdc86d02201d0280a2fc78a2af4bf7f1245bd8bf3384ada22098ba84645958ff1715655630414730440220090757399dc9f989ff1a7d998af385cd9490fe07c2c216b54967d4138067312a02204c3bb010902d72e90a1133cc8ae34cb629e139863f62ab259f25e5cac2125779414d13015821030f0fb9a244ad31a369ee02b7abfbbb0bfa3812b9a39ed93346d03d67d412d17721022f1b310f4c065331bc0d79ba4661bb9822d67d7c4a1b0a1892e1fd0cd23aa68d210299c2aa85d2b21a62f396907a802a58e521dafd5bddaccbd72786eea189bc4dc921021a7a569e91dbf60581509c7fc946d1003b60c7dee85299538db6353538d595742103a92c9b7cac68758de5783ed8e5123598e4ad137091e42987d3bad8a08e35bf3d21034f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa21036360e856310ce5d294e8be33fc807077dc56ac80d95d9cd4ddbd21325eff73f721031d16453b3ab3132acb0a5bc16cc49690d819a585267a15cd5a064e2a0ad4059958ae0000000001f0780f000000000017a914e5d65da9624e4754827edb627fe31d4c75954a388700000000");
-    // transaction = transaction.copyWith(inputs: inputs);
-    final transaction =
-        BtcTransaction(inputs: inputs, outputs: outputs, hasSegwit: false);
+    final transaction = BtcTransaction(inputs: inputs, outputs: outputs);
     const sighash =
-        BitcoinOpCodeConst.SIGHASH_ALL | BitcoinOpCodeConst.SIGHASH_FORKED;
+        BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked;
 
     /// Well, now let's do what we want for each input
     for (var i = 0; i < inputs.length; i++) {
@@ -529,8 +529,7 @@ be retrieved by anyone who examines the blockchain's history.
           sign(digest, indexUtxo, indexUtxo.ownerDetails.publicKey!, sighash);
       _addScripts(input: inputs[i], signatures: [sig], utxo: indexUtxo);
     }
-    final ea = BtcTransaction.fromRaw(transaction.serialize());
-    assert(ea.serialize() == transaction.serialize(), transaction.serialize());
+
     return transaction;
   }
 
@@ -564,11 +563,10 @@ be retrieved by anyone who examines the blockchain's history.
         sumOutputAmounts: sumOutputAmounts);
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
-    final transaction =
-        BtcTransaction(inputs: inputs, outputs: outputs, hasSegwit: false);
+    final transaction = BtcTransaction(inputs: inputs, outputs: outputs);
 
     const sighash =
-        BitcoinOpCodeConst.SIGHASH_ALL | BitcoinOpCodeConst.SIGHASH_FORKED;
+        BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked;
 
     /// Well, now let's do what we want for each input
     for (var i = 0; i < inputs.length; i++) {

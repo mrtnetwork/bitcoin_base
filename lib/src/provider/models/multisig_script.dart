@@ -1,5 +1,10 @@
-import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
+import 'package:bitcoin_base/src/bitcoin/script/script.dart';
+import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
+import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
+import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/src/utils/btc_utils.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// MultiSignatureSigner is an interface that defines methods required for representing
@@ -21,9 +26,12 @@ class MultiSignatureSigner {
   /// specified public key and weight.
   factory MultiSignatureSigner(
       {required String publicKey, required int weight}) {
-    ECPublic.fromHex(publicKey);
+    final pubkeyMode = BtcUtils.isCompressedPubKey(publicKey);
+
     return MultiSignatureSigner._(
-        publicKey, weight, BtcUtils.isCompressedPubKey(publicKey));
+        ECPublic.fromHex(publicKey).toHex(mode: pubkeyMode),
+        weight,
+        pubkeyMode);
   }
 }
 
@@ -145,5 +153,74 @@ class MultiSignatureAddress {
         threshold: threshold,
         multiSigScript: script,
         canSelectSegwit: signers.every((e) => e.keyType.isCompressed));
+  }
+}
+
+class P2trMultiSignatureSigner {
+  P2trMultiSignatureSigner._(this.xOnly, this.weight);
+
+  final String xOnly;
+
+  /// Weight returns the weight or significance of the signer within the multi-signature scheme.
+  /// The weight is used to determine the number of signatures required for a valid transaction.
+  final int weight;
+
+  factory P2trMultiSignatureSigner(
+      {required String xOnly, required int weight}) {
+    return P2trMultiSignatureSigner._(TaprootUtils.toXonlyHex(xOnly), weight);
+  }
+}
+
+class P2trMultiSignatureAddress {
+  /// Signers is a collection of signers participating in the multi-signature scheme.
+  final List<P2trMultiSignatureSigner> signers;
+
+  /// Threshold is the minimum number of signatures required to spend the bitcoins associated
+  /// with this address.
+  final int threshold;
+
+  /// ScriptDetails provides details about the multi-signature script used in transactions,
+  /// including "OP_M", compressed public keys, "OP_N", and "OP_CHECKMULTISIG."
+  final Script multiSigScript;
+  P2trMultiSignatureAddress._(
+      {required List<P2trMultiSignatureSigner> signers,
+      required this.threshold,
+      required this.multiSigScript})
+      : signers = signers.immutable;
+
+  factory P2trMultiSignatureAddress(
+      {required int threshold,
+      required List<P2trMultiSignatureSigner> signers}) {
+    final sumWeight =
+        signers.fold<int>(0, (sum, signer) => sum + signer.weight);
+    if (threshold > 15 || threshold < 1) {
+      throw const DartBitcoinPluginException(
+          'The threshold should be between 1 and 15');
+    }
+    if (sumWeight > 15) {
+      throw const DartBitcoinPluginException(
+          'The total weight of the owners should not exceed 15');
+    }
+    if (sumWeight < threshold) {
+      throw const DartBitcoinPluginException(
+          'The total weight of the signatories should reach the threshold');
+    }
+    final multiSigScript = <String>[];
+    for (int i = 0; i < signers.length; i++) {
+      final signer = signers[i];
+      for (var w = 0; w < signer.weight; w++) {
+        if (i == 0 && w == 0) {
+          multiSigScript.add(signer.xOnly);
+          multiSigScript.add("OP_CHECKSIG");
+          continue;
+        }
+        multiSigScript.add(signer.xOnly);
+        multiSigScript.add("OP_CHECKSIGADD");
+      }
+    }
+    multiSigScript.addAll(['OP_$threshold', 'OP_NUMEQUAL']);
+    final script = Script(script: multiSigScript);
+    return P2trMultiSignatureAddress._(
+        signers: signers, threshold: threshold, multiSigScript: script);
   }
 }

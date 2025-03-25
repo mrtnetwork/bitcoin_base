@@ -27,3 +27,4 @@ export 'methods/relay_fee.dart';
 export 'methods/scripthash_unsubscribe.dart';
 export 'methods/server_peer_subscribe.dart';
 export 'methods/status.dart';
+export 'methods/get_raw_transaction.dart';

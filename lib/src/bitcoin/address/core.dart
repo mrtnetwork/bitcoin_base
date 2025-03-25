@@ -7,16 +7,18 @@ abstract class BitcoinAddressType implements Enumerate {
   const BitcoinAddressType._(this.value);
 
   /// Factory method to create a BitcoinAddressType enum value from a name or value.
-  static BitcoinAddressType fromValue(String value) {
+  static BitcoinAddressType fromValue(String? value) {
     return values.firstWhere((element) => element.value == value,
-        orElse: () => throw DartBitcoinPluginException(
-            'Invalid BitcoinAddressType: $value'));
+        orElse: () =>
+            throw DartBitcoinPluginException('Unknown address type. $value'));
   }
 
   /// Check if the address type is Pay-to-Script-Hash (P2SH).
   bool get isP2sh;
-  int get hashLength;
   bool get isSegwit;
+  bool get isP2tr => false;
+  int get hashLength;
+  bool get isP2sh32 => isP2sh && hashLength == 32;
 
   // Enum values as a list for iteration
   static const List<BitcoinAddressType> values = [
@@ -38,7 +40,8 @@ abstract class BitcoinAddressType implements Enumerate {
   ];
   T cast<T extends BitcoinAddressType>() {
     if (this is! T) {
-      throw DartBitcoinPluginException('BitcoinAddressType casting failed.',
+      throw DartBitcoinPluginException(
+          "Invalid cast: expected ${T.runtimeType}, but found $runtimeType.",
           details: {'expected': '$T', 'type': value});
     }
     return this as T;
@@ -151,6 +154,9 @@ class SegwitAddressType extends BitcoinAddressType {
   bool get isP2sh => false;
   @override
   bool get isSegwit => true;
+
+  @override
+  bool get isP2tr => this == p2tr;
 
   @override
   int get hashLength {

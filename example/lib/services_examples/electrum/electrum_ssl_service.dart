@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/service/models/params.dart';
+import 'package:blockchain_utils/utils/string/string.dart';
 import 'package:example/services_examples/electrum/request_completer.dart';
 
 class ElectrumSSLService with ElectrumServiceProvider {
@@ -67,10 +68,17 @@ class ElectrumSSLService with ElectrumServiceProvider {
         defaultRequestTimeOut: defaultRequestTimeOut);
   }
 
+  String? ddd;
   void _onMessge(List<int> event) {
-    final Map<String, dynamic> decode = json.decode(utf8.decode(event));
-    if (decode.containsKey("id")) {
-      final int id = int.parse(decode["id"]!.toString());
+    final msg = utf8.decode(event);
+    if (msg.contains("jsonrpc")) {
+      ddd = msg;
+    } else {
+      ddd = "$ddd$msg";
+    }
+    Map<String, dynamic>? decode = StringUtils.tryToJson(ddd);
+    if (decode?.containsKey("id") ?? false) {
+      final int id = int.parse(decode!["id"]!.toString());
       final request = requests.remove(id);
       request?.completer.complete(decode);
     }

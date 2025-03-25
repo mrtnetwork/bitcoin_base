@@ -141,7 +141,7 @@ void _spendLTCP2pkhAddress() async {
   /// Calculate the size of the transaction in bytes.
   /// You can determine the transaction fee by multiplying the transaction size
   /// Formula: transaction fee = (transaction size in bytes * fee rate in bytes)
-  final size = tr.hasSegwit ? tr.getVSize() : tr.getSize();
+  final size = tr.hasWitness ? tr.getVSize() : tr.getSize();
 
   /// broadcast transaction
   await _broadcastTransaction(tr.serialize());
@@ -287,7 +287,7 @@ void _spendFrom2P2shAddressAndOneMultiSigP2shAddress() async {
   /// Calculate the size of the transaction in bytes.
   /// You can determine the transaction fee by multiplying the transaction size
   /// Formula: transaction fee = (transaction size in bytes * fee rate in bytes)
-  final size = tr.hasSegwit ? tr.getVSize() : tr.getSize();
+  final size = tr.hasWitness ? tr.getVSize() : tr.getSize();
 
   /// broadcast transaction
   await _broadcastTransaction(tr.serialize());
@@ -399,7 +399,7 @@ void _spendFromNestedSegwitP2WPKHInP2SH() async {
   /// Calculate the size of the transaction in bytes.
   /// You can determine the transaction fee by multiplying the transaction size
   /// Formula: transaction fee = (transaction size in bytes * fee rate in bytes)
-  final size = tr.hasSegwit ? tr.getVSize() : tr.getSize();
+  final size = tr.hasWitness ? tr.getVSize() : tr.getSize();
 
   /// broadcast transaction
   await _broadcastTransaction(tr.serialize());
@@ -519,7 +519,7 @@ void _spendFromSegwitP2WPKHAddress() async {
   /// Calculate the size of the transaction in bytes.
   /// You can determine the transaction fee by multiplying the transaction size
   /// Formula: transaction fee = (transaction size in bytes * fee rate in bytes)
-  final size = tr.hasSegwit ? tr.getVSize() : tr.getSize();
+  final size = tr.hasWitness ? tr.getVSize() : tr.getSize();
 
   /// broadcast transaction
   await _broadcastTransaction(tr.serialize());

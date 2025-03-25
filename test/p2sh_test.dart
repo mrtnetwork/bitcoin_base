@@ -12,8 +12,10 @@ void main() {
     final p2pkSk = ECPrivate.fromWif(
         'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
-    final p2pkRedeemScript =
-        Script(script: [p2pkSk.getPublic().toHex(), 'OP_CHECKSIG']);
+    final p2pkRedeemScript = Script(script: [
+      p2pkSk.getPublic().toHex(),
+      BitcoinOpcode.opCheckSig,
+    ]);
     final txout = TxOutput(
         amount: BigInt.from(9000000),
         scriptPubKey: P2shAddress.fromScript(
@@ -36,8 +38,8 @@ void main() {
     final skCsvP2pkh = ECPrivate.fromWif(
         'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
-    final seq = Sequence(
-        seqType: BitcoinOpCodeConst.TYPE_RELATIVE_TIMELOCK, value: 200);
+    final seq =
+        Sequence(seqType: BitcoinOpCodeConst.typeRelativeTimelock, value: 200);
     final txinSeq = TxInput(
         txId:
             'f557c623e55f0affc696b742630770df2342c4aac395e0ed470923247bc51b95',
@@ -73,13 +75,13 @@ void main() {
     test('test3', () {
       final redeemScript = Script(script: [
         seq.forScript(),
-        'OP_CHECKSEQUENCEVERIFY',
-        'OP_DROP',
-        'OP_DUP',
-        'OP_HASH160',
-        skCsvP2pkh.getPublic().toHash160(),
-        'OP_EQUALVERIFY',
-        'OP_CHECKSIG'
+        BitcoinOpcode.opCheckSequenceVerify,
+        BitcoinOpcode.opDrop,
+        BitcoinOpcode.opDup,
+        BitcoinOpcode.opHash160,
+        skCsvP2pkh.getPublic().toHash160Hex(),
+        BitcoinOpcode.opEqualVerify,
+        BitcoinOpcode.opCheckSig,
       ]);
 
       final txout1 = TxOutput(

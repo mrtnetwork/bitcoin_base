@@ -176,7 +176,7 @@ class _BitcoinAddressUtils {
     try {
       final toBytes = BytesUtils.fromHexString(hash160);
       if (toBytes.length == addressType.hashLength) {
-        return hash160;
+        return StringUtils.strip0x(hash160.toLowerCase());
       }
       // ignore: empty_catches
     } catch (e) {}

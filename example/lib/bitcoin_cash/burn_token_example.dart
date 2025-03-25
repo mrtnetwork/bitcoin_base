@@ -61,8 +61,7 @@ void main() async {
   if (sumOfUtxo == BigInt.zero) {
     return;
   }
-  // print(sumOfUtxo);
-  // return;
+
   /// CashToken{bitfield: 16, commitment: null, amount: 2000, category: 4e7873d4529edfd2c6459139257042950230baa9297f111b8675829443f70430}
   final CashToken token = elctrumUtxos
       .firstWhere((e) =>

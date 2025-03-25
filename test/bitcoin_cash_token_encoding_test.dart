@@ -758,7 +758,7 @@ void main() {
       final appendBytes = QuickCrypto.generateRandom(c * 2);
       final tokenBytes = BytesUtils.fromHexString(i['prefix']!);
       final combine = <int>[...tokenBytes, ...appendBytes];
-      final decode = CashToken.fromRaw(combine);
+      final decode = CashToken.deserialize(combine);
       final data = Map<String, dynamic>.from(i['data']);
       final amount = BigInt.parse(data['amount']);
       final nft =

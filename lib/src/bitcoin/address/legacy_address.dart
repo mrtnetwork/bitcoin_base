@@ -41,9 +41,32 @@ abstract class LegacyAddress implements BitcoinBaseAddress {
   String pubKeyHash() {
     return _BitcoinAddressUtils.pubKeyHash(toScriptPubKey());
   }
+
+  @override
+  operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! LegacyAddress) return false;
+    if (runtimeType != other.runtimeType) return false;
+    if (type != other.type) return false;
+    return _addressProgram == other._addressProgram;
+  }
+
+  @override
+  int get hashCode =>
+      HashCodeGenerator.generateHashCode([_addressProgram, type]);
 }
 
 class P2shAddress extends LegacyAddress {
+  factory P2shAddress.fromScript32(
+      {required Script script,
+      P2shAddressType addressType = P2shAddressType.p2pkInP2sh32}) {
+    if (addressType.hashLength != 32) {
+      throw DartBitcoinPluginException("Invalid P2sh 32 address type.");
+    }
+    return P2shAddress.fromHash160(
+        addrHash: BytesUtils.toHexString(
+            QuickCrypto.sha256DoubleHash(script.toBytes())));
+  }
   P2shAddress.fromScript(
       {required super.script, this.type = P2shAddressType.p2pkInP2sh})
       : super.fromScript();
@@ -64,7 +87,7 @@ class P2shAddress extends LegacyAddress {
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
       throw DartBitcoinPluginException(
-          'network does not support ${type.value} address');
+          'network does not support ${type.value} address.');
     }
     return super.toAddress(network);
   }
@@ -77,6 +100,17 @@ class P2shAddress extends LegacyAddress {
     }
     return Script(script: ['OP_HASH160', addressProgram, 'OP_EQUAL']);
   }
+
+  @override
+  operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! LegacyAddress) return false;
+    if (runtimeType != other.runtimeType) return false;
+    return _addressProgram == other._addressProgram;
+  }
+
+  @override
+  int get hashCode => HashCodeGenerator.generateHashCode([_addressProgram]);
 }
 
 class P2pkhAddress extends LegacyAddress {
@@ -108,29 +142,38 @@ class P2pkhAddress extends LegacyAddress {
 }
 
 class P2pkAddress extends LegacyAddress {
-  P2pkAddress({required String publicKey}) : super._() {
+  P2pkAddress._(this.publicKey) : super._();
+  factory P2pkAddress({required String publicKey}) {
     final toBytes = BytesUtils.fromHexString(publicKey);
     if (!Secp256k1PublicKeyEcdsa.isValidBytes(toBytes)) {
-      throw const DartBitcoinPluginException('Invalid secp256k1 public key');
+      throw const DartBitcoinPluginException('Invalid Public key.');
     }
-    publicHex = publicKey;
+    return P2pkAddress._(StringUtils.strip0x(publicKey.toLowerCase()));
   }
-  late final String publicHex;
+  final String publicKey;
 
-  /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override
   Script toScriptPubKey() {
-    return Script(script: [publicHex, 'OP_CHECKSIG']);
+    return Script(script: [publicKey, 'OP_CHECKSIG']);
   }
 
   @override
   String toAddress(BasedUtxoNetwork network) {
     return _BitcoinAddressUtils.legacyToAddress(
         network: network,
-        addressProgram: _BitcoinAddressUtils.pubkeyToHash160(publicHex),
+        addressProgram: _BitcoinAddressUtils.pubkeyToHash160(publicKey),
         type: type);
   }
 
   @override
   final PubKeyAddressType type = PubKeyAddressType.p2pk;
+  @override
+  operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! P2pkAddress) return false;
+    return publicKey == other.publicKey;
+  }
+
+  @override
+  int get hashCode => HashCodeGenerator.generateHashCode([publicKey, type]);
 }

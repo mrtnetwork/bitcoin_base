@@ -1,5 +1,6 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
+import 'package:blockchain_utils/utils/numbers/utils/bigint_utils.dart';
 
 class TxRef implements UTXO {
   final String txHash;
@@ -32,13 +33,27 @@ class TxRef implements UTXO {
       blockHeight: json['block_height'],
       txInputN: json['tx_input_n'],
       txOutputN: json['tx_output_n'],
-      value: BigInt.from(json['value']),
+      value: BigintUtils.parse(json['value']),
       refBalance: json['ref_balance'],
       spent: json['spent'],
       confirmations: json['confirmations'],
       confirmed: DateTime.parse(json['confirmed']),
       script: json['script'],
     );
+  }
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      "tx_hash": txHash,
+      "block_height": blockHeight,
+      "tx_input_n": txInputN,
+      "value": value.toString(),
+      "tx_output_n": txOutputN,
+      "spent": spent,
+      "confirmations": confirmations,
+      "confirmed": confirmed.toString(),
+      "script": script
+    };
   }
 
   @override

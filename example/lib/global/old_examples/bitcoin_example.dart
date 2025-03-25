@@ -181,7 +181,7 @@ void _spendFromP2pkhTo10DifferentType() async {
   /// Calculate the size of the transaction in bytes.
   /// You can determine the transaction fee by multiplying the transaction size
   /// Formula: transaction fee = (transaction size in bytes * fee rate in bytes)
-  final size = tr.hasSegwit ? tr.getVSize() : tr.getSize();
+  final size = tr.hasWitness ? tr.getVSize() : tr.getSize();
 
   /// broadcast transaction
   /// https://mempool.space/testnet/tx/05411dce1a1c9e3f44b54413bdf71e7ab3eff1e2f94818a3568c39814c27b258
@@ -427,7 +427,7 @@ void _spendFrom10DifferentTypeToP2pkh() async {
   /// Calculate the size of the transaction in bytes.
   /// You can determine the transaction fee by multiplying the transaction size
   /// Formula: transaction fee = (transaction size in bytes * fee rate in bytes)
-  final size = tr.hasSegwit ? tr.getVSize() : tr.getSize();
+  final size = tr.hasWitness ? tr.getVSize() : tr.getSize();
 
   /// broadcast transaction
   /// https://mempool.space/testnet/tx/3e697e0993a6882689ff9b66ff73cdf53e4a3029664ec4a516da2b291e1cd8a6

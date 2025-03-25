@@ -43,6 +43,20 @@ abstract class SegwitAddress implements BitcoinBaseAddress {
   String pubKeyHash() {
     return _BitcoinAddressUtils.pubKeyHash(toScriptPubKey());
   }
+
+  @override
+  operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! SegwitAddress) return false;
+    if (runtimeType != other.runtimeType) return false;
+    if (type != other.type) return false;
+    return addressProgram == addressProgram &&
+        segwitVersion == other.segwitVersion;
+  }
+
+  @override
+  int get hashCode =>
+      HashCodeGenerator.generateHashCode([addressProgram, segwitVersion, type]);
 }
 
 class P2wpkhAddress extends SegwitAddress {
@@ -53,8 +67,6 @@ class P2wpkhAddress extends SegwitAddress {
       : super.fromProgram(
             segwitVersion: _BitcoinAddressUtils.segwitV0,
             addresType: SegwitAddressType.p2wpkh);
-  P2wpkhAddress.fromScript({required super.script})
-      : super.fromScript(segwitVersion: _BitcoinAddressUtils.segwitV0);
 
   /// returns the scriptPubKey of a P2WPKH witness script
   @override
@@ -74,8 +86,18 @@ class P2trAddress extends SegwitAddress {
       : super.fromProgram(
             segwitVersion: _BitcoinAddressUtils.segwitV1,
             addresType: SegwitAddressType.p2tr);
-  P2trAddress.fromScript({required super.script})
-      : super.fromScript(segwitVersion: _BitcoinAddressUtils.segwitV1);
+  P2trAddress.fromInternalKey({
+    required List<int> internalKey,
+    TaprootTree? treeScript,
+    List<int>? merkleRoot,
+  }) : super.fromProgram(
+            program: BytesUtils.toHexString(TaprootUtils.tweakPublicKey(
+                    internalKey,
+                    treeScript: treeScript,
+                    merkleRoot: merkleRoot)
+                .toXonly()),
+            segwitVersion: _BitcoinAddressUtils.segwitV1,
+            addresType: SegwitAddressType.p2tr);
 
   /// returns the scriptPubKey of a P2TR witness script
   @override

@@ -1,4 +1,4 @@
-import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/utils/enumerate.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
@@ -560,5 +560,57 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
       Bip49Coins.electraProtocolTestnet,
       Bip84Coins.electraProtocolTestnet
     ];
+  }
+}
+
+/// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
+class BonkcoinNetwork implements BasedUtxoNetwork {
+  /// Mainnet configuration with associated `CoinConf`.
+  static const BonkcoinNetwork mainnet =
+      BonkcoinNetwork._('bonkcoinMainnet', CoinsConf.dogecoinMainNet);
+
+  /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
+  @override
+  final CoinConf conf;
+
+  /// Constructor for creating a Dogecoin network with a specific configuration.
+  const BonkcoinNetwork._(this.value, this.conf);
+
+  @override
+  final String value;
+
+  /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get wifNetVer => conf.params.wifNetVer!;
+
+  /// Retrieves the Pay-to-Public-Key-Hash (P2PKH) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get p2pkhNetVer => conf.params.p2pkhNetVer!;
+
+  /// Retrieves the Pay-to-Script-Hash (P2SH) version bytes from the associated `CoinConf`.
+  @override
+  List<int> get p2shNetVer => [25];
+
+  /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
+  @override
+  String get p2wpkhHrp => throw const DartBitcoinPluginException(
+      'BonkcoinNetwork network does not support P2WPKH/P2WSH');
+
+  /// Checks if the current network is the mainnet.
+  @override
+  bool get isMainnet => this == BonkcoinNetwork.mainnet;
+
+  @override
+  final List<BitcoinAddressType> supportedAddress = const [
+    PubKeyAddressType.p2pk,
+    P2pkhAddressType.p2pkh,
+    P2shAddressType.p2pkhInP2sh,
+    P2shAddressType.p2pkInP2sh
+  ];
+
+  @override
+  List<BipCoins> get coins {
+    if (isMainnet) return [Bip44Coins.dogecoin, Bip49Coins.dogecoin];
+    return [Bip44Coins.dogecoinTestnet, Bip49Coins.dogecoinTestnet];
   }
 }

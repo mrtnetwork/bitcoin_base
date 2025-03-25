@@ -1,6 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
+import 'package:blockchain_utils/crypto/quick_crypto.dart';
+import 'package:blockchain_utils/helper/extensions/extensions.dart';
 import 'package:blockchain_utils/utils/utils.dart';
 import 'script.dart';
 
@@ -11,14 +14,36 @@ import 'script.dart';
 /// [scriptSig] the script that satisfies the locking conditions
 /// [sequence] the input sequence (for timelocks, RBF, etc.)
 class TxInput {
-  TxInput(
+  TxInput._(
       {required this.txId,
       required this.txIndex,
       Script? scriptSig,
       List<int>? sequance})
-      : sequence = List.unmodifiable(
-            sequance ?? BitcoinOpCodeConst.DEFAULT_TX_SEQUENCE),
+      : sequence =
+            (sequance ?? BitcoinOpCodeConst.defaultTxSequence).asImmutableBytes,
         scriptSig = scriptSig ?? Script(script: []);
+  factory TxInput(
+      {required String txId,
+      required int txIndex,
+      Script? scriptSig,
+      List<int>? sequance}) {
+    if (sequance != null &&
+        sequance.length != BitcoinOpCodeConst.sequenceLengthInBytes) {
+      throw DartBitcoinPluginException(
+          "Invalid sequence length: expected ${BitcoinOpCodeConst.sequenceLengthInBytes}, but got ${sequance.length}.");
+    }
+    final txBytes = BytesUtils.tryFromHexString(txId);
+    if (txBytes?.length != QuickCrypto.sha256DigestSize) {
+      throw DartBitcoinPluginException(
+          "Invalid transaction ID: Expected ${QuickCrypto.sha256DigestSize} bytes, but received a different length.",
+          details: {"transactionID": txId});
+    }
+    return TxInput._(
+        txId: StringUtils.strip0x(txId.toLowerCase()),
+        txIndex: txIndex,
+        sequance: sequance,
+        scriptSig: scriptSig);
+  }
   TxInput copyWith(
       {String? txId, int? txIndex, Script? scriptSig, List<int>? sequence}) {
     return TxInput(
@@ -34,7 +59,7 @@ class TxInput {
   List<int> sequence;
 
   /// creates a copy of the object
-  TxInput copy() {
+  TxInput clone() {
     return TxInput(
         txId: txId, txIndex: txIndex, scriptSig: scriptSig, sequance: sequence);
   }
@@ -42,10 +67,8 @@ class TxInput {
   /// serializes TxInput to bytes
   List<int> toBytes() {
     final txidBytes = BytesUtils.fromHexString(txId).reversed.toList();
-
     final txoutBytes =
         IntUtils.toBytes(txIndex, length: 4, byteOrder: Endian.little);
-    // writeUint32LE(txIndex, txoutBytes);
     final scriptSigBytes = scriptSig.toBytes();
     final scriptSigLengthVarint = IntUtils.encodeVarint(scriptSigBytes.length);
     final data = List<int>.from([
@@ -59,7 +82,7 @@ class TxInput {
   }
 
   static Tuple<TxInput, int> deserialize(
-      {required List<int> bytes, int cursor = 0, bool hasSegwit = false}) {
+      {required List<int> bytes, int cursor = 0}) {
     final inpHash = bytes.sublist(cursor, cursor + 32).reversed.toList();
     cursor += 32;
     final outputN = IntUtils.fromBytes(bytes.sublist(cursor, cursor + 4),
@@ -75,17 +98,24 @@ class TxInput {
         TxInput(
             txId: BytesUtils.toHexString(inpHash),
             txIndex: outputN,
-            scriptSig: Script.deserialize(
-                bytes: unlockingScript, hasSegwit: hasSegwit),
+            scriptSig: Script.deserialize(bytes: unlockingScript),
             sequance: sequenceNumberData),
         cursor);
+  }
+
+  List<int> txIdBytes() {
+    return BytesUtils.fromHexString(txId).reversed.toList();
+  }
+
+  int sequenceAsNumber() {
+    return IntUtils.fromBytes(sequence, byteOrder: Endian.little);
   }
 
   Map<String, dynamic> toJson() {
     return {
       'txid': txId,
       'txIndex': txIndex,
-      'scriptSig': scriptSig.script,
+      'scriptSig': scriptSig.toJson(),
       'sequance': BytesUtils.toHexString(sequence),
     };
   }
@@ -94,4 +124,17 @@ class TxInput {
   String toString() {
     return 'TxInput{txId: $txId, txIndex: $txIndex, scriptSig: $scriptSig, sequence: ${BytesUtils.toHexString(sequence)}}';
   }
+
+  @override
+  operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! TxInput) return false;
+    return txIndex == other.txIndex &&
+        txId == other.txId &&
+        BytesUtils.bytesEqual(sequence, other.sequence);
+  }
+
+  @override
+  int get hashCode =>
+      HashCodeGenerator.generateHashCode([txIndex, txId, sequence]);
 }

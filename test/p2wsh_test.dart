@@ -11,11 +11,11 @@ void main() {
         netVersion: BitcoinNetwork.testnet.wifNetVer);
 
     final p2wshScript = Script(script: [
-      'OP_2',
+      BitcoinOpcode.op2,
       sk1.getPublic().toHex(),
       sk2.getPublic().toHex(),
-      'OP_2',
-      'OP_CHECKMULTISIG'
+      BitcoinOpcode.op2,
+      BitcoinOpcode.opCheckMultiSig
     ]);
 
     final p2wshAddr = P2wshAddress.fromScript(script: p2wshScript);
@@ -79,7 +79,9 @@ void main() {
     });
     test('test2', () {
       var tx = BtcTransaction(
-          inputs: [txinSpend], outputs: [txout2], hasSegwit: true);
+        inputs: [txinSpend],
+        outputs: [txout2],
+      );
       final digit1 = tx.getTransactionSegwitDigit(
           txInIndex: 0, script: p2wshRedeemScript, amount: txinSpendAmount);
       final sig1 = sk1.signInput(digit1);
@@ -93,9 +95,9 @@ void main() {
     });
     test('test3', () {
       var tx = BtcTransaction(
-          inputs: [txin1Multiple, txin2Multiple, txin3Multiple],
-          outputs: [output1Multiple, output2Multiple, output3Multiple],
-          hasSegwit: true);
+        inputs: [txin1Multiple, txin2Multiple, txin3Multiple],
+        outputs: [output1Multiple, output2Multiple, output3Multiple],
+      );
       final digit1 = tx.getTransactionDigest(
           txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
       final sig1 = sk1.signInput(digit1);

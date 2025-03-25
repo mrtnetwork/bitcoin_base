@@ -282,7 +282,7 @@ void main() async {
 
   // we check if transaction is segwit or not
   // When one of the input UTXO addresses is SegWit, the transaction is considered SegWit.
-  final isSegwitTr = transaction.hasSegwit;
+  final isSegwitTr = transaction.hasWitness;
 
   // transaction id
   final transactionId = transaction.txId();

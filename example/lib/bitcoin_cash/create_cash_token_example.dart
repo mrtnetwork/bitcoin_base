@@ -64,8 +64,6 @@ void main() async {
     /// if we dont have utxos with index 0 we must create them with some estimate transaction before create transaction
     return;
   }
-  // print("vout $vout0Hash");
-  // return;
   final bchTransaction = ForkedTransactionBuilder(
       outPuts: [
         BitcoinTokenOutput(

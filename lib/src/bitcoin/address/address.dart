@@ -8,8 +8,10 @@
 // - Enhanced functionality for improved handling of addresses across diverse networks.
 library;
 
-import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
+import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
+import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/utils/enumerate.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 part 'core.dart';

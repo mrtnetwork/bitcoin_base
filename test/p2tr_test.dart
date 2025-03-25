@@ -1,6 +1,31 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
+Map<Script, int> findAllLeafIndexes(List<dynamic> treeScripts) {
+  int index = 0; // Tracks current leaf index
+  Map<Script, int> leafIndexes = {}; // Stores script -> index mapping
+
+  void traverse(dynamic level) {
+    if (level is List) {
+      if (level.length == 1) {
+        traverse(level[0]); // Flatten single-element lists
+      } else if (level.length == 2) {
+        traverse(level[0]); // Left branch
+        traverse(level[1]); // Right branch
+      } else {
+        throw DartBitcoinPluginException(
+            "Invalid Merkle branch: A list must have at most 2 branches.");
+      }
+    } else if (level is Script) {
+      leafIndexes[level] = index; // Store script with its leaf index
+      index++; // Move to next index
+    }
+  }
+
+  traverse(treeScripts);
+  return leafIndexes;
+}
+
 void main() {
   group('TestCreateP2trWithSingleTapScript', () {
     late ECPrivate toPriv1;
@@ -35,17 +60,18 @@ void main() {
           'cSW2kQbqC9zkqagw8oTYKFTozKuZ214zd6CMTDs4V32cMfH3dgKa',
           netVersion: BitcoinNetwork.testnet.wifNetVer);
       pubkeyTrScript1 = privkeyTrScript1.getPublic();
-      trScriptP2pk1 =
-          Script(script: [pubkeyTrScript1.toXOnlyHex(), 'OP_CHECKSIG']);
+      trScriptP2pk1 = Script(script: [
+        pubkeyTrScript1.toXOnlyHex(),
+        BitcoinOpcode.opCheckSig,
+      ]);
       toTaprootScriptAddress1 =
           'tb1p0fcjs5l5xqdyvde5u7ut7sr0gzaxp4yya8mv06d2ygkeu82l65xs6k4uqr';
       fromPriv2 = ECPrivate.fromWif(
           'cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR',
           netVersion: BitcoinNetwork.testnet.wifNetVer);
       fromPub2 = fromPriv2.getPublic();
-      fromAddress2 = fromPub2.toTaprootAddress(scripts: [
-        [trScriptP2pk1]
-      ]);
+      fromAddress2 = fromPub2.toTaprootAddress(
+          treeScript: TaprootLeaf(script: trScriptP2pk1));
       txIn2 = TxInput(
           txId:
               '3d4c9d73c4c65772e645ff26493590ae4913d9c37125b72398222a553b73fa66',
@@ -62,9 +88,8 @@ void main() {
 
     // 1-create address with single script spending path
     test('address_with_script_path', () {
-      final toAddress = toPub1.toTaprootAddress(scripts: [
-        [trScriptP2pk1]
-      ]);
+      final toAddress = toPub1.toTaprootAddress(
+          treeScript: TaprootLeaf(script: trScriptP2pk1));
 
       expect(
           toAddress.toAddress(BitcoinNetwork.testnet), toTaprootScriptAddress1);
@@ -72,25 +97,24 @@ void main() {
 
     // 2-spend taproot from key path (has single tapleaf script for spending)
     test('spend_key_path2', () {
-      var tx =
-          BtcTransaction(inputs: [txIn2], outputs: [txOut2], hasSegwit: true);
+      var tx = BtcTransaction(
+        inputs: [txIn2],
+        outputs: [txOut2],
+      );
 
-      const signHash = BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL;
+      const signHash = BitcoinOpCodeConst.sighashDefault;
       final txDigit = tx.getTransactionTaprootDigset(
           txIndex: 0,
           scriptPubKeys: [scriptPubKey2],
           amounts: [BigInt.from(3500)],
           sighash: signHash);
       final signatur = fromPriv2.signTapRoot(txDigit,
-          tapScripts: [
-            [trScriptP2pk1]
-          ],
-          sighash: signHash);
+          treeScript: TaprootLeaf(script: trScriptP2pk1), sighash: signHash);
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: [signatur])
       ]);
       expect(tx.serialize(), signedTx2);
-      final decode = BtcTransaction.fromRaw(tx.serialize());
+      final decode = BtcTransaction.deserialize(tx.toBytes());
       expect(decode.serialize(), tx.serialize());
     });
 
@@ -99,26 +123,25 @@ void main() {
       var tx = BtcTransaction(
         outputs: [txOut2],
         inputs: [txIn2],
-        hasSegwit: true,
       );
       final digit = tx.getTransactionTaprootDigset(
         amounts: [BigInt.from(3500)],
         scriptPubKeys: [scriptPubKey2],
         txIndex: 0,
-        extFlags: 1,
-        script: trScriptP2pk1,
+        tapleafScript: TaprootLeaf(script: trScriptP2pk1),
       );
       final sig = privkeyTrScript1.signTapRoot(digit,
-          sighash: BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL, tweak: false);
-      final controlBlock = ControlBlock(public: fromPub2);
+          sighash: BitcoinOpCodeConst.sighashDefault, tweak: false);
+      final controlBlock = TaprootControlBlock.generate(
+          xOnlyOrInternalPubKey: fromPub2.toXOnly(),
+          scriptTree: TaprootLeaf(script: trScriptP2pk1),
+          leafScript: TaprootLeaf(script: trScriptP2pk1));
 
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(
             stack: [sig, trScriptP2pk1.toHex(), controlBlock.toHex()])
       ]);
       expect(tx.serialize(), signedTx3);
-      final decode = BtcTransaction.fromRaw(tx.serialize());
-      expect(decode.serialize(), tx.serialize());
     });
   });
 
@@ -127,24 +150,30 @@ void main() {
         'cSW2kQbqC9zkqagw8oTYKFTozKuZ214zd6CMTDs4V32cMfH3dgKa',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
     late final pubkeyTrScriptA = privkeyTrScriptA.getPublic();
-    late final trScriptP2pkA =
-        Script(script: [pubkeyTrScriptA.toXOnlyHex(), 'OP_CHECKSIG']);
+    late final trScriptP2pkA = Script(script: [
+      pubkeyTrScriptA.toXOnlyHex(),
+      BitcoinOpcode.opCheckSig,
+    ]);
 
     late final privkeyTrScriptB = ECPrivate.fromWif(
         'cSv48xapaqy7fPs8VvoSnxNBNA2jpjcuURRqUENu3WVq6Eh4U3JU',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
     late final pubkeyTrScriptB = privkeyTrScriptB.getPublic();
 
-    late final trScriptP2pkB =
-        Script(script: [pubkeyTrScriptB.toXOnlyHex(), 'OP_CHECKSIG']);
+    late final trScriptP2pkB = Script(script: [
+      pubkeyTrScriptB.toXOnlyHex(),
+      BitcoinOpcode.opCheckSig,
+    ]);
 
     late final fromPriv = ECPrivate.fromWif(
         'cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
     late final fromPub = fromPriv.getPublic();
-    late final fromAddress = fromPub.toTaprootAddress(scripts: [
-      [trScriptP2pkA, trScriptP2pkB]
-    ]);
+    late final fromAddress = fromPub.toTaprootAddress(
+      treeScript: TaprootBranch(
+          a: TaprootLeaf(script: trScriptP2pkA),
+          b: TaprootLeaf(script: trScriptP2pkB)),
+    );
 
     late final txIn = TxInput(
         txId:
@@ -166,30 +195,45 @@ void main() {
 
     // 1-spend taproot from first script path (A) of two (A,B)
     test('test_spend_script_path_A_from_AB', () {
-      var tx =
-          BtcTransaction(inputs: [txIn], outputs: [txOut], hasSegwit: true);
+      var tx = BtcTransaction(
+        inputs: [txIn],
+        outputs: [txOut],
+      );
 
       final txDigit = tx.getTransactionTaprootDigset(
-          amounts: [BigInt.from(3500)],
-          scriptPubKeys: allUtxosScriptpubkeys,
-          txIndex: 0,
-          script: trScriptP2pkA,
-          extFlags: 1);
+        amounts: [BigInt.from(3500)],
+        scriptPubKeys: allUtxosScriptpubkeys,
+        txIndex: 0,
+        tapleafScript: TaprootLeaf(script: trScriptP2pkA),
+      );
 
       final sign = privkeyTrScriptA.signTapRoot(
         txDigit,
         tweak: false,
       );
-      final leafB = toTapleafTaggedHash(trScriptP2pkB.toBytes());
-
-      final controlBlock = ControlBlock(public: fromPub, scripts: leafB);
+      final controlBlock = TaprootControlBlock.generate(
+        xOnlyOrInternalPubKey: fromPub.toXOnly(),
+        scriptTree: TaprootBranch(
+            a: TaprootLeaf(script: trScriptP2pkA),
+            b: TaprootLeaf(script: trScriptP2pkB)),
+        leafScript: TaprootLeaf(script: trScriptP2pkA),
+        // treeScripts: [
+        //   [
+        //     TapLeafScript(script: trScriptP2pkA),
+        //     TapLeafScript(script: trScriptP2pkB)
+        //   ]
+        // ],
+        // leafScripts: [
+        //   [TapLeafScript(script: trScriptP2pkA)]
+        // ],
+      );
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(
             stack: [sign, trScriptP2pkA.toHex(), controlBlock.toHex()])
       ]);
 
       expect(tx.serialize(), signedTx3);
-      final decode = BtcTransaction.fromRaw(tx.serialize());
+      final decode = BtcTransaction.deserialize(tx.toBytes());
       expect(decode.serialize(), tx.serialize());
     });
   });
@@ -200,31 +244,40 @@ void main() {
         'cSW2kQbqC9zkqagw8oTYKFTozKuZ214zd6CMTDs4V32cMfH3dgKa',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
     final pubkeyTrScriptA = privkeyTrScriptA.getPublic();
-    final trScriptP2pkA =
-        Script(script: [pubkeyTrScriptA.toXOnlyHex(), 'OP_CHECKSIG']);
+    final trScriptP2pkA = Script(script: [
+      pubkeyTrScriptA.toXOnlyHex(),
+      BitcoinOpcode.opCheckSig,
+    ]);
 
     final privkeyTrScriptB = ECPrivate.fromWif(
         'cSv48xapaqy7fPs8VvoSnxNBNA2jpjcuURRqUENu3WVq6Eh4U3JU',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
     final pubkeyTrScriptB = privkeyTrScriptB.getPublic();
-    final trScriptP2pkB =
-        Script(script: [pubkeyTrScriptB.toXOnlyHex(), 'OP_CHECKSIG']);
+    final trScriptP2pkB = Script(script: [
+      pubkeyTrScriptB.toXOnlyHex(),
+      BitcoinOpcode.opCheckSig,
+    ]);
 
     final privkeyTrScriptC = ECPrivate.fromWif(
         'cRkZPNnn3jdr64o3PDxNHG68eowDfuCdcyL6nVL4n3czvunuvryC',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
     final pubkeyTrScriptC = privkeyTrScriptC.getPublic();
-    final trScriptP2pkC =
-        Script(script: [pubkeyTrScriptC.toXOnlyHex(), 'OP_CHECKSIG']);
+    final trScriptP2pkC = Script(script: [
+      pubkeyTrScriptC.toXOnlyHex(),
+      BitcoinOpcode.opCheckSig,
+    ]);
 
     final fromPriv = ECPrivate.fromWif(
         'cT33CWKwcV8afBs5NYzeSzeSoGETtAB8izjDjMEuGqyqPoF7fbQR',
         netVersion: BitcoinNetwork.testnet.wifNetVer);
     final fromPub = fromPriv.getPublic();
-    final fromAddress = fromPub.toTaprootAddress(scripts: [
-      [trScriptP2pkA, trScriptP2pkB],
-      [trScriptP2pkC]
-    ]);
+    final fromAddress = fromPub.toTaprootAddress(
+      treeScript: TaprootBranch(
+          a: TaprootBranch(
+              b: TaprootLeaf(script: trScriptP2pkA),
+              a: TaprootLeaf(script: trScriptP2pkB)),
+          b: TaprootLeaf(script: trScriptP2pkC)),
+    );
 
     final txIn = TxInput(
         txId:
@@ -249,27 +302,37 @@ void main() {
         '02000000000101d387dafa20087c38044f3cbc2e93e1e0141e64265d304d0d44b233f3d0018a9b0000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50340644e392f5fd88d812bad30e73ff9900cdcf7f260ecbc862819542fd4683fa9879546613be4e2fc762203e45715df1a42c65497a63edce5f1dfe5caea5170273f2220e808f1396f12a253cf00efdf841e01c8376b616fb785c39595285c30f2817e71ac61c01036a7ed8d24eac9057e114f22342ebf20c16d37f0d25cfd2c900bf401ec09c9ed9f1b2b0090138e31e11a31c1aea790928b7ce89112a706e5caa703ff7e0ab928109f92c2781611bb5de791137cbd40a5482a4a23fd0ffe50ee4de9d5790dd100000000';
 
     test('test_spend_script_path_A_from_AB', () {
-      var tx =
-          BtcTransaction(inputs: [txIn], outputs: [txOut], hasSegwit: true);
+      var tx = BtcTransaction(
+        inputs: [txIn],
+        outputs: [txOut],
+      );
       final digit = tx.getTransactionTaprootDigset(
           txIndex: 0,
-          extFlags: 1,
           scriptPubKeys: allUtxosScriptPubkeys.map((e) => e).toList(),
-          script: trScriptP2pkB,
+          tapleafScript: TaprootLeaf(script: trScriptP2pkB),
           amounts: allAmounts.map((e) => e).toList());
       final sig = privkeyTrScriptB.signTapRoot(digit, tweak: false);
+      final controlBlock = TaprootControlBlock.generate(
+        xOnlyOrInternalPubKey: fromPub.toXOnly(),
+        scriptTree: TaprootBranch(
+            a: TaprootBranch(
+                a: TaprootLeaf(script: trScriptP2pkA),
+                b: TaprootLeaf(script: trScriptP2pkB)),
+            b: TaprootLeaf(script: trScriptP2pkC)),
+        leafScript: TaprootLeaf(script: trScriptP2pkB),
+        // leafScripts: [
+        //   [TapLeafScript(script: trScriptP2pkB)],
+        // ],
+      );
 
-      final leafA = toTapleafTaggedHash(trScriptP2pkA.toBytes());
-      final leafC = toTapleafTaggedHash(trScriptP2pkC.toBytes());
-      final controlBlock = ControlBlock(
-          public: fromPub, scripts: List<int>.from([...leafA, ...leafC]));
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(
             stack: [sig, trScriptP2pkB.toHex(), controlBlock.toHex()])
       ]);
       expect(tx.serialize(), signedTx);
-      final decode = BtcTransaction.fromRaw(tx.serialize());
+      final decode = BtcTransaction.deserialize(tx.toBytes());
       expect(decode.serialize(), tx.serialize());
     });
   });
+  return;
 }

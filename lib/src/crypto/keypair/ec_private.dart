@@ -1,5 +1,10 @@
-import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
+import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
+import 'package:bitcoin_base/src/exception/exception.dart';
+import 'package:bitcoin_base/src/models/network.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
+
+import 'ec_public.dart';
 
 /// Represents an ECDSA private key.
 class ECPrivate {
@@ -56,46 +61,63 @@ class ECPrivate {
 
   /// sign transaction digest  and returns the signature.
   String signInput(List<int> txDigest,
-      {int sigHash = BitcoinOpCodeConst.SIGHASH_ALL}) {
+      {int? sigHash = BitcoinOpCodeConst.sighashAll}) {
     final btcSigner = BitcoinSigner.fromKeyBytes(toBytes());
-    var signature = btcSigner.signTransaction(txDigest);
-    signature = <int>[...signature, sigHash];
+    List<int> signature = btcSigner.signTransaction(txDigest);
+    if (sigHash != null) {
+      signature = <int>[...signature, sigHash];
+    }
     return BytesUtils.toHexString(signature);
   }
 
   String signSchnorr(List<int> txDigest,
-      {int sighash = BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL}) {
+      {int sighash = BitcoinOpCodeConst.sighashDefault}) {
     final btcSigner = BitcoinSigner.fromKeyBytes(toBytes());
-    var signatur = btcSigner.signSchnorrTransaction(txDigest,
+    var signature = btcSigner.signSchnorrTransaction(txDigest,
         tapScripts: [], tweak: false);
-    if (sighash != BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL) {
-      signatur = <int>[...signatur, sighash];
+    if (sighash != BitcoinOpCodeConst.sighashDefault) {
+      signature = <int>[...signature, sighash];
     }
-    return BytesUtils.toHexString(signatur);
+    return BytesUtils.toHexString(signature);
   }
 
-  /// sign taproot transaction digest and returns the signature.
+  /// Signs a Taproot transaction digest and returns the signature.
+  ///
+  /// - [txDigest]: The transaction digest to be signed.
+  /// - [sighash]: The sighash type (default: `TAPROOT_SIGHASH_ALL`).
+  /// - [treeScript]: Taproot script tree for Tweaking with public key.
+  /// - [merkleRoot]: Merkle root for the Taproot tree. If provided, this overrides the default computation of the Merkle root from [treeScript].
+  /// - [tweak]: If `true`, the internal key is tweaked, either with or without [treeScript] or [merkleRoot], before signing.
   String signTapRoot(List<int> txDigest,
-      {int sighash = BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL,
-      List<List<Script>> tapScripts = const [],
+      {int sighash = BitcoinOpCodeConst.sighashDefault,
+      TaprootTree? treeScript,
+      List<int>? merkleRoot,
       bool tweak = true}) {
-    assert(() {
-      if (!tweak && tapScripts.isNotEmpty) {
-        return false;
-      }
-      return true;
-    }(),
-        'When the tweak is false, the `tapScripts` are ignored, to use the tap script path, you need to consider the tweak value to be true.');
-    final tapScriptBytes = !tweak
-        ? []
-        : tapScripts.map((e) => e.map((e) => e.toBytes()).toList()).toList();
-    final btcSigner = BitcoinSigner.fromKeyBytes(toBytes());
-    var signatur = btcSigner.signSchnorrTransaction(txDigest,
-        tapScripts: tapScriptBytes, tweak: tweak);
-    if (sighash != BitcoinOpCodeConst.TAPROOT_SIGHASH_ALL) {
-      signatur = <int>[...signatur, sighash];
+    if (!tweak && treeScript != null) {
+      throw DartBitcoinPluginException(
+          "Invalid parameters: 'tweak' must be true when using 'treeScript'.");
     }
-    return BytesUtils.toHexString(signatur);
+    final btcSigner = BitcoinSigner.fromKeyBytes(toBytes());
+    List<int> signature = btcSigner.signSchnorrTx(txDigest,
+        tweak: tweak
+            ? TaprootUtils.calculateTweek(getPublic().toXOnly(),
+                treeScript: merkleRoot != null ? null : treeScript,
+                merkleRoot: merkleRoot)
+            : null);
+    if (sighash != BitcoinOpCodeConst.sighashDefault) {
+      signature = <int>[...signature, sighash];
+    }
+    return BytesUtils.toHexString(signature);
+  }
+
+  /// Signs a Taproot transaction digest and returns the signature.
+  ///
+  /// - [txDigest]: The transaction digest to be signed.
+  /// - [tweak]: Optional public key tweak to be applied when signing.
+  List<int> signBtcSchnorr(List<int> txDigest, {List<int>? tweak}) {
+    final btcSigner = BitcoinSigner.fromKeyBytes(toBytes());
+    List<int> signature = btcSigner.signSchnorrTx(txDigest, tweak: tweak);
+    return signature;
   }
 
   static ECPrivate random() {

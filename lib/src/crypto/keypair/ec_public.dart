@@ -1,12 +1,13 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
+import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 typedef PublicKeyType = PubKeyModes;
 
 class ECPublic {
-  final Bip32PublicKey publicKey;
+  final Secp256k1PublicKeyEcdsa publicKey;
   const ECPublic._(this.publicKey);
 
   factory ECPublic.fromBip32(Bip32PublicKey publicKey) {
@@ -14,13 +15,13 @@ class ECPublic {
       throw const DartBitcoinPluginException(
           'invalid public key curve for bitcoin');
     }
-    return ECPublic._(publicKey);
+    return ECPublic._(publicKey.pubKey as Secp256k1PublicKeyEcdsa);
   }
+  ProjectiveECCPoint get point => publicKey.point.cast();
 
   /// Constructs an ECPublic key from a byte representation.
   factory ECPublic.fromBytes(List<int> public) {
-    final publicKey = Bip32PublicKey.fromBytes(public, Bip32KeyData(),
-        Bip32Const.mainNetKeyNetVersions, EllipticCurveTypes.secp256k1);
+    final publicKey = Secp256k1PublicKeyEcdsa.fromBytes(public);
     return ECPublic._(publicKey);
   }
 
@@ -32,30 +33,26 @@ class ECPublic {
   /// toHex converts the ECPublic key to a hex-encoded string.
   /// If 'compressed' is true, the key is in compressed format.
   String toHex({PublicKeyType mode = PublicKeyType.compressed}) {
-    if (mode.isCompressed) {
-      return BytesUtils.toHexString(publicKey.compressed);
-    }
-    return BytesUtils.toHexString(publicKey.uncompressed);
+    return BytesUtils.toHexString(toBytes(mode: mode));
   }
 
-  /// _toHash160 computes the RIPEMD160 hash of the ECPublic key.
+  /// toHash160 computes the RIPEMD160 hash of the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
-  List<int> _toHash160({PublicKeyType mode = PublicKeyType.compressed}) {
+  List<int> toHash160({PublicKeyType mode = PublicKeyType.compressed}) {
     final bytes = BytesUtils.fromHexString(toHex(mode: mode));
     return QuickCrypto.hash160(bytes);
   }
 
   /// toHash160 computes the RIPEMD160 hash of the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
-  String toHash160({PublicKeyType mode = PublicKeyType.compressed}) {
-    final bytes = BytesUtils.fromHexString(toHex(mode: mode));
-    return BytesUtils.toHexString(QuickCrypto.hash160(bytes));
+  String toHash160Hex({PublicKeyType mode = PublicKeyType.compressed}) {
+    return BytesUtils.toHexString(toHash160(mode: mode));
   }
 
   /// toAddress generates a P2PKH (Pay-to-Public-Key-Hash) address from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
   P2pkhAddress toAddress({PublicKeyType mode = PublicKeyType.compressed}) {
-    final h16 = _toHash160(mode: mode);
+    final h16 = toHash160(mode: mode);
     final toHex = BytesUtils.toHexString(h16);
     return P2pkhAddress.fromHash160(addrHash: toHex);
   }
@@ -63,7 +60,7 @@ class ECPublic {
   /// toSegwitAddress generates a P2WPKH (Pay-to-Witness-Public-Key-Hash) SegWit address
   /// from the ECPublic key. If 'compressed' is true, the key is in compressed format.
   P2wpkhAddress toSegwitAddress() {
-    final h16 = _toHash160();
+    final h16 = toHash160();
     final toHex = BytesUtils.toHexString(h16);
 
     return P2wpkhAddress.fromProgram(program: toHex);
@@ -72,15 +69,13 @@ class ECPublic {
   /// toP2pkAddress generates a P2PK (Pay-to-Public-Key) address from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
   P2pkAddress toP2pkAddress({PublicKeyType mode = PublicKeyType.compressed}) {
-    final h = toHex(mode: mode);
-    return P2pkAddress(publicKey: h);
+    return P2pkAddress(publicKey: toHex(mode: mode));
   }
 
   /// toRedeemScript generates a redeem script from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
   Script toRedeemScript({PublicKeyType mode = PublicKeyType.compressed}) {
-    final redeem = toHex(mode: mode);
-    return Script(script: [redeem, 'OP_CHECKSIG']);
+    return Script(script: [toHex(mode: mode), 'OP_CHECKSIG']);
   }
 
   /// toP2pkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
@@ -117,12 +112,14 @@ class ECPublic {
         script: script, type: P2shAddressType.p2pkInP2sh);
   }
 
-  /// ToTaprootAddress generates a P2TR(Taproot) address from the ECPublic key
+  /// ToTaprootAddre.
+  /// ss generates a P2TR(Taproot) address from the ECPublic key
   /// and an optional script. The 'script' parameter can be used to specify
   /// custom spending conditions.
-  P2trAddress toTaprootAddress({List<List<Script>>? scripts}) {
-    final pubKey = toTapRotHex(script: scripts);
-    return P2trAddress.fromProgram(program: pubKey);
+  P2trAddress toTaprootAddress({TaprootTree? treeScript}) {
+    return P2trAddress.fromInternalKey(
+        internalKey: publicKey.point.cast<ProjectiveECCPoint>().toXonly(),
+        treeScript: treeScript);
   }
 
   /// toP2wpkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
@@ -155,34 +152,31 @@ class ECPublic {
         script: p2sh.toScriptPubKey(), type: P2shAddressType.p2wshInP2sh);
   }
 
-  /// toBytes returns the uncompressed byte representation of the ECPublic key.
-  List<int> toBytes({bool whitPrefix = true}) {
-    if (!whitPrefix) {
-      return publicKey.uncompressed.sublist(1);
+  List<int> toBytes({PubKeyModes mode = PubKeyModes.uncompressed}) {
+    switch (mode) {
+      case PubKeyModes.uncompressed:
+        return publicKey.uncompressed;
+      case PubKeyModes.compressed:
+        return publicKey.compressed;
     }
-    return publicKey.uncompressed;
-  }
-
-  /// toCompressedBytes returns the compressed byte representation of the ECPublic key.
-  List<int> toCompressedBytes() {
-    return publicKey.compressed;
   }
 
   /// returns the x coordinate only as hex string after tweaking (needed for taproot)
-  String toTapRotHex({List<List<Script>>? script}) {
-    final scriptBytes =
-        script?.map((e) => e.map((e) => e.toBytes()).toList()).toList();
-    final pubKey = P2TRUtils.tweakPublicKey(
-        publicKey.point as ProjectiveECCPoint,
-        script: scriptBytes);
-    return BytesUtils.toHexString(
-        BigintUtils.toBytes(pubKey.x, length: publicKey.point.curve.baselen));
+  String tweakPublicKey({TaprootTree? treeScript}) {
+    final pubKey = TaprootUtils.tweakPublicKey(
+        toBytes(mode: PubKeyModes.compressed),
+        treeScript: treeScript);
+    return BytesUtils.toHexString(pubKey.toXonly());
+  }
+
+  List<int> toXOnly() {
+    return publicKey.point.cast<ProjectiveECCPoint>().toXonly();
   }
 
   /// toXOnlyHex extracts and returns the x-coordinate (first 32 bytes) of the ECPublic key
   /// as a hexadecimal string.
   String toXOnlyHex() {
-    return BytesUtils.toHexString(publicKey.uncompressed.sublist(1, 33));
+    return BytesUtils.toHexString(toXOnly());
   }
 
   /// returns true if the message was signed with this public key's
@@ -200,9 +194,24 @@ class ECPublic {
 
   /// returns true if the message was signed with this public key's
   bool verifySchnorrTransactionSignature(List<int> message, List<int> signature,
-      {List<dynamic>? tapleafScripts, bool isTweak = true}) {
+      {List<List<Script>> tapleafScripts = const [], bool isTweak = true}) {
     final verifyKey = BitcoinVerifier.fromKeyBytes(toBytes());
+    final tapScriptBytes = !isTweak
+        ? []
+        : tapleafScripts
+            .map((e) => e.map((e) => e.toBytes()).toList())
+            .toList();
     return verifyKey.verifySchnorr(message, signature,
-        tapleafScripts: tapleafScripts, isTweak: isTweak);
+        tapleafScripts: tapScriptBytes, isTweak: isTweak);
   }
+
+  @override
+  operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! ECPublic) return false;
+    return other.publicKey == publicKey;
+  }
+
+  @override
+  int get hashCode => publicKey.hashCode;
 }

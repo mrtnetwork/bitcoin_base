@@ -262,12 +262,12 @@ class CashToken {
   final List<int> commitment;
   final int bitfield;
 
-  CashToken.noValidate(
+  CashToken._(
       {required this.category,
       required this.amount,
       required List<int> commitment,
       required this.bitfield})
-      : commitment = List<int>.unmodifiable(commitment);
+      : commitment = commitment.asImmutableBytes;
   factory CashToken(
       {required String category,
       BigInt? amount,
@@ -300,18 +300,18 @@ class CashToken {
       throw const DartBitcoinPluginException(
           'Invalid cash token: the bitfield indicates an commitment, but the commitment is null or empty.');
     }
-    return CashToken.noValidate(
-        category: category,
+    return CashToken._(
+        category: StringUtils.strip0x(category.toLowerCase()),
         amount: amount ?? BigInt.zero,
         commitment: commitment ?? const [],
         bitfield: bitfield);
   }
-  static Tuple<CashToken?, int> fromRaw(List<int> scriptBytes) {
+  static Tuple<CashToken?, int> deserialize(List<int> scriptBytes) {
     if (scriptBytes.isEmpty ||
         scriptBytes[0] != CashTokenUtils.cashTokenPrefix) {
       return const Tuple(null, 0);
     }
-    var cursor = 1;
+    int cursor = 1;
     final id =
         scriptBytes.sublist(cursor, cursor + CashTokenUtils.idBytesLength);
 
@@ -422,6 +422,19 @@ class CashToken {
     };
   }
 
+  @override
+  operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! CashToken) return false;
+    return category == other.category &&
+        amount == other.amount &&
+        bitfield == other.bitfield &&
+        BytesUtils.bytesEqual(commitment, other.commitment);
+  }
+
+  @override
+  int get hashCode => HashCodeGenerator.generateBytesHashCode(
+      commitment, [category, amount, bitfield]);
   @override
   String toString() {
     return 'CashToken{bitfield: $bitfield, commitment: $commitmentInHex, amount: $amount, category: $category}';

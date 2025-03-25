@@ -1,5 +1,5 @@
-import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
+import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/provider/constant/constant.dart';
 
 enum APIType { mempool, blockCypher }
@@ -82,15 +82,15 @@ class APIConfig {
         blockHeight: '$baseUrl/blocks/###');
   }
 
-  factory APIConfig.mempool(BasedUtxoNetwork network) {
-    String baseUrl;
+  factory APIConfig.mempool(BasedUtxoNetwork network, {String? baseUrl}) {
     switch (network) {
       case BitcoinNetwork.mainnet:
-        baseUrl = BtcApiConst.mempoolMainBaseURL;
+        baseUrl ??= BtcApiConst.mempoolMainBaseURL;
         break;
       case BitcoinNetwork.testnet:
-        baseUrl = BtcApiConst.mempoolBaseURL;
+        baseUrl ??= BtcApiConst.mempoolBaseURL;
         break;
+
       default:
         throw DartBitcoinPluginException(
             'mempool does not support ${network.conf.coinName.name}');

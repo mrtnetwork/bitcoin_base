@@ -9,20 +9,40 @@ class TxWitnessInput {
   final List<String> stack;
 
   /// creates a copy of the object (classmethod)
-  TxWitnessInput copy() {
+  TxWitnessInput clone() {
+    return TxWitnessInput(stack: stack);
+  }
+
+  factory TxWitnessInput.deserialize(List<int> bytes) {
+    final length = IntUtils.decodeVarint(bytes);
+    int offset = length.item2;
+    final List<String> stack = [];
+    for (int n = 0; n < length.item1; n++) {
+      List<int> witness = [];
+      final itemLen = IntUtils.decodeVarint(bytes.sublist(offset));
+      offset += itemLen.item2;
+      if (itemLen.item1 != 0) {
+        witness = bytes.sublist(offset, offset + itemLen.item1);
+      }
+      offset += itemLen.item1;
+      stack.add(BytesUtils.toHexString(witness));
+    }
+
     return TxWitnessInput(stack: stack);
   }
 
   /// returns a serialized byte version of the witness items list
   List<int> toBytes() {
-    var stackBytes = <int>[];
-
+    final bytes = DynamicByteTracker();
+    final length = IntUtils.encodeVarint(stack.length);
+    bytes.add(length);
     for (final item in stack) {
-      final itemBytes = IntUtils.prependVarint(BytesUtils.fromHexString(item));
-      stackBytes = [...stackBytes, ...itemBytes];
+      final itemBytes = BytesUtils.fromHexString(item);
+      final varint = IntUtils.prependVarint(itemBytes);
+      bytes.add(varint);
     }
 
-    return stackBytes;
+    return bytes.toBytes();
   }
 
   Map<String, dynamic> toJson() {
