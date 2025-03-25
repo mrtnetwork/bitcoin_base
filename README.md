@@ -66,6 +66,23 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
 
 - BitcoinTransactionBuilder: Even with limited prior knowledge, you can utilize this class to send various types of transactions. Below, I've provided an example in which a transaction features 8 distinct input addresses with different types and private keys, as well as 10 different output addresses. Furthermore, additional examples have been prepared, which you can find in the [`example`](https://github.com/mrtnetwork/bitcoin_base/tree/main/example) folder.
 
+### PSBT
+  Find example implementations [here](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/psbt)
+
+- BIP-0174: Partially Signed Bitcoin Transaction Format
+- BIP-0370: PSBT Version 2
+- BIP-0371: Taproot Fields for PSBT
+- BIP-0373: MuSig2 PSBT Fields
+
+### MuSig2 (BIP-327):
+  Find example implementations [here](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/musig)
+
+ - Sign/Verify: Supports signing and verifying multisignature transactions using MuSig2
+ - NonceAgg: Aggregates nonces from multiple participants for secure signature generation.
+ - KeyAgg: Combines multiple public keys into a single aggregated public key for efficient multisignature verification
+
+
+
 ### Addresses
 
 - P2PKH A P2PKH (Pay-to-Public-Key-Hash) address in Bitcoin represents ownership of a cryptocurrency wallet by encoding a hashed public key
@@ -79,21 +96,6 @@ Using this package, you can create a Bitcoin transaction in two ways: either thr
 - P2SH: A P2SH (Pay-to-Script-Hash) address in Bitcoin is an address type that enables the use of more complex scripting, often associated with multi-signature transactions or other advanced smart contract functionality, enhancing flexibility and security.
   
 - P2SH(SEGWIT): A P2SH (Pay-to-Script-Hash) Segregated Witness (SegWit) address in Bitcoin combines the benefits of P2SH and SegWit technologies, allowing for enhanced transaction security, reduced fees, and improved scalability.
-
-### MuSig2 (BIP-327):
-  Find example implementations [here](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/musig)
-
- - Sign/Verify: Supports signing and verifying multisignature transactions using MuSig2
- - NonceAgg: Aggregates nonces from multiple participants for secure signature generation.
- - KeyAgg: Combines multiple public keys into a single aggregated public key for efficient multisignature verification
-
-### PSBT
-  Find example implementations [here](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/lib/psbt)
-
-- BIP-0174: Partially Signed Bitcoin Transaction Format
-- BIP-0370: PSBT Version 2
-- BIP-0371: Taproot Fields for PSBT
-- BIP-0373: MuSig2 PSBT Fields
 
 ### Addresses specific to Bitcoin Cash
 
