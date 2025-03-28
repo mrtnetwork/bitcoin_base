@@ -315,31 +315,37 @@ class BitcoinScriptUtils {
     }
   }
 
-  static BitcoinBaseAddress findAddressFromScriptPubKey(Script script) {
+  static BitcoinBaseAddress generateAddressFromScriptPubKey(Script script) {
+    BitcoinBaseAddress? address;
     if (BitcoinScriptUtils.isP2wpkh(script)) {
-      return P2wpkhAddress.fromProgram(program: script.script[1]);
-    }
-    if (BitcoinScriptUtils.isP2pkh(script)) {
-      return P2pkhAddress.fromHash160(addrHash: script.script[2]);
-    }
-    if (BitcoinScriptUtils.isP2pk(script)) {
-      return P2pkAddress(publicKey: script.script[0]);
-    }
-    if (BitcoinScriptUtils.isP2sh(script)) {
-      return P2shAddress.fromHash160(addrHash: script.script[1]);
-    }
-    if (BitcoinScriptUtils.isP2sh32(script)) {
-      return P2shAddress.fromHash160(
+      address = P2wpkhAddress.fromProgram(program: script.script[1]);
+    } else if (BitcoinScriptUtils.isP2pkh(script)) {
+      address = P2pkhAddress.fromHash160(addrHash: script.script[2]);
+    } else if (BitcoinScriptUtils.isP2pk(script)) {
+      address = P2pkAddress(publicKey: script.script[0]);
+    } else if (BitcoinScriptUtils.isP2sh(script)) {
+      address = P2shAddress.fromHash160(addrHash: script.script[1]);
+    } else if (BitcoinScriptUtils.isP2sh32(script)) {
+      address = P2shAddress.fromHash160(
           addrHash: script.script[1], type: P2shAddressType.p2pkInP2sh32);
+    } else if (BitcoinScriptUtils.isP2wsh(script)) {
+      address = P2wshAddress.fromProgram(program: script.script[1]);
+    } else if (BitcoinScriptUtils.isP2tr(script)) {
+      address = P2trAddress.fromProgram(program: script.script[1]);
     }
-    if (BitcoinScriptUtils.isP2wsh(script)) {
-      return P2wshAddress.fromProgram(program: script.script[1]);
+    if (address == null || address.toScriptPubKey() != script) {
+      throw DartBitcoinPluginException(
+          "Unknown scriptPubKey: Unable to generate a valid address.");
     }
-    if (BitcoinScriptUtils.isP2tr(script)) {
-      return P2trAddress.fromProgram(program: script.script[1]);
+    return address;
+  }
+
+  static BitcoinBaseAddress? tryGenerateAddressFromScriptPubKey(Script script) {
+    try {
+      return generateAddressFromScriptPubKey(script);
+    } catch (_) {
+      return null;
     }
-    throw DartBitcoinPluginException(
-        "Unable to create address. Unknow scriptPubKey ${script.script}");
   }
 
   static List<int> opPushData(List<int> dataBytes) {

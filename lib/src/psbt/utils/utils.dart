@@ -136,11 +136,8 @@ class PsbtUtils {
       throw DartBitcoinPluginException(
           "Invalid PSBT input: merkleRoot and leaf scripts must not be provided for Witness v0.");
     }
-    address ??= BitcoinScriptUtils.findAddressFromScriptPubKey(scriptPubKey!);
-    if (address.toScriptPubKey() != scriptPubKey) {
-      throw DartBitcoinPluginException(
-          "ScriptPubKey does not match the one generated.");
-    }
+    address ??=
+        BitcoinScriptUtils.generateAddressFromScriptPubKey(scriptPubKey!);
     switch (inputType) {
       case PsbtTxType.legacy:
         return PsbtNonTaprootInputInfo.legacy(
@@ -203,7 +200,7 @@ class PsbtUtils {
       }
       final TxInput input = txInputs[i];
       final sciptPubKey =
-          getInputScriptPubKey(psbt: psbt, input: input, index: i);
+          getInputScriptPubKey(psbtInput: psbt.input, input: input, index: i);
       final amount = getInputAmount(psbt: psbt, input: input, index: i);
       scriptPubKeys.add(sciptPubKey);
       amounts.add(amount);
@@ -352,8 +349,10 @@ class PsbtUtils {
   }
 
   static Script getInputScriptPubKey(
-      {required Psbt psbt, required TxInput input, required int index}) {
-    final noneWitnessUtxo = psbt.input.getInput<PsbtInputNonWitnessUtxo>(
+      {required PsbtInput psbtInput,
+      required TxInput input,
+      required int index}) {
+    final noneWitnessUtxo = psbtInput.getInput<PsbtInputNonWitnessUtxo>(
         index, PsbtInputTypes.nonWitnessUTXO);
     if (noneWitnessUtxo != null) {
       if (input.txIndex >= noneWitnessUtxo.transaction.outputs.length) {
@@ -363,8 +362,8 @@ class PsbtUtils {
       final output = noneWitnessUtxo.transaction.outputs[input.txIndex];
       return output.scriptPubKey;
     }
-    final witnessUtxo = psbt.input
-        .getInput<PsbtInputWitnessUtxo>(index, PsbtInputTypes.witnessUTXO);
+    final witnessUtxo = psbtInput.getInput<PsbtInputWitnessUtxo>(
+        index, PsbtInputTypes.witnessUTXO);
     if (witnessUtxo != null) {
       return witnessUtxo.scriptPubKey;
     }
@@ -850,6 +849,7 @@ class PsbtUtils {
         index: index,
         input: input,
         sighashType: sighashType);
+
     PsbtInputTaprootLeafScript? tapleafScript;
     final digest = switch (params.type) {
       PsbtTxType.legacy => () {
@@ -905,11 +905,47 @@ class PsbtUtils {
         "Invalid Psbt input: Cannot mix height-based and time-based locktimes in a PSBT.");
   }
 
+  /// must be move to blockchain_utils package
+  static bool isValidBitcoinDERSignature(List<int> signature) {
+    if (signature.length < 9 || signature.length > 73) {
+      return false;
+    }
+    if (signature[0] != 0x30) {
+      return false;
+    }
+    if (signature[1] != signature.length - 3) {
+      return false;
+    }
+    int lenR = signature[3];
+    if (5 + lenR >= signature.length) {
+      return false;
+    }
+    int lenS = signature[5 + lenR];
+    if ((7 + lenR + lenS) != signature.length) {
+      return false;
+    }
+    if (signature[4] & 0x80 != 0) {
+      return false;
+    }
+    if (lenR > 1 && (signature[4] == 0x00) && (signature[5] & 0x80) == 0) {
+      return false;
+    }
+    if (signature[lenR + 4] != 0x02) return false;
+    if (lenS == 0) return false;
+    if ((signature[lenR + 6] & 0x80) != 0) return false;
+    if (lenS > 1 &&
+        (signature[lenR + 6] == 0x00) &&
+        (signature[lenR + 7] & 0x80) == 0) {
+      return false;
+    }
+    return true;
+  }
+
   static List<int> validateEcdsaSignature(
       {required List<int> signature,
       required int index,
       required int expectedSighash}) {
-    if (!CryptoSignatureUtils.isValidBitcoinDERSignature(signature)) {
+    if (!isValidBitcoinDERSignature(signature)) {
       throw DartBitcoinPluginException(
           "Invalid DER-encoded signature at input $index. Signature may be malformed or improperly formatted.");
     }
@@ -989,7 +1025,7 @@ class PsbtUtils {
       if (!i.canModifyOutput(
           outputIndex: outputIndex ?? -1,
           isUpdate: isUpdate,
-          allSigashes: sighashes.map((e) => e.sighashType).toList())) {
+          allSigashes: sighashes)) {
         throw DartBitcoinPluginException(
             "Unable to modify output${outputIndex == null ? '' : ' $outputIndex'}. A signature with an unmodifiable sighash flag exists, preventing changes.");
       }
@@ -1107,5 +1143,19 @@ class PsbtUtils {
       throw DartBitcoinPluginException(
           "Duplicate nonce detected: A nonce with the same public key and tapleaf hash already exists.");
     }
+  }
+
+  static bool canChangeOutput(int sighashType) {
+    if (sighashType == BitcoinOpCodeConst.sighashDefault) return false;
+    if (isSighash(sighashType, BitcoinOpCodeConst.sighashAll)) return false;
+    return true;
+  }
+
+  static bool isSighash(int sighash, int type) {
+    return (sighash & 0x1F) == type;
+  }
+
+  static bool isAnyoneCanPay(int sighash) {
+    return (sighash & BitcoinOpCodeConst.sighashAnyoneCanPay) != 0;
   }
 }

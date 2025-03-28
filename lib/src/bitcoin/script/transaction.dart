@@ -215,6 +215,7 @@ class BtcTransaction {
     for (final txIn in inputs) {
       data.add(txIn.toBytes());
     }
+
     data.add(txOutCountBytes);
     for (final txOut in outputs) {
       data.add(txOut.toBytes());

@@ -21,7 +21,7 @@ abstract class BasedUtxoNetwork implements Enumerate {
   abstract final CoinConf conf;
 
   abstract final List<BitcoinAddressType> supportedAddress;
-
+  String get identifier;
   @override
   bool operator ==(other) {
     if (identical(other, this)) return true;
@@ -36,6 +36,7 @@ abstract class BasedUtxoNetwork implements Enumerate {
   static List<BasedUtxoNetwork> values = const [
     BitcoinNetwork.mainnet,
     BitcoinNetwork.testnet,
+    BitcoinNetwork.testnet4,
     LitecoinNetwork.mainnet,
     LitecoinNetwork.testnet,
     DashNetwork.mainnet,
@@ -52,7 +53,9 @@ abstract class BasedUtxoNetwork implements Enumerate {
   ];
 
   static BasedUtxoNetwork fromName(String name) {
-    return values.firstWhere((element) => element.value == name);
+    return values.firstWhere((element) => element.value == name,
+        orElse: () => throw DartBitcoinPluginException(
+            "No matching network found for the given name."));
   }
 
   List<BipCoins> get coins;
@@ -64,12 +67,12 @@ abstract class BasedUtxoNetwork implements Enumerate {
 /// Class representing a Bitcoin network, implementing the `BasedUtxoNetwork` abstract class.
 class BitcoinSVNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  static const BitcoinSVNetwork mainnet =
-      BitcoinSVNetwork._('BitcoinSVMainnet', CoinsConf.bitcoinSvMainNet);
+  static const BitcoinSVNetwork mainnet = BitcoinSVNetwork._(
+      'BitcoinSVMainnet', CoinsConf.bitcoinSvMainNet, 'bitcoinsv:mainnet');
 
   /// Testnet configuration with associated `CoinConf`.
-  static const BitcoinSVNetwork testnet =
-      BitcoinSVNetwork._('BitcoinSVTestnet', CoinsConf.bitcoinSvTestNet);
+  static const BitcoinSVNetwork testnet = BitcoinSVNetwork._(
+      'BitcoinSVTestnet', CoinsConf.bitcoinSvTestNet, 'bitcoinsv:testnet');
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
@@ -79,7 +82,7 @@ class BitcoinSVNetwork implements BasedUtxoNetwork {
   final String value;
 
   /// Constructor for creating a Bitcoin network with a specific configuration.
-  const BitcoinSVNetwork._(this.value, this.conf);
+  const BitcoinSVNetwork._(this.value, this.conf, this.identifier);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -111,17 +114,24 @@ class BitcoinSVNetwork implements BasedUtxoNetwork {
     if (isMainnet) return [Bip44Coins.bitcoinSv];
     return [Bip44Coins.bitcoinSvTestnet];
   }
+
+  @override
+  final String identifier;
 }
 
 /// Class representing a Bitcoin network, implementing the `BasedUtxoNetwork` abstract class.
 class BitcoinNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  static const BitcoinNetwork mainnet =
-      BitcoinNetwork._('bitcoinMainnet', CoinsConf.bitcoinMainNet);
+  static const BitcoinNetwork mainnet = BitcoinNetwork._(
+      'bitcoinMainnet', CoinsConf.bitcoinMainNet, 'bitcoin:mainnet');
 
   /// Testnet configuration with associated `CoinConf`.
-  static const BitcoinNetwork testnet =
-      BitcoinNetwork._('bitcoinTestnet', CoinsConf.bitcoinTestNet);
+  static const BitcoinNetwork testnet = BitcoinNetwork._(
+      'bitcoinTestnet', CoinsConf.bitcoinTestNet, 'bitcoin:testnet');
+
+  /// Testnet4 configuration with associated `CoinConf`.
+  static const BitcoinNetwork testnet4 = BitcoinNetwork._(
+      'bitcoinTestnet4', CoinsConf.bitcoinTestNet, 'bitcoin:testnet4');
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
@@ -131,7 +141,7 @@ class BitcoinNetwork implements BasedUtxoNetwork {
   final String value;
 
   /// Constructor for creating a Bitcoin network with a specific configuration.
-  const BitcoinNetwork._(this.value, this.conf);
+  const BitcoinNetwork._(this.value, this.conf, this.identifier);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -184,17 +194,20 @@ class BitcoinNetwork implements BasedUtxoNetwork {
       Bip86Coins.bitcoinTestnet,
     ];
   }
+
+  @override
+  final String identifier;
 }
 
 /// Class representing a Litecoin network, implementing the `BasedUtxoNetwork` abstract class.
 class LitecoinNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  static const LitecoinNetwork mainnet =
-      LitecoinNetwork._('litecoinMainnet', CoinsConf.litecoinMainNet);
+  static const LitecoinNetwork mainnet = LitecoinNetwork._(
+      'litecoinMainnet', CoinsConf.litecoinMainNet, 'litecoin:mainnet');
 
   /// Testnet configuration with associated `CoinConf`.
-  static const LitecoinNetwork testnet =
-      LitecoinNetwork._('litecoinTestnet', CoinsConf.litecoinTestNet);
+  static const LitecoinNetwork testnet = LitecoinNetwork._(
+      'litecoinTestnet', CoinsConf.litecoinTestNet, 'litecoin:testnet');
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
@@ -203,7 +216,7 @@ class LitecoinNetwork implements BasedUtxoNetwork {
   final String value;
 
   /// Constructor for creating a Litecoin network with a specific configuration.
-  const LitecoinNetwork._(this.value, this.conf);
+  const LitecoinNetwork._(this.value, this.conf, this.identifier);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -249,24 +262,27 @@ class LitecoinNetwork implements BasedUtxoNetwork {
       Bip84Coins.litecoinTestnet
     ];
   }
+
+  @override
+  final String identifier;
 }
 
 /// Class representing a Dash network, implementing the `BasedUtxoNetwork` abstract class.
 class DashNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
   static const DashNetwork mainnet =
-      DashNetwork._('dashMainnet', CoinsConf.dashMainNet);
+      DashNetwork._('dashMainnet', CoinsConf.dashMainNet, 'dash:mainnet');
 
   /// Testnet configuration with associated `CoinConf`.
   static const DashNetwork testnet =
-      DashNetwork._('dashTestnet', CoinsConf.dashTestNet);
+      DashNetwork._('dashTestnet', CoinsConf.dashTestNet, 'dash:testnet');
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Dash network with a specific configuration.
-  const DashNetwork._(this.value, this.conf);
+  const DashNetwork._(this.value, this.conf, this.identifier);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -305,24 +321,27 @@ class DashNetwork implements BasedUtxoNetwork {
     if (isMainnet) return [Bip44Coins.dash, Bip49Coins.dash];
     return [Bip44Coins.dashTestnet, Bip49Coins.dashTestnet];
   }
+
+  @override
+  final String identifier;
 }
 
 /// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
 class DogecoinNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  static const DogecoinNetwork mainnet =
-      DogecoinNetwork._('dogeMainnet', CoinsConf.dogecoinMainNet);
+  static const DogecoinNetwork mainnet = DogecoinNetwork._(
+      'dogeMainnet', CoinsConf.dogecoinMainNet, 'dogecoin:mainnet');
 
   /// Testnet configuration with associated `CoinConf`.
-  static const DogecoinNetwork testnet =
-      DogecoinNetwork._('dogeTestnet', CoinsConf.dogecoinTestNet);
+  static const DogecoinNetwork testnet = DogecoinNetwork._(
+      'dogeTestnet', CoinsConf.dogecoinTestNet, 'dogecoin:testnet');
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Dogecoin network with a specific configuration.
-  const DogecoinNetwork._(this.value, this.conf);
+  const DogecoinNetwork._(this.value, this.conf, this.identifier);
 
   @override
   final String value;
@@ -361,24 +380,31 @@ class DogecoinNetwork implements BasedUtxoNetwork {
     if (isMainnet) return [Bip44Coins.dogecoin, Bip49Coins.dogecoin];
     return [Bip44Coins.dogecoinTestnet, Bip49Coins.dogecoinTestnet];
   }
+
+  @override
+  final String identifier;
 }
 
 /// Class representing a Bitcoin Cash network, implementing the `BasedUtxoNetwork` abstract class.
 class BitcoinCashNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  static const BitcoinCashNetwork mainnet =
-      BitcoinCashNetwork._('bitcoinCashMainnet', CoinsConf.bitcoinCashMainNet);
+  static const BitcoinCashNetwork mainnet = BitcoinCashNetwork._(
+      'bitcoinCashMainnet',
+      CoinsConf.bitcoinCashMainNet,
+      'bitcoincash:mainnet');
 
   /// Testnet configuration with associated `CoinConf`.
-  static const BitcoinCashNetwork testnet =
-      BitcoinCashNetwork._('bitcoinCashTestnet', CoinsConf.bitcoinCashTestNet);
+  static const BitcoinCashNetwork testnet = BitcoinCashNetwork._(
+      'bitcoinCashTestnet',
+      CoinsConf.bitcoinCashTestNet,
+      'bitcoincash:testnet');
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Bitcoin Cash network with a specific configuration.
-  const BitcoinCashNetwork._(this.value, this.conf);
+  const BitcoinCashNetwork._(this.value, this.conf, this.identifier);
   @override
   final String value;
 
@@ -438,20 +464,23 @@ class BitcoinCashNetwork implements BasedUtxoNetwork {
     if (isMainnet) return [Bip44Coins.bitcoinCash, Bip49Coins.bitcoinCash];
     return [Bip44Coins.bitcoinCashTestnet, Bip49Coins.bitcoinCashTestnet];
   }
+
+  @override
+  final String identifier;
 }
 
 /// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
 class PepeNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
-  static const PepeNetwork mainnet =
-      PepeNetwork._('pepecoinMainnet', CoinsConf.pepeMainnet);
+  static const PepeNetwork mainnet = PepeNetwork._(
+      'pepecoinMainnet', CoinsConf.pepeMainnet, 'pepecoin:mainnet');
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
   final CoinConf conf;
 
   /// Constructor for creating a Dogecoin network with a specific configuration.
-  const PepeNetwork._(this.value, this.conf);
+  const PepeNetwork._(this.value, this.conf, this.identifier);
 
   @override
   final String value;
@@ -492,17 +521,24 @@ class PepeNetwork implements BasedUtxoNetwork {
     }
     return [Bip44Coins.pepecoinTestnet, Bip49Coins.pepecoinTestnet];
   }
+
+  @override
+  final String identifier;
 }
 
 /// Class representing a Electra Protocol network, implementing the `BasedUtxoNetwork` abstract class.
 class ElectraProtocolNetwork implements BasedUtxoNetwork {
   /// Mainnet configuration with associated `CoinConf`.
   static const ElectraProtocolNetwork mainnet = ElectraProtocolNetwork._(
-      'electraProtocolMainnet', CoinsConf.electraProtocolMainNet);
+      'electraProtocolMainnet',
+      CoinsConf.electraProtocolMainNet,
+      'electra:mainnet');
 
   /// Testnet configuration with associated `CoinConf`.
   static const ElectraProtocolNetwork testnet = ElectraProtocolNetwork._(
-      'electraProtocolTestnet', CoinsConf.electraProtocolTestNet);
+      'electraProtocolTestnet',
+      CoinsConf.electraProtocolTestNet,
+      'electra:testnet');
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
@@ -511,7 +547,7 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
   final String value;
 
   /// Constructor for creating a Electra Protocol network with a specific configuration.
-  const ElectraProtocolNetwork._(this.value, this.conf);
+  const ElectraProtocolNetwork._(this.value, this.conf, this.identifier);
 
   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
   @override
@@ -561,56 +597,7 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
       Bip84Coins.electraProtocolTestnet
     ];
   }
-}
-
-/// Class representing a Dogecoin network, implementing the `BasedUtxoNetwork` abstract class.
-class BonkcoinNetwork implements BasedUtxoNetwork {
-  /// Mainnet configuration with associated `CoinConf`.
-  static const BonkcoinNetwork mainnet =
-      BonkcoinNetwork._('bonkcoinMainnet', CoinsConf.dogecoinMainNet);
-
-  /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
-  @override
-  final CoinConf conf;
-
-  /// Constructor for creating a Dogecoin network with a specific configuration.
-  const BonkcoinNetwork._(this.value, this.conf);
 
   @override
-  final String value;
-
-  /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
-  @override
-  List<int> get wifNetVer => conf.params.wifNetVer!;
-
-  /// Retrieves the Pay-to-Public-Key-Hash (P2PKH) version bytes from the associated `CoinConf`.
-  @override
-  List<int> get p2pkhNetVer => conf.params.p2pkhNetVer!;
-
-  /// Retrieves the Pay-to-Script-Hash (P2SH) version bytes from the associated `CoinConf`.
-  @override
-  List<int> get p2shNetVer => [25];
-
-  /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses.
-  @override
-  String get p2wpkhHrp => throw const DartBitcoinPluginException(
-      'BonkcoinNetwork network does not support P2WPKH/P2WSH');
-
-  /// Checks if the current network is the mainnet.
-  @override
-  bool get isMainnet => this == BonkcoinNetwork.mainnet;
-
-  @override
-  final List<BitcoinAddressType> supportedAddress = const [
-    PubKeyAddressType.p2pk,
-    P2pkhAddressType.p2pkh,
-    P2shAddressType.p2pkhInP2sh,
-    P2shAddressType.p2pkInP2sh
-  ];
-
-  @override
-  List<BipCoins> get coins {
-    if (isMainnet) return [Bip44Coins.dogecoin, Bip49Coins.dogecoin];
-    return [Bip44Coins.dogecoinTestnet, Bip49Coins.dogecoinTestnet];
-  }
+  final String identifier;
 }

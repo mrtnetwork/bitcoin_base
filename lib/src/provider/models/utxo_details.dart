@@ -60,7 +60,7 @@ class UtxoWithAddress {
         utxo: utxo,
         ownerDetails: ownerDetails,
         keyType: ownerDetails.publicKey != null && !utxo.isSegwit
-            ? BtcUtils.isCompressedPubKey(ownerDetails.publicKey!)
+            ? BtcUtils.determinatePubKeyModeHex(ownerDetails.publicKey!)
             : PublicKeyType.compressed);
   }
 

@@ -2,6 +2,8 @@ class BtcApiConst {
   static const String blockCypherBaseURL =
       'https://api.blockcypher.com/v1/btc/test3';
   static const String mempoolBaseURL = 'https://mempool.space/testnet/api';
+  static const String mempoolTestnet4BaseURL =
+      'https://mempool.space/testnet4/api';
   static const String blockstreamBaseURL =
       'https://blockstream.info/testnet/api';
   static const String blockCypherMainBaseURL =

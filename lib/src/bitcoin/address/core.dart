@@ -54,6 +54,27 @@ abstract class BitcoinAddressType implements Enumerate {
 }
 
 abstract class BitcoinBaseAddress {
+  const BitcoinBaseAddress();
+  factory BitcoinBaseAddress.fromProgram(
+      {required String addressProgram, required BitcoinAddressType type}) {
+    if (type.isP2sh) {
+      return P2shAddress.fromHash160(
+          addrHash: addressProgram, type: type.cast());
+    }
+    return switch (type) {
+      PubKeyAddressType.p2pk => P2pkAddress(publicKey: addressProgram),
+      P2pkhAddressType.p2pkh ||
+      P2pkhAddressType.p2pkhwt =>
+        P2pkhAddress.fromHash160(addrHash: addressProgram, type: type.cast()),
+      SegwitAddressType.p2wpkh =>
+        P2wpkhAddress.fromProgram(program: addressProgram),
+      SegwitAddressType.p2wsh =>
+        P2wshAddress.fromProgram(program: addressProgram),
+      SegwitAddressType.p2tr =>
+        P2trAddress.fromProgram(program: addressProgram),
+      _ => throw DartBitcoinPluginException("Unsuported bitcoin address type."),
+    };
+  }
   BitcoinAddressType get type;
   String toAddress(BasedUtxoNetwork network);
   Script toScriptPubKey();

@@ -1,3 +1,7 @@
+## 6.1.0
+
+- Fix der signature validation.
+
 ## 6.0.0
 
 - Added support for BIP-327: MuSig2 for BIP340-compatible multi-signatures

@@ -6,16 +6,6 @@ import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/psbt/psbt.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
-enum PsbtTxType {
-  legacy,
-  witnessV0,
-  witnessV1;
-
-  bool get isLegacy => this == legacy;
-  bool get isSegwit => this != legacy;
-  bool get isP2tr => this == witnessV1;
-}
-
 abstract class PsbtInputInfo {
   final PsbtTxType type;
   abstract final Script redeemScript;
@@ -470,85 +460,6 @@ class PsbtGeneratedTransactionDigest {
     }
     return null;
   }
-}
-
-class PsbtInputSighashInfo {
-  final int inputIndex;
-  final int sighashType;
-  const PsbtInputSighashInfo(
-      {required this.inputIndex, required this.sighashType});
-  bool get isSighashAll => sighashType == BitcoinOpCodeConst.sighashAll;
-  bool get isSighashSignle => sighashType == BitcoinOpCodeConst.sighashSingle;
-  bool get isSighashNone => sighashType == BitcoinOpCodeConst.sighashNone;
-  bool get isSighashAllAnyOneCanPay =>
-      sighashType == BitcoinOpCodeConst.sighashAllAnyOneCanPay;
-  bool get isSighashSingleAnyOneCanPay =>
-      sighashType == BitcoinOpCodeConst.sighashSingleAnyOneCanPay;
-  bool get isSighashNoneAnyOneCanPay =>
-      sighashType == BitcoinOpCodeConst.sighashNoneAnyOneCanPay;
-
-  @override
-  String toString() {
-    if (isSighashAll) {
-      return "SIGHASH_ALL";
-    }
-    if (isSighashAllAnyOneCanPay) {
-      return "SIGHASH_ALL_ANYONECANPAY";
-    }
-    if (isSighashSignle) {
-      return "SIGHASH_SINGLE";
-    }
-    if (isSighashSingleAnyOneCanPay) {
-      return "SIGHASH_SINGLE_ANYONECANPAY";
-    }
-    if (isSighashNone) {
-      return "SIGHASH_NONE";
-    }
-    if (isSighashNoneAnyOneCanPay) {
-      return "SIGHASH_NONE_ANYONECANPAY";
-    }
-    return "0x${sighashType.toRadixString(16)}";
-  }
-
-  bool canModifyInput(int inputIndex) {
-    if (isSighashAllAnyOneCanPay ||
-        isSighashSingleAnyOneCanPay ||
-        isSighashNoneAnyOneCanPay) {
-      return inputIndex != this.inputIndex;
-    }
-    return false;
-  }
-
-  bool canModifyOutput(
-      {required int outputIndex,
-      required bool isUpdate,
-      required List<int> allSigashes}) {
-    if (isSighashAll || isSighashAllAnyOneCanPay) return false;
-    if (isSighashNone || isSighashNoneAnyOneCanPay) return true;
-    if (isSighashSignle || isSighashSingleAnyOneCanPay) {
-      if (isUpdate) return outputIndex != inputIndex;
-      if (outputIndex + 1 >= allSigashes.length) {
-        return outputIndex != inputIndex;
-      }
-      final r = allSigashes.sublist(outputIndex + 1);
-      return outputIndex != inputIndex &&
-          !r.contains(BitcoinOpCodeConst.sighashSingle) &&
-          !r.contains(BitcoinOpCodeConst.sighashSingle |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
-    }
-    return true;
-  }
-
-  @override
-  operator ==(other) {
-    if (identical(this, other)) return true;
-    if (other is! PsbtInputSighashInfo) return false;
-    return inputIndex == other.inputIndex && sighashType == other.sighashType;
-  }
-
-  @override
-  int get hashCode =>
-      HashCodeGenerator.generateHashCode([inputIndex, sighashType]);
 }
 
 enum PsbtScriptKeyMode {

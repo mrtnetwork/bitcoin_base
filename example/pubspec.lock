@@ -15,14 +15,15 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "5.3.0"
+    version: "6.0.0"
   blockchain_utils:
     dependency: "direct main"
     description:
-      path: "../../blockchain_utils"
-      relative: true
-    source: path
-    version: "4.2.0"
+      name: blockchain_utils
+      sha256: "2f0e9bed57e55a0bdb8dfa7471aab41d83c488f7865c0bb8a55ce67b4f87f486"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.3.0"
   boolean_selector:
     dependency: transitive
     description:

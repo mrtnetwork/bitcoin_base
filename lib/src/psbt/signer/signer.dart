@@ -4,6 +4,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 
 abstract class PsbtBtcSigner<SIGNINGRESPONSE extends SignInputResponse,
     DIGEST extends PsbtSignInputDigest> {
+  const PsbtBtcSigner();
   abstract final ECPublic signerPublicKey;
   SIGNINGRESPONSE btcSignInput(DIGEST digest);
   Future<SIGNINGRESPONSE> btcSignInputAsync(DIGEST digest);
@@ -11,6 +12,7 @@ abstract class PsbtBtcSigner<SIGNINGRESPONSE extends SignInputResponse,
 
 abstract class PsbtBtcMusig2Signer
     extends PsbtBtcSigner<SignInputResponse, PsbtMusig2SigningInputDigest> {
+  const PsbtBtcMusig2Signer();
   abstract final ECPublic aggPublicKey;
   abstract final List<ECPublic> publicKeys;
 }

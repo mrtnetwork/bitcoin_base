@@ -12,6 +12,7 @@ class APIConfig {
   final String sendTransaction;
   final String blockHeight;
   final APIType apiType;
+  final String rawTransaction;
   final BasedUtxoNetwork network;
 
   factory APIConfig.selectApi(APIType apiType, BasedUtxoNetwork network) {
@@ -34,6 +35,11 @@ class APIConfig {
 
   String getTransactionUrl(String transactionId) {
     final baseUrl = transaction;
+    return baseUrl.replaceAll('###', transactionId);
+  }
+
+  String getRawTransactionUrl(String transactionId) {
+    final baseUrl = rawTransaction;
     return baseUrl.replaceAll('###', transactionId);
   }
 
@@ -75,6 +81,7 @@ class APIConfig {
             '$baseUrl/addrs/###/?unspentOnly=true&includeScript=true&limit=2000',
         feeRate: baseUrl,
         transaction: '$baseUrl/txs/###',
+        rawTransaction: '$baseUrl/txs/###',
         sendTransaction: '$baseUrl/txs/push',
         apiType: APIType.blockCypher,
         transactions: '$baseUrl/addrs/###/full?limit=200',
@@ -90,7 +97,9 @@ class APIConfig {
       case BitcoinNetwork.testnet:
         baseUrl ??= BtcApiConst.mempoolBaseURL;
         break;
-
+      case BitcoinNetwork.testnet4:
+        baseUrl ??= BtcApiConst.mempoolTestnet4BaseURL;
+        break;
       default:
         throw DartBitcoinPluginException(
             'mempool does not support ${network.conf.coinName.name}');
@@ -100,6 +109,7 @@ class APIConfig {
         url: '$baseUrl/address/###/utxo',
         feeRate: '$baseUrl/v1/fees/recommended',
         transaction: '$baseUrl/tx/###',
+        rawTransaction: '$baseUrl/tx/###/hex',
         sendTransaction: '$baseUrl/tx',
         apiType: APIType.mempool,
         transactions: '$baseUrl/address/###/txs',
@@ -115,5 +125,6 @@ class APIConfig {
       required this.sendTransaction,
       required this.apiType,
       required this.network,
-      required this.blockHeight});
+      required this.blockHeight,
+      required this.rawTransaction});
 }

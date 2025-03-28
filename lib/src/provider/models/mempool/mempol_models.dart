@@ -140,10 +140,10 @@ class MempoolTransaction {
       txID: json['txid'],
       version: json['version'],
       locktime: json['locktime'],
-      vin:
-          List<MempoolVin>.from(json['vin'].map((x) => MempoolVin.fromJson(x))),
+      vin: List<MempoolVin>.from(
+          (json['vin'] as List).map((x) => MempoolVin.fromJson(x))),
       vout: List<MempoolVout>.from(
-          json['vout'].map((x) => MempoolVout.fromJson(x))),
+          (json['vout'] as List).map((x) => MempoolVout.fromJson(x))),
       size: json['size'],
       weight: json['weight'],
       fee: json['fee'],

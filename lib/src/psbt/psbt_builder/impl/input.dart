@@ -161,16 +161,8 @@ mixin PsbtInputImpl on PsbtBuilderImpl {
 
   PsbtFinalizeParams _generateFinalizeParams(
       {required int index, required List<TxInput> txInputs}) {
-    final scriptPubKey = PsbtUtils.getInputScriptPubKey(
-        psbt: _psbt, input: txInputs[index], index: index);
-    final address =
-        BitcoinScriptUtils.findAddressFromScriptPubKey(scriptPubKey);
     final inputData = psbtInput(index);
-    return PsbtFinalizeParams(
-        index: index,
-        inputData: inputData,
-        scriptPubKey: scriptPubKey,
-        address: address);
+    return PsbtFinalizeParams(index: index, inputData: inputData);
   }
 
   void _cleanFinalizedInput(int index) {

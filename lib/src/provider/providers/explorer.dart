@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
 import 'package:bitcoin_base/src/provider/models/models.dart';
 import 'package:bitcoin_base/src/provider/services/explorer.dart';
 import 'package:bitcoin_base/src/models/network.dart';
+import 'package:blockchain_utils/utils/binary/utils.dart';
 import 'package:blockchain_utils/utils/string/string.dart';
 
 class ApiProvider {
@@ -24,26 +26,22 @@ class ApiProvider {
 
   final Map<String, String> _header;
 
-  Future<T> _getRequest<T>(String url) async {
+  Future<T> _getRequest<T>(String url,
+      {Map<String, String> queryParameters = const {}}) async {
+    if (queryParameters.isNotEmpty) {
+      Uri uri = Uri.parse(url);
+      uri = uri.replace(queryParameters: {
+        ...uri.queryParameters,
+        ...queryParameters,
+      });
+      url = uri.normalizePath().toString();
+    }
     final response = await service.get<T>(url);
     return response;
   }
 
   Future<T> _postRequest<T>(String url, Object? data) async {
     final response = await service.post<T>(url, body: data, headers: _header);
-    return response;
-  }
-
-  Future<Map<String, dynamic>> testmempool(List<dynamic> params) async {
-    final data = <String, dynamic>{
-      'jsonrpc': '2.0',
-      'method': 'testmempoolaccept',
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'params': params
-    };
-    final response = await _postRequest<Map<String, dynamic>>(
-        'https://btc.getblock.io/786c97b8-f53f-427b-80f7-9af7bd5bdb84/testnet/',
-        json.encode(data));
     return response;
   }
 
@@ -154,5 +152,28 @@ class ApiProvider {
 
   Future<String> genesis() async {
     return getBlockHeight(0);
+  }
+
+  Future<BtcTransaction> getRawTransaction(String transactionId,
+      {String Function(String)? tokenize}) async {
+    final apiUrl = api.getRawTransactionUrl(transactionId);
+    final url = tokenize?.call(apiUrl) ?? apiUrl;
+
+    switch (api.apiType) {
+      case APIType.mempool:
+        final response = await _getRequest<String>(url);
+        final tx =
+            BtcTransaction.deserialize(BytesUtils.fromHexString(response));
+        assert(tx.serialize() == StringUtils.strip0x(response.toLowerCase()));
+        return tx;
+      default:
+        final response = await _getRequest<Map<String, dynamic>>(url,
+            queryParameters: {"includeHex": 'true'});
+        final tx = BtcTransaction.deserialize(
+            BytesUtils.fromHexString(response["hex"]));
+        assert(tx.serialize() ==
+            StringUtils.strip0x(response["hex"].toLowerCase()));
+        return tx;
+    }
   }
 }

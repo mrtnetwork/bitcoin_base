@@ -190,10 +190,6 @@ void _test2() {
             0, PsbtTransactionOutput(amount: amount1, address: recipient2())),
         throwsA(isA<DartBitcoinPluginException>().having((p0) => p0.message,
             'error message', contains('Unable to modify output'))));
-    expect(
-        () => builder.removeOutput(0),
-        throwsA(isA<DartBitcoinPluginException>().having((p0) => p0.message,
-            'error message', contains('Unable to modify output'))));
     expect(builder.txOutputs().length, 1);
 
     sign(

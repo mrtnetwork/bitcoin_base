@@ -82,6 +82,12 @@ abstract class PsbtBuilderImpl {
         _psbt.input.hasInput(index, PsbtInputTypes.finalizedWitness);
   }
 
+  /// Determines the current transaction type (Legacy, WitnessV0, or WitnessV1).
+  /// The transaction type can change when inputs are added or removed.
+  PsbtTxType txType() {
+    return PsbtUtils.getTxType(_psbt.input);
+  }
+
   /// Encodes the PSBT as a Base64 string.
   ///
   /// Returns a Base64-encoded representation of the PSBT.

@@ -26,7 +26,7 @@ class MultiSignatureSigner {
   /// specified public key and weight.
   factory MultiSignatureSigner(
       {required String publicKey, required int weight}) {
-    final pubkeyMode = BtcUtils.isCompressedPubKey(publicKey);
+    final pubkeyMode = BtcUtils.determinatePubKeyModeHex(publicKey);
 
     return MultiSignatureSigner._(
         ECPublic.fromHex(publicKey).toHex(mode: pubkeyMode),
