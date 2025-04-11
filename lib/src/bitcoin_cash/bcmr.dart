@@ -42,4 +42,7 @@ class BCMR implements BitcoinScriptOutput {
   /// output value. always zero
   @override
   final BigInt value = BigInt.zero;
+
+  @override
+  CashToken? get token => null;
 }

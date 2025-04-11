@@ -121,7 +121,7 @@ void main() async {
       outputOrdering: BitcoinOrdering.none);
   final transaaction =
       bchTransaction.buildTransaction((trDigest, utxo, publicKey, sighash) {
-    return privateKey.signInput(trDigest, sigHash: sighash);
+    return privateKey.signECDSA(trDigest, sighash: sighash);
   });
 
   /// transaction ID

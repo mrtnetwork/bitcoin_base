@@ -59,7 +59,7 @@ void main() {
       final tx = BtcTransaction(inputs: [txin], outputs: [txout]);
       final digit = tx.getTransactionDigest(
           txInIndex: 0, script: fromAddr.toScriptPubKey());
-      final sig = sk.signInput(digit);
+      final sig = sk.signECDSA(digit);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), createP2shAndSendResult);
     });
@@ -68,7 +68,7 @@ void main() {
       final tx = BtcTransaction(inputs: [txinSpend], outputs: [txout2]);
       final digit =
           tx.getTransactionDigest(txInIndex: 0, script: p2pkRedeemScript);
-      final sig = p2pkSk.signInput(digit);
+      final sig = p2pkSk.signECDSA(digit);
       txinSpend.scriptSig = Script(script: [sig, p2pkRedeemScript.toHex()]);
       expect(tx.serialize(), spendP2shResult);
     });
@@ -90,7 +90,7 @@ void main() {
       final tx = BtcTransaction(inputs: [txinSeq], outputs: [txout1]);
 
       final digit = tx.getTransactionDigest(txInIndex: 0, script: redeemScript);
-      final sig = skCsvP2pkh.signInput(digit);
+      final sig = skCsvP2pkh.signECDSA(digit);
 
       txinSeq.scriptSig = Script(
           script: [sig, skCsvP2pkh.getPublic().toHex(), redeemScript.toHex()]);

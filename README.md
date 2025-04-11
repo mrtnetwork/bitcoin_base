@@ -141,10 +141,10 @@ We have integrated three APIs—Mempool, BlockCypher, and Electrum—into the pl
     final publicKey = privateKey.getPublic();
 
     // Sign an input using the private key.
-    final signSegwitV0OrLagacy = privateKey.signInput();
+    final signSegwitV0OrLagacy = privateKey.signECDSA();
 
     // Sign a Taproot transaction using the private key.
-    final signSegwitV1TapprotTransaction = privateKey.signTapRoot();
+    final signSegwitV1TapprotTransaction = privateKey.signBip340();
 
     // Convert the private key to a WIF (Wallet Import Format) encoded string.
     // The boolean argument specifies whether to use the compressed format.
@@ -432,9 +432,9 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
   final transaction =
       builder.buildTransaction((trDigest, utxo, publicKey, sighash) {
     if (utxo.utxo.isP2tr()) {
-      return privateKey.signTapRoot(trDigest, sighash: sighash);
+      return privateKey.signBip340(trDigest, sighash: sighash);
     }
-    return privateKey.signInput(trDigest, sigHash: sighash);
+    return privateKey.signECDSA(trDigest, sighash: sighash);
   });
 
   /// get tx id
@@ -569,7 +569,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
   );
   final transaaction =
       bchTransaction.buildTransaction((trDigest, utxo, publicKey, sighash) {
-    return privateKey.signInput(trDigest, sigHash: sighash);
+    return privateKey.signECDSA(trDigest, sighash: sighash);
   });
 
   /// transaction ID
@@ -645,7 +645,7 @@ In the [example](https://github.com/mrtnetwork/bitcoin_base/tree/main/example/li
         extFlags: 0,
       );
 
-      // sign transaction using `signTapRoot` method of thransaction
+      // sign transaction using `signBip340` method of thransaction
       final signedTx = sign(txDigit, utxo[i].public().toHex(), SIGHASH_ALL);
 
       // add witness for current index

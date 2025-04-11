@@ -1,6 +1,20 @@
-import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
-import 'package:blockchain_utils/utils/binary/utils.dart';
+import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
+
+ECPrivate getPublicKey({String path = "m/84'/1'/0'/0/1"}) {
+  final key = getKey(path: path);
+  return ECPrivate.fromBytes(key.privateKey.raw);
+}
+
+Bip32Slip10Secp256k1 getKey(
+    {String key =
+        "tprv8ZgxMBicQKsPdgBQV2Y9EVPSjAGhyZXArhwSzHwnV3FytzPRr8KCR8EKEpLeHbANAncgbc31a6QoXjBTARQiZ2h1Z2NgSCjFYeTqKpAN5Gc",
+    String path = "m/86'/1'/0'/0/1"}) {
+  Bip32Slip10Secp256k1 secp = Bip32Slip10Secp256k1.fromExtendedKey(
+      key, Bip44Coins.bitcoinTestnet.conf.keyNetVer);
+  return secp.derivePath(path) as Bip32Slip10Secp256k1;
+}
 
 void main() {
   _decodeTx();

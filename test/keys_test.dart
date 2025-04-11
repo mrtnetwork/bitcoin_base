@@ -161,17 +161,63 @@ void main() {
         netVersion: BitcoinNetwork.mainnet.wifNetVer);
     final pub = priv.getPublic();
 
-    test('test1', () {
+    test('sign/verify message', () {
       final sign = priv.signMessage(StringUtils.encode(message));
-      pub.verify(StringUtils.encode(message), BytesUtils.fromHexString(sign));
-
       expect(
           pub.verify(
-              StringUtils.encode(message), BytesUtils.fromHexString(sign)),
+              message: StringUtils.encode(message),
+              signature: BytesUtils.fromHexString(sign)),
           true);
     });
 
-    test('test2', () {});
+    test('sign/verify bip137 p2pkh uncompressed', () {
+      final signature = priv.signBip137(StringUtils.encode(message));
+
+      expect(
+          pub.verifyBip137Address(
+              message: StringUtils.encode(message),
+              signature: signature,
+              address:
+                  priv.getPublic().toAddress(mode: PubKeyModes.uncompressed)),
+          true);
+    });
+
+    test('sign/verify bip137 p2pkh compressed', () {
+      final signature = priv.signBip137(StringUtils.encode(message),
+          mode: BIP137Mode.p2pkhCompressed);
+
+      expect(
+          pub.verifyBip137Address(
+              message: StringUtils.encode(message),
+              signature: signature,
+              address:
+                  priv.getPublic().toAddress(mode: PubKeyModes.compressed)),
+          true);
+    });
+
+    test('sign/verify bip137 p2wpkh', () {
+      final signature =
+          priv.signBip137(StringUtils.encode(message), mode: BIP137Mode.p2wpkh);
+
+      expect(
+          pub.verifyBip137Address(
+              message: StringUtils.encode(message),
+              signature: signature,
+              address: priv.getPublic().toSegwitAddress()),
+          true);
+    });
+
+    test('sign/verify bip137 p2wpkh/p2sh', () {
+      final signature = priv.signBip137(StringUtils.encode(message),
+          mode: BIP137Mode.p2shP2wpkh);
+
+      expect(
+          pub.verifyBip137Address(
+              message: StringUtils.encode(message),
+              signature: signature,
+              address: priv.getPublic().toP2wpkhInP2sh()),
+          true);
+    });
   });
 
   group('TestP2pkhAddresses', () {

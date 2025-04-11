@@ -73,7 +73,6 @@ class TaprootUtils {
     if (xKey.length == EcdsaKeysConst.pubKeyCompressedByteLen) {
       xKey = xKey.sublist(1);
     }
-
     final tweak =
         calculateTweek(xKey, treeScript: treeScript, merkleRoot: merkleRoot);
     return tweakInternalKey(xKey, tweak);

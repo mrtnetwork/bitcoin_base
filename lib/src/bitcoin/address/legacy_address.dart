@@ -65,7 +65,8 @@ class P2shAddress extends LegacyAddress {
     }
     return P2shAddress.fromHash160(
         addrHash: BytesUtils.toHexString(
-            QuickCrypto.sha256DoubleHash(script.toBytes())));
+            QuickCrypto.sha256DoubleHash(script.toBytes())),
+        type: addressType);
   }
   P2shAddress.fromScript(
       {required super.script, this.type = P2shAddressType.p2pkInP2sh})
@@ -95,10 +96,18 @@ class P2shAddress extends LegacyAddress {
   /// Returns the scriptPubKey (P2SH) that corresponds to this address
   @override
   Script toScriptPubKey() {
-    if (addressProgram.length == 64) {
-      return Script(script: ['OP_HASH256', addressProgram, 'OP_EQUAL']);
+    if (addressProgram.length == QuickCrypto.sha256DigestSize * 2) {
+      return Script(script: [
+        BitcoinOpcode.opHash256,
+        addressProgram,
+        BitcoinOpcode.opEqual
+      ]);
     }
-    return Script(script: ['OP_HASH160', addressProgram, 'OP_EQUAL']);
+    return Script(script: [
+      BitcoinOpcode.opHash160,
+      addressProgram,
+      BitcoinOpcode.opEqual
+    ]);
   }
 
   @override
@@ -129,11 +138,11 @@ class P2pkhAddress extends LegacyAddress {
   @override
   Script toScriptPubKey() {
     return Script(script: [
-      'OP_DUP',
-      'OP_HASH160',
+      BitcoinOpcode.opDup,
+      BitcoinOpcode.opHash160,
       addressProgram,
-      'OP_EQUALVERIFY',
-      'OP_CHECKSIG'
+      BitcoinOpcode.opEqualVerify,
+      BitcoinOpcode.opCheckSig
     ]);
   }
 
@@ -154,7 +163,7 @@ class P2pkAddress extends LegacyAddress {
 
   @override
   Script toScriptPubKey() {
-    return Script(script: [publicKey, 'OP_CHECKSIG']);
+    return Script(script: [publicKey, BitcoinOpcode.opCheckSig]);
   }
 
   @override

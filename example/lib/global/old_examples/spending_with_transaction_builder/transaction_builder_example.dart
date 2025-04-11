@@ -216,10 +216,10 @@ void main() async {
       // yes is p2tr utxo and now we use SignTaprootTransaction(Schnorr sign)
       // for now this transaction builder support only tweak transaction
       // If you want to spend a Taproot script-path spending, you must create your own transaction builder.
-      return key.signTapRoot(trDigest, sighash: sighash);
+      return key.signBip340(trDigest, sighash: sighash);
     } else {
       // is seqwit(v0) or lagacy address we use  SingInput (ECDSA)
-      return key.signInput(trDigest, sigHash: sighash);
+      return key.signECDSA(trDigest, sighash: sighash);
     }
   });
 

@@ -150,10 +150,11 @@ class PsbtGeneratedTransactionDigest {
             partialSignature: PsbtUtils.validateMusigPartialSignature(
                 signature: signature.signature, index: taprootParams.index));
       }
-      final schnorrSignature = PsbtUtils.validateSchnorrSignature(
+      final schnorrSignature = PsbtUtils.validateSignature(
           signature: signature.signature,
           index: params.index,
-          expectedSighash: sighashType);
+          expectedSighash: sighashType,
+          type: params.type);
       if (leafScript == null) {
         return PsbtInputTaprootKeySpendSignature(schnorrSignature);
       }
@@ -163,10 +164,11 @@ class PsbtGeneratedTransactionDigest {
           leafHash: leafScript!.leafScript.hash(),
           xOnlyPubKey: signature.signerPublicKey.toXOnly());
     }
-    final ecdsaSignature = PsbtUtils.validateEcdsaSignature(
+    final ecdsaSignature = PsbtUtils.validateSignature(
         signature: signature.signature,
         index: params.index,
-        expectedSighash: sighashType);
+        expectedSighash: sighashType,
+        type: params.type);
     return PsbtInputPartialSig(
         signature: ecdsaSignature,
         publicKey: signature.signerPublicKey.toBytes(
@@ -325,7 +327,13 @@ class PsbtGeneratedTransactionDigest {
 
   bool verifyEcdsaSignature(PsbtInputPartialSig sig) {
     try {
-      return sig.publicKey.verifyTransaactionSignature(digest, sig.signature);
+      if (CryptoSignatureUtils.isValidSchnorrSignature(sig.signature)) {
+        return sig.publicKey
+            .verifySchnorrSignature(digest: digest, signature: sig.signature);
+      }
+
+      return sig.publicKey
+          .verifyDerSignature(digest: digest, signature: sig.signature);
     } catch (_) {
       return false;
     }
@@ -418,8 +426,11 @@ class PsbtGeneratedTransactionDigest {
       {required List<int> xOnly, required List<int> signature}) {
     try {
       final tweak = generateTaprootTweak();
-      return BitcoinVerifier.verifySchnorrSignature(
-          xOnly: xOnly, message: digest, signature: signature, tweak: tweak);
+      return BitcoinSignatureVerifier.verifyBip340SignatureUsingXOnly(
+          xOnly: xOnly,
+          digest: digest,
+          signature: signature,
+          tapTweakHash: tweak);
     } catch (_) {
       return false;
     }

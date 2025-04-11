@@ -138,9 +138,9 @@ void main() async {
   final transaction =
       builder.buildTransaction((trDigest, utxo, publicKey, sighash) {
     if (utxo.utxo.isP2tr) {
-      return examplePrivateKey2.signTapRoot(trDigest, sighash: sighash);
+      return examplePrivateKey2.signBip340(trDigest, sighash: sighash);
     }
-    return examplePrivateKey2.signInput(trDigest, sigHash: sighash);
+    return examplePrivateKey2.signECDSA(trDigest, sighash: sighash);
   });
 
   /// get tx id

@@ -72,7 +72,7 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
   static int estimateTransactionSize(
       {required List<UtxoWithAddress> utxos,
       required List<BitcoinBaseOutput> outputs,
-      required BitcoinCashNetwork network,
+      required BasedUtxoNetwork network,
       String? memo,
       bool enableRBF = false}) {
     final transactionBuilder = ForkedTransactionBuilder(
@@ -319,9 +319,9 @@ be retrieved by anyone who examines the blockchain's history.
   /// Total token amount to spend.
   Map<String, BigInt> _sumTokenOutputAmounts(List<TxOutput> outputs) {
     final tokens = <String, BigInt>{};
-    for (final utxo in outputs) {
-      if (utxo.cashToken == null) continue;
-      final token = utxo.cashToken!;
+    for (final out in outputs) {
+      if (out.cashToken == null) continue;
+      final token = out.cashToken!;
       if (!token.hasAmount) continue;
       if (tokens.containsKey(token.category)) {
         tokens[token.category] = tokens[token.category]! + token.amount;

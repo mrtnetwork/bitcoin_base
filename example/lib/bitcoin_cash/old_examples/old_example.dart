@@ -152,13 +152,13 @@ void _spendFrom2P2SHAnd2P2PKHAddress() async {
     /// For each input in the transaction, locate the corresponding private key
     /// and sign the transaction digest to construct the unlocking script.
     if (publicKey == childKey1PublicKey.toHex()) {
-      return childKey1PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey1PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey.toHex()) {
-      return childKey2PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey2PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey2.toHex()) {
-      return examplePrivateKey.signInput(trDigest, sigHash: sighash);
+      return examplePrivateKey.signECDSA(trDigest, sighash: sighash);
     }
 
     throw UnimplementedError();
@@ -353,13 +353,13 @@ void _spendFrom2P2SHAnd1P2PKHAddress() async {
       ]);
   final tr = b.buildTransaction((trDigest, utxo, publicKey, int sighash) {
     if (publicKey == childKey1PublicKey.toHex()) {
-      return childKey1PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey1PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey.toHex()) {
-      return childKey2PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey2PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey2.toHex()) {
-      return examplePrivateKey.signInput(trDigest, sigHash: sighash);
+      return examplePrivateKey.signECDSA(trDigest, sighash: sighash);
     }
 
     throw UnimplementedError();

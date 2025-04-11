@@ -1,4 +1,5 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
+import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
@@ -211,7 +212,7 @@ class P2trMultiSignatureAddress {
       for (var w = 0; w < signer.weight; w++) {
         if (i == 0 && w == 0) {
           multiSigScript.add(signer.xOnly);
-          multiSigScript.add("OP_CHECKSIG");
+          multiSigScript.add(BitcoinOpcode.opCheckSig.name);
           continue;
         }
         multiSigScript.add(signer.xOnly);

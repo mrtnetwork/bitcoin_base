@@ -2,7 +2,7 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 
 BtcTransaction buildP2wpkTransaction({
   required List<BitcoinOutput> receiver,
-  required String Function(List<int>, String publicKey, int sigHash) sign,
+  required String Function(List<int>, String publicKey, int sighash) sign,
   required List<UtxoWithAddress> utxo,
 }) {
   // We define transaction inputs by specifying the transaction ID and index.
@@ -66,7 +66,7 @@ BtcTransaction buildP2wpkTransaction({
 
 BtcTransaction buildP2WSHTransaction({
   required List<BitcoinOutput> receiver,
-  required String Function(List<int>, String publicKey, int sigHash) sign,
+  required String Function(List<int>, String publicKey, int sighash) sign,
   required List<UtxoWithAddress> utxo,
 }) {
   // We define transaction inputs by specifying the transaction ID and index.
@@ -132,7 +132,7 @@ BtcTransaction buildP2WSHTransaction({
 
 BtcTransaction buildP2pkhTransaction({
   required List<BitcoinOutput> receiver,
-  required String Function(List<int>, String publicKey, int sigHash) sign,
+  required String Function(List<int>, String publicKey, int sighash) sign,
   required List<UtxoWithAddress> utxo,
 }) {
   // We define transaction inputs by specifying the transaction ID and index.
@@ -178,7 +178,7 @@ BtcTransaction buildP2pkhTransaction({
 
 BtcTransaction buildP2shNoneSegwitTransaction({
   required List<BitcoinOutput> receiver,
-  required String Function(List<int>, String publicKey, int sigHash) sign,
+  required String Function(List<int>, String publicKey, int sighash) sign,
   required List<UtxoWithAddress> utxo,
 }) {
   // We define transaction inputs by specifying the transaction ID and index.
@@ -238,7 +238,7 @@ BtcTransaction buildP2shNoneSegwitTransaction({
 
 BtcTransaction buildP2SHSegwitTransaction({
   required List<BitcoinOutput> receiver,
-  required String Function(List<int>, String publicKey, int sigHash) sign,
+  required String Function(List<int>, String publicKey, int sighash) sign,
   required List<UtxoWithAddress> utxo,
 }) {
   // We define transaction inputs by specifying the transaction ID and index.
@@ -323,7 +323,7 @@ BtcTransaction buildP2SHSegwitTransaction({
 
 BtcTransaction buildP2trTransaction({
   required List<BitcoinOutput> receiver,
-  required String Function(List<int>, String publicKey, int sigHash) sign,
+  required String Function(List<int>, String publicKey, int sighash) sign,
   required List<UtxoWithAddress> utxo,
 }) {
   // We define transaction inputs by specifying the transaction ID and index.
@@ -373,7 +373,7 @@ BtcTransaction buildP2trTransaction({
       sighash: BitcoinOpCodeConst.sighashDefault,
     );
 
-    // sign transaction using `signTapRoot` method of thransaction
+    // sign transaction using `signBip340` method of thransaction
     final signedTx =
         sign(txDigit, utxo[i].public().toHex(), BitcoinOpCodeConst.sighashAll);
 

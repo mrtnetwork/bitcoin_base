@@ -108,7 +108,7 @@ void main() {
           scriptPubKeys: [scriptPubKey2],
           amounts: [BigInt.from(3500)],
           sighash: signHash);
-      final signatur = fromPriv2.signTapRoot(txDigit,
+      final signatur = fromPriv2.signBip340(txDigit,
           treeScript: TaprootLeaf(script: trScriptP2pk1), sighash: signHash);
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: [signatur])
@@ -130,7 +130,7 @@ void main() {
         txIndex: 0,
         tapleafScript: TaprootLeaf(script: trScriptP2pk1),
       );
-      final sig = privkeyTrScript1.signTapRoot(digit,
+      final sig = privkeyTrScript1.signBip340(digit,
           sighash: BitcoinOpCodeConst.sighashDefault, tweak: false);
       final controlBlock = TaprootControlBlock.generate(
           xOnlyOrInternalPubKey: fromPub2.toXOnly(),
@@ -207,7 +207,7 @@ void main() {
         tapleafScript: TaprootLeaf(script: trScriptP2pkA),
       );
 
-      final sign = privkeyTrScriptA.signTapRoot(
+      final sign = privkeyTrScriptA.signBip340(
         txDigit,
         tweak: false,
       );
@@ -311,7 +311,7 @@ void main() {
           scriptPubKeys: allUtxosScriptPubkeys.map((e) => e).toList(),
           tapleafScript: TaprootLeaf(script: trScriptP2pkB),
           amounts: allAmounts.map((e) => e).toList());
-      final sig = privkeyTrScriptB.signTapRoot(digit, tweak: false);
+      final sig = privkeyTrScriptB.signBip340(digit, tweak: false);
       final controlBlock = TaprootControlBlock.generate(
         xOnlyOrInternalPubKey: fromPub.toXOnly(),
         scriptTree: TaprootBranch(

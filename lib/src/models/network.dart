@@ -3,6 +3,18 @@ import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/utils/enumerate.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
+class MessagePrefixes {
+  static const String bitcoinMainnet = "\x18Bitcoin Signed Message:\n";
+  static const String litecoinMainnet = "\x19Litecoin Signed Message:\n";
+  static const String dashMainnet = "\x19DarkCoin Signed Message:\n";
+  static const String dogecoinMainnet = "\x19Dogecoin Signed Message:\n";
+  static const String bitcoinCashMainnet = "\x1cBitcoin Cash Signed Message:\n";
+  static const String bitcoinSVMainnet = "\x18Bitcoin Signed Message:\n";
+  static const String pepeMainnet = "\x15Pepe Signed Message:\n";
+  static const String electraProtocolMainnet =
+      "\x20Electra Protocol Signed Message:\n";
+}
+
 /// Abstract class representing a base for UTXO-based cryptocurrency networks.
 abstract class BasedUtxoNetwork implements Enumerate {
   /// List of version bytes for Wallet Import Format (WIF).

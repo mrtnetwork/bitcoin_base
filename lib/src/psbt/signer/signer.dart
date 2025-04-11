@@ -78,12 +78,14 @@ class PsbtDefaultSigner
   SignInputResponse btcSignInput(PsbtSigningInputDigest digest) {
     if (digest.isTaproot) {
       return SignInputResponse(
-          signature:
-              privateKey.signBtcSchnorr(digest.digest, tweak: digest.tweak),
+          signature: BytesUtils.fromHexString(privateKey.signBip340(
+              digest.digest,
+              tapTweakHash: digest.tweak,
+              tweak: digest.tweak != null)),
           signerPublicKey: signerPublicKey);
     }
     final signature =
-        privateKey.signInput(digest.digest, sigHash: digest.sighash);
+        privateKey.signECDSA(digest.digest, sighash: digest.sighash);
     return SignInputResponse(
         signature: BytesUtils.fromHexString(signature),
         signerPublicKey: signerPublicKey);

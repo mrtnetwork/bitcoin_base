@@ -129,7 +129,7 @@ void _spendLTCP2pkhAddress() async {
     /// and sign the transaction digest to construct the unlocking script.
     if (publicKey == pub.toHex()) {
       /// sign the transaction input using specified sighash or default to SIGHASH_ALL
-      return examplePrivateKey.signInput(trDigest, sigHash: sighash);
+      return examplePrivateKey.signECDSA(trDigest, sighash: sighash);
     }
 
     throw UnimplementedError();
@@ -269,13 +269,13 @@ void _spendFrom2P2shAddressAndOneMultiSigP2shAddress() async {
     /// and sign the transaction digest to construct the unlocking script.
 
     if (publicKey == childKey1PublicKey.toHex()) {
-      return childKey1PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey1PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey.toHex()) {
-      return childKey2PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey2PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey2.toHex()) {
-      return examplePrivateKey.signInput(trDigest, sigHash: sighash);
+      return examplePrivateKey.signECDSA(trDigest, sighash: sighash);
     }
 
     throw UnimplementedError();
@@ -381,13 +381,13 @@ void _spendFromNestedSegwitP2WPKHInP2SH() async {
     /// For each input in the transaction, locate the corresponding private key
     /// and sign the transaction digest to construct the unlocking script.
     if (publicKey == childKey1PublicKey.toHex()) {
-      return childKey1PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey1PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey.toHex()) {
-      return childKey2PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey2PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey2.toHex()) {
-      return examplePrivateKey.signInput(trDigest, sigHash: sighash);
+      return examplePrivateKey.signECDSA(trDigest, sighash: sighash);
     }
 
     throw UnimplementedError();
@@ -501,13 +501,13 @@ void _spendFromSegwitP2WPKHAddress() async {
     /// For each input in the transaction, locate the corresponding private key
     /// and sign the transaction digest to construct the unlocking script.
     if (publicKey == childKey1PublicKey.toHex()) {
-      return childKey1PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey1PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey.toHex()) {
-      return childKey2PrivateKey.signInput(trDigest, sigHash: sighash);
+      return childKey2PrivateKey.signECDSA(trDigest, sighash: sighash);
     }
     if (publicKey == examplePublicKey2.toHex()) {
-      return examplePrivateKey.signInput(trDigest, sigHash: sighash);
+      return examplePrivateKey.signECDSA(trDigest, sighash: sighash);
     }
 
     throw UnimplementedError();

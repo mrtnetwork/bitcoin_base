@@ -146,7 +146,6 @@ mixin PsbtSignerImpl on PsbtBuilderImpl {
           await signer.btcSignInputAsync(digest.createRequest(signer));
       final psbtSignature = digest.createSignature(signature, signer);
       final sighash = digest.getPsbtSigHash();
-      print("come here ${sighash?.sighash}");
       _psbt.input
           .updateInputs(index, [psbtSignature, if (sighash != null) sighash]);
     }

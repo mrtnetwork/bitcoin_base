@@ -1,3 +1,10 @@
+## 6.2.0
+
+- Update dependencies.
+- Support PSBT for BCH
+- Support for BIP-173
+- Support for BCH schnorr signing
+
 ## 6.1.0
 
 - Fix der signature validation.

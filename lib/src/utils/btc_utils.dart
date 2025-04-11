@@ -33,4 +33,10 @@ class BtcUtils {
     dec = dec * BigRational(BigInt.from(10).pow(8));
     return dec.toBigInt();
   }
+
+  static String toBtc(BigInt amount) {
+    BigRational dec = BigRational(amount);
+    dec = dec / BigRational(BigInt.from(10).pow(8));
+    return dec.toDecimal(digits: 8);
+  }
 }

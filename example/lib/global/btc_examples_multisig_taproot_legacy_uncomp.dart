@@ -125,9 +125,9 @@ void main() async {
       bchTransaction.buildTransaction((trDigest, utxo, publicKey, sighash) {
     final pk = ECPublic.fromHex(publicKey);
     if (utxo.utxo.isP2tr) {
-      return keys[pk.toHex()]!.signTapRoot(trDigest, sighash: sighash);
+      return keys[pk.toHex()]!.signBip340(trDigest, sighash: sighash);
     }
-    return keys[pk.toHex()]!.signInput(trDigest, sigHash: sighash);
+    return keys[pk.toHex()]!.signECDSA(trDigest, sighash: sighash);
   });
 
   final transactionRaw = transaaction.toHex();

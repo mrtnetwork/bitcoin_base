@@ -83,11 +83,11 @@ Future<void> spendingP2WPKH(ECPrivate sWallet, ECPrivate rWallet) async {
   // You can refer to this method to learn how to create a transaction.
   final transaction = buildP2wpkTransaction(
     receiver: outPutWithValue,
-    sign: (p0, publicKey, sigHash) {
+    sign: (p0, publicKey, sighash) {
       // Here, we find the corresponding private key based on the public key and proceed to sign the transaction."
-      // Note that to sign Taproot transactions, you must use the 'signTapRoot' method for signing.
+      // Note that to sign Taproot transactions, you must use the 'signBip340' method for signing.
       // Below is a method for spending Taproot transactions that you can review.
-      return prive.signInput(p0, sigHash: sigHash);
+      return prive.signECDSA(p0, sighash: sighash);
     },
     utxo: utxo,
   );
@@ -143,8 +143,8 @@ Future<void> spendingP2WSH(ECPrivate sWallet, ECPrivate rWallet) async {
       .toList();
   final transaction = buildP2WSHTransaction(
     receiver: outPutWithValue,
-    sign: (p0, publicKey, sigHash) {
-      return prive.signInput(p0, sigHash: sigHash);
+    sign: (p0, publicKey, sighash) {
+      return prive.signECDSA(p0, sighash: sighash);
     },
     utxo: utxo,
   );
@@ -192,8 +192,8 @@ Future<void> spendingP2PKH(ECPrivate sWallet, ECPrivate rWallet) async {
 
   final transaction = buildP2pkhTransaction(
     receiver: outPutWithValue,
-    sign: (p0, publicKey, sigHash) {
-      return prive.signInput(p0, sigHash: sigHash);
+    sign: (p0, publicKey, sighash) {
+      return prive.signECDSA(p0, sighash: sighash);
     },
     utxo: utxo,
   );
@@ -243,8 +243,8 @@ Future<void> spendingP2SHNoneSegwit(
       .toList();
   final transaction = buildP2shNoneSegwitTransaction(
     receiver: outPutWithValue,
-    sign: (p0, publicKey, sigHash) {
-      return prive.signInput(p0, sigHash: sigHash);
+    sign: (p0, publicKey, sighash) {
+      return prive.signECDSA(p0, sighash: sighash);
     },
     utxo: utxo,
   );
@@ -296,8 +296,8 @@ Future<void> spendingP2shSegwit(ECPrivate sWallet, ECPrivate rWallet) async {
   // return;
   final transaction = buildP2SHSegwitTransaction(
     receiver: outPutWithValue,
-    sign: (p0, publicKey, sigHash) {
-      return prive.signInput(p0, sigHash: sigHash);
+    sign: (p0, publicKey, sighash) {
+      return prive.signECDSA(p0, sighash: sighash);
     },
     utxo: utxo,
   );
@@ -311,7 +311,7 @@ Future<void> spendingP2TR(ECPrivate sWallet, ECPrivate rWallet) async {
   // All the steps are the same as in the first tutorial;
   // the only difference is the transaction input type,
   // and we use method `buildP2trTransaction` to create the transaction.
-  // we use `signTapRoot` of ECPrivate for signing taproot transaction
+  // we use `signBip340` of ECPrivate for signing taproot transaction
   final addr = sWallet.getPublic();
   // P2TR address
   final sender = addr.toTaprootAddress();
@@ -346,9 +346,9 @@ Future<void> spendingP2TR(ECPrivate sWallet, ECPrivate rWallet) async {
 
   final transaction = buildP2trTransaction(
     receiver: outPutWithValue,
-    sign: (p0, publicKey, sigHash) {
-      // Use signTapRoot instead of signInput for the taproot transaction input.
-      return prive.signTapRoot(p0, sighash: sigHash, tweak: true);
+    sign: (p0, publicKey, sighash) {
+      // Use signBip340 instead of signECDSA for the taproot transaction input.
+      return prive.signBip340(p0, sighash: sighash, tweak: true);
     },
     utxo: utxo,
   );

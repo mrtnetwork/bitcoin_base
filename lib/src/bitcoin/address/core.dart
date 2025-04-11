@@ -20,6 +20,13 @@ abstract class BitcoinAddressType implements Enumerate {
   int get hashLength;
   bool get isP2sh32 => isP2sh && hashLength == 32;
 
+  bool get supportBip137 => switch (this) {
+        P2pkhAddressType.p2pkh || P2pkhAddressType.p2pkhwt => true,
+        P2shAddressType.p2wpkhInP2sh => true,
+        SegwitAddressType.p2wpkh => true,
+        _ => false
+      };
+
   // Enum values as a list for iteration
   static const List<BitcoinAddressType> values = [
     P2pkhAddressType.p2pkh,

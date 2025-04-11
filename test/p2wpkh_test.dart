@@ -135,7 +135,7 @@ void main() {
       final tx = BtcTransaction(inputs: [txin1], outputs: [txout1]);
       final digit = tx.getTransactionDigest(
           txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
-      final sig = sk.signInput(digit);
+      final sig = sk.signECDSA(digit);
       txin1.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), createSendToP2wpkhResult);
     });
@@ -143,7 +143,7 @@ void main() {
       var tx = BtcTransaction(inputs: [txinSpend], outputs: [txout2]);
       final digit = tx.getTransactionSegwitDigit(
           txInIndex: 0, script: p2pkhRedeemScript, amount: txinSpendAmount);
-      final sig = sk.signInput(digit);
+      final sig = sk.signECDSA(digit);
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
       ]);
@@ -156,13 +156,13 @@ void main() {
       );
       final digit = tx.getTransactionDigest(
           txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
-      final sig = sk.signInput(digit);
+      final sig = sk.signECDSA(digit);
       txinSpendP2pkh.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       final segwitDigit = tx.getTransactionSegwitDigit(
           amount: txinSpendP2wpkhAmount,
           script: p2pkhRedeemScript,
           txInIndex: 1);
-      final sig2 = sk.signInput(segwitDigit);
+      final sig2 = sk.signECDSA(segwitDigit);
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: []),
         TxWitnessInput(stack: [sig2, sk.getPublic().toHex()])
@@ -176,7 +176,7 @@ void main() {
           script: p2pkhRedeemScript,
           amount: txin1SignoneAmount,
           sighash: BitcoinOpCodeConst.sighashNone);
-      final sig = sk.signInput(digit, sigHash: BitcoinOpCodeConst.sighashNone);
+      final sig = sk.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashNone);
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
       ]);
@@ -195,7 +195,7 @@ void main() {
           amount: txin1SigsingleAmount,
           sighash: BitcoinOpCodeConst.sighashSingle);
       final sig =
-          sk.signInput(digit, sigHash: BitcoinOpCodeConst.sighashSingle);
+          sk.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashSingle);
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
       ]);
@@ -214,8 +214,8 @@ void main() {
           amount: txin1SiganyonecanpayAllAmount,
           sighash: BitcoinOpCodeConst.sighashAll |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
-      final sig = sk.signInput(digit,
-          sigHash: BitcoinOpCodeConst.sighashAll |
+      final sig = sk.signECDSA(digit,
+          sighash: BitcoinOpCodeConst.sighashAll |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
 
       tx = tx.copyWith(inputs: [...tx.inputs, txin2SiganyonecanpayAll]);
@@ -224,7 +224,7 @@ void main() {
           script: p2pkhRedeemScript,
           amount: txin2SiganyonecanpayAllAmount,
           sighash: BitcoinOpCodeConst.sighashAll);
-      final sig2 = sk.signInput(digit2, sigHash: BitcoinOpCodeConst.sighashAll);
+      final sig2 = sk.signECDSA(digit2, sighash: BitcoinOpCodeConst.sighashAll);
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
         TxWitnessInput(stack: [sig2, sk.getPublic().toHex()])
@@ -244,8 +244,8 @@ void main() {
           amount: txin1SiganyonecanpayNoneAmount,
           sighash: BitcoinOpCodeConst.sighashNone |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
-      final sig = sk.signInput(digit,
-          sigHash: BitcoinOpCodeConst.sighashNone |
+      final sig = sk.signECDSA(digit,
+          sighash: BitcoinOpCodeConst.sighashNone |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
       tx = tx.copyWith(inputs: [...tx.inputs, txin2SiganyonecanpayNone]);
       tx = tx.copyWith(outputs: [...tx.outputs, txout2SiganyonecanpayNone]);
@@ -254,7 +254,7 @@ void main() {
           script: p2pkhRedeemScript,
           amount: txin2SiganyonecanpayNoneAmount,
           sighash: BitcoinOpCodeConst.sighashAll);
-      final sig2 = sk.signInput(digit2, sigHash: BitcoinOpCodeConst.sighashAll);
+      final sig2 = sk.signECDSA(digit2, sighash: BitcoinOpCodeConst.sighashAll);
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
         TxWitnessInput(stack: [sig2, sk.getPublic().toHex()])
@@ -274,8 +274,8 @@ void main() {
           amount: txin1SiganyonecanpaySingleAmount,
           sighash: BitcoinOpCodeConst.sighashSingle |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
-      final sig = sk.signInput(digit,
-          sigHash: BitcoinOpCodeConst.sighashSingle |
+      final sig = sk.signECDSA(digit,
+          sighash: BitcoinOpCodeConst.sighashSingle |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: [sig, sk.getPublic().toHex()])

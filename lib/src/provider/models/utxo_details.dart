@@ -96,6 +96,10 @@ abstract class BitcoinBaseOutput {
   TxOutput get toOutput;
 }
 
+abstract class BCHBaseOutput extends BitcoinOutput {
+  BCHBaseOutput({required super.address, required super.value});
+}
+
 /// Abstract class representing a spendable Bitcoin output, extending BitcoinBaseOutput.
 abstract class BitcoinSpendableBaseOutput implements BitcoinBaseOutput {
   /// The Bitcoin address associated with this output.
@@ -130,12 +134,15 @@ class BitcoinScriptOutput implements BitcoinBaseOutput {
 
   /// The value (amount) of the Bitcoin output.
   final BigInt value;
-  const BitcoinScriptOutput({required this.script, required this.value});
+
+  final CashToken? token;
+  const BitcoinScriptOutput(
+      {required this.script, required this.value, this.token});
 
   /// Convert the custom script output to a standard TxOutput.
   @override
   TxOutput get toOutput =>
-      TxOutput(amount: value, scriptPubKey: script, cashToken: null);
+      TxOutput(amount: value, scriptPubKey: script, cashToken: token);
 }
 
 /// BitcoinTokenOutput represents details about a Bitcoin cash transaction with cash token output, including

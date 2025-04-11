@@ -9,7 +9,6 @@ import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/psbt/psbt_builder/types/types.dart';
 import 'package:bitcoin_base/src/psbt/types/types/psbt.dart';
-import 'package:bitcoin_base/src/psbt/utils/utils.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 enum PsbtInputTypes {
@@ -450,7 +449,8 @@ class PsbtInputPartialSig extends PsbtInputDataSignature {
         super._(type: PsbtInputTypes.partialSignature);
   factory PsbtInputPartialSig(
       {required List<int> signature, required List<int> publicKey}) {
-    if (PsbtUtils.isValidBitcoinDERSignature(signature)) {
+    if (CryptoSignatureUtils.isValidBitcoinDERSignature(signature) ||
+        CryptoSignatureUtils.isValidSchnorrSignature(signature)) {
       final pubKey = ECPublic.fromBytes(publicKey);
       final mode = publicKey.length == EcdsaKeysConst.pubKeyCompressedByteLen
           ? PubKeyModes.compressed
@@ -473,7 +473,8 @@ class PsbtInputPartialSig extends PsbtInputDataSignature {
       throw DartBitcoinPluginException(
           "Invalid PSBT Partial Signature type flag.");
     }
-    if (PsbtUtils.isValidBitcoinDERSignature(keypair.value.data)) {
+    if (CryptoSignatureUtils.isValidBitcoinDERSignature(keypair.value.data) ||
+        CryptoSignatureUtils.isValidSchnorrSignature(keypair.value.data)) {
       try {
         final mode = keypair.key.extraData?.length ==
                 EcdsaKeysConst.pubKeyCompressedByteLen

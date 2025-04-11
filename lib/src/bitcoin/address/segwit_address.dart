@@ -71,7 +71,7 @@ class P2wpkhAddress extends SegwitAddress {
   /// returns the scriptPubKey of a P2WPKH witness script
   @override
   Script toScriptPubKey() {
-    return Script(script: ['OP_0', addressProgram]);
+    return Script(script: [BitcoinOpcode.op0, addressProgram]);
   }
 
   /// returns the type of address
@@ -102,7 +102,7 @@ class P2trAddress extends SegwitAddress {
   /// returns the scriptPubKey of a P2TR witness script
   @override
   Script toScriptPubKey() {
-    return Script(script: ['OP_1', addressProgram]);
+    return Script(script: [BitcoinOpcode.op1, addressProgram]);
   }
 
   /// returns the type of address
@@ -123,7 +123,7 @@ class P2wshAddress extends SegwitAddress {
   /// Returns the scriptPubKey of a P2WPKH witness script
   @override
   Script toScriptPubKey() {
-    return Script(script: ['OP_0', addressProgram]);
+    return Script(script: [BitcoinOpcode.op0, addressProgram]);
   }
 
   /// Returns the type of address

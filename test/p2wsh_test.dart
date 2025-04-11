@@ -73,7 +73,7 @@ void main() {
       final tx = BtcTransaction(inputs: [txin1], outputs: [txout1]);
       final digit = tx.getTransactionDigest(
           txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
-      final sig = sk1.signInput(digit);
+      final sig = sk1.signECDSA(digit);
       txin1.scriptSig = Script(script: [sig, sk1.getPublic().toHex()]);
       expect(tx.serialize(), createSendToP2pkhResult);
     });
@@ -84,8 +84,8 @@ void main() {
       );
       final digit1 = tx.getTransactionSegwitDigit(
           txInIndex: 0, script: p2wshRedeemScript, amount: txinSpendAmount);
-      final sig1 = sk1.signInput(digit1);
-      final sig2 = sk2.signInput(digit1);
+      final sig1 = sk1.signECDSA(digit1);
+      final sig2 = sk2.signECDSA(digit1);
       final pk = p2wshRedeemScript.toHex();
       // tx.addWitnesses(TxWitnessInput(stack: ['', sig1, sig2, pk]));
       tx = tx.copyWith(witnesses: [
@@ -100,13 +100,13 @@ void main() {
       );
       final digit1 = tx.getTransactionDigest(
           txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
-      final sig1 = sk1.signInput(digit1);
+      final sig1 = sk1.signECDSA(digit1);
       txin1Multiple.scriptSig = Script(script: [sig1, sk1.getPublic().toHex()]);
       // tx.addWitnesses(TxWitnessInput(stack: []));
       final seqwitDigit = tx.getTransactionSegwitDigit(
           txInIndex: 1, script: p2wshRedeemScript, amount: txin2MultipleAmount);
-      final sigP2sh1 = sk1.signInput(seqwitDigit);
-      final sigP2sh2 = sk2.signInput(seqwitDigit);
+      final sigP2sh1 = sk1.signECDSA(seqwitDigit);
+      final sigP2sh2 = sk2.signECDSA(seqwitDigit);
 
       // tx.addWitnesses(TxWitnessInput(
       //     stack: ['', sigP2sh1, sigP2sh2, p2wshRedeemScript.toHex()]));
@@ -114,7 +114,7 @@ void main() {
           txInIndex: 2,
           script: p2pkhAddr.toScriptPubKey(),
           amount: txin3MultipleAmount);
-      final sig3 = sk1.signInput(segwitDigitIndex2);
+      final sig3 = sk1.signECDSA(segwitDigitIndex2);
       // tx.addWitnesses(TxWitnessInput(stack: [sig3, sk1.getPublic().toHex()]));
       tx = tx.copyWith(witnesses: [
         TxWitnessInput(stack: []),

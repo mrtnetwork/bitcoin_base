@@ -143,8 +143,8 @@ BtcTransaction _spendWithLeafC(
               existsUtxosScriptPubKeys.map((e) => e.toScriptPubKey()).toList(),
           amounts: existsUtxosAmounts)
       .asImmutableBytes;
-  final sig1 = key1.signTapRoot(digest, tweak: false);
-  final sig2 = key2.signTapRoot(digest, tweak: false);
+  final sig1 = key1.signBip340(digest, tweak: false);
+  final sig2 = key2.signBip340(digest, tweak: false);
   final controlBlock = TaprootControlBlock.generate(
       xOnlyOrInternalPubKey: internalKey.toXOnly(),
       leafScript: leafC,

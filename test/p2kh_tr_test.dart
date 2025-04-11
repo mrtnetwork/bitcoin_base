@@ -118,7 +118,7 @@ void main() {
             BitcoinOpcode.opEqualVerify,
             BitcoinOpcode.opCheckSig,
           ]));
-      final sig = sk.signInput(digit);
+      final sig = sk.signECDSA(digit);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), coreTxSignedResult);
     });
@@ -127,7 +127,7 @@ void main() {
           BtcTransaction(inputs: [txin], outputs: [txout, changeLowSTxout]);
       final digit = tx.getTransactionDigest(
           txInIndex: 0, script: fromAddr.toScriptPubKey());
-      final sig = sk.signInput(digit);
+      final sig = sk.signECDSA(digit);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), coreTxSignedLowSSigallResult);
     });
@@ -138,7 +138,7 @@ void main() {
           txInIndex: 0,
           script: fromAddr.toScriptPubKey(),
           sighash: BitcoinOpCodeConst.sighashNone);
-      final sig = sk.signInput(digit, sigHash: BitcoinOpCodeConst.sighashNone);
+      final sig = sk.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashNone);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), coreTxSignedLowSSignoneResult);
       expect(tx.txId(), coreTxSignedLowSSignoneTxid);
@@ -151,7 +151,7 @@ void main() {
           script: sigFromAddr1.toScriptPubKey(),
           sighash: BitcoinOpCodeConst.sighashSingle);
       final sig =
-          sigSk1.signInput(digit, sigHash: BitcoinOpCodeConst.sighashSingle);
+          sigSk1.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashSingle);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       expect(tx.serialize(), sigSighashSingleResult);
     });
@@ -163,13 +163,13 @@ void main() {
           script: sigFromAddr1.toScriptPubKey(),
           sighash: BitcoinOpCodeConst.sighashAll);
       final sig =
-          sigSk1.signInput(digit, sigHash: BitcoinOpCodeConst.sighashAll);
+          sigSk1.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashAll);
       final digit2 = tx.getTransactionDigest(
           txInIndex: 1,
           script: sigFromAddr2.toScriptPubKey(),
           sighash: BitcoinOpCodeConst.sighashAll);
       final sig2 =
-          sigSk2.signInput(digit2, sigHash: BitcoinOpCodeConst.sighashAll);
+          sigSk2.signECDSA(digit2, sighash: BitcoinOpCodeConst.sighashAll);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       sigTxin2.scriptSig = Script(script: [sig2, sigSk2.getPublic().toHex()]);
       expect(tx.serialize(), signSighashAll2in2outResult);
@@ -182,13 +182,13 @@ void main() {
           script: sigFromAddr1.toScriptPubKey(),
           sighash: BitcoinOpCodeConst.sighashNone);
       final sig =
-          sigSk1.signInput(digit, sigHash: BitcoinOpCodeConst.sighashNone);
+          sigSk1.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashNone);
       final digit2 = tx.getTransactionDigest(
           txInIndex: 1,
           script: sigFromAddr2.toScriptPubKey(),
           sighash: BitcoinOpCodeConst.sighashNone);
       final sig2 =
-          sigSk2.signInput(digit2, sigHash: BitcoinOpCodeConst.sighashNone);
+          sigSk2.signECDSA(digit2, sighash: BitcoinOpCodeConst.sighashNone);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       sigTxin2.scriptSig = Script(script: [sig2, sigSk2.getPublic().toHex()]);
       expect(tx.serialize(), signSighashNone2in2outResult);
@@ -202,8 +202,8 @@ void main() {
           sighash: BitcoinOpCodeConst.sighashAll |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
 
-      final sig = sigSk1.signInput(digit,
-          sigHash: BitcoinOpCodeConst.sighashAll |
+      final sig = sigSk1.signECDSA(digit,
+          sighash: BitcoinOpCodeConst.sighashAll |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
 
       final digit2 = tx.getTransactionDigest(
@@ -211,8 +211,8 @@ void main() {
           script: sigFromAddr2.toScriptPubKey(),
           sighash: BitcoinOpCodeConst.sighashSingle |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
-      final sig2 = sigSk2.signInput(digit2,
-          sigHash: BitcoinOpCodeConst.sighashSingle |
+      final sig2 = sigSk2.signECDSA(digit2,
+          sighash: BitcoinOpCodeConst.sighashSingle |
               BitcoinOpCodeConst.sighashAnyoneCanPay);
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       sigTxin2.scriptSig = Script(script: [sig2, sigSk2.getPublic().toHex()]);

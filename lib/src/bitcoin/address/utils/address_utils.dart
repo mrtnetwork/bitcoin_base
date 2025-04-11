@@ -3,10 +3,10 @@ part of 'package:bitcoin_base/src/bitcoin/address/address.dart';
 /// Utility class for working with Bitcoin addresses and related operations.
 class _BitcoinAddressUtils {
   /// Length of a script hash in bytes.
-  static const int scriptHashLenght = 32;
+  static const int scriptHashLenght = QuickCrypto.sha256DigestSize;
 
   /// Length of a hash160 digest in bytes.
-  static const int hash160DigestLength = 20;
+  static const int hash160DigestLength = QuickCrypto.hash160DigestSize;
 
   /// Segregated Witness version 0.
   static const int segwitV0 = 0;
@@ -158,7 +158,7 @@ class _BitcoinAddressUtils {
     }
     baseAddress ??= toLegacy(address, network);
     if (baseAddress == null) {
-      throw const DartBitcoinPluginException('Invalid Bitcoin address');
+      throw const DartBitcoinPluginException('Invalid Bitcoin address.');
     }
     return validateAddress(baseAddress, network);
   }
@@ -178,8 +178,7 @@ class _BitcoinAddressUtils {
       if (toBytes.length == addressType.hashLength) {
         return StringUtils.strip0x(hash160.toLowerCase());
       }
-      // ignore: empty_catches
-    } catch (e) {}
+    } catch (_) {}
     throw const DartBitcoinPluginException(
         'Invalid Bitcoin address program length (program length should be 32 or 20 bytes)');
   }
@@ -205,7 +204,7 @@ class _BitcoinAddressUtils {
       final version = decode.item1;
       return _validateBchScriptBytes(
           network: network, scriptBytes: scriptBytes, version: version);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
