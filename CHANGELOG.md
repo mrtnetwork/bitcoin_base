@@ -1,7 +1,7 @@
 ## 6.3.0
 
 - Update dependencies.
-- Add estimate size for psbt
+- Add estimate transaction size for psbt
 - Add more script validation in psbt
 
 ## 6.2.0
