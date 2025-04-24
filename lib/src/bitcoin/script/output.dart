@@ -25,12 +25,11 @@ class TxOutput {
       CashToken? cashToken}) {
     try {
       return TxOutput._(
-          amount: amount.asUint64,
+          amount: amount.asInt64,
           scriptPubKey: scriptPubKey,
           cashToken: cashToken);
     } catch (_) {
-      throw DartBitcoinPluginException(
-          "Invalid output amount: must be a non-negative 64-bit integer.");
+      throw DartBitcoinPluginException("Invalid output amount.");
     }
   }
   final CashToken? cashToken;

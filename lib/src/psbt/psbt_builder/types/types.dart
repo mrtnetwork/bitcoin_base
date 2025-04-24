@@ -1,7 +1,6 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
-import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/provider/models/models.dart';
 import 'package:bitcoin_base/src/psbt/psbt.dart';
@@ -180,9 +179,14 @@ class PsbtTransactionInput {
           "Mismatch detected: The provided scriptPubKey does not match the nonWitnessUtxo output scriptPubKey.");
     }
     final type = PsbtUtils.findScriptType(output.scriptPubKey);
+    if (type.isP2tr) {
+      throw DartBitcoinPluginException(
+          "Incorrect legacy scriptPubKey. Use `witnessV1` constractor instead of `legacy` for taproot spending.",
+          details: {"type": type.name});
+    }
     if (type.isSegwit) {
       throw DartBitcoinPluginException(
-          "Incorrect scriptPubKey. Use `addWitnessV0Input` instead of `addLegacyInput`.",
+          "Incorrect legacy scriptPubKey. Use `witnessV0` constractor instead of `legacy` for segwit spending.",
           details: {"type": type.name});
     }
     if (type.isP2sh) {
@@ -190,6 +194,12 @@ class PsbtTransactionInput {
         throw DartBitcoinPluginException(
             "redeemScript is required to spend P2SH scripts.",
             details: {"script": scriptPubKey?.script.join(", ")});
+      }
+      if (BitcoinScriptUtils.isP2wsh(redeemScript) ||
+          BitcoinScriptUtils.isP2wpkh(redeemScript)) {
+        throw DartBitcoinPluginException(
+            "Incorrect legacy scriptPubKey. Use `witnessV1` constractor instead of `legacy` for nested segwit p2sh spending.",
+            details: {"type": type.name});
       }
       P2shAddress addr;
       if (type.isP2sh32) {
@@ -632,7 +642,6 @@ class PsbtUtxo {
   /// The list of individual TapLeaf merkle proofs used in script-path spending.
   /// Each proof shows how a leaf is part of the Taproot commitment.
   final List<TapLeafMerkleProof>? leafScripts;
-  final List<ECPrivate> privateKeys;
   final List<PsbtInputMuSig2ParticipantPublicKeys>? muSig2ParticipantPublicKeys;
 
   final List<PsbtInputRipemd160>? ripemd160;
@@ -642,7 +651,6 @@ class PsbtUtxo {
 
   const PsbtUtxo(
       {required this.utxo,
-      required this.privateKeys,
       this.tx,
       required this.scriptPubKey,
       this.xOnlyOrInternalPubKey,
@@ -661,11 +669,6 @@ class PsbtUtxo {
   factory PsbtUtxo.fromJson(Map<String, dynamic> json) {
     return PsbtUtxo(
         utxo: BitcoinUtxo.fromJson(json["utxo"]),
-        privateKeys: (json["privateKeys"] as List)
-            .map(
-              (e) => ECPrivate.fromHex(e),
-            )
-            .toList(),
         tx: json["tx"] == null
             ? null
             : BtcTransaction.deserialize(BytesUtils.fromHexString(json["tx"])),
@@ -705,7 +708,6 @@ class PsbtUtxo {
       "xonly": BytesUtils.tryToHexString(xOnlyOrInternalPubKey),
       "merkle_root": BytesUtils.tryToHexString(merkleRoot),
       "leaf_scripts": leafScripts?.map((e) => e.toJson()).toList(),
-      "privateKeys": privateKeys.map((e) => e.toHex()).toList()
     };
   }
 }
@@ -942,7 +944,7 @@ class PsbtTransactionOutput {
           "Either scriptPubKey or address must be provided.");
     }
     address ??=
-        BitcoinScriptUtils.generateAddressFromScriptPubKey(scriptPubKey);
+        BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(scriptPubKey);
     return PsbtTransactionOutput._(
         scriptPubKey: scriptPubKey, amount: amount, address: address);
   }

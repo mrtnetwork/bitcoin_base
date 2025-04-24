@@ -6,6 +6,55 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork> {
       {required this.address,
       required this.network,
       required this.baseAddress});
+
+  static ADDRESS fromBaseAddress<ADDRESS extends BitcoinNetworkAddress>(
+      {required BitcoinBaseAddress address,
+      required BasedUtxoNetwork network}) {
+    BitcoinNetworkAddress baseAddress;
+    switch (network) {
+      case BitcoinSVNetwork.mainnet:
+      case BitcoinSVNetwork.testnet:
+        baseAddress = BitcoinSVAddress.fromBaseAddress(address,
+            network: network as BitcoinSVNetwork);
+      case BitcoinNetwork.mainnet:
+      case BitcoinNetwork.testnet:
+      case BitcoinNetwork.testnet4:
+        baseAddress = BitcoinAddress.fromBaseAddress(address,
+            network: network as BitcoinNetwork);
+      case LitecoinNetwork.mainnet:
+      case LitecoinNetwork.testnet:
+        baseAddress = LitecoinAddress.fromBaseAddress(address,
+            network: network as LitecoinNetwork);
+      case DashNetwork.mainnet:
+      case DashNetwork.testnet:
+        baseAddress = DashAddress.fromBaseAddress(address,
+            network: network as DashNetwork);
+      case DogecoinNetwork.mainnet:
+      case DogecoinNetwork.testnet:
+        baseAddress = DogeAddress.fromBaseAddress(address,
+            network: network as DogecoinNetwork);
+      case BitcoinCashNetwork.mainnet:
+      case BitcoinCashNetwork.testnet:
+        baseAddress = BitcoinCashAddress.fromBaseAddress(address,
+            network: network as BitcoinCashNetwork);
+      case PepeNetwork.mainnet:
+        baseAddress = PepeAddress.fromBaseAddress(address,
+            network: network as PepeNetwork);
+      case ElectraProtocolNetwork.mainnet:
+      case ElectraProtocolNetwork.testnet:
+        baseAddress = ElectraProtocolAddress.fromBaseAddress(address,
+            network: network as ElectraProtocolNetwork);
+      default:
+        throw DartBitcoinPluginException("Unknown network. ${network.value}");
+    }
+    if (baseAddress is! ADDRESS) {
+      throw DartBitcoinPluginException(
+        "Invalid cast: expected ${ADDRESS.runtimeType}, but found ${baseAddress.runtimeType}.",
+      );
+    }
+    return baseAddress;
+  }
+
   static ADDRESS parse<ADDRESS extends BitcoinNetworkAddress>(
       {required String address, required BasedUtxoNetwork network}) {
     BitcoinNetworkAddress baseAddress;

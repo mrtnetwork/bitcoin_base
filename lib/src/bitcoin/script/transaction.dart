@@ -65,9 +65,9 @@ class BtcTransaction {
     List<int>? version,
   }) {
     return BtcTransaction(
-        inputs: inputs ?? this.inputs,
-        outputs: outputs ?? this.outputs,
-        witnesses: witnesses ?? this.witnesses,
+        inputs: inputs ?? this.inputs.map((e) => e.clone()).toList(),
+        outputs: outputs ?? this.outputs.map((e) => e.clone()).toList(),
+        witnesses: witnesses ?? this.witnesses.map((e) => e.clone()).toList(),
         locktime: locktime ?? this.locktime,
         version: version ?? this.version);
   }

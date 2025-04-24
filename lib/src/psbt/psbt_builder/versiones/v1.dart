@@ -23,19 +23,18 @@ class PsbtBuilderV0 extends PsbtBuilder {
         output: PsbtOutput(version: version)));
   }
 
-  BtcTransaction get _unsignedTx => _psbt.global.entries
+  BtcTransaction get _tx => _psbt.global.entries
       .whereType<PsbtGlobalUnsignedTransaction>()
       .first
       .transaction;
-
   @override
   TxInput txInput(int index) {
-    final unsignedTx = _unsignedTx;
+    final unsignedTx = _tx;
     PsbtUtils.validateTxInputs(
         psbInput: _psbt.input,
         inputIndex: index,
         inputsLength: unsignedTx.inputs.length);
-    return _unsignedTx.inputs[index];
+    return _tx.inputs[index];
   }
 
   @override
@@ -47,19 +46,19 @@ class PsbtBuilderV0 extends PsbtBuilder {
 
   @override
   List<TxInput> txInputs() {
-    final unsignedTx = _unsignedTx;
+    final unsignedTx = _tx;
     return unsignedTx.inputs.clone();
   }
 
   @override
   List<TxOutput> txOutputs() {
-    final unsignedTx = _unsignedTx;
+    final unsignedTx = _tx;
     return unsignedTx.outputs.clone();
   }
 
   @override
   BtcTransaction buildUnsignedTransaction() {
-    return _unsignedTx;
+    return _tx.copyWith();
   }
 
   @override
@@ -68,6 +67,7 @@ class PsbtBuilderV0 extends PsbtBuilder {
   }
 
   void _updateUnsignedTx(BtcTransaction transaction) {
+    // _unsignedTx.copyWith();
     _psbt.global.updateGlobals([PsbtGlobalUnsignedTransaction(transaction)]);
   }
 
@@ -75,7 +75,7 @@ class PsbtBuilderV0 extends PsbtBuilder {
   void _addNewTxOutput(PsbtTransactionOutput output) {
     super._addNewTxOutput(output);
     _psbt.output.addOutputs(output.toPsbtOutput(psbtVersion));
-    BtcTransaction tx = _unsignedTx;
+    BtcTransaction tx = _tx;
     tx = tx.copyWith(outputs: [...tx.outputs, output.toTxOutput()]);
     _updateUnsignedTx(tx);
   }
@@ -86,7 +86,7 @@ class PsbtBuilderV0 extends PsbtBuilder {
     _psbt.output.replaceOutput(index, output.toPsbtOutput(psbtVersion));
     final txOutputs = this.txOutputs();
     txOutputs[index] = output.toTxOutput();
-    BtcTransaction tx = _unsignedTx;
+    BtcTransaction tx = _tx;
     tx = tx.copyWith(outputs: txOutputs);
     _updateUnsignedTx(tx);
   }
@@ -97,7 +97,7 @@ class PsbtBuilderV0 extends PsbtBuilder {
     final outputs = txOutputs();
     outputs.removeAt(index);
     _psbt.output.removeOutput(index);
-    BtcTransaction tx = _unsignedTx;
+    BtcTransaction tx = _tx;
     tx = tx.copyWith(outputs: outputs);
     _updateUnsignedTx(tx);
   }
@@ -105,7 +105,7 @@ class PsbtBuilderV0 extends PsbtBuilder {
   @override
   void _updateTxInput(int index, PsbtTransactionInput input) {
     super._updateTxInput(index, input);
-    BtcTransaction tx = _unsignedTx;
+    BtcTransaction tx = _tx;
     final List<TxInput> newInputs = List.generate(tx.inputs.length, (i) {
       if (i == index) return input.txInput;
       return tx.inputs[i];
@@ -121,7 +121,7 @@ class PsbtBuilderV0 extends PsbtBuilder {
     _psbt.input.removeInput(index);
     final inputs = txInputs();
     inputs.removeAt(index);
-    BtcTransaction tx = _unsignedTx;
+    BtcTransaction tx = _tx;
     final locktime = PsbtUtils.buildTransactionLocktime(inputs: inputs);
     tx = tx.copyWith(inputs: inputs, locktime: locktime);
     _updateUnsignedTx(tx);
@@ -131,7 +131,7 @@ class PsbtBuilderV0 extends PsbtBuilder {
   void _addNewTxInput(PsbtTransactionInput input) {
     super._addNewTxInput(input);
     _psbt.input.addInputs(input.toPsbtInputs(psbtVersion));
-    BtcTransaction tx = _unsignedTx;
+    BtcTransaction tx = _tx;
     final locktime = PsbtUtils.buildTransactionLocktime(
         inputs: [...tx.inputs, input.txInput]);
     tx = tx.copyWith(inputs: [...tx.inputs, input.txInput], locktime: locktime);

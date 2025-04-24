@@ -141,8 +141,7 @@ class PsbtGlobal {
   }
 
   /// Retrieves all entries of a specified type.
-  List<T>? getGlobals<T extends PsbtGlobalData>(
-      int index, PsbtGlobalTypes type) {
+  List<T>? getGlobals<T extends PsbtGlobalData>(PsbtGlobalTypes type) {
     final data = _entries.where((e) => e.type == type);
     if (data.isEmpty) return null;
     return data.toList().cast<T>();

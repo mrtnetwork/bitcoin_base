@@ -27,6 +27,13 @@ enum ScriptPubKeyType {
 }
 
 class BitcoinScriptUtils {
+  static Script buildOpReturn(List<List<int>> data) {
+    return Script(script: [
+      BitcoinOpcode.opReturn,
+      ...data.map((e) => BytesUtils.toHexString(e))
+    ]);
+  }
+
   static bool scriptContains(
       {required Script script, required List<dynamic> elements}) {
     if (elements.length != script.script.length) return false;

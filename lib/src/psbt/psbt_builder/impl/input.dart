@@ -132,6 +132,7 @@ mixin PsbtInputImpl on PsbtBuilderImpl {
   ///   the operation may fail.
   ///
   /// Returns the finalized [BtcTransaction] if successful.
+  @override
   BtcTransaction finalizeAll({ONFINALIZEINPUT? onFinalizeInput}) {
     for (int i = 0; i < _psbt.input.entries.length; i++) {
       finalizeInput(i, onFinalizeInput: onFinalizeInput);

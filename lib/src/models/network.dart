@@ -613,3 +613,76 @@ class ElectraProtocolNetwork implements BasedUtxoNetwork {
   @override
   final String identifier;
 }
+
+// class BonkcoinNetwork implements BasedUtxoNetwork {
+//   /// Mainnet configuration with associated `CoinConf`.
+//   static const ElectraProtocolNetwork mainnet = ElectraProtocolNetwork._(
+//       'BonkcoinMainnet', CoinsConf.electraProtocolMainNet, 'electra:mainnet');
+
+//   /// Testnet configuration with associated `CoinConf`.
+//   static const ElectraProtocolNetwork testnet = ElectraProtocolNetwork._(
+//       'electraProtocolTestnet',
+//       CoinsConf.electraProtocolTestNet,
+//       'electra:testnet');
+
+//   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
+//   @override
+//   final CoinConf conf;
+//   @override
+//   final String value;
+
+//   /// Constructor for creating a Electra Protocol network with a specific configuration.
+//   const BonkcoinNetwork._(this.value, this.conf, this.identifier);
+
+//   /// Retrieves the Wallet Import Format (WIF) version bytes from the associated `CoinConf`.
+//   @override
+//   List<int> get wifNetVer => conf.params.wifNetVer!;
+
+//   /// Retrieves the Pay-to-Public-Key-Hash (P2PKH) version bytes from the associated `CoinConf`.
+//   @override
+//   List<int> get p2pkhNetVer => conf.params.p2pkhNetVer!;
+
+//   /// Retrieves the Pay-to-Script-Hash (P2SH) version bytes from the associated `CoinConf`.
+//   @override
+//   List<int> get p2shNetVer => conf.params.p2shNetVer!;
+
+//   /// Retrieves the Human-Readable Part (HRP) for Pay-to-Witness-Public-Key-Hash (P2WPKH) addresses
+//   /// from the associated `CoinConf`.
+//   @override
+//   String get p2wpkhHrp => conf.params.p2wpkhHrp!;
+
+//   /// Checks if the current network is the mainnet.
+//   @override
+//   bool get isMainnet => this == ElectraProtocolNetwork.mainnet;
+
+//   @override
+//   final List<BitcoinAddressType> supportedAddress = const [
+//     P2pkhAddressType.p2pkh,
+//     SegwitAddressType.p2wpkh,
+//     PubKeyAddressType.p2pk,
+//     SegwitAddressType.p2wsh,
+//     P2shAddressType.p2wshInP2sh,
+//     P2shAddressType.p2wpkhInP2sh,
+//     P2shAddressType.p2pkhInP2sh,
+//     P2shAddressType.p2pkInP2sh,
+//   ];
+
+//   @override
+//   List<BipCoins> get coins {
+//     if (isMainnet) {
+//       return [
+//         Bip44Coins.electraProtocol,
+//         Bip49Coins.electraProtocol,
+//         Bip84Coins.electraProtocol
+//       ];
+//     }
+//     return [
+//       Bip44Coins.electraProtocolTestnet,
+//       Bip49Coins.electraProtocolTestnet,
+//       Bip84Coins.electraProtocolTestnet
+//     ];
+//   }
+
+//   @override
+//   final String identifier;
+// }

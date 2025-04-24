@@ -300,6 +300,14 @@ class PsbtGeneratedTransactionDigest {
     return partialSigs.first;
   }
 
+  PsbtInputPartialSig? getPartialSignatureOrNull() {
+    try {
+      return getPartialSignature();
+    } catch (e) {
+      return null;
+    }
+  }
+
   List<PsbtInputTaprootScriptSpendSignature> getTaprootScriptSignatures(
       List<String> xOnlyKeys) {
     final musig2Signatures = PsbtUtils.getReadyMusig2Signature(this);

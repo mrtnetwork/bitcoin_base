@@ -127,6 +127,57 @@ abstract class PsbtBuilderImpl {
     _psbt.input.updateInputs(index, [pubKeyNonce]);
   }
 
+  /// Finalizes all inputs in the PSBT and returns the finalized transaction.
+  ///
+  /// This method attempts to finalize each input in the PSBT.
+  ///
+  /// Note:
+  /// - If an input is already finalized, it will be skipped.
+  /// - If any input requires custom script handling, you must provide an
+  ///   `onFinalizeInput` callback to finalize it manually; otherwise,
+  ///   the operation may fail.
+  ///
+  /// Returns the finalized [BtcTransaction] if successful.
+  BtcTransaction finalizeAll({ONFINALIZEINPUT? onFinalizeInput});
+
+  /// Estimates the transaction size before finalization.
+  /// Optionally accepts a [onFinalizeInput] callback to customize input finalization.
+  /// - If any input requires custom script handling, you must provide an
+  ///   `onFinalizeInput` callback to finalize it manually; otherwise,
+  ///   the operation may fail.
+  ///
+  /// This method does not reflect the finalized transaction size.
+  /// For unsigned P2PKH inputs, it assumes an uncompressed public key
+  /// unlocking script for estimation.
+  /// For SegWit transactions, it returns the estimated virtual size (vsize).
+  int getUnSafeTransactionSize({ONFINALIZEINPUT? onFinalizeInput}) {
+    final fakeSignature = PsbtGlobalProprietaryUseType(
+        identifier: PsbtUtils.fakeFinalizeGlobalIdentifier,
+        subkeydata: [],
+        data: const []);
+    final Psbt psbt = Psbt(
+        global: PsbtGlobal(
+            version: _psbt.version,
+            entries: [..._psbt.global.entries.clone(), fakeSignature]),
+        input: PsbtInput(
+            version: _psbt.version, entries: _psbt.input.entries.clone()),
+        output: PsbtOutput(
+            version: _psbt.version, entries: _psbt.output.entries.clone()));
+    final builder = PsbtBuilder.fromPsbt(psbt);
+    final tx = builder.finalizeAll(onFinalizeInput: onFinalizeInput);
+    return tx.getSize();
+  }
+
+  /// Finalizes all inputs and returns the serialized transaction size in bytes.
+  ///
+  /// Optionally accepts a [onFinalizeInput] callback to customize input finalization.
+  /// The returned size is the actual size of the fully finalized transaction.
+  /// For SegWit transactions, it returns the estimated virtual size (vsize).
+  int finalizeAllAndGetTransactionSize({ONFINALIZEINPUT? onFinalizeInput}) {
+    final tx = finalizeAll(onFinalizeInput: onFinalizeInput);
+    return tx.getSize();
+  }
+
   void _addNewTxOutput(PsbtTransactionOutput output) {
     PsbtUtils.validateCanAddOrUpdateOutput(psbt: _psbt);
   }

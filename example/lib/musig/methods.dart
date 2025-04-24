@@ -73,7 +73,6 @@ Future<List<PsbtUtxo>> getPsbtUtxo(
             merkleProof: request.merkleProof,
             treeScript: request.treeScript,
             merkleRoot: request.merkleRoot,
-            privateKeys: request.privateKeys,
             xOnlyOrInternalPubKey: request.xOnlyOrInternalPubKey,
             muSig2ParticipantPublicKeys: request.muSig2ParticipantPublicKeys,
             hash160: request.hash160,

@@ -292,7 +292,6 @@ class _BitcoinAddressUtils {
     final version = decode.item2;
     final addrBytes = decode.item1;
     final scriptHex = BytesUtils.toHexString(addrBytes);
-
     switch (type) {
       case P2pkhAddressType.p2pkh:
         if (BytesUtils.bytesEqual(version, network.p2pkhNetVer)) {
