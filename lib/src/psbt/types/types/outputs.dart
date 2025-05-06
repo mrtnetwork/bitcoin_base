@@ -326,7 +326,7 @@ class PsbtOutputBip32DerivationPath extends PsbtOutputData {
       required List<Bip32KeyIndex> indexes,
       required List<int> publicKey}) {
     if (fingerprint.length == Bip32KeyDataConst.fingerprintByteLen &&
-        Secp256k1PublicKeyEcdsa.isValidBytes(publicKey)) {
+        Secp256k1PublicKey.isValidBytes(publicKey)) {
       return PsbtOutputBip32DerivationPath._(
           fingerprint: fingerprint,
           indexes: indexes,
@@ -348,7 +348,7 @@ class PsbtOutputBip32DerivationPath extends PsbtOutputData {
           "Invalid PSBT bip32 derivation path type flag");
     }
     if (keypair.key.extraData == null ||
-        !Secp256k1PublicKeyEcdsa.isValidBytes(keypair.key.extraData!)) {
+        !Secp256k1PublicKey.isValidBytes(keypair.key.extraData!)) {
       throw DartBitcoinPluginException(
           "Invalid PSBT bip32 derivation public key.");
     }
@@ -370,7 +370,7 @@ class PsbtOutputBip32DerivationPath extends PsbtOutputData {
             offset, offset + Bip32KeyDataConst.keyIndexByteLen));
       });
       if (fingerPrint.length == Bip32KeyDataConst.fingerprintByteLen &&
-          Secp256k1PublicKeyEcdsa.isValidBytes(keypair.key.extraData!)) {
+          Secp256k1PublicKey.isValidBytes(keypair.key.extraData!)) {
         return PsbtOutputBip32DerivationPath._(
             fingerprint: fingerPrint,
             indexes: bip32Indexes,
@@ -748,8 +748,8 @@ class PsbtOutputMuSig2ParticipantPublicKeys extends PsbtOutputData {
         super(type: PsbtOutputTypes.muSig2ParticipantPublicKeys);
   factory PsbtOutputMuSig2ParticipantPublicKeys(
       {required List<int> aggregatePubKey, required List<List<int>> pubKeys}) {
-    if (Secp256k1PublicKeyEcdsa.isValidBytes(aggregatePubKey) &&
-        pubKeys.every(Secp256k1PublicKeyEcdsa.isValidBytes)) {
+    if (Secp256k1PublicKey.isValidBytes(aggregatePubKey) &&
+        pubKeys.every(Secp256k1PublicKey.isValidBytes)) {
       return PsbtOutputMuSig2ParticipantPublicKeys._(
           aggregatePubKey: aggregatePubKey,
           pubKeys: pubKeys,
@@ -781,8 +781,8 @@ class PsbtOutputMuSig2ParticipantPublicKeys extends PsbtOutputData {
                 offset, offset + EcdsaKeysConst.pubKeyCompressedByteLen);
             pubKeys.add(key);
           }
-          if (Secp256k1PublicKeyEcdsa.isValidBytes(keypair.key.extraData!) &&
-              pubKeys.every(Secp256k1PublicKeyEcdsa.isValidBytes)) {
+          if (Secp256k1PublicKey.isValidBytes(keypair.key.extraData!) &&
+              pubKeys.every(Secp256k1PublicKey.isValidBytes)) {
             return PsbtOutputMuSig2ParticipantPublicKeys._(
                 aggregatePubKey: keypair.key.extraData!,
                 pubKeys: pubKeys,

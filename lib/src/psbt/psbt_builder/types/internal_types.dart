@@ -335,13 +335,14 @@ class PsbtGeneratedTransactionDigest {
 
   bool verifyEcdsaSignature(PsbtInputPartialSig sig) {
     try {
+      /// handle bch schnorr signature
       if (CryptoSignatureUtils.isValidSchnorrSignature(sig.signature)) {
         return sig.publicKey
             .verifySchnorrSignature(digest: digest, signature: sig.signature);
       }
-
-      return sig.publicKey
+      final verify = sig.publicKey
           .verifyDerSignature(digest: digest, signature: sig.signature);
+      return verify;
     } catch (_) {
       return false;
     }

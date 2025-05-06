@@ -1,3 +1,11 @@
+## 6.4.0
+
+- Update dependencies.
+- Improved security: Private key operations now use blinded ecmult for safer public key generation.
+- All signing methods now use constant-time operations with blinded ecmult to securely generate signatures.
+
+
+
 ## 6.3.0
 
 - Update dependencies.

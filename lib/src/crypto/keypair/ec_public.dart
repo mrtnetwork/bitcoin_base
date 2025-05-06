@@ -9,7 +9,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 typedef PublicKeyType = PubKeyModes;
 
 class ECPublic {
-  final Secp256k1PublicKeyEcdsa publicKey;
+  final Secp256k1PublicKey publicKey;
   const ECPublic._(this.publicKey);
 
   factory ECPublic.fromBip32(Bip32PublicKey publicKey) {
@@ -17,13 +17,13 @@ class ECPublic {
       throw const DartBitcoinPluginException(
           'invalid public key curve for bitcoin');
     }
-    return ECPublic._(publicKey.pubKey as Secp256k1PublicKeyEcdsa);
+    return ECPublic._(publicKey.pubKey as Secp256k1PublicKey);
   }
   ProjectiveECCPoint get point => publicKey.point.cast();
 
   /// Constructs an ECPublic key from a byte representation.
   factory ECPublic.fromBytes(List<int> public) {
-    final publicKey = Secp256k1PublicKeyEcdsa.fromBytes(public);
+    final publicKey = Secp256k1PublicKey.fromBytes(public);
     return ECPublic._(publicKey);
   }
 

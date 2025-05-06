@@ -651,7 +651,7 @@ class PsbtInputBip32DerivationPath extends PsbtInputData {
     required List<int> publicKey,
   }) {
     if (fingerprint.length == Bip32KeyDataConst.fingerprintByteLen &&
-        Secp256k1PublicKeyEcdsa.isValidBytes(publicKey)) {
+        Secp256k1PublicKey.isValidBytes(publicKey)) {
       return PsbtInputBip32DerivationPath._(
           fingerprint: fingerprint,
           indexes: indexes,
@@ -694,7 +694,7 @@ class PsbtInputBip32DerivationPath extends PsbtInputData {
             offset, offset + Bip32KeyDataConst.keyIndexByteLen));
       });
       if (fingerPrint.length == Bip32KeyDataConst.fingerprintByteLen &&
-          Secp256k1PublicKeyEcdsa.isValidBytes(keypair.key.extraData ?? [])) {
+          Secp256k1PublicKey.isValidBytes(keypair.key.extraData ?? [])) {
         return PsbtInputBip32DerivationPath._(
             fingerprint: fingerPrint,
             indexes: bip32Indexes,
@@ -1943,9 +1943,9 @@ class PsbtInputMuSig2PublicNonce extends PsbtInputData {
             : keypair.key.extraData!
                 .sublist(EcdsaKeysConst.pubKeyCompressedByteLen * 2);
         if (publicKey.length == EcdsaKeysConst.pubKeyCompressedByteLen &&
-            Secp256k1PublicKeyEcdsa.isValidBytes(publicKey) &&
+            Secp256k1PublicKey.isValidBytes(publicKey) &&
             plainPublicKey.length == EcdsaKeysConst.pubKeyCompressedByteLen &&
-            Secp256k1PublicKeyEcdsa.isValidBytes(plainPublicKey) &&
+            Secp256k1PublicKey.isValidBytes(plainPublicKey) &&
             (hash == null || hash.length == QuickCrypto.sha256DigestSize) &&
             keypair.value.data.length ==
                 EcdsaKeysConst.pubKeyCompressedByteLen * 2) {
@@ -2042,9 +2042,9 @@ class PsbtInputMuSig2ParticipantPartialSignature
             ? null
             : keypair.key.extraData!.sublist(66);
         if (publicKey.length == EcdsaKeysConst.pubKeyCompressedByteLen &&
-            Secp256k1PublicKeyEcdsa.isValidBytes(publicKey) &&
+            Secp256k1PublicKey.isValidBytes(publicKey) &&
             plainPublicKey.length == EcdsaKeysConst.pubKeyCompressedByteLen &&
-            Secp256k1PublicKeyEcdsa.isValidBytes(plainPublicKey) &&
+            Secp256k1PublicKey.isValidBytes(plainPublicKey) &&
             (hash == null || hash.length == QuickCrypto.sha256DigestSize) &&
             keypair.value.data.length == QuickCrypto.sha256DigestSize) {
           return PsbtInputMuSig2ParticipantPartialSignature._(

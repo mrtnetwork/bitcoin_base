@@ -101,7 +101,7 @@ class ECPrivate {
     List<int> extraEntropy = const [],
   }) {
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    final signature = btcSigner.signMessage(
+    final signature = btcSigner.signMessageConst(
         message: message,
         messagePrefix: messagePrefix,
         extraEntropy: extraEntropy);
@@ -122,7 +122,7 @@ class ECPrivate {
       {String messagePrefix = BitcoinSignerUtils.signMessagePrefix,
       List<int> extraEntropy = const []}) {
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    final signature = btcSigner.signMessage(
+    final signature = btcSigner.signMessageConst(
         message: message,
         messagePrefix: messagePrefix,
         extraEntropy: extraEntropy);
@@ -138,7 +138,7 @@ class ECPrivate {
       List<int> extraEntropy = const []}) {
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
     List<int> signature =
-        btcSigner.signECDSADer(txDigest, extraEntropy: extraEntropy);
+        btcSigner.signECDSADerConst(txDigest, extraEntropy: extraEntropy);
     if (sighash != null) {
       signature = <int>[...signature, sighash];
     }
@@ -157,7 +157,8 @@ class ECPrivate {
       {int sighash = BitcoinOpCodeConst.sighashDefault,
       List<int> extraEntropy = const []}) {
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    var signature = btcSigner.signSchnorr(txDigest, extraEntropy: extraEntropy);
+    var signature =
+        btcSigner.signSchnorrConst(txDigest, extraEntropy: extraEntropy);
     if (sighash != BitcoinOpCodeConst.sighashDefault) {
       signature = <int>[...signature, sighash];
     }
@@ -193,7 +194,7 @@ class ECPrivate {
           "Use either tapTweakHash or (treeScript/merkleRoot), not both.");
     }
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    List<int> signature = btcSigner.signBip340(
+    List<int> signature = btcSigner.signBip340Const(
         digest: txDigest,
         aux: aux,
         tapTweakHash: tweak

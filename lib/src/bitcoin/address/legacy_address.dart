@@ -154,7 +154,7 @@ class P2pkAddress extends LegacyAddress {
   P2pkAddress._(this.publicKey) : super._();
   factory P2pkAddress({required String publicKey}) {
     final toBytes = BytesUtils.fromHexString(publicKey);
-    if (!Secp256k1PublicKeyEcdsa.isValidBytes(toBytes)) {
+    if (!Secp256k1PublicKey.isValidBytes(toBytes)) {
       throw const DartBitcoinPluginException('Invalid Public key.');
     }
     return P2pkAddress._(StringUtils.strip0x(publicKey.toLowerCase()));
