@@ -1,4 +1,4 @@
-import 'package:bitcoin_base/src/provider/models/electrum/electrum_utxo.dart';
+import 'package:bitcoin_base/src/provider/models/electrum/models.dart';
 import 'package:bitcoin_base/src/provider/core/methods.dart';
 import 'package:bitcoin_base/src/provider/core/params.dart';
 

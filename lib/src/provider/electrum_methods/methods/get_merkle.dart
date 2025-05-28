@@ -1,10 +1,11 @@
 import 'package:bitcoin_base/src/provider/core/methods.dart';
 import 'package:bitcoin_base/src/provider/core/params.dart';
+import 'package:bitcoin_base/src/provider/models/electrum/models.dart';
 
 /// Return the merkle branch to a confirmed transaction given its hash and height.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
 class ElectrumRequestGetMerkle
-    extends ElectrumRequest<Map<String, dynamic>, Map<String, dynamic>> {
+    extends ElectrumRequest<ElectrumGetMerkleResponse, Map<String, dynamic>> {
   ElectrumRequestGetMerkle(
       {required this.transactionHash, required this.height});
 
@@ -24,7 +25,7 @@ class ElectrumRequestGetMerkle
   }
 
   @override
-  Map<String, dynamic> onResonse(result) {
-    return result;
+  ElectrumGetMerkleResponse onResonse(result) {
+    return ElectrumGetMerkleResponse.fromJson(result);
   }
 }

@@ -1,5 +1,6 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
+import 'package:blockchain_utils/utils/numbers/numbers.dart';
 import 'package:blockchain_utils/utils/numbers/utils/bigint_utils.dart';
 
 class TxRef implements UTXO {
@@ -306,5 +307,70 @@ class BlockCypherAddressInfo {
               .toList() ??
           [],
     );
+  }
+}
+
+class BlockCypherChainInfo {
+  final BigInt height;
+  final String? hash;
+  final String? time;
+  final String? latestUrl;
+  final String? previousHash;
+  final String? previousUrl;
+  final int? peerCount;
+  final int? unconfirmedCount;
+  final BigInt? highFeePerKb;
+  final BigInt? mediumFeePerKb;
+  final BigInt? lowFeePerKb;
+  final BigInt? latestForkHeight;
+  final String? latestForkHash;
+  const BlockCypherChainInfo(
+      {required this.height,
+      required this.hash,
+      required this.time,
+      required this.latestUrl,
+      required this.previousHash,
+      required this.previousUrl,
+      required this.peerCount,
+      required this.unconfirmedCount,
+      required this.highFeePerKb,
+      required this.mediumFeePerKb,
+      required this.lowFeePerKb,
+      required this.latestForkHeight,
+      required this.latestForkHash});
+
+  factory BlockCypherChainInfo.fromJson(Map<String, dynamic> json) {
+    return BlockCypherChainInfo(
+        height: BigintUtils.parse(json["height"]),
+        hash: json["hash"],
+        time: json["time"],
+        latestUrl: json["latest_url"],
+        previousHash: json["previous_hash"],
+        previousUrl: json["previous_url"],
+        peerCount: IntUtils.tryParse(json["peer_count"]),
+        unconfirmedCount: IntUtils.tryParse(json["unconfirmed_count"]),
+        highFeePerKb: BigintUtils.tryParse(json["high_fee_per_kb"]),
+        mediumFeePerKb: BigintUtils.tryParse(json["medium_fee_per_kb"]),
+        lowFeePerKb: BigintUtils.tryParse(json["low_fee_per_kb"]),
+        latestForkHeight: BigintUtils.tryParse(json["last_fork_height"]),
+        latestForkHash: json["last_fork_hash"]);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "height": height.toString(),
+      "hash": hash,
+      "time": time,
+      "latest_url": latestUrl,
+      "previous_hash": previousHash,
+      "previous_url": previousUrl,
+      "peer_count": peerCount,
+      "unconfirmed_count": unconfirmedCount,
+      "high_fee_per_kb": highFeePerKb?.toString(),
+      "medium_fee_per_kb": mediumFeePerKb?.toString(),
+      "low_fee_per_kb": lowFeePerKb?.toString(),
+      "last_fork_height": latestForkHeight?.toString(),
+      "last_fork_hash": latestForkHash
+    };
   }
 }

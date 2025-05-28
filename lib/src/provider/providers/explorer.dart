@@ -4,6 +4,7 @@ import 'package:bitcoin_base/src/provider/models/models.dart';
 import 'package:bitcoin_base/src/provider/services/explorer.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 import 'package:blockchain_utils/utils/binary/utils.dart';
+import 'package:blockchain_utils/utils/numbers/utils/bigint_utils.dart';
 import 'package:blockchain_utils/utils/string/string.dart';
 
 class ApiProvider {
@@ -138,8 +139,8 @@ class ApiProvider {
     }
   }
 
-  Future<String> getBlockHeight(int height) async {
-    final url = api.getBlockHeight(height);
+  Future<String> getBlockHashByHeight(int height) async {
+    final url = api.getBlockHashByHeight(height);
     final response = await _getRequest<String>(url);
     switch (api.apiType) {
       case APIType.mempool:
@@ -150,8 +151,21 @@ class ApiProvider {
     }
   }
 
+  Future<BigInt> getLatestBlockHeight() async {
+    final url = api.getLatestBlockHeightUrl();
+    final response = await _getRequest<String>(url);
+    switch (api.apiType) {
+      case APIType.mempool:
+        return BigintUtils.parse(response);
+      default:
+        final toJson = StringUtils.toJson<Map<String, dynamic>>(response);
+        final chainInfo = BlockCypherChainInfo.fromJson(toJson);
+        return chainInfo.height;
+    }
+  }
+
   Future<String> genesis() async {
-    return getBlockHeight(0);
+    return getBlockHashByHeight(0);
   }
 
   Future<BtcTransaction> getRawTransaction(String transactionId,

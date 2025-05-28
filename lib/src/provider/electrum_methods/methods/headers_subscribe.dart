@@ -1,10 +1,11 @@
 import 'package:bitcoin_base/src/provider/core/methods.dart';
 import 'package:bitcoin_base/src/provider/core/params.dart';
+import 'package:bitcoin_base/src/provider/models/electrum/models.dart';
 
 /// Subscribe to receive block headers when a new block is found.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumRequestHeaderSubscribe
-    extends ElectrumRequest<Map<String, dynamic>, Map<String, dynamic>> {
+class ElectrumRequestHeaderSubscribe extends ElectrumRequest<
+    ElectrumHeaderSubscribeResponse, Map<String, dynamic>> {
   /// blockchain.headers.subscribe
   @override
   String get method => ElectrumRequestMethods.headersSubscribe.method;
@@ -16,7 +17,7 @@ class ElectrumRequestHeaderSubscribe
 
   /// The header of the current block chain tip.
   @override
-  Map<String, dynamic> onResonse(result) {
-    return result;
+  ElectrumHeaderSubscribeResponse onResonse(result) {
+    return ElectrumHeaderSubscribeResponse.fromJson(result);
   }
 }

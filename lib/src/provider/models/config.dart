@@ -11,6 +11,7 @@ class APIConfig {
   final String transactions;
   final String sendTransaction;
   final String blockHeight;
+  final String latestBlockHeight;
   final APIType apiType;
   final String rawTransaction;
   final BasedUtxoNetwork network;
@@ -20,7 +21,7 @@ class APIConfig {
       case APIType.mempool:
         return APIConfig.mempool(network);
       default:
-        return APIConfig.mempool(network);
+        return APIConfig.fromBlockCypher(network);
     }
   }
 
@@ -48,9 +49,13 @@ class APIConfig {
     return baseUrl.replaceAll('###', address);
   }
 
-  String getBlockHeight(int blockHaight) {
+  String getBlockHashByHeight(int blockHaight) {
     final baseUrl = blockHeight;
     return baseUrl.replaceAll('###', '$blockHaight');
+  }
+
+  String getLatestBlockHeightUrl() {
+    return latestBlockHeight;
   }
 
   factory APIConfig.fromBlockCypher(BasedUtxoNetwork network) {
@@ -86,7 +91,8 @@ class APIConfig {
         apiType: APIType.blockCypher,
         transactions: '$baseUrl/addrs/###/full?limit=200',
         network: network,
-        blockHeight: '$baseUrl/blocks/###');
+        blockHeight: '$baseUrl/blocks/###',
+        latestBlockHeight: "$baseUrl/");
   }
 
   factory APIConfig.mempool(BasedUtxoNetwork network, {String? baseUrl}) {
@@ -114,7 +120,8 @@ class APIConfig {
         apiType: APIType.mempool,
         transactions: '$baseUrl/address/###/txs',
         network: network,
-        blockHeight: '$baseUrl/block-height/###');
+        blockHeight: '$baseUrl/block-height/###',
+        latestBlockHeight: "$baseUrl/blocks/tip/height");
   }
 
   APIConfig(
@@ -126,5 +133,6 @@ class APIConfig {
       required this.apiType,
       required this.network,
       required this.blockHeight,
-      required this.rawTransaction});
+      required this.rawTransaction,
+      required this.latestBlockHeight});
 }

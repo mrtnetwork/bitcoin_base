@@ -4,4 +4,4 @@ export 'mempool/mempol_models.dart';
 export 'config.dart';
 export 'utxo_details.dart';
 export 'multisig_script.dart';
-export 'electrum/electrum_utxo.dart';
+export 'electrum/models.dart';

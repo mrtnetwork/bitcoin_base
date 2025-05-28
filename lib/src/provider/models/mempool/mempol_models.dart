@@ -56,7 +56,7 @@ class MempoolVin {
       prevOut: MempoolPrevOut.fromJson(json['prevout']),
       scriptSig: json['scriptsig'],
       scriptSigAsm: json['scriptsig_asm'],
-      witness: List<String>.from(json['witness']),
+      witness: List<String>.from(json['witness'] ?? []),
       isCoinbase: json['is_coinbase'],
       sequence: json['sequence'],
     );

@@ -1,3 +1,7 @@
+## 6.5.0
+
+- Fix transaction parsing in Mempool API.
+
 ## 6.4.0
 
 - Update dependencies.
