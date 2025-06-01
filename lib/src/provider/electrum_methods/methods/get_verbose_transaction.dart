@@ -1,6 +1,6 @@
-import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:bitcoin_base/src/provider/core/methods.dart';
 import 'package:bitcoin_base/src/provider/core/params.dart';
+import 'package:bitcoin_base/src/provider/models/electrum/models.dart';
 
 /// Return a raw transaction.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html

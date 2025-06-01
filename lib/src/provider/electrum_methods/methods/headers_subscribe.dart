@@ -6,7 +6,6 @@ import 'package:bitcoin_base/src/provider/models/electrum/models.dart';
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
 class ElectrumRequestHeaderSubscribe extends ElectrumRequest<
     ElectrumHeaderSubscribeResponse, Map<String, dynamic>> {
-  /// blockchain.headers.subscribe
   @override
   String get method => ElectrumRequestMethods.headersSubscribe.method;
 

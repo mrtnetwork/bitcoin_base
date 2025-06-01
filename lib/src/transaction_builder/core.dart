@@ -1,4 +1,5 @@
-import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
+import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
 
 typedef BitcoinSignerCallBack = String Function(
     List<int> trDigest, UtxoWithAddress utxo, String publicKey, int sighash);
