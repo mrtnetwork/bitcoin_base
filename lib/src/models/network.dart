@@ -49,6 +49,7 @@ abstract class BasedUtxoNetwork implements Enumerate {
     BitcoinNetwork.mainnet,
     BitcoinNetwork.testnet,
     BitcoinNetwork.testnet4,
+    BitcoinNetwork.signet,
     LitecoinNetwork.mainnet,
     LitecoinNetwork.testnet,
     DashNetwork.mainnet,
@@ -144,6 +145,10 @@ class BitcoinNetwork implements BasedUtxoNetwork {
   /// Testnet4 configuration with associated `CoinConf`.
   static const BitcoinNetwork testnet4 = BitcoinNetwork._(
       'bitcoinTestnet4', CoinsConf.bitcoinTestNet, 'bitcoin:testnet4');
+
+  /// Signet configuration with associated `CoinConf`.
+  static const BitcoinNetwork signet = BitcoinNetwork._(
+      'bitcoinSignet', CoinsConf.bitcoinTestNet, 'bitcoin:signet');
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override

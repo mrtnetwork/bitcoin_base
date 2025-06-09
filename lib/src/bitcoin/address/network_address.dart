@@ -19,6 +19,7 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork> {
       case BitcoinNetwork.mainnet:
       case BitcoinNetwork.testnet:
       case BitcoinNetwork.testnet4:
+      case BitcoinNetwork.signet:
         baseAddress = BitcoinAddress.fromBaseAddress(address,
             network: network as BitcoinNetwork);
       case LitecoinNetwork.mainnet:
@@ -66,6 +67,7 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork> {
       case BitcoinNetwork.mainnet:
       case BitcoinNetwork.testnet:
       case BitcoinNetwork.testnet4:
+      case BitcoinNetwork.signet:
         baseAddress =
             BitcoinAddress(address, network: network as BitcoinNetwork);
       case LitecoinNetwork.mainnet:
