@@ -3,6 +3,7 @@ import 'package:blockchain_utils/helper/extensions/extensions.dart';
 enum BitcoinOpcode {
   op0("OP_0", 0x00),
   opFalse("OP_FALSE", 0x00),
+  opPUSHBYTES33("OP_PUSHBYTES_33", 0x21),
   opPushData1("OP_PUSHDATA1", 0x4c),
   opPushData2("OP_PUSHDATA2", 0x4d),
   opPushData4("OP_PUSHDATA4", 0x4e),
