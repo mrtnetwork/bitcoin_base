@@ -170,7 +170,7 @@ class PsbtTransactionInput {
     if (nonWitnessUtxo == null) {
       throw DartBitcoinPluginException("Missing input non-witness UTXOs.");
     }
-    nonWitnessUtxo = PsbtUtils.cleanUpAdnValidateNonUtxoWitness(
+    nonWitnessUtxo = PsbtUtils.cleanUpAndValidateNonUtxoWitness(
         transaction: nonWitnessUtxo, outIndex: outIndex, txId: txId);
 
     final output = nonWitnessUtxo.outputs[outIndex];
@@ -269,7 +269,7 @@ class PsbtTransactionInput {
     }
 
     if (nonWitnessUtxo != null) {
-      nonWitnessUtxo = PsbtUtils.cleanUpAdnValidateNonUtxoWitness(
+      nonWitnessUtxo = PsbtUtils.cleanUpAndValidateNonUtxoWitness(
           transaction: nonWitnessUtxo, outIndex: outIndex, txId: txId);
 
       final output = nonWitnessUtxo.outputs[outIndex];
@@ -407,7 +407,7 @@ class PsbtTransactionInput {
       }
     }
     if (nonWitnessUtxo != null) {
-      nonWitnessUtxo = PsbtUtils.cleanUpAdnValidateNonUtxoWitness(
+      nonWitnessUtxo = PsbtUtils.cleanUpAndValidateNonUtxoWitness(
           transaction: nonWitnessUtxo, outIndex: outIndex, txId: txId);
       final output = nonWitnessUtxo.outputs[outIndex];
       if (scriptPubKey != null) {

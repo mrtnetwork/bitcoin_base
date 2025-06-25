@@ -235,7 +235,7 @@ class PsbtUtils {
         musig2inputInfo: v1Param.musig2inputInfo);
   }
 
-  static BtcTransaction cleanUpAdnValidateNonUtxoWitness(
+  static BtcTransaction cleanUpAndValidateNonUtxoWitness(
       {required BtcTransaction transaction,
       required int outIndex,
       required String txId}) {

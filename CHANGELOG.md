@@ -1,3 +1,8 @@
+## 6.6.0
+
+- Update dependencies.
+- Add bitcoin signet network
+
 ## 6.5.0
 
 - Fix transaction parsing in Mempool API.
