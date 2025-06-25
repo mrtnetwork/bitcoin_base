@@ -106,6 +106,9 @@ class APIConfig {
       case BitcoinNetwork.testnet4:
         baseUrl ??= BtcApiConst.mempoolTestnet4BaseURL;
         break;
+      case BitcoinNetwork.signet:
+        baseUrl ??= BtcApiConst.mempoolSignetBaseURL;
+        break;
       default:
         throw DartBitcoinPluginException(
             'mempool does not support ${network.conf.coinName.name}');
