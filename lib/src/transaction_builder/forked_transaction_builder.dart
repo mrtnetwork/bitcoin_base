@@ -24,27 +24,21 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// - [outputOrdering]: Ordering preference for transaction outputs. Default is BIP-69.
 ///
 /// Note: The constructor automatically validates the builder by calling the [_validateBuilder] method.
-class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
-  final List<BitcoinBaseOutput> outPuts;
-  final BigInt fee;
-  final BasedUtxoNetwork network;
-  final List<UtxoWithAddress> utxosInfo;
+class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   final String? memo;
   final bool enableRBF;
   final bool isFakeTransaction;
-  final BitcoinOrdering inputOrdering;
-  final BitcoinOrdering outputOrdering;
+
   ForkedTransactionBuilder(
-      {required this.outPuts,
-      required this.fee,
-      required this.network,
-      required List<UtxoWithAddress> utxos,
-      this.inputOrdering = BitcoinOrdering.bip69,
-      this.outputOrdering = BitcoinOrdering.bip69,
+      {required super.outPuts,
+      required super.fee,
+      required super.network,
+      required super.utxos,
+      super.inputOrdering = BitcoinOrdering.bip69,
+      super.outputOrdering = BitcoinOrdering.bip69,
       this.memo,
       this.enableRBF = false,
-      this.isFakeTransaction = false})
-      : utxosInfo = utxos {
+      this.isFakeTransaction = false}) {
     _validateBuilder();
   }
 
@@ -56,7 +50,7 @@ class ForkedTransactionBuilder implements BasedBitcoinTransacationBuilder {
 
     /// validate every address is related to network
     /// exception if failed.
-    for (final i in utxosInfo) {
+    for (final i in utxos) {
       i.ownerDetails.address.toAddress(network);
     }
     for (final i in outPuts) {
@@ -242,21 +236,20 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
   }
 
   Tuple<List<TxInput>, List<UtxoWithAddress>> _buildInputs() {
-    var sortedUtxos = List<UtxoWithAddress>.from(utxosInfo);
+    final sortedUtxos = List<UtxoWithAddress>.from(utxos);
 
     if (inputOrdering == BitcoinOrdering.shuffle) {
-      sortedUtxos = sortedUtxos..shuffle();
+      sortedUtxos.shuffle();
     } else if (inputOrdering == BitcoinOrdering.bip69) {
-      sortedUtxos = sortedUtxos
-        ..sort(
-          (a, b) {
-            final txidComparison = a.utxo.txHash.compareTo(b.utxo.txHash);
-            if (txidComparison == 0) {
-              return a.utxo.vout - b.utxo.vout;
-            }
-            return txidComparison;
-          },
-        );
+      sortedUtxos.sort(
+        (a, b) {
+          final txidComparison = a.utxo.txHash.compareTo(b.utxo.txHash);
+          if (txidComparison == 0) {
+            return a.utxo.vout - b.utxo.vout;
+          }
+          return txidComparison;
+        },
+      );
     }
     final inputs = sortedUtxos.map((e) => e.utxo.toInput()).toList();
     if (enableRBF && inputs.isNotEmpty) {
@@ -320,14 +313,10 @@ be retrieved by anyone who examines the blockchain's history.
   Map<String, BigInt> _sumTokenOutputAmounts(List<TxOutput> outputs) {
     final tokens = <String, BigInt>{};
     for (final out in outputs) {
-      if (out.cashToken == null) continue;
-      final token = out.cashToken!;
-      if (!token.hasAmount) continue;
-      if (tokens.containsKey(token.category)) {
-        tokens[token.category] = tokens[token.category]! + token.amount;
-      } else {
-        tokens[token.category] = token.amount;
-      }
+      final token = out.cashToken;
+      if (token == null || !token.hasAmount) continue;
+      final amount = tokens[token.category] ?? BigInt.zero;
+      tokens[token.category] = amount + token.amount;
     }
     return tokens;
   }
@@ -355,14 +344,12 @@ be retrieved by anyone who examines the blockchain's history.
     final sumTokenOutputAmouts = _sumTokenOutputAmounts(outputs);
     for (final i in sumOfTokenUtxos.entries) {
       if (sumTokenOutputAmouts[i.key] != i.value) {
-        var amount = sumTokenOutputAmouts[i.key] ?? BigInt.zero;
+        BigInt amount = sumTokenOutputAmouts[i.key] ?? BigInt.zero;
         amount += outPuts
             .whereType<BitcoinBurnableOutput>()
             .where((element) => element.categoryID == i.key)
-            .fold(
-                BigInt.zero,
-                (previousValue, element) =>
-                    previousValue + (element.value ?? BigInt.zero));
+            .fold(BigInt.zero,
+                (previousValue, element) => previousValue + (element.value));
 
         if (amount != i.value) {
           throw DartBitcoinPluginException(

@@ -17,7 +17,6 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// - [outPuts]: List of Bitcoin outputs to be included in the transaction.
 /// - [fee]: Transaction fee (BigInt) for processing the transaction.
 /// - [network]: The target Bitcoin network.
-/// - [utxosInfo]: List of UtxoWithAddress objects providing information about Unspent Transaction Outputs (UTXOs).
 /// - [memo]: Optional memo or additional information associated with the transaction.
 /// - [enableRBF]: Flag indicating whether Replace-By-Fee (RBF) is enabled. Default is false.
 /// - [isFakeTransaction]: Flag indicating whether the transaction is a fake/mock transaction. Default is false.
@@ -25,27 +24,22 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// - [outputOrdering]: Ordering preference for transaction outputs. Default is BIP-69.
 ///
 /// Note: The constructor automatically validates the builder by calling the [_validateBuilder] method.
-class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
-  final List<BitcoinBaseOutput> outPuts;
-  final BigInt fee;
-  final BasedUtxoNetwork network;
-  final List<UtxoWithAddress> utxosInfo;
+class BitcoinTransactionBuilder extends BasedBitcoinTransacationBuilder {
   final String? memo;
   final bool enableRBF;
   final bool isFakeTransaction;
-  final BitcoinOrdering inputOrdering;
-  final BitcoinOrdering outputOrdering;
+
   BitcoinTransactionBuilder({
-    required this.outPuts,
-    required this.fee,
-    required this.network,
-    required List<UtxoWithAddress> utxos,
-    this.inputOrdering = BitcoinOrdering.bip69,
-    this.outputOrdering = BitcoinOrdering.bip69,
+    required super.outPuts,
+    required super.fee,
+    required super.network,
+    required super.utxos,
+    super.inputOrdering = BitcoinOrdering.bip69,
+    super.outputOrdering = BitcoinOrdering.bip69,
     this.memo,
     this.enableRBF = false,
     this.isFakeTransaction = false,
-  }) : utxosInfo = utxos {
+  }) {
     _validateBuilder();
   }
 
@@ -55,14 +49,14 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
       throw const DartBitcoinPluginException(
           'invalid network for BitcoinCashNetwork and BSVNetwork use ForkedTransactionBuilder');
     }
-    final token = utxosInfo.any((element) => element.utxo.token != null);
+    final token = utxos.any((element) => element.utxo.token != null);
     final tokenInput = outPuts.whereType<BitcoinTokenOutput>();
     final burn = outPuts.whereType<BitcoinBurnableOutput>();
     if (token || tokenInput.isNotEmpty || burn.isNotEmpty) {
       throw const DartBitcoinPluginException(
           'Cash Token only work on Bitcoin cash network');
     }
-    for (final i in utxosInfo) {
+    for (final i in utxos) {
       /// Verify each input for its association with this network's address. Raise an exception if the address is incorrect.
       i.ownerDetails.address.toAddress(network);
     }
@@ -151,7 +145,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// Returns:
   /// - bool: True if at least one UTXO in the list is a SegWit UTXO, false otherwise.
   bool _hasSegwit() {
-    for (final element in utxosInfo) {
+    for (final element in utxos) {
       if (element.utxo.isSegwit) {
         return true;
       }
@@ -166,7 +160,7 @@ class BitcoinTransactionBuilder implements BasedBitcoinTransacationBuilder {
   /// Returns:
   /// - bool: True if at least one UTXO in the list is a P2TR UTXO, false otherwise.
   bool _hasTaproot() {
-    for (final element in utxosInfo) {
+    for (final element in utxos) {
       if (element.utxo.isP2tr) {
         return true;
       }
@@ -383,21 +377,20 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
   }
 
   Tuple<List<TxInput>, List<UtxoWithAddress>> _buildInputs() {
-    var sortedUtxos = List<UtxoWithAddress>.from(utxosInfo);
+    final sortedUtxos = List<UtxoWithAddress>.from(utxos);
 
     if (inputOrdering == BitcoinOrdering.shuffle) {
-      sortedUtxos = sortedUtxos..shuffle();
+      sortedUtxos.shuffle();
     } else if (inputOrdering == BitcoinOrdering.bip69) {
-      sortedUtxos = sortedUtxos
-        ..sort(
-          (a, b) {
-            final txidComparison = a.utxo.txHash.compareTo(b.utxo.txHash);
-            if (txidComparison == 0) {
-              return a.utxo.vout - b.utxo.vout;
-            }
-            return txidComparison;
-          },
-        );
+      sortedUtxos.sort(
+        (a, b) {
+          final txidComparison = a.utxo.txHash.compareTo(b.utxo.txHash);
+          if (txidComparison == 0) {
+            return a.utxo.vout - b.utxo.vout;
+          }
+          return txidComparison;
+        },
+      );
     }
     final inputs = sortedUtxos.map((e) => e.utxo.toInput()).toList();
     if (enableRBF && inputs.isNotEmpty) {

@@ -1,3 +1,7 @@
+## 6.7.0
+
+- Update dependencies.
+
 ## 6.6.0
 
 - Update dependencies.

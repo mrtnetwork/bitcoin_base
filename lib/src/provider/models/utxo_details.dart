@@ -94,6 +94,8 @@ abstract class BitcoinBaseOutput {
 
   /// Convert the output to a TxOutput, a generic representation of a transaction output.
   TxOutput get toOutput;
+
+  BigInt get value;
 }
 
 abstract class BCHBaseOutput extends BitcoinOutput {
@@ -106,6 +108,7 @@ abstract class BitcoinSpendableBaseOutput implements BitcoinBaseOutput {
   abstract final BitcoinBaseAddress address;
 
   /// The value (amount) of the Bitcoin output.
+  @override
   abstract final BigInt value;
 }
 
@@ -133,6 +136,7 @@ class BitcoinScriptOutput implements BitcoinBaseOutput {
   final Script script;
 
   /// The value (amount) of the Bitcoin output.
+  @override
   final BigInt value;
 
   final CashToken? token;
@@ -180,9 +184,12 @@ class BitcoinBurnableOutput extends BitcoinBaseOutput {
   final String categoryID;
 
   /// The value (amount) of the burnable output (optional only for token with hasAmount flags).
-  final BigInt? value;
+  @override
+  final BigInt value;
 
-  BitcoinBurnableOutput({required this.categoryID, this.utxoHash, this.value});
+  BitcoinBurnableOutput(
+      {required this.categoryID, this.utxoHash, BigInt? value})
+      : value = value ?? BigInt.zero;
 
   @override
   TxOutput get toOutput => throw UnimplementedError();
@@ -297,14 +304,10 @@ extension Calculate on List<UtxoWithAddress> {
   Map<String, BigInt> sumOfTokenUtxos() {
     final tokens = <String, BigInt>{};
     for (final utxo in this) {
-      if (utxo.utxo.token == null) continue;
-      final token = utxo.utxo.token!;
-      if (!token.hasAmount) continue;
-      if (tokens.containsKey(token.category)) {
-        tokens[token.category] = tokens[token.category]! + token.amount;
-      } else {
-        tokens[token.category] = token.amount;
-      }
+      final token = utxo.utxo.token;
+      if (token == null || !token.hasAmount) continue;
+      final amount = tokens[token.category] ?? BigInt.zero;
+      tokens[token.category] = amount + token.amount;
     }
     return tokens;
   }
