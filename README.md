@@ -19,7 +19,7 @@ This package was inspired by the [python-bitcoin-utils](https://github.com/karas
 - **Dash**
   - P2PK, P2PKH, P2SH
 - **Bitcoin Cash**
-  - P2PK, P2PKH, P2SH, P2SH32, Token-aware, CashTOKEN
+  - P2PK, P2PKH, P2SH, P2SH32, Token-aware, CashTOKEN: P2PKHWT
 - **Bitcoin SV**
   - P2PK, P2PKH
 
@@ -153,6 +153,10 @@ We have integrated three APIs—Mempool, BlockCypher, and Electrum—into the pl
     // Convert the private key to its hexadecimal representation.
     final toHex = privateKey.toHex();
     ```
+    How to import a BCH/BitcoinCash Cashtoken aware PSPKHWT mnemonic and create a private/public key pair to lookup available UTXOs
+
+  <img width="857" height="501" alt="Screenshot from 2025-08-20 09-25-36" src="https://github.com/user-attachments/assets/207836b4-3f39-42df-b901-012287b3c111" />
+
 
 - Public key
 
