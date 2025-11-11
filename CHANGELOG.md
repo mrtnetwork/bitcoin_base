@@ -1,3 +1,7 @@
+## 7.0.0
+
+- Update dependencies.
+
 ## 6.9.0
 
 - Fix Segwit address equality operation.
