@@ -25,12 +25,13 @@ class TaprootUtils {
     return taggedHash(data, TaprootConst.tapTweakHashDomain);
   }
 
-  static List<int> tapleafTaggedHash(
-      {required Script script,
-      int leafVersion = BitcoinOpCodeConst.leafVersionTapscript}) {
+  static List<int> tapleafTaggedHash({
+    required Script script,
+    int leafVersion = BitcoinOpCodeConst.leafVersionTapscript,
+  }) {
     final leafVarBytes = [
       leafVersion,
-      ...IntUtils.prependVarint(script.toBytes())
+      ...IntUtils.prependVarint(script.toBytes()),
     ];
     return tapLeafTaggedHash(leafVarBytes);
   }
@@ -42,8 +43,10 @@ class TaprootUtils {
     return taggedHash([...b, ...a], TaprootConst.tapBranchHashDomain);
   }
 
-  static List<int>? generateMerkleProof(
-      {required TaprootTree scriptTree, required TaprootLeaf leafScript}) {
+  static List<int>? generateMerkleProof({
+    required TaprootTree scriptTree,
+    required TaprootLeaf leafScript,
+  }) {
     if (scriptTree == leafScript) return [];
     if (scriptTree is TaprootLeaf) {
       return null;
@@ -60,42 +63,56 @@ class TaprootUtils {
     return null;
   }
 
-  static ProjectiveECCPoint tweakPublicKey(List<int> pubKey,
-      {TaprootTree? treeScript, List<int>? merkleRoot}) {
+  static ProjectiveECCPoint tweakPublicKey(
+    List<int> pubKey, {
+    TaprootTree? treeScript,
+    List<int>? merkleRoot,
+  }) {
     if (merkleRoot != null && merkleRoot.length != 32) {
       throw DartBitcoinPluginException(
-          "Invalid Merkle root: must be exactly 32 bytes.",
-          details: {
-            "length": merkleRoot.length,
-          });
+        "Invalid Merkle root: must be exactly 32 bytes.",
+        details: {"length": merkleRoot.length},
+      );
     }
     List<int>? xKey = pubKey.clone();
     if (xKey.length == EcdsaKeysConst.pubKeyCompressedByteLen) {
       xKey = xKey.sublist(1);
     }
-    final tweak =
-        calculateTweek(xKey, treeScript: treeScript, merkleRoot: merkleRoot);
+    final tweak = calculateTweek(
+      xKey,
+      treeScript: treeScript,
+      merkleRoot: merkleRoot,
+    );
     return tweakInternalKey(xKey, tweak);
   }
 
-  static List<int> calculateTweek(List<int> xKey,
-      {TaprootTree? treeScript, List<int>? merkleRoot}) {
+  static List<int> calculateTweek(
+    List<int> xKey, {
+    TaprootTree? treeScript,
+    List<int>? merkleRoot,
+  }) {
     if (treeScript != null && merkleRoot != null) {
       throw DartBitcoinPluginException(
-          "Provide either a Merkle root or script trees to generate one, but not both.");
+        "Provide either a Merkle root or script trees to generate one, but not both.",
+      );
     }
     if (xKey.length != 32) {
-      throw DartBitcoinPluginException("Invalid XOnlyKey length.",
-          details: {"excpected": 32, "length": xKey.length});
+      throw DartBitcoinPluginException(
+        "Invalid XOnlyKey length.",
+        details: {"excpected": 32, "length": xKey.length},
+      );
     }
-    final tweek = tapTweakTaggedHash(
-      [...xKey, ...treeScript?.hash() ?? merkleRoot ?? []],
-    );
+    final tweek = tapTweakTaggedHash([
+      ...xKey,
+      ...treeScript?.hash() ?? merkleRoot ?? [],
+    ]);
     return tweek;
   }
 
   static ProjectiveECCPoint tweakInternalKey(
-      List<int> internalPubKey, List<int> leafHash) {
+    List<int> internalPubKey,
+    List<int> leafHash,
+  ) {
     final x = BigintUtils.fromBytes(internalPubKey);
     final n = Curves.generatorSecp256k1 * BigintUtils.fromBytes(leafHash);
     final outPoint = P2TRUtils.liftX(x) + n;
@@ -148,16 +165,18 @@ class TaprootUtils {
     return leavesHashes.first; // The final hash is the Merkle root
   }
 
-  static List<TapLeafMerkleProof> generateAllPossibleProofs(
-      {required TaprootTree treeScript,
-      required List<int> xOnlyOrInternalPubKey}) {
+  static List<TapLeafMerkleProof> generateAllPossibleProofs({
+    required TaprootTree treeScript,
+    required List<int> xOnlyOrInternalPubKey,
+  }) {
     final leafs = extractLeafs(treeScript).toSet();
     return leafs
         .map(
           (e) => TapLeafMerkleProof.generate(
-              leafScript: e,
-              scriptTree: treeScript,
-              xOnlyOrInternalPubKey: xOnlyOrInternalPubKey),
+            leafScript: e,
+            scriptTree: treeScript,
+            xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
+          ),
         )
         .toList();
   }

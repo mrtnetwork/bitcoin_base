@@ -25,14 +25,17 @@ class MultiSignatureSigner {
 
   /// creates a new instance of a multi-signature signer with the
   /// specified public key and weight.
-  factory MultiSignatureSigner(
-      {required String publicKey, required int weight}) {
+  factory MultiSignatureSigner({
+    required String publicKey,
+    required int weight,
+  }) {
     final pubkeyMode = BtcUtils.determinatePubKeyModeHex(publicKey);
 
     return MultiSignatureSigner._(
-        ECPublic.fromHex(publicKey).toHex(mode: pubkeyMode),
-        weight,
-        pubkeyMode);
+      ECPublic.fromHex(publicKey).toHex(mode: pubkeyMode),
+      weight,
+      pubkeyMode,
+    );
   }
 }
 
@@ -44,7 +47,7 @@ class MultiSignatureAddress {
     P2shAddressType.p2pkhInP2sh,
     P2shAddressType.p2pkhInP2sh32,
     P2shAddressType.p2pkhInP2shwt,
-    P2shAddressType.p2pkhInP2sh32wt
+    P2shAddressType.p2pkhInP2sh32wt,
   ];
   final bool canSelectSegwit;
 
@@ -65,11 +68,13 @@ class MultiSignatureAddress {
   BitcoinBaseAddress toP2wshAddress({required BasedUtxoNetwork network}) {
     if (network is! LitecoinNetwork && network is! BitcoinNetwork) {
       throw DartBitcoinPluginException(
-          '${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress');
+        '${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress',
+      );
     }
     if (!canSelectSegwit) {
       throw const DartBitcoinPluginException(
-          "One of the signer's accounts used an uncompressed public key.");
+        "One of the signer's accounts used an uncompressed public key.",
+      );
     }
     return P2wshAddress.fromScript(script: multiSigScript);
   }
@@ -77,28 +82,35 @@ class MultiSignatureAddress {
   BitcoinBaseAddress toP2wshInP2shAddress({required BasedUtxoNetwork network}) {
     final p2wsh = toP2wshAddress(network: network);
     return P2shAddress.fromScript(
-        script: p2wsh.toScriptPubKey(), type: P2shAddressType.p2wshInP2sh);
+      script: p2wsh.toScriptPubKey(),
+      type: P2shAddressType.p2wshInP2sh,
+    );
   }
 
-  BitcoinBaseAddress toP2shAddress(
-      {P2shAddressType addressType = P2shAddressType.p2pkhInP2sh}) {
+  BitcoinBaseAddress toP2shAddress({
+    P2shAddressType addressType = P2shAddressType.p2pkhInP2sh,
+  }) {
     if (!legacySupportP2shTypes.contains(addressType)) {
       throw DartBitcoinPluginException(
-          "invalid p2sh type please use one of them ${legacySupportP2shTypes.map((e) => "$e").join(", ")}");
+        "invalid p2sh type please use one of them ${legacySupportP2shTypes.map((e) => "$e").join(", ")}",
+      );
     }
 
     if (addressType.hashLength == 32) {
       return P2shAddress.fromHash160(
-          addrHash: BytesUtils.toHexString(
-              QuickCrypto.sha256DoubleHash(multiSigScript.toBytes())),
-          type: addressType);
+        addrHash: BytesUtils.toHexString(
+          QuickCrypto.sha256DoubleHash(multiSigScript.toBytes()),
+        ),
+        type: addressType,
+      );
     }
     return P2shAddress.fromScript(script: multiSigScript, type: addressType);
   }
 
-  BitcoinBaseAddress fromType(
-      {required BasedUtxoNetwork network,
-      required BitcoinAddressType addressType}) {
+  BitcoinBaseAddress fromType({
+    required BasedUtxoNetwork network,
+    required BitcoinAddressType addressType,
+  }) {
     switch (addressType) {
       case SegwitAddressType.p2wsh:
         return toP2wshAddress(network: network);
@@ -111,35 +123,44 @@ class MultiSignatureAddress {
         return toP2shAddress(addressType: addressType as P2shAddressType);
       default:
         throw const DartBitcoinPluginException(
-            'invalid multisig address type. use of of them [BitcoinAddressType.p2wsh, BitcoinAddressType.p2wshInP2sh, BitcoinAddressType.p2pkhInP2sh]');
+          'invalid multisig address type. use of of them [BitcoinAddressType.p2wsh, BitcoinAddressType.p2wshInP2sh, BitcoinAddressType.p2pkhInP2sh]',
+        );
     }
   }
 
-  MultiSignatureAddress._(
-      {required this.signers,
-      required this.threshold,
-      required this.multiSigScript,
-      required this.canSelectSegwit});
+  MultiSignatureAddress._({
+    required this.signers,
+    required this.threshold,
+    required this.multiSigScript,
+    required this.canSelectSegwit,
+  });
 
   /// CreateMultiSignatureAddress creates a new instance of a MultiSignatureAddress, representing
   /// a multi-signature Bitcoin address configuration. It allows you to specify the minimum number
   /// of required signatures (threshold), provide the collection of signers participating in the
   /// multi-signature scheme, and specify the address type.
-  factory MultiSignatureAddress(
-      {required int threshold, required List<MultiSignatureSigner> signers}) {
-    final sumWeight =
-        signers.fold<int>(0, (sum, signer) => sum + signer.weight);
+  factory MultiSignatureAddress({
+    required int threshold,
+    required List<MultiSignatureSigner> signers,
+  }) {
+    final sumWeight = signers.fold<int>(
+      0,
+      (sum, signer) => sum + signer.weight,
+    );
     if (threshold > 16 || threshold < 1) {
       throw const DartBitcoinPluginException(
-          'The threshold should be between 1 and 16');
+        'The threshold should be between 1 and 16',
+      );
     }
     if (sumWeight > 16) {
       throw const DartBitcoinPluginException(
-          'The total weight of the owners should not exceed 16');
+        'The total weight of the owners should not exceed 16',
+      );
     }
     if (sumWeight < threshold) {
       throw const DartBitcoinPluginException(
-          'The total weight of the signatories should reach the threshold');
+        'The total weight of the signatories should reach the threshold',
+      );
     }
     final multiSigScript = <String>['OP_$threshold'];
     for (final signer in signers) {
@@ -150,10 +171,11 @@ class MultiSignatureAddress {
     multiSigScript.addAll(['OP_$sumWeight', 'OP_CHECKMULTISIG']);
     final script = Script(script: multiSigScript);
     return MultiSignatureAddress._(
-        signers: signers,
-        threshold: threshold,
-        multiSigScript: script,
-        canSelectSegwit: signers.every((e) => e.keyType.isCompressed));
+      signers: signers,
+      threshold: threshold,
+      multiSigScript: script,
+      canSelectSegwit: signers.every((e) => e.keyType.isCompressed),
+    );
   }
 }
 
@@ -166,8 +188,10 @@ class P2trMultiSignatureSigner {
   /// The weight is used to determine the number of signatures required for a valid transaction.
   final int weight;
 
-  factory P2trMultiSignatureSigner(
-      {required String xOnly, required int weight}) {
+  factory P2trMultiSignatureSigner({
+    required String xOnly,
+    required int weight,
+  }) {
     return P2trMultiSignatureSigner._(TaprootUtils.toXonlyHex(xOnly), weight);
   }
 }
@@ -183,28 +207,34 @@ class P2trMultiSignatureAddress {
   /// ScriptDetails provides details about the multi-signature script used in transactions,
   /// including "OP_M", compressed public keys, "OP_N", and "OP_CHECKMULTISIG."
   final Script multiSigScript;
-  P2trMultiSignatureAddress._(
-      {required List<P2trMultiSignatureSigner> signers,
-      required this.threshold,
-      required this.multiSigScript})
-      : signers = signers.immutable;
+  P2trMultiSignatureAddress._({
+    required List<P2trMultiSignatureSigner> signers,
+    required this.threshold,
+    required this.multiSigScript,
+  }) : signers = signers.immutable;
 
-  factory P2trMultiSignatureAddress(
-      {required int threshold,
-      required List<P2trMultiSignatureSigner> signers}) {
-    final sumWeight =
-        signers.fold<int>(0, (sum, signer) => sum + signer.weight);
+  factory P2trMultiSignatureAddress({
+    required int threshold,
+    required List<P2trMultiSignatureSigner> signers,
+  }) {
+    final sumWeight = signers.fold<int>(
+      0,
+      (sum, signer) => sum + signer.weight,
+    );
     if (threshold > 15 || threshold < 1) {
       throw const DartBitcoinPluginException(
-          'The threshold should be between 1 and 15');
+        'The threshold should be between 1 and 15',
+      );
     }
     if (sumWeight > 15) {
       throw const DartBitcoinPluginException(
-          'The total weight of the owners should not exceed 15');
+        'The total weight of the owners should not exceed 15',
+      );
     }
     if (sumWeight < threshold) {
       throw const DartBitcoinPluginException(
-          'The total weight of the signatories should reach the threshold');
+        'The total weight of the signatories should reach the threshold',
+      );
     }
     final multiSigScript = <String>[];
     for (int i = 0; i < signers.length; i++) {
@@ -222,6 +252,9 @@ class P2trMultiSignatureAddress {
     multiSigScript.addAll(['OP_$threshold', 'OP_NUMEQUAL']);
     final script = Script(script: multiSigScript);
     return P2trMultiSignatureAddress._(
-        signers: signers, threshold: threshold, multiSigScript: script);
+      signers: signers,
+      threshold: threshold,
+      multiSigScript: script,
+    );
   }
 }

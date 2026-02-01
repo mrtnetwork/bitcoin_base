@@ -124,17 +124,18 @@ class Tag {
       name: json['name'],
       description: json['description'],
       uris: json['uris'] != null ? URIs.fromJson(json['uris']) : null,
-      extensions: json['extensions'] != null
-          ? Extensions.fromJson(json['extensions'])
-          : null,
+      extensions:
+          json['extensions'] != null
+              ? Extensions.fromJson(json['extensions'])
+              : null,
     );
   }
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'description': description,
-        'uris': uris?.toJson(),
-        'extensions': extensions?.toJson(),
-      }..removeWhere((key, value) => value == null);
+    'name': name,
+    'description': description,
+    'uris': uris?.toJson(),
+    'extensions': extensions?.toJson(),
+  }..removeWhere((key, value) => value == null);
 }
 
 /// A definition for one type of NFT within a token category.
@@ -196,25 +197,27 @@ class NftType {
       description: json['description'],
       fields: json['fields'] == null ? null : List<String>.from(json['fields']),
       uris: json['uris'] != null ? URIs.fromJson(json['uris']) : null,
-      extensions: json['extensions'] != null
-          ? Extensions.fromJson(json['extensions'])
-          : null,
+      extensions:
+          json['extensions'] != null
+              ? Extensions.fromJson(json['extensions'])
+              : null,
     );
   }
-  const NftType(
-      {required this.name,
-      this.description,
-      this.fields,
-      this.uris,
-      this.extensions});
+  const NftType({
+    required this.name,
+    this.description,
+    this.fields,
+    this.uris,
+    this.extensions,
+  });
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'description': description,
-        'fields': fields,
-        'uris': uris?.toJson(),
-        'extensions': extensions?.toJson(),
-      }..removeWhere((key, value) => value == null);
+    'name': name,
+    'description': description,
+    'fields': fields,
+    'uris': uris?.toJson(),
+    'extensions': extensions?.toJson(),
+  }..removeWhere((key, value) => value == null);
 }
 
 class NftCategoryFieldType {
@@ -286,9 +289,10 @@ class NftCategoryFieldType {
       description: json['description'],
       encoding: json['encoding'],
       uris: json['uris'] != null ? URIs.fromJson(json['uris']) : null,
-      extensions: json['extensions'] != null
-          ? Extensions.fromJson(json['extensions'])
-          : null,
+      extensions:
+          json['extensions'] != null
+              ? Extensions.fromJson(json['extensions'])
+              : null,
     );
   }
   const NftCategoryFieldType({
@@ -300,12 +304,12 @@ class NftCategoryFieldType {
   });
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'description': description,
-        'encoding': encoding,
-        'uris': uris?.toJson(),
-        'extensions': extensions?.toJson(),
-      }..removeWhere((key, value) => value == null);
+    'name': name,
+    'description': description,
+    'encoding': encoding,
+    'uris': uris?.toJson(),
+    'extensions': extensions?.toJson(),
+  }..removeWhere((key, value) => value == null);
 }
 
 /// A definition specifying a field that can be encoded in non-fungible tokens of
@@ -351,14 +355,15 @@ class SequentialNftCollection implements Parse {
   final Map<String, NftType> types;
   factory SequentialNftCollection.fromJson(Map<String, dynamic> json) {
     return SequentialNftCollection(
-      types: Map<String, dynamic>.from(json['types'])
-          .map((key, value) => MapEntry(key, NftType.fromJson(value))),
+      types: Map<String, dynamic>.from(
+        json['types'],
+      ).map((key, value) => MapEntry(key, NftType.fromJson(value))),
     );
   }
   @override
   Map<String, dynamic> toJson() => {
-        'types': {for (final i in types.entries) i.key: i.value.toJson()}
-      };
+    'types': {for (final i in types.entries) i.key: i.value.toJson()},
+  };
 }
 
 /// Interpretation information for a collection of parsable NFTs, a collection
@@ -423,17 +428,18 @@ class ParsableNftCollection implements Parse {
   factory ParsableNftCollection.fromJson(Map<String, dynamic> json) {
     return ParsableNftCollection(
       bytecode: json['bytecode'],
-      types: Map<String, dynamic>.from(json['types'])
-          .map((key, value) => MapEntry(key, NftType.fromJson(value))),
+      types: Map<String, dynamic>.from(
+        json['types'],
+      ).map((key, value) => MapEntry(key, NftType.fromJson(value))),
     );
   }
   const ParsableNftCollection({required this.bytecode, required this.types});
 
   @override
   Map<String, dynamic> toJson() => {
-        'bytecode': bytecode,
-        'types': {for (final i in types.entries) i.key: i.value.toJson()}
-      };
+    'bytecode': bytecode,
+    'types': {for (final i in types.entries) i.key: i.value.toJson()},
+  };
 }
 
 /// A definition specifying the non-fungible token information for a
@@ -472,18 +478,19 @@ class NftCategory {
   factory NftCategory.fromJson(Map<String, dynamic> json) {
     return NftCategory(
       description: json['description'],
-      fields: json['fields'] != null
-          ? NftCategoryField.fromJson(json['fields'])
-          : null,
+      fields:
+          json['fields'] != null
+              ? NftCategoryField.fromJson(json['fields'])
+              : null,
       parse: json['parse'] != null ? Parse.fromJson(json['parse']) : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'description': description,
-        'fields': fields?.toJson(),
-        'parse': parse?.toJson(),
-      }..removeWhere((key, value) => value == null);
+    'description': description,
+    'fields': fields?.toJson(),
+    'parse': parse?.toJson(),
+  }..removeWhere((key, value) => value == null);
 }
 
 /// A definition specifying information about an identity's token category.
@@ -523,15 +530,19 @@ class TokenCategory {
     );
   }
 
-  const TokenCategory(
-      {required this.category, required this.symbol, this.decimals, this.nfts});
+  const TokenCategory({
+    required this.category,
+    required this.symbol,
+    this.decimals,
+    this.nfts,
+  });
 
   Map<String, dynamic> toJson() => {
-        'category': category,
-        'decimals': decimals,
-        'symbol': symbol,
-        'nfts': nfts?.toJson(),
-      }..removeWhere((key, value) => value == null);
+    'category': category,
+    'decimals': decimals,
+    'symbol': symbol,
+    'nfts': nfts?.toJson(),
+  }..removeWhere((key, value) => value == null);
 }
 
 /// A snapshot of the metadata for a particular identity at a specific time.
@@ -648,9 +659,10 @@ class IdentitySnapshot {
       status: json['status'],
       splitId: json['splitId'],
       uris: json['uris'] != null ? URIs.fromJson(json['uris']) : null,
-      extensions: json['extensions'] != null
-          ? Extensions.fromJson(json['extensions'])
-          : null,
+      extensions:
+          json['extensions'] != null
+              ? Extensions.fromJson(json['extensions'])
+              : null,
     );
   }
 
@@ -667,16 +679,16 @@ class IdentitySnapshot {
   });
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'description': description,
-        'tags': tags,
-        'migrated': migrated,
-        'token': token?.toJson(),
-        'status': status,
-        'splitId': splitId,
-        'uris': uris?.toJson(),
-        'extensions': extensions?.toJson(),
-      }..removeWhere((key, value) => value == null);
+    'name': name,
+    'description': description,
+    'tags': tags,
+    'migrated': migrated,
+    'token': token?.toJson(),
+    'status': status,
+    'splitId': splitId,
+    'uris': uris?.toJson(),
+    'extensions': extensions?.toJson(),
+  }..removeWhere((key, value) => value == null);
 }
 
 /// A snapshot of the metadata for a particular chain/network at a specific
@@ -694,9 +706,10 @@ class ChainSnapshot extends IdentitySnapshot {
       status: json['status'],
       splitId: json['splitId'],
       uris: json['uris'] != null ? URIs.fromJson(json['uris']) : null,
-      extensions: json['extensions'] != null
-          ? Extensions.fromJson(json['extensions'])
-          : null,
+      extensions:
+          json['extensions'] != null
+              ? Extensions.fromJson(json['extensions'])
+              : null,
     );
   }
   const ChainSnapshot({
@@ -717,8 +730,9 @@ class RegistryTimestampKeyedValues<T extends IdentitySnapshot> {
 
   final Map<String, T> timestampMap;
 
-  Map<String, dynamic> toJson() =>
-      {for (final i in timestampMap.entries) i.key: i.value.toJson()};
+  Map<String, dynamic> toJson() => {
+    for (final i in timestampMap.entries) i.key: i.value.toJson(),
+  };
 }
 
 class ChainHistory extends RegistryTimestampKeyedValues<ChainSnapshot> {
@@ -766,24 +780,28 @@ class OffChainRegistryIdentity {
       description: json['description'],
       uris: json['uris'] != null ? URIs.fromJson(json['uris']) : null,
       tags: json['tags'] == null ? null : List<String>.from(json['tags']),
-      extensions: json['extensions'] != null
-          ? Extensions.fromJson(json['extensions'])
-          : null,
+      extensions:
+          json['extensions'] != null
+              ? Extensions.fromJson(json['extensions'])
+              : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'description': description,
-        'uris': uris?.toJson(),
-        'tags': tags,
-        'extensions': extensions?.toJson(),
-      }..removeWhere((key, value) => value == null);
+    'name': name,
+    'description': description,
+    'uris': uris?.toJson(),
+    'tags': tags,
+    'extensions': extensions?.toJson(),
+  }..removeWhere((key, value) => value == null);
 }
 
 class Version {
-  const Version(
-      {required this.major, required this.minor, required this.patch});
+  const Version({
+    required this.major,
+    required this.minor,
+    required this.patch,
+  });
 
   final int major;
   final int minor;
@@ -938,29 +956,34 @@ class Registry {
       schema: json[r'$schema'],
       version: Version.fromJson(json['version']),
       latestRevision: json['latestRevision'],
-      registryIdentity: json['registryIdentity'] != null
-          ? OffChainRegistryIdentity.fromJson(json['registryIdentity'])
-          : json['registryIdentity'],
+      registryIdentity:
+          json['registryIdentity'] != null
+              ? OffChainRegistryIdentity.fromJson(json['registryIdentity'])
+              : json['registryIdentity'],
       defaultChain: json['defaultChain'],
       license: json['license'],
-      extensions: json['extensions'] != null
-          ? Extensions.fromJson(json['extensions'])
-          : null,
-      identities: json['identities'] != null
-          ? (json['identities'] as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key, IdentityHistory.fromJson(value)),
-            )
-          : null,
-      chains: json['chains'] != null
-          ? (json['chains'] as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key, ChainHistory.fromJson(value)),
-            )
-          : null,
-      tags: json['tags'] != null
-          ? (json['tags'] as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key, Tag.fromJson(value)),
-            )
-          : null,
+      extensions:
+          json['extensions'] != null
+              ? Extensions.fromJson(json['extensions'])
+              : null,
+      identities:
+          json['identities'] != null
+              ? (json['identities'] as Map<String, dynamic>).map(
+                (key, value) => MapEntry(key, IdentityHistory.fromJson(value)),
+              )
+              : null,
+      chains:
+          json['chains'] != null
+              ? (json['chains'] as Map<String, dynamic>).map(
+                (key, value) => MapEntry(key, ChainHistory.fromJson(value)),
+              )
+              : null,
+      tags:
+          json['tags'] != null
+              ? (json['tags'] as Map<String, dynamic>).map(
+                (key, value) => MapEntry(key, Tag.fromJson(value)),
+              )
+              : null,
     );
   }
   const Registry({
@@ -981,9 +1004,10 @@ class Registry {
       r'$schema': schema,
       'version': version.toJson(),
       'latestRevision': latestRevision,
-      'registryIdentity': registryIdentity is OffChainRegistryIdentity
-          ? (registryIdentity as OffChainRegistryIdentity).toJson()
-          : registryIdentity,
+      'registryIdentity':
+          registryIdentity is OffChainRegistryIdentity
+              ? (registryIdentity as OffChainRegistryIdentity).toJson()
+              : registryIdentity,
       'identities': null,
       'defaultChain': defaultChain,
       'license': license,

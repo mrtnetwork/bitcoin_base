@@ -4,7 +4,8 @@ mixin PsbtSignerImpl on PsbtBuilderImpl {
   void _checkFinalizeInput(int index) {
     if (PsbtUtils.finalized(index: index, input: _psbt.input)) {
       throw DartBitcoinPluginException(
-          "Input at index $index is already finalized and cannot be modified.");
+        "Input at index $index is already finalized and cannot be modified.",
+      );
     }
   }
 
@@ -28,28 +29,35 @@ mixin PsbtSignerImpl on PsbtBuilderImpl {
     _checkFinalizeInput(index);
     final txInputs = this.txInputs();
     final params = PsbtUtils.getPsbtInputInfo(
-        psbt: _psbt, inputIndex: index, txInputs: txInputs);
+      psbt: _psbt,
+      inputIndex: index,
+      txInputs: txInputs,
+    );
     final request = PsbtSignerParams(
-        scriptPubKey: params.scriptPubKey,
-        index: index,
-        inputData: psbtInput(index),
-        address: params.address);
+      scriptPubKey: params.scriptPubKey,
+      index: index,
+      inputData: psbtInput(index),
+      address: params.address,
+    );
     final btcSigner = signer(request);
     if (btcSigner == null || btcSigner.signers.isEmpty) return;
     for (final signer in btcSigner.signers) {
       final digest = PsbtUtils.generateInputTransactionDigest(
-          index: index,
-          unsignedTx: buildUnsignedTransaction(),
-          params: params,
-          input: _psbt.input,
-          tapleafHash: btcSigner.tapleafHash,
-          sighashType: btcSigner.sighash,
-          psbt: _psbt);
+        index: index,
+        unsignedTx: buildUnsignedTransaction(),
+        params: params,
+        input: _psbt.input,
+        tapleafHash: btcSigner.tapleafHash,
+        sighashType: btcSigner.sighash,
+        psbt: _psbt,
+      );
       final signature = signer.btcSignInput(digest.createRequest(signer));
       final psbtSignature = digest.createSignature(signature, signer);
       final sighash = digest.getPsbtSigHash();
-      _psbt.input
-          .updateInputs(index, [psbtSignature, if (sighash != null) sighash]);
+      _psbt.input.updateInputs(index, [
+        psbtSignature,
+        if (sighash != null) sighash,
+      ]);
     }
   }
 
@@ -94,8 +102,10 @@ mixin PsbtSignerImpl on PsbtBuilderImpl {
   ///   you must determine the correct tapleafHash; otherwise, signing will fail.
   ///
   /// Throws an error if signing fails for any reason.
-  Future<void> signAllInputAsync(
-      {required ONBTCSIGNERASYNC signer, int? sighashType}) async {
+  Future<void> signAllInputAsync({
+    required ONBTCSIGNERASYNC signer,
+    int? sighashType,
+  }) async {
     for (int i = 0; i < _psbt.input.entries.length; i++) {
       if (indexFinalized(i)) continue;
       await signInputAsync(index: i, signer: signer, sighashType: sighashType);
@@ -118,36 +128,45 @@ mixin PsbtSignerImpl on PsbtBuilderImpl {
   ///   you must determine the correct tapleafHash; otherwise, signing will fail.
   ///
   /// Throws an error if signing fails for any reason.
-  Future<void> signInputAsync(
-      {required int index,
-      required ONBTCSIGNERASYNC signer,
-      int? sighashType}) async {
+  Future<void> signInputAsync({
+    required int index,
+    required ONBTCSIGNERASYNC signer,
+    int? sighashType,
+  }) async {
     _checkFinalizeInput(index);
     final txInputs = this.txInputs();
     final params = PsbtUtils.getPsbtInputInfo(
-        psbt: _psbt, inputIndex: index, txInputs: txInputs);
+      psbt: _psbt,
+      inputIndex: index,
+      txInputs: txInputs,
+    );
     final request = PsbtSignerParams(
-        scriptPubKey: params.scriptPubKey,
-        index: index,
-        inputData: psbtInput(index),
-        address: params.address);
+      scriptPubKey: params.scriptPubKey,
+      index: index,
+      inputData: psbtInput(index),
+      address: params.address,
+    );
     final btcSigner = await signer(request);
     if (btcSigner == null) return;
     for (final signer in btcSigner.signers) {
       final digest = PsbtUtils.generateInputTransactionDigest(
-          index: index,
-          unsignedTx: buildUnsignedTransaction(),
-          params: params,
-          input: _psbt.input,
-          tapleafHash: btcSigner.tapleafHash,
-          sighashType: sighashType,
-          psbt: _psbt);
-      final signature =
-          await signer.btcSignInputAsync(digest.createRequest(signer));
+        index: index,
+        unsignedTx: buildUnsignedTransaction(),
+        params: params,
+        input: _psbt.input,
+        tapleafHash: btcSigner.tapleafHash,
+        sighashType: sighashType,
+        psbt: _psbt,
+      );
+      final signature = await signer.btcSignInputAsync(
+        digest.createRequest(signer),
+      );
       final psbtSignature = digest.createSignature(signature, signer);
       final sighash = digest.getPsbtSigHash();
-      _psbt.input
-          .updateInputs(index, [psbtSignature, if (sighash != null) sighash]);
+      _psbt.input.updateInputs(index, [
+        psbtSignature,
+        if (sighash != null) sighash,
+      ]);
     }
   }
 }

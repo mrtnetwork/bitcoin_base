@@ -10,8 +10,8 @@ const artCollection = {
       'icon': 'https://example.com/registry-icon.svg',
       'web': 'https://example.com/',
       'registry':
-          'https://example.com/.well-known/bitcoin-cash-metadata-registry.json'
-    }
+          'https://example.com/.well-known/bitcoin-cash-metadata-registry.json',
+    },
   },
   'identities': {
     '89cad9e3e34280eb1e8bc420542c00a7fcc01002b663dbf7f38bceddf80e680c': {
@@ -35,8 +35,8 @@ const artCollection = {
                         'ipfs://bafybeihnmh5bkbaspp3xfdanje74pekhsklhobzzraeyywq6gcpb3iuvey/0.svg',
                     'image':
                         'ipfs://bafybeihnmh5bkbaspp3xfdanje74pekhsklhobzzraeyywq6gcpb3iuvey/0.svg',
-                    'web': 'https://example.com/xamplz/0/details'
-                  }
+                    'web': 'https://example.com/xamplz/0/details',
+                  },
                 },
                 '01': {
                   'name': 'Example #1',
@@ -48,8 +48,9 @@ const artCollection = {
                     'image':
                         'ipfs://bafybeihnmh5bkbaspp3xfdanje74pekhsklhobzzraeyywq6gcpb3iuvey/1.svg',
                     'web': 'https://example.com/xamplz/1/details',
-                    'custom-uri-identifier': 'protocol://data-for-some-protocol'
-                  }
+                    'custom-uri-identifier':
+                        'protocol://data-for-some-protocol',
+                  },
                 },
                 '02': {
                   'name': 'Example #2',
@@ -62,12 +63,12 @@ const artCollection = {
                         'ipfs://bafybeihnmh5bkbaspp3xfdanje74pekhsklhobzzraeyywq6gcpb3iuvey/2.svg',
                     'web': 'https://example.com/another/path',
                     'another-uri-identifier':
-                        'protocol://data-for-that-protocol'
-                  }
-                }
-              }
-            }
-          }
+                        'protocol://data-for-that-protocol',
+                  },
+                },
+              },
+            },
+          },
         },
         'uris': {
           'icon': 'https://example.com/xamplz-icon.svg',
@@ -79,10 +80,10 @@ const artCollection = {
               'https://example.com/.well-known/bitcoin-cash-metadata-registry.json',
           'support': 'https://support.example.com/',
           'custom-uri-identifier':
-              'protocol://connection-info-for-some-protocol'
-        }
-      }
-    }
+              'protocol://connection-info-for-some-protocol',
+        },
+      },
+    },
   },
-  'license': 'CC0-1.0'
+  'license': 'CC0-1.0',
 };

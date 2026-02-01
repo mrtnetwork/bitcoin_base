@@ -1,26 +1,34 @@
 part of 'package:bitcoin_base/src/bitcoin/address/address.dart';
 
 abstract class SegwitAddress implements BitcoinBaseAddress {
-  SegwitAddress.fromAddress(
-      {required String address,
-      required BasedUtxoNetwork network,
-      required this.segwitVersion}) {
+  SegwitAddress.fromAddress({
+    required String address,
+    required BasedUtxoNetwork network,
+    required this.segwitVersion,
+  }) {
     if (!network.supportedAddress.contains(type)) {
       throw DartBitcoinPluginException(
-          'network does not support ${type.value} address');
+        'network does not support ${type.value} address',
+      );
     }
-    addressProgram = _BitcoinAddressUtils.toSegwitProgramWithVersionAndNetwork(
-        address: address, version: segwitVersion, network: network);
+    addressProgram = BitcoinAddressUtils.toSegwitProgramWithVersionAndNetwork(
+      address: address,
+      version: segwitVersion,
+      network: network,
+    );
   }
-  SegwitAddress.fromProgram(
-      {required String program,
-      required this.segwitVersion,
-      required SegwitAddressType addresType})
-      : addressProgram =
-            _BitcoinAddressUtils.validateAddressProgram(program, addresType);
-  SegwitAddress.fromScript(
-      {required Script script, required this.segwitVersion})
-      : addressProgram = _BitcoinAddressUtils.segwitScriptToSHA256(script);
+  SegwitAddress.fromProgram({
+    required String program,
+    required this.segwitVersion,
+    required SegwitAddressType addresType,
+  }) : addressProgram = BitcoinAddressUtils.validateAddressProgram(
+         program,
+         addresType,
+       );
+  SegwitAddress.fromScript({
+    required Script script,
+    required this.segwitVersion,
+  }) : addressProgram = BitcoinAddressUtils.segwitScriptToSHA256(script);
 
   @override
   late final String addressProgram;
@@ -31,17 +39,19 @@ abstract class SegwitAddress implements BitcoinBaseAddress {
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
       throw DartBitcoinPluginException(
-          'network does not support ${type.value} address');
+        'network does not support ${type.value} address',
+      );
     }
-    return _BitcoinAddressUtils.segwitToAddress(
-        addressProgram: addressProgram,
-        network: network,
-        segwitVersion: segwitVersion);
+    return BitcoinAddressUtils.segwitToAddress(
+      addressProgram: addressProgram,
+      network: network,
+      segwitVersion: segwitVersion,
+    );
   }
 
   @override
   String pubKeyHash() {
-    return _BitcoinAddressUtils.pubKeyHash(toScriptPubKey());
+    return BitcoinAddressUtils.pubKeyHash(toScriptPubKey());
   }
 
   @override
@@ -61,12 +71,13 @@ abstract class SegwitAddress implements BitcoinBaseAddress {
 
 class P2wpkhAddress extends SegwitAddress {
   P2wpkhAddress.fromAddress({required super.address, required super.network})
-      : super.fromAddress(segwitVersion: _BitcoinAddressUtils.segwitV0);
+    : super.fromAddress(segwitVersion: BitcoinAddressUtils.segwitV0);
 
   P2wpkhAddress.fromProgram({required super.program})
-      : super.fromProgram(
-            segwitVersion: _BitcoinAddressUtils.segwitV0,
-            addresType: SegwitAddressType.p2wpkh);
+    : super.fromProgram(
+        segwitVersion: BitcoinAddressUtils.segwitV0,
+        addresType: SegwitAddressType.p2wpkh,
+      );
 
   /// returns the scriptPubKey of a P2WPKH witness script
   @override
@@ -81,23 +92,27 @@ class P2wpkhAddress extends SegwitAddress {
 
 class P2trAddress extends SegwitAddress {
   P2trAddress.fromAddress({required super.address, required super.network})
-      : super.fromAddress(segwitVersion: _BitcoinAddressUtils.segwitV1);
+    : super.fromAddress(segwitVersion: BitcoinAddressUtils.segwitV1);
   P2trAddress.fromProgram({required super.program})
-      : super.fromProgram(
-            segwitVersion: _BitcoinAddressUtils.segwitV1,
-            addresType: SegwitAddressType.p2tr);
+    : super.fromProgram(
+        segwitVersion: BitcoinAddressUtils.segwitV1,
+        addresType: SegwitAddressType.p2tr,
+      );
   P2trAddress.fromInternalKey({
     required List<int> internalKey,
     TaprootTree? treeScript,
     List<int>? merkleRoot,
   }) : super.fromProgram(
-            program: BytesUtils.toHexString(TaprootUtils.tweakPublicKey(
-                    internalKey,
-                    treeScript: treeScript,
-                    merkleRoot: merkleRoot)
-                .toXonly()),
-            segwitVersion: _BitcoinAddressUtils.segwitV1,
-            addresType: SegwitAddressType.p2tr);
+         program: BytesUtils.toHexString(
+           TaprootUtils.tweakPublicKey(
+             internalKey,
+             treeScript: treeScript,
+             merkleRoot: merkleRoot,
+           ).toXonly(),
+         ),
+         segwitVersion: BitcoinAddressUtils.segwitV1,
+         addresType: SegwitAddressType.p2tr,
+       );
 
   /// returns the scriptPubKey of a P2TR witness script
   @override
@@ -112,13 +127,14 @@ class P2trAddress extends SegwitAddress {
 
 class P2wshAddress extends SegwitAddress {
   P2wshAddress.fromAddress({required super.address, required super.network})
-      : super.fromAddress(segwitVersion: _BitcoinAddressUtils.segwitV0);
+    : super.fromAddress(segwitVersion: BitcoinAddressUtils.segwitV0);
   P2wshAddress.fromProgram({required super.program})
-      : super.fromProgram(
-            segwitVersion: _BitcoinAddressUtils.segwitV0,
-            addresType: SegwitAddressType.p2wsh);
+    : super.fromProgram(
+        segwitVersion: BitcoinAddressUtils.segwitV0,
+        addresType: SegwitAddressType.p2wsh,
+      );
   P2wshAddress.fromScript({required super.script})
-      : super.fromScript(segwitVersion: _BitcoinAddressUtils.segwitV0);
+    : super.fromScript(segwitVersion: BitcoinAddressUtils.segwitV0);
 
   /// Returns the scriptPubKey of a P2WPKH witness script
   @override

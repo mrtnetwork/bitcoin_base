@@ -29,23 +29,25 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   final bool enableRBF;
   final bool isFakeTransaction;
 
-  ForkedTransactionBuilder(
-      {required super.outPuts,
-      required super.fee,
-      required super.network,
-      required super.utxos,
-      super.inputOrdering = BitcoinOrdering.bip69,
-      super.outputOrdering = BitcoinOrdering.bip69,
-      this.memo,
-      this.enableRBF = false,
-      this.isFakeTransaction = false}) {
+  ForkedTransactionBuilder({
+    required super.outPuts,
+    required super.fee,
+    required super.network,
+    required super.utxos,
+    super.inputOrdering = BitcoinOrdering.bip69,
+    super.outputOrdering = BitcoinOrdering.bip69,
+    this.memo,
+    this.enableRBF = false,
+    this.isFakeTransaction = false,
+  }) {
     _validateBuilder();
   }
 
   void _validateBuilder() {
     if (network is! BitcoinCashNetwork && network is! BitcoinSVNetwork) {
       throw const DartBitcoinPluginException(
-          'invalid network. use ForkedTransactionBuilder for BitcoinCashNetwork and BSVNetwork otherwise use BitcoinTransactionBuilder');
+        'invalid network. use ForkedTransactionBuilder for BitcoinCashNetwork and BSVNetwork otherwise use BitcoinTransactionBuilder',
+      );
     }
 
     /// validate every address is related to network
@@ -63,49 +65,54 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   /// This method is used to create a dummy transaction,
   /// allowing us to obtain the size of the original transaction
   /// before conducting the actual transaction. This helps us estimate the transaction cost
-  static int estimateTransactionSize(
-      {required List<UtxoWithAddress> utxos,
-      required List<BitcoinBaseOutput> outputs,
-      required BasedUtxoNetwork network,
-      String? memo,
-      bool enableRBF = false}) {
+  static int estimateTransactionSize({
+    required List<UtxoWithAddress> utxos,
+    required List<BitcoinBaseOutput> outputs,
+    required BasedUtxoNetwork network,
+    String? memo,
+    bool enableRBF = false,
+  }) {
     final transactionBuilder = ForkedTransactionBuilder(
+      /// Now, we provide the UTXOs we want to spend.
+      utxos: utxos,
 
-        /// Now, we provide the UTXOs we want to spend.
-        utxos: utxos,
+      /// We select transaction outputs
+      outPuts: outputs,
 
-        /// We select transaction outputs
-        outPuts: outputs,
+      /// Transaction fee
+      /// Ensure that you have accurately calculated the amounts.
+      /// If the sum of the outputs, including the transaction fee,
+      /// does not match the total amount of UTXOs,
+      /// it will result in an error. Please double-check your calculations.
+      fee: BigInt.from(10000000000000),
 
-        /// Transaction fee
-        /// Ensure that you have accurately calculated the amounts.
-        /// If the sum of the outputs, including the transaction fee,
-        /// does not match the total amount of UTXOs,
-        /// it will result in an error. Please double-check your calculations.
-        fee: BigInt.from(10000000000000),
+      /// network, testnet, mainnet
+      network: network,
 
-        /// network, testnet, mainnet
-        network: network,
+      /// If you like the note write something else and leave it blank
+      memo: memo,
 
-        /// If you like the note write something else and leave it blank
-        memo: memo,
+      /// RBF, or Replace-By-Fee, is a feature in Bitcoin that allows you to increase the fee of an unconfirmed
+      /// transaction that you've broadcasted to the network.
+      /// This feature is useful when you want to speed up a
+      /// transaction that is taking longer than expected to get confirmed due to low transaction fees.
+      enableRBF: true,
 
-        /// RBF, or Replace-By-Fee, is a feature in Bitcoin that allows you to increase the fee of an unconfirmed
-        /// transaction that you've broadcasted to the network.
-        /// This feature is useful when you want to speed up a
-        /// transaction that is taking longer than expected to get confirmed due to low transaction fees.
-        enableRBF: true,
-
-        /// We consider the transaction to be fake so that it doesn't check the amounts
-        /// and doesn't generate errors when determining the transaction size.
-        isFakeTransaction: true);
+      /// We consider the transaction to be fake so that it doesn't check the amounts
+      /// and doesn't generate errors when determining the transaction size.
+      isFakeTransaction: true,
+    );
 
     /// 72 bytes (64 byte signature, 6-7 byte Der encoding length + sighash)
     const fakeECDSASignatureBytes =
         '010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101';
 
-    final transaction = transactionBuilder
-        .buildTransaction((trDigest, utxo, multiSigPublicKey, int sighash) {
+    final transaction = transactionBuilder.buildTransaction((
+      trDigest,
+      utxo,
+      multiSigPublicKey,
+      int sighash,
+    ) {
       return fakeECDSASignatureBytes;
     });
 
@@ -127,7 +134,8 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
           return script;
         default:
           throw DartBitcoinPluginException(
-              'unsuported multi-sig type ${utxo.utxo.scriptType} for ${network.conf.coinName.name}');
+            'unsuported multi-sig type ${utxo.utxo.scriptType} for ${network.conf.coinName.name}',
+          );
       }
     }
 
@@ -148,7 +156,8 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
         return senderPub.toAddress(mode: utxo.keyType).toScriptPubKey();
       default:
         throw DartBitcoinPluginException(
-            '${utxo.utxo.scriptType} does not sudpport on ${network.conf.coinName.name}');
+          '${utxo.utxo.scriptType} does not sudpport on ${network.conf.coinName.name}',
+        );
     }
   }
 
@@ -156,7 +165,7 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   /// transaction. The digest is used for signing the transaction input. The function takes into account whether the
   /// associated UTXO is Segregated Witness (SegWit) or Pay-to-Taproot (P2TR), and it computes the appropriate digest
   /// based on these conditions.
-//
+  //
   /// Parameters:
   /// - scriptPubKeys: representing the scriptPubKey for the transaction output being spent.
   /// - input: An integer indicating the index of the input being processed within the transaction.
@@ -164,22 +173,24 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   /// - transaction: A BtcTransaction representing the Bitcoin transaction being constructed.
   /// - taprootAmounts: A List of BigInt containing taproot-specific amounts for P2TR inputs (ignored for non-P2TR inputs).
   /// - tapRootPubKeys: A List of of Script representing taproot public keys for P2TR inputs (ignored for non-P2TR inputs).
-//
+  //
   /// Returns:
   /// - `List<int>`: representing the transaction digest to be used for signing the input.
-  List<int> _generateTransactionDigest(
-      {required Script scriptPubKeys,
-      required int input,
-      required UtxoWithAddress utox,
-      required BtcTransaction transaction,
-      int sighash =
-          BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked}) {
+  List<int> _generateTransactionDigest({
+    required Script scriptPubKeys,
+    required int input,
+    required UtxoWithAddress utox,
+    required BtcTransaction transaction,
+    int sighash =
+        BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked,
+  }) {
     return transaction.getTransactionSegwitDigit(
-        txInIndex: input,
-        script: scriptPubKeys,
-        amount: utox.utxo.value,
-        token: utox.utxo.token,
-        sighash: sighash);
+      txInIndex: input,
+      script: scriptPubKeys,
+      amount: utox.utxo.value,
+      token: utox.utxo.token,
+      sighash: sighash,
+    );
   }
 
   /// buildP2wshOrP2shScriptSig constructs and returns a script signature (represented as a List of strings)
@@ -193,13 +204,15 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   /// Returns:
   /// - `List<String>`: A List of strings representing the script signature for the P2WSH or P2SH input.
   List<String> _buildMiltisigUnlockingScript(
-      List<String> signedDigest, UtxoWithAddress utx) {
+    List<String> signedDigest,
+    UtxoWithAddress utx,
+  ) {
     /// The constructed script signature consists of the signed digest elements followed by
     /// the script details of the multi-signature address.
     return ['', ...signedDigest, utx.multiSigAddress.multiSigScript.toHex()];
   }
 
-/*
+  /*
 Unlocking Script (scriptSig): The scriptSig is also referred to as
 the unlocking script because it provides data and instructions to unlock
 a specific output. It contains information and cryptographic signatures
@@ -221,7 +234,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
         return [
           signedDigest,
           senderPub.toHex(mode: utx.keyType),
-          script.toHex()
+          script.toHex(),
         ];
       case P2shAddressType.p2pkInP2sh:
       case P2shAddressType.p2pkInP2shwt:
@@ -231,65 +244,69 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
         return [signedDigest, script.toHex()];
       default:
         throw DartBitcoinPluginException(
-            'Cannot send from this type of address ${utx.utxo.scriptType}');
+          'Cannot send from this type of address ${utx.utxo.scriptType}',
+        );
     }
   }
 
-  Tuple<List<TxInput>, List<UtxoWithAddress>> _buildInputs() {
+  (List<TxInput>, List<UtxoWithAddress>) _buildInputs() {
     final sortedUtxos = List<UtxoWithAddress>.from(utxos);
 
     if (inputOrdering == BitcoinOrdering.shuffle) {
       sortedUtxos.shuffle();
     } else if (inputOrdering == BitcoinOrdering.bip69) {
-      sortedUtxos.sort(
-        (a, b) {
-          final txidComparison = a.utxo.txHash.compareTo(b.utxo.txHash);
-          if (txidComparison == 0) {
-            return a.utxo.vout - b.utxo.vout;
-          }
-          return txidComparison;
-        },
-      );
+      sortedUtxos.sort((a, b) {
+        final txidComparison = a.utxo.txHash.compareTo(b.utxo.txHash);
+        if (txidComparison == 0) {
+          return a.utxo.vout - b.utxo.vout;
+        }
+        return txidComparison;
+      });
     }
     final inputs = sortedUtxos.map((e) => e.utxo.toInput()).toList();
     if (enableRBF && inputs.isNotEmpty) {
-      inputs[0] =
-          inputs[0].copyWith(sequence: BitcoinOpCodeConst.replaceByFeeSequence);
+      inputs[0] = inputs[0].copyWith(
+        sequence: BitcoinOpCodeConst.replaceByFeeSequence,
+      );
     }
-    return Tuple(List<TxInput>.unmodifiable(inputs),
-        List<UtxoWithAddress>.unmodifiable(sortedUtxos));
+    return (
+      List<TxInput>.unmodifiable(inputs),
+      List<UtxoWithAddress>.unmodifiable(sortedUtxos),
+    );
   }
 
   List<TxOutput> _buildOutputs() {
-    var outputs = outPuts
-        .where((element) => element is! BitcoinBurnableOutput)
-        .map((e) => e.toOutput)
-        .toList();
+    var outputs =
+        outPuts
+            .where((element) => element is! BitcoinBurnableOutput)
+            .map((e) => e.toOutput)
+            .toList();
 
     if (memo != null) {
-      outputs
-          .add(TxOutput(amount: BigInt.zero, scriptPubKey: _opReturn(memo!)));
+      outputs.add(
+        TxOutput(amount: BigInt.zero, scriptPubKey: _opReturn(memo!)),
+      );
     }
 
     if (outputOrdering == BitcoinOrdering.shuffle) {
       outputs = outputs..shuffle();
     } else if (outputOrdering == BitcoinOrdering.bip69) {
-      outputs = outputs
-        ..sort(
-          (a, b) {
+      outputs =
+          outputs..sort((a, b) {
             final valueComparison = a.amount.compareTo(b.amount);
             if (valueComparison == 0) {
               return BytesUtils.compareBytes(
-                  a.scriptPubKey.toBytes(), b.scriptPubKey.toBytes());
+                a.scriptPubKey.toBytes(),
+                b.scriptPubKey.toBytes(),
+              );
             }
             return valueComparison;
-          },
-        );
+          });
     }
     return List<TxOutput>.unmodifiable(outputs);
   }
 
-/*
+  /*
 The primary use case for OP_RETURN is data storage. You can embed various types of
 data within the OP_RETURN output, such as text messages, document hashes, or metadata
 related to a transaction. This data is permanently recorded on the blockchain and can
@@ -321,20 +338,23 @@ be retrieved by anyone who examines the blockchain's history.
     return tokens;
   }
 
-  void _validate(
-      {required List<UtxoWithAddress> utxos,
-      required List<TxOutput> outputs,
-      required BigInt sumAmountsWithFee,
-      required BigInt sumUtxoAmount,
-      required BigInt sumOutputAmounts}) {
+  void _validate({
+    required List<UtxoWithAddress> utxos,
+    required List<TxOutput> outputs,
+    required BigInt sumAmountsWithFee,
+    required BigInt sumUtxoAmount,
+    required BigInt sumOutputAmounts,
+  }) {
     if (isFakeTransaction) return;
     if (sumAmountsWithFee != sumUtxoAmount) {
-      throw DartBitcoinPluginException('Sum value of utxo not spending',
-          details: {
-            'inputAmount': sumUtxoAmount,
-            'fee': fee,
-            'outputAmount': sumOutputAmounts
-          });
+      throw DartBitcoinPluginException(
+        'Sum value of utxo not spending',
+        details: {
+          'inputAmount': sumUtxoAmount,
+          'fee': fee,
+          'outputAmount': sumOutputAmounts,
+        },
+      );
     }
 
     /// sum of token amounts
@@ -348,17 +368,20 @@ be retrieved by anyone who examines the blockchain's history.
         amount += outPuts
             .whereType<BitcoinBurnableOutput>()
             .where((element) => element.categoryID == i.key)
-            .fold(BigInt.zero,
-                (previousValue, element) => previousValue + (element.value));
+            .fold(
+              BigInt.zero,
+              (previousValue, element) => previousValue + (element.value),
+            );
 
         if (amount != i.value) {
           throw DartBitcoinPluginException(
-              'Sum token value of UTXOs not spending. use BitcoinBurnableOutput if you want to burn tokens.',
-              details: {
-                'token': i.key,
-                'inputValue': i.value,
-                'outputValue': amount
-              });
+            'Sum token value of UTXOs not spending. use BitcoinBurnableOutput if you want to burn tokens.',
+            details: {
+              'token': i.key,
+              'inputValue': i.value,
+              'outputValue': amount,
+            },
+          );
         }
       }
     }
@@ -367,19 +390,23 @@ be retrieved by anyone who examines the blockchain's history.
       if (token != null && token.hasNFT) {
         if (token.hasAmount) continue;
         final hasOneoutput = outPuts.whereType<BitcoinTokenOutput>().any(
-            (element) =>
-                element.utxoHash == i.utxo.txHash &&
-                element.token.category == token.category);
+          (element) =>
+              element.utxoHash == i.utxo.txHash &&
+              element.token.category == token.category,
+        );
         if (hasOneoutput) continue;
         final hasBurnableOutput = outPuts
             .whereType<BitcoinBurnableOutput>()
-            .any((element) =>
-                element.utxoHash == i.utxo.txHash &&
-                element.categoryID == token.category);
+            .any(
+              (element) =>
+                  element.utxoHash == i.utxo.txHash &&
+                  element.categoryID == token.category,
+            );
         if (hasBurnableOutput) continue;
         throw DartBitcoinPluginException(
-            'Some NFTs in the inputs lack the corresponding spending in the outputs. If you intend to burn tokens, consider utilizing the BitcoinBurnableOutput.',
-            details: {'category id': token.category});
+          'Some NFTs in the inputs lack the corresponding spending in the outputs. If you intend to burn tokens, consider utilizing the BitcoinBurnableOutput.',
+          details: {'category id': token.category},
+        );
       }
     }
   }
@@ -387,8 +414,8 @@ be retrieved by anyone who examines the blockchain's history.
   @override
   Map<String, int> getSignatureCount() {
     final sortedInputs = _buildInputs();
-    final inputs = sortedInputs.item1;
-    final utxos = sortedInputs.item2;
+    final inputs = sortedInputs.$1;
+    final utxos = sortedInputs.$2;
     final count = <String, int>{};
 
     for (var i = 0; i < inputs.length; i++) {
@@ -398,12 +425,16 @@ be retrieved by anyone who examines the blockchain's history.
         final multiSigAddress = indexUtxo.multiSigAddress;
         var sumMultiSigWeight = 0;
         final mutlsiSigSignatures = <String>[];
-        for (var ownerIndex = 0;
-            ownerIndex < multiSigAddress.signers.length;
-            ownerIndex++) {
-          for (var weight = 0;
-              weight < multiSigAddress.signers[ownerIndex].weight;
-              weight++) {
+        for (
+          var ownerIndex = 0;
+          ownerIndex < multiSigAddress.signers.length;
+          ownerIndex++
+        ) {
+          for (
+            var weight = 0;
+            weight < multiSigAddress.signers[ownerIndex].weight;
+            weight++
+          ) {
             if (mutlsiSigSignatures.length >= multiSigAddress.threshold) {
               break;
             }
@@ -418,7 +449,8 @@ be retrieved by anyone who examines the blockchain's history.
         }
         if (sumMultiSigWeight < multiSigAddress.threshold) {
           throw const DartBitcoinPluginException(
-              'some multisig signature does not exist');
+            'some multisig signature does not exist',
+          );
         }
         continue;
       }
@@ -433,9 +465,9 @@ be retrieved by anyone who examines the blockchain's history.
     /// build inputs
     final sortedInputs = _buildInputs();
 
-    final inputs = sortedInputs.item1;
+    final inputs = sortedInputs.$1;
 
-    final utxos = sortedInputs.item2;
+    final utxos = sortedInputs.$2;
 
     /// build outout
     final outputs = _buildOutputs();
@@ -450,11 +482,12 @@ be retrieved by anyone who examines the blockchain's history.
     final sumAmountsWithFee = (sumOutputAmounts + fee);
 
     _validate(
-        utxos: utxos,
-        outputs: outputs,
-        sumAmountsWithFee: sumAmountsWithFee,
-        sumUtxoAmount: sumUtxoAmount,
-        sumOutputAmounts: sumOutputAmounts);
+      utxos: utxos,
+      outputs: outputs,
+      sumAmountsWithFee: sumAmountsWithFee,
+      sumUtxoAmount: sumUtxoAmount,
+      sumOutputAmounts: sumOutputAmounts,
+    );
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
     final transaction = BtcTransaction(inputs: inputs, outputs: outputs);
@@ -470,27 +503,36 @@ be retrieved by anyone who examines the blockchain's history.
 
       /// We generate transaction digest for current input
       final digest = _generateTransactionDigest(
-          scriptPubKeys: script,
-          input: i,
-          utox: indexUtxo,
-          transaction: transaction,
-          sighash: sighash);
+        scriptPubKeys: script,
+        input: i,
+        utox: indexUtxo,
+        transaction: transaction,
+        sighash: sighash,
+      );
 
       /// handle multisig address
       if (indexUtxo.isMultiSig()) {
         final multiSigAddress = indexUtxo.multiSigAddress;
         var sumMultiSigWeight = 0;
         final mutlsiSigSignatures = <String>[];
-        for (var ownerIndex = 0;
-            ownerIndex < multiSigAddress.signers.length;
-            ownerIndex++) {
+        for (
+          var ownerIndex = 0;
+          ownerIndex < multiSigAddress.signers.length;
+          ownerIndex++
+        ) {
           /// now we need sign the transaction digest
-          final sig = sign(digest, indexUtxo,
-              multiSigAddress.signers[ownerIndex].publicKey, sighash);
+          final sig = sign(
+            digest,
+            indexUtxo,
+            multiSigAddress.signers[ownerIndex].publicKey,
+            sighash,
+          );
           if (sig.isEmpty) continue;
-          for (var weight = 0;
-              weight < multiSigAddress.signers[ownerIndex].weight;
-              weight++) {
+          for (
+            var weight = 0;
+            weight < multiSigAddress.signers[ownerIndex].weight;
+            weight++
+          ) {
             if (mutlsiSigSignatures.length >= multiSigAddress.threshold) {
               break;
             }
@@ -503,17 +545,25 @@ be retrieved by anyone who examines the blockchain's history.
         }
         if (sumMultiSigWeight < multiSigAddress.threshold) {
           throw const DartBitcoinPluginException(
-              'some multisig signature does not exist');
+            'some multisig signature does not exist',
+          );
         }
 
         _addScripts(
-            input: inputs[i], signatures: mutlsiSigSignatures, utxo: indexUtxo);
+          input: inputs[i],
+          signatures: mutlsiSigSignatures,
+          utxo: indexUtxo,
+        );
         continue;
       }
 
       /// now we need sign the transaction digest
-      final sig =
-          sign(digest, indexUtxo, indexUtxo.ownerDetails.publicKey!, sighash);
+      final sig = sign(
+        digest,
+        indexUtxo,
+        indexUtxo.ownerDetails.publicKey!,
+        sighash,
+      );
       _addScripts(input: inputs[i], signatures: [sig], utxo: indexUtxo);
     }
 
@@ -522,13 +572,14 @@ be retrieved by anyone who examines the blockchain's history.
 
   @override
   Future<BtcTransaction> buildTransactionAsync(
-      BitcoinSignerCallBackAsync sign) async {
+    BitcoinSignerCallBackAsync sign,
+  ) async {
     /// build inputs
     final sortedInputs = _buildInputs();
 
-    final inputs = sortedInputs.item1;
+    final inputs = sortedInputs.$1;
 
-    final utxos = sortedInputs.item2;
+    final utxos = sortedInputs.$2;
 
     /// build outout
     final outputs = _buildOutputs();
@@ -543,11 +594,12 @@ be retrieved by anyone who examines the blockchain's history.
     final sumAmountsWithFee = (sumOutputAmounts + fee);
 
     _validate(
-        utxos: utxos,
-        outputs: outputs,
-        sumAmountsWithFee: sumAmountsWithFee,
-        sumUtxoAmount: sumUtxoAmount,
-        sumOutputAmounts: sumOutputAmounts);
+      utxos: utxos,
+      outputs: outputs,
+      sumAmountsWithFee: sumAmountsWithFee,
+      sumUtxoAmount: sumUtxoAmount,
+      sumOutputAmounts: sumOutputAmounts,
+    );
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
     final transaction = BtcTransaction(inputs: inputs, outputs: outputs);
@@ -564,28 +616,37 @@ be retrieved by anyone who examines the blockchain's history.
 
       /// We generate transaction digest for current input
       final digest = _generateTransactionDigest(
-          scriptPubKeys: script,
-          input: i,
-          utox: indexUtxo,
-          transaction: transaction,
-          sighash: sighash);
+        scriptPubKeys: script,
+        input: i,
+        utox: indexUtxo,
+        transaction: transaction,
+        sighash: sighash,
+      );
 
       /// handle multisig address
       if (indexUtxo.isMultiSig()) {
         final multiSigAddress = indexUtxo.multiSigAddress;
         var sumMultiSigWeight = 0;
         final mutlsiSigSignatures = <String>[];
-        for (var ownerIndex = 0;
-            ownerIndex < multiSigAddress.signers.length;
-            ownerIndex++) {
+        for (
+          var ownerIndex = 0;
+          ownerIndex < multiSigAddress.signers.length;
+          ownerIndex++
+        ) {
           /// now we need sign the transaction digest
-          final sig = await sign(digest, indexUtxo,
-              multiSigAddress.signers[ownerIndex].publicKey, sighash);
+          final sig = await sign(
+            digest,
+            indexUtxo,
+            multiSigAddress.signers[ownerIndex].publicKey,
+            sighash,
+          );
 
           if (sig.isEmpty) continue;
-          for (var weight = 0;
-              weight < multiSigAddress.signers[ownerIndex].weight;
-              weight++) {
+          for (
+            var weight = 0;
+            weight < multiSigAddress.signers[ownerIndex].weight;
+            weight++
+          ) {
             if (mutlsiSigSignatures.length >= multiSigAddress.threshold) {
               break;
             }
@@ -599,30 +660,40 @@ be retrieved by anyone who examines the blockchain's history.
         }
         if (sumMultiSigWeight < multiSigAddress.threshold) {
           throw const DartBitcoinPluginException(
-              'some multisig signature does not exist');
+            'some multisig signature does not exist',
+          );
         }
 
         _addScripts(
-            input: inputs[i], signatures: mutlsiSigSignatures, utxo: indexUtxo);
+          input: inputs[i],
+          signatures: mutlsiSigSignatures,
+          utxo: indexUtxo,
+        );
         continue;
       }
 
       /// now we need sign the transaction digest
       final sig = await sign(
-          digest, indexUtxo, indexUtxo.ownerDetails.publicKey!, sighash);
+        digest,
+        indexUtxo,
+        indexUtxo.ownerDetails.publicKey!,
+        sighash,
+      );
       _addScripts(input: inputs[i], signatures: [sig], utxo: indexUtxo);
     }
     return transaction;
   }
 
-  void _addScripts(
-      {required UtxoWithAddress utxo,
-      required TxInput input,
-      required List<String> signatures}) {
+  void _addScripts({
+    required UtxoWithAddress utxo,
+    required TxInput input,
+    required List<String> signatures,
+  }) {
     /// ok we signed, now we need unlocking script for this input
-    final scriptSig = utxo.isMultiSig()
-        ? _buildMiltisigUnlockingScript(signatures, utxo)
-        : _buildUnlockingScript(signatures.first, utxo);
+    final scriptSig =
+        utxo.isMultiSig()
+            ? _buildMiltisigUnlockingScript(signatures, utxo)
+            : _buildUnlockingScript(signatures.first, utxo);
     input.scriptSig = Script(script: scriptSig);
   }
 }

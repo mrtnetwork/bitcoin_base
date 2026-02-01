@@ -618,5 +618,5 @@ Bip32Slip10Secp256k1 _deriveKey(
     String path = "m/86'/1'/0'/0/1"}) {
   Bip32Slip10Secp256k1 secp = Bip32Slip10Secp256k1.fromExtendedKey(
       key, Bip44Coins.bitcoinTestnet.conf.keyNetVer);
-  return secp.derivePath(path) as Bip32Slip10Secp256k1;
+  return secp.derivePath(path);
 }

@@ -9,18 +9,25 @@ class PsbtBuilderV2 extends PsbtBuilder {
   }
 
   /// Creates a new `PsbtBuilderV2` instance with default values for the transaction locktime and version.
-  factory PsbtBuilderV2.create(
-      {int transactionVesion = BitcoinOpCodeConst.defaultTxVersionNumber}) {
+  factory PsbtBuilderV2.create({
+    int transactionVesion = BitcoinOpCodeConst.defaultTxVersionNumber,
+  }) {
     final PsbtVersion version = PsbtVersion.v2;
-    return PsbtBuilderV2._(Psbt(
-        global: PsbtGlobal(entries: [
-          PsbtGlobalPSBTVersionNumber(version),
-          PsbtGlobalTransactionVersion(transactionVesion),
-          PsbtGlobalOutputCount(0),
-          PsbtGlobalInputCount(0)
-        ], version: version),
+    return PsbtBuilderV2._(
+      Psbt(
+        global: PsbtGlobal(
+          entries: [
+            PsbtGlobalPSBTVersionNumber(version),
+            PsbtGlobalTransactionVersion(transactionVesion),
+            PsbtGlobalOutputCount(0),
+            PsbtGlobalInputCount(0),
+          ],
+          version: version,
+        ),
         input: PsbtInput(version: version),
-        output: PsbtOutput(version: version)));
+        output: PsbtOutput(version: version),
+      ),
+    );
   }
 
   @override
@@ -30,32 +37,44 @@ class PsbtBuilderV2 extends PsbtBuilder {
 
   List<int> _buildInputSequence(int index) {
     final sequence = _psbt.input.getInput<PsbtInputSequenceNumber>(
-        index, PsbtInputTypes.sequenceNumber);
+      index,
+      PsbtInputTypes.sequenceNumber,
+    );
     final locktime = _psbt.input.getInput<PsbtInputRequiredTimeBasedLockTime>(
-        index, PsbtInputTypes.requiredTimeBasedLockTime);
+      index,
+      PsbtInputTypes.requiredTimeBasedLockTime,
+    );
     final heightNumber = _psbt.input
         .getInput<PsbtInputRequiredHeightBasedLockTime>(
-            index, PsbtInputTypes.requiredHeightBasedLockTime);
+          index,
+          PsbtInputTypes.requiredHeightBasedLockTime,
+        );
     if (sequence == null && locktime == null && heightNumber == null) {
       return BitcoinOpCodeConst.defaultTxSequence;
     }
     if (locktime != null && heightNumber != null) {
       throw DartBitcoinPluginException(
-          "Invalid PSBT input $index: Only one locktime field (PSBT_IN_REQUIRED_TIME_LOCKTIME or PSBT_IN_REQUIRED_HEIGHT_LOCKTIME) can be set.");
+        "Invalid PSBT input $index: Only one locktime field (PSBT_IN_REQUIRED_TIME_LOCKTIME or PSBT_IN_REQUIRED_HEIGHT_LOCKTIME) can be set.",
+      );
     }
     if (sequence != null) {
       final sequenceBytes = sequence.sequenceBytes();
       if (locktime == null && heightNumber == null) {
         return sequenceBytes;
       } else if (BytesUtils.bytesEqual(
-          BitcoinOpCodeConst.defaultTxSequence, sequenceBytes)) {
+        BitcoinOpCodeConst.defaultTxSequence,
+        sequenceBytes,
+      )) {
         if (locktime != null &&
-            BytesUtils.bytesEqual(BitcoinOpCodeConst.defaultTxSequence,
-                locktime.sequenceBytes())) {
+            BytesUtils.bytesEqual(
+              BitcoinOpCodeConst.defaultTxSequence,
+              locktime.sequenceBytes(),
+            )) {
           return sequenceBytes;
         }
         throw DartBitcoinPluginException(
-            'Invalid PSBT input: Locktime is set, but sequence is 0xFFFFFFFF (disable locktime).');
+          'Invalid PSBT input: Locktime is set, but sequence is 0xFFFFFFFF (disable locktime).',
+        );
       }
     }
     return locktime?.sequenceBytes() ?? heightNumber!.sequenceBytes();
@@ -70,23 +89,30 @@ class PsbtBuilderV2 extends PsbtBuilder {
 
   @override
   TxInput txInput(int index) {
-    final txId = _psbt.input
-        .getInput<PsbtInputPreviousTXID>(index, PsbtInputTypes.previousTxId);
+    final txId = _psbt.input.getInput<PsbtInputPreviousTXID>(
+      index,
+      PsbtInputTypes.previousTxId,
+    );
     final txIndex = _psbt.input.getInput<PsbtInputSpentOutputIndex>(
-        index, PsbtInputTypes.spentOutputIndex);
+      index,
+      PsbtInputTypes.spentOutputIndex,
+    );
     if (txId == null) {
       throw DartBitcoinPluginException(
-          'Invalid Psbt input $index: Missing required field: previous tx id (PSBT_IN_PREVIOUS_TXID)');
+        'Invalid Psbt input $index: Missing required field: previous tx id (PSBT_IN_PREVIOUS_TXID)',
+      );
     }
     if (txIndex == null) {
       throw DartBitcoinPluginException(
-          'Invalid Psbt input $index: Missing required field: spent output index (PSBT_IN_OUTPUT_INDEX)');
+        'Invalid Psbt input $index: Missing required field: spent output index (PSBT_IN_OUTPUT_INDEX)',
+      );
     }
     final sequence = _buildInputSequence(index);
     return TxInput(
-        txId: BytesUtils.toHexString(txId.txId.reversed.toList()),
-        txIndex: txIndex.index,
-        sequance: sequence);
+      txId: BytesUtils.toHexString(txId.txId.reversed.toList()),
+      txIndex: txIndex.index,
+      sequance: sequence,
+    );
   }
 
   @override
@@ -125,17 +151,23 @@ class PsbtBuilderV2 extends PsbtBuilder {
   }
 
   TxOutput _getOutput(int index) {
-    final amount =
-        _psbt.output.getOutput<PsbtOutputAmount>(index, PsbtOutputTypes.amount);
-    final script =
-        _psbt.output.getOutput<PsbtOutputScript>(index, PsbtOutputTypes.script);
+    final amount = _psbt.output.getOutput<PsbtOutputAmount>(
+      index,
+      PsbtOutputTypes.amount,
+    );
+    final script = _psbt.output.getOutput<PsbtOutputScript>(
+      index,
+      PsbtOutputTypes.script,
+    );
     if (amount == null) {
       throw DartBitcoinPluginException(
-          'Invalid Psbt output $index: Missing required field: amount (PSBT_OUT_AMOUNT)');
+        'Invalid Psbt output $index: Missing required field: amount (PSBT_OUT_AMOUNT)',
+      );
     }
     if (script == null) {
       throw DartBitcoinPluginException(
-          'Invalid Psbt output $index: Missing required field: output script (PSBT_OUT_SCRIPT)');
+        'Invalid Psbt output $index: Missing required field: output script (PSBT_OUT_SCRIPT)',
+      );
     }
     return TxOutput(amount: amount.amount, scriptPubKey: script.script);
   }
@@ -147,22 +179,27 @@ class PsbtBuilderV2 extends PsbtBuilder {
 
   @override
   BtcTransaction buildUnsignedTransaction() {
-    final txVersion = _psbt.global
-        .getGlobal<PsbtGlobalTransactionVersion>(PsbtGlobalTypes.version);
+    final txVersion = _psbt.global.getGlobal<PsbtGlobalTransactionVersion>(
+      PsbtGlobalTypes.version,
+    );
     final locktimeFallBack = _psbt.global.getGlobal<PsbtGlobalFallbackLocktime>(
-        PsbtGlobalTypes.fallBackLockTime);
+      PsbtGlobalTypes.fallBackLockTime,
+    );
     if (txVersion == null) {
       throw DartBitcoinPluginException(
-          'Invalid Psbt global: Missing required field: Transaction Version (PSBT_GLOBAL_TX_VERSION)');
+        'Invalid Psbt global: Missing required field: Transaction Version (PSBT_GLOBAL_TX_VERSION)',
+      );
     }
     final inputs = txInputs();
     return BtcTransaction(
+      inputs: inputs,
+      outputs: txOutputs(),
+      version: txVersion.versionBytes(),
+      locktime: PsbtUtils.buildTransactionLocktime(
         inputs: inputs,
-        outputs: txOutputs(),
-        version: txVersion.versionBytes(),
-        locktime: PsbtUtils.buildTransactionLocktime(
-            inputs: inputs,
-            locktimeFallBack: locktimeFallBack?.locktimeBytes()));
+        locktimeFallBack: locktimeFallBack?.locktimeBytes(),
+      ),
+    );
   }
 
   @override
@@ -175,7 +212,8 @@ class PsbtBuilderV2 extends PsbtBuilder {
     final txOutputs = this.txOutputs();
     if (index >= txOutputs.length) {
       throw DartBitcoinPluginException(
-          "Index out of bounds: PSBT output index exceeds transaction outputs.");
+        "Index out of bounds: PSBT output index exceeds transaction outputs.",
+      );
     }
     return txOutputs[index];
   }

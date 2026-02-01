@@ -8,17 +8,25 @@ import 'package:blockchain_utils/utils/numbers/utils/bigint_utils.dart';
 import 'package:blockchain_utils/utils/string/string.dart';
 
 class ApiProvider {
-  ApiProvider(
-      {required this.api, Map<String, String>? header, required this.service})
-      : _header = header ?? {'Content-Type': 'application/json'};
-  factory ApiProvider.fromMempool(BasedUtxoNetwork network, ApiService service,
-      {Map<String, String>? header, String? baseUrl}) {
+  ApiProvider({
+    required this.api,
+    Map<String, String>? header,
+    required this.service,
+  }) : _header = header ?? {'Content-Type': 'application/json'};
+  factory ApiProvider.fromMempool(
+    BasedUtxoNetwork network,
+    ApiService service, {
+    Map<String, String>? header,
+    String? baseUrl,
+  }) {
     final api = APIConfig.mempool(network, baseUrl: baseUrl);
     return ApiProvider(api: api, header: header, service: service);
   }
   factory ApiProvider.fromBlocCypher(
-      BasedUtxoNetwork network, ApiService service,
-      {Map<String, String>? header}) {
+    BasedUtxoNetwork network,
+    ApiService service, {
+    Map<String, String>? header,
+  }) {
     final api = APIConfig.fromBlockCypher(network);
     return ApiProvider(api: api, header: header, service: service);
   }
@@ -27,14 +35,15 @@ class ApiProvider {
 
   final Map<String, String> _header;
 
-  Future<T> _getRequest<T>(String url,
-      {Map<String, String> queryParameters = const {}}) async {
+  Future<T> _getRequest<T>(
+    String url, {
+    Map<String, String> queryParameters = const {},
+  }) async {
     if (queryParameters.isNotEmpty) {
       Uri uri = Uri.parse(url);
-      uri = uri.replace(queryParameters: {
-        ...uri.queryParameters,
-        ...queryParameters,
-      });
+      uri = uri.replace(
+        queryParameters: {...uri.queryParameters, ...queryParameters},
+      );
       url = uri.normalizePath().toString();
     }
     final response = await service.get<T>(url);
@@ -46,8 +55,10 @@ class ApiProvider {
     return response;
   }
 
-  Future<List<UtxoWithAddress>> getAccountUtxo(UtxoAddressDetails owner,
-      {String Function(String)? tokenize}) async {
+  Future<List<UtxoWithAddress>> getAccountUtxo(
+    UtxoAddressDetails owner, {
+    String Function(String)? tokenize,
+  }) async {
     final apiUrl = api.getUtxoUrl(owner.address.toAddress(api.network));
     final url = tokenize?.call(apiUrl) ?? apiUrl;
     final response = await _getRequest(url);
@@ -62,8 +73,10 @@ class ApiProvider {
     }
   }
 
-  Future<String> sendRawTransaction(String txDigest,
-      {String Function(String)? tokenize}) async {
+  Future<String> sendRawTransaction(
+    String txDigest, {
+    String Function(String)? tokenize,
+  }) async {
     final apiUrl = api.sendTransaction;
     final url = tokenize?.call(apiUrl) ?? apiUrl;
 
@@ -74,7 +87,9 @@ class ApiProvider {
       default:
         final digestData = <String, dynamic>{'tx': txDigest};
         final response = await _postRequest<Map<String, dynamic>>(
-            url, json.encode(digestData));
+          url,
+          json.encode(digestData),
+        );
         BlockCypherTransaction? tr;
         if (response['tx'] != null) {
           tr = BlockCypherTransaction.fromJson(response['tx']);
@@ -85,8 +100,9 @@ class ApiProvider {
     }
   }
 
-  Future<BitcoinFeeRate> getNetworkFeeRate(
-      {String Function(String)? tokenize}) async {
+  Future<BitcoinFeeRate> getNetworkFeeRate({
+    String Function(String)? tokenize,
+  }) async {
     final apiUrl = api.getFeeApiUrl();
     final url = tokenize?.call(apiUrl) ?? apiUrl;
     final response = await _getRequest<Map<String, dynamic>>(url);
@@ -98,8 +114,10 @@ class ApiProvider {
     }
   }
 
-  Future<T> getTransaction<T>(String transactionId,
-      {String Function(String)? tokenize}) async {
+  Future<T> getTransaction<T>(
+    String transactionId, {
+    String Function(String)? tokenize,
+  }) async {
     final apiUrl = api.getTransactionUrl(transactionId);
     final url = tokenize?.call(apiUrl) ?? apiUrl;
     final response = await _getRequest<Map<String, dynamic>>(url);
@@ -111,30 +129,35 @@ class ApiProvider {
     }
   }
 
-  Future<List<T>> getAccountTransactions<T>(String address,
-      {String Function(String)? tokenize}) async {
+  Future<List<T>> getAccountTransactions<T>(
+    String address, {
+    String Function(String)? tokenize,
+  }) async {
     final apiUrl = api.getTransactionsUrl(address);
     final url = tokenize?.call(apiUrl) ?? apiUrl;
     final response = await _getRequest(url);
     switch (api.apiType) {
       case APIType.mempool:
-        final transactions = (response as List)
-            .map((e) => MempoolTransaction.fromJson(e) as T)
-            .toList();
+        final transactions =
+            (response as List)
+                .map((e) => MempoolTransaction.fromJson(e) as T)
+                .toList();
         return transactions;
       default:
         if (response is Map) {
           if (response.containsKey('txs')) {
-            final transactions = (response['txs'] as List)
-                .map((e) => BlockCypherTransaction.fromJson(e) as T)
-                .toList();
+            final transactions =
+                (response['txs'] as List)
+                    .map((e) => BlockCypherTransaction.fromJson(e) as T)
+                    .toList();
             return transactions;
           }
           return [];
         }
-        final transactions = (response as List)
-            .map((e) => BlockCypherTransaction.fromJson(e) as T)
-            .toList();
+        final transactions =
+            (response as List)
+                .map((e) => BlockCypherTransaction.fromJson(e) as T)
+                .toList();
         return transactions;
     }
   }
@@ -168,25 +191,32 @@ class ApiProvider {
     return getBlockHashByHeight(0);
   }
 
-  Future<BtcTransaction> getRawTransaction(String transactionId,
-      {String Function(String)? tokenize}) async {
+  Future<BtcTransaction> getRawTransaction(
+    String transactionId, {
+    String Function(String)? tokenize,
+  }) async {
     final apiUrl = api.getRawTransactionUrl(transactionId);
     final url = tokenize?.call(apiUrl) ?? apiUrl;
 
     switch (api.apiType) {
       case APIType.mempool:
         final response = await _getRequest<String>(url);
-        final tx =
-            BtcTransaction.deserialize(BytesUtils.fromHexString(response));
+        final tx = BtcTransaction.deserialize(
+          BytesUtils.fromHexString(response),
+        );
         assert(tx.serialize() == StringUtils.strip0x(response.toLowerCase()));
         return tx;
       default:
-        final response = await _getRequest<Map<String, dynamic>>(url,
-            queryParameters: {"includeHex": 'true'});
+        final response = await _getRequest<Map<String, dynamic>>(
+          url,
+          queryParameters: {"includeHex": 'true'},
+        );
         final tx = BtcTransaction.deserialize(
-            BytesUtils.fromHexString(response["hex"]));
-        assert(tx.serialize() ==
-            StringUtils.strip0x(response["hex"].toLowerCase()));
+          BytesUtils.fromHexString(response["hex"]),
+        );
+        assert(
+          tx.serialize() == StringUtils.strip0x(response["hex"].toLowerCase()),
+        );
         return tx;
     }
   }

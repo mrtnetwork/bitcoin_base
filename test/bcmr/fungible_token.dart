@@ -10,8 +10,8 @@ const fungibleToken = {
       'icon': 'https://example.com/registry-icon.svg',
       'web': 'https://example.com/',
       'registry':
-          'https://example.com/.well-known/bitcoin-cash-metadata-registry.json'
-    }
+          'https://example.com/.well-known/bitcoin-cash-metadata-registry.json',
+    },
   },
   'identities': {
     '89cad9e3e34280eb1e8bc420542c00a7fcc01002b663dbf7f38bceddf80e680c': {
@@ -23,14 +23,14 @@ const fungibleToken = {
           'category':
               '89cad9e3e34280eb1e8bc420542c00a7fcc01002b663dbf7f38bceddf80e680c',
           'decimals': 8,
-          'symbol': 'EXAMPLE'
+          'symbol': 'EXAMPLE',
         },
         'uris': {
           'icon': 'https://example.com/old-example-asset-icon.png',
-          'web': 'https://blog.example.com/example-asset-is-now-XAMPL'
-        }
-      }
-    }
+          'web': 'https://blog.example.com/example-asset-is-now-XAMPL',
+        },
+      },
+    },
   },
-  'license': 'CC0-1.0'
+  'license': 'CC0-1.0',
 };

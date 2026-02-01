@@ -9,12 +9,16 @@ import 'package:blockchain_utils/utils/utils.dart';
 /// [seqType] Specifies the type of sequence (.typeRelativeTimelock | .typeAbsoluteTimelock | .typeReplaceByFee
 /// [isTypeBlock] If type is .typeRelativeTimelock then this specifies its type (block height or 512 secs increments)
 class Sequence {
-  Sequence(
-      {required this.seqType, required this.value, this.isTypeBlock = true}) {
+  Sequence({
+    required this.seqType,
+    required this.value,
+    this.isTypeBlock = true,
+  }) {
     if (seqType == BitcoinOpCodeConst.typeRelativeTimelock &&
-        (value < 1 || value > mask16)) {
+        (value < 1 || value > BinaryOps.mask16)) {
       throw const DartBitcoinPluginException(
-          'Sequence should be between 1 and 65535');
+        'Sequence should be between 1 and 65535',
+      );
     }
   }
   final int seqType;
@@ -46,7 +50,8 @@ class Sequence {
   int forScript() {
     if (seqType == BitcoinOpCodeConst.typeReplaceByFee) {
       throw const DartBitcoinPluginException(
-          'RBF is not to be included in a script.');
+        'RBF is not to be included in a script.',
+      );
     }
     var scriptIntiger = value;
     if (seqType == BitcoinOpCodeConst.typeRelativeTimelock && !isTypeBlock) {

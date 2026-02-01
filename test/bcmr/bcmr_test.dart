@@ -17,6 +17,8 @@ void main() {
     expect(json.encode(registry3.toJson()), json.encode(fungibleToken));
     final registry4 = Registry.fromJson(decentralizedApplication);
     expect(
-        json.encode(registry4.toJson()), json.encode(decentralizedApplication));
+      json.encode(registry4.toJson()),
+      json.encode(decentralizedApplication),
+    );
   });
 }

@@ -25,8 +25,8 @@ class PsbtKey {
   final List<int>? extraData;
 
   PsbtKey(int type, {List<int>? extraData})
-      : extraData = extraData?.asImmutableBytes,
-        type = type.asUint8;
+    : extraData = extraData?.asImmutableBytes,
+      type = type.asU8;
   factory PsbtKey._deserialize(List<int> bytes) {
     if (bytes.isEmpty) {
       throw DartBitcoinPluginException("Invalid PSBT key bytes length.");
@@ -127,11 +127,13 @@ class Psbt {
     final version = global.version;
     if (input.version != version) {
       throw DartBitcoinPluginException(
-          "Missmatch version between PSBT global and input");
+        "Missmatch version between PSBT global and input",
+      );
     }
     if (output.version != version) {
       throw DartBitcoinPluginException(
-          "Missmatch version between PSBT global and output");
+        "Missmatch version between PSBT global and output",
+      );
     }
     return Psbt._(global: global, input: input, output: output);
   }
@@ -139,7 +141,8 @@ class Psbt {
     final decode = BytesUtils.tryFromHexString(hexBytes);
     if (decode == null) {
       throw DartBitcoinPluginException(
-          "Invalid PSBT hex: Decoding failed or malformed input.");
+        "Invalid PSBT hex: Decoding failed or malformed input.",
+      );
     }
     return Psbt.deserialize(decode);
   }
@@ -148,7 +151,8 @@ class Psbt {
     final decode = StringUtils.tryEncode(base64, type: StringEncoding.base64);
     if (decode == null) {
       throw DartBitcoinPluginException(
-          "Invalid PSBT base64: Decoding failed or malformed input.");
+        "Invalid PSBT base64: Decoding failed or malformed input.",
+      );
     }
     return Psbt.deserialize(decode);
   }
@@ -168,7 +172,8 @@ class Psbt {
       }
       PsbtVersion psbtVersion = PsbtVersion.v0;
       final psbtVersionKeyType = global.firstWhereNullable(
-          (e) => e.key.type == PsbtGlobalTypes.psbtVersion.flag);
+        (e) => e.key.type == PsbtGlobalTypes.psbtVersion.flag,
+      );
       if (psbtVersionKeyType != null) {
         final v = PsbtGlobalPSBTVersionNumber.deserialize(psbtVersionKeyType);
         psbtVersion = v.version;
@@ -179,27 +184,42 @@ class Psbt {
       switch (psbtVersion) {
         case PsbtVersion.v0:
           final unsignedTx = global.firstWhere(
-              (element) => element.key.type == PsbtGlobalTypes.unsignedTx.flag,
-              orElse: () => throw DartBitcoinPluginException(
-                  "PSBTv0 Global unsigned tx required."));
-          final btcTransaction =
-              BtcTransaction.deserialize(unsignedTx.value.data);
-          assert(BytesUtils.bytesEqual(
-              unsignedTx.value.data, btcTransaction.toBytes()));
+            (element) => element.key.type == PsbtGlobalTypes.unsignedTx.flag,
+            orElse:
+                () =>
+                    throw DartBitcoinPluginException(
+                      "PSBTv0 Global unsigned tx required.",
+                    ),
+          );
+          final btcTransaction = BtcTransaction.deserialize(
+            unsignedTx.value.data,
+          );
+          assert(
+            BytesUtils.bytesEqual(
+              unsignedTx.value.data,
+              btcTransaction.toBytes(),
+            ),
+          );
           inputLength = btcTransaction.inputs.length;
           outputLength = btcTransaction.outputs.length;
           break;
         case PsbtVersion.v2:
           final inputCount = global.firstWhere(
-              (e) => e.key.type == PsbtGlobalTypes.inputCount.flag,
-              orElse: () => throw DartBitcoinPluginException(
-                    "Invalid PSBT global: Missing required field ${PsbtGlobalTypes.inputCount.psbtName} for PSBT version ${psbtVersion.name}.",
-                  ));
+            (e) => e.key.type == PsbtGlobalTypes.inputCount.flag,
+            orElse:
+                () =>
+                    throw DartBitcoinPluginException(
+                      "Invalid PSBT global: Missing required field ${PsbtGlobalTypes.inputCount.psbtName} for PSBT version ${psbtVersion.name}.",
+                    ),
+          );
           final outputCount = global.firstWhere(
-              (e) => e.key.type == PsbtGlobalTypes.outputCount.flag,
-              orElse: () => throw DartBitcoinPluginException(
-                    "Invalid PSBT global: Missing required field ${PsbtGlobalTypes.outputCount.psbtName} for PSBT version ${psbtVersion.name}.",
-                  ));
+            (e) => e.key.type == PsbtGlobalTypes.outputCount.flag,
+            orElse:
+                () =>
+                    throw DartBitcoinPluginException(
+                      "Invalid PSBT global: Missing required field ${PsbtGlobalTypes.outputCount.psbtName} for PSBT version ${psbtVersion.name}.",
+                    ),
+          );
           inputLength = PsbtGlobalInputCount.deserialize(inputCount).count;
           outputLength = PsbtGlobalOutputCount.deserialize(outputCount).count;
           break;
@@ -229,23 +249,29 @@ class Psbt {
       }
 
       return Psbt(
-          global:
-              PsbtGlobal.fromKeyPairs(version: psbtVersion, keypairs: global),
-          input: PsbtInput.fromKeyPairs(keypairs: inputs, version: psbtVersion),
-          output:
-              PsbtOutput.fromKeyPairs(keypairs: outputs, version: psbtVersion));
+        global: PsbtGlobal.fromKeyPairs(version: psbtVersion, keypairs: global),
+        input: PsbtInput.fromKeyPairs(keypairs: inputs, version: psbtVersion),
+        output: PsbtOutput.fromKeyPairs(
+          keypairs: outputs,
+          version: psbtVersion,
+        ),
+      );
     } on DartBitcoinPluginException {
       rethrow;
     } catch (e) {
       throw DartBitcoinPluginException(
-          "PSBT deserialization failed: Unable to parse the PSBT structure.",
-          details: {"error": e.toString()});
+        "PSBT deserialization failed: Unable to parse the PSBT structure.",
+        details: {"error": e.toString()},
+      );
     }
   }
 
   Psbt clone() {
     return Psbt._(
-        global: global.clone(), input: input.clone(), output: output.clone());
+      global: global.clone(),
+      input: input.clone(),
+      output: output.clone(),
+    );
   }
 
   String toHex() {
@@ -266,13 +292,15 @@ class Psbt {
     if (globalKeys.length != globalKeyPairs.length) {
       throw DartBitcoinPluginException("Duplicate global entries found.");
     }
-    final dupInputs = inputKeyPairs
-        .any((e) => e.map((e) => e.key).toSet().length != e.length);
+    final dupInputs = inputKeyPairs.any(
+      (e) => e.map((e) => e.key).toSet().length != e.length,
+    );
     if (dupInputs) {
       throw DartBitcoinPluginException("Duplicate inputs entries found.");
     }
-    final dupOutputs = outputKeyPairs
-        .any((e) => e.map((e) => e.key).toSet().length != e.length);
+    final dupOutputs = outputKeyPairs.any(
+      (e) => e.map((e) => e.key).toSet().length != e.length,
+    );
     if (dupOutputs) {
       throw DartBitcoinPluginException("Duplicate output entries found.");
     }
@@ -308,7 +336,7 @@ class Psbt {
     return {
       "global": global.toJson(),
       "input": input.toJson(),
-      "output": output.toJson()
+      "output": output.toJson(),
     };
   }
 }

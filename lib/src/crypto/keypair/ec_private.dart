@@ -14,9 +14,14 @@ enum BIP137Mode {
 
   const BIP137Mode(this.header);
   static BIP137Mode fromValue(int? header) {
-    return values.firstWhere((e) => e.header == header,
-        orElse: () => throw DartBitcoinPluginException(
-            "No BIP137Mode found for the given header value"));
+    return values.firstWhere(
+      (e) => e.header == header,
+      orElse:
+          () =>
+              throw DartBitcoinPluginException(
+                "No BIP137Mode found for the given header value",
+              ),
+    );
   }
 
   final int header;
@@ -47,8 +52,12 @@ class ECPrivate {
 
   /// creates an object from raw 32 bytes
   factory ECPrivate.fromBytes(List<int> prive) {
-    final key = Bip32PrivateKey.fromBytes(prive, Bip32KeyData(),
-        Bip32Const.mainNetKeyNetVersions, EllipticCurveTypes.secp256k1);
+    final key = Bip32PrivateKey.fromBytes(
+      prive,
+      Bip32KeyData(),
+      Bip32Const.mainNetKeyNetVersions,
+      EllipticCurveTypes.secp256k1,
+    );
     return ECPrivate(key);
   }
 
@@ -58,17 +67,23 @@ class ECPrivate {
 
   /// creates an object from a WIF of WIFC format (string)
   factory ECPrivate.fromWif(String wif, {List<int>? netVersion}) {
-    final decode = WifDecoder.decode(wif,
-        netVer: netVersion ?? BitcoinNetwork.mainnet.wifNetVer);
-    return ECPrivate.fromBytes(decode.item1);
+    final decode = WifDecoder.decode(
+      wif,
+      netVer: netVersion ?? BitcoinNetwork.mainnet.wifNetVer,
+    );
+    return ECPrivate.fromBytes(decode.$1);
   }
 
   /// returns as WIFC (compressed) or WIF format (string)
-  String toWif(
-      {PubKeyModes pubKeyMode = PubKeyModes.compressed,
-      BitcoinNetwork network = BitcoinNetwork.mainnet}) {
-    return WifEncoder.encode(toBytes(),
-        netVer: network.wifNetVer, pubKeyMode: pubKeyMode);
+  String toWif({
+    PubKeyModes pubKeyMode = PubKeyModes.compressed,
+    BitcoinNetwork network = BitcoinNetwork.mainnet,
+  }) {
+    return WifEncoder.encode(
+      toBytes(),
+      netVer: network.wifNetVer,
+      pubKeyMode: pubKeyMode,
+    );
   }
 
   /// returns the key's raw bytes
@@ -102,12 +117,15 @@ class ECPrivate {
   }) {
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
     final signature = btcSigner.signMessageConst(
-        message: message,
-        messagePrefix: messagePrefix,
-        extraEntropy: extraEntropy);
+      message: message,
+      messagePrefix: messagePrefix,
+      extraEntropy: extraEntropy,
+    );
     int rId = signature[0] + mode.header;
-    return StringUtils.decode([rId, ...signature.sublist(1)],
-        type: StringEncoding.base64);
+    return StringUtils.decode([
+      rId,
+      ...signature.sublist(1),
+    ], type: StringEncoding.base64);
   }
 
   /// Signs a message using Bitcoin's message signing format.
@@ -118,14 +136,17 @@ class ECPrivate {
   /// - [message]: The raw message to be signed.
   /// - [messagePrefix]: The prefix used for Bitcoin's message signing.
   /// - [extraEntropy]: Optional extra entropy to modify the signature.
-  String signMessage(List<int> message,
-      {String messagePrefix = BitcoinSignerUtils.signMessagePrefix,
-      List<int> extraEntropy = const []}) {
+  String signMessage(
+    List<int> message, {
+    String messagePrefix = BitcoinSignerUtils.signMessagePrefix,
+    List<int> extraEntropy = const [],
+  }) {
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
     final signature = btcSigner.signMessageConst(
-        message: message,
-        messagePrefix: messagePrefix,
-        extraEntropy: extraEntropy);
+      message: message,
+      messagePrefix: messagePrefix,
+      extraEntropy: extraEntropy,
+    );
     return BytesUtils.toHexString(signature.sublist(1));
   }
 
@@ -133,12 +154,16 @@ class ECPrivate {
   ///
   /// - [txDigest]: The transaction digest (message) to sign.
   /// - [sighash]: The sighash flag to append (default is SIGHASH_ALL).
-  String signECDSA(List<int> txDigest,
-      {int? sighash = BitcoinOpCodeConst.sighashAll,
-      List<int> extraEntropy = const []}) {
+  String signECDSA(
+    List<int> txDigest, {
+    int? sighash = BitcoinOpCodeConst.sighashAll,
+    List<int> extraEntropy = const [],
+  }) {
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    List<int> signature =
-        btcSigner.signECDSADerConst(txDigest, extraEntropy: extraEntropy);
+    List<int> signature = btcSigner.signECDSADerConst(
+      txDigest,
+      extraEntropy: extraEntropy,
+    );
     if (sighash != null) {
       signature = <int>[...signature, sighash];
     }
@@ -153,12 +178,16 @@ class ECPrivate {
   /// https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/2019-05-15-schnorr.md
   /// - [txDigest]: The transaction digest (message) to sign.
   /// - [sighash]: The sighash flag to append (default is SIGHASH_DEFAULT).
-  String signSchnorr(List<int> txDigest,
-      {int sighash = BitcoinOpCodeConst.sighashDefault,
-      List<int> extraEntropy = const []}) {
+  String signSchnorr(
+    List<int> txDigest, {
+    int sighash = BitcoinOpCodeConst.sighashDefault,
+    List<int> extraEntropy = const [],
+  }) {
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    var signature =
-        btcSigner.signSchnorrConst(txDigest, extraEntropy: extraEntropy);
+    var signature = btcSigner.signSchnorrConst(
+      txDigest,
+      extraEntropy: extraEntropy,
+    );
     if (sighash != BitcoinOpCodeConst.sighashDefault) {
       signature = <int>[...signature, sighash];
     }
@@ -173,36 +202,45 @@ class ECPrivate {
   /// - [merkleRoot]: Merkle root for the Taproot tree. If provided, this overrides the default computation of the Merkle root from [treeScript].
   /// - [tweak]: If `true`, the internal key is tweaked, either with or without [treeScript] or [merkleRoot], before signing.
   /// - [tapTweakHash]: If provided, it will be used directly instead of tweaking with the internal key.
-  String signBip340(List<int> txDigest,
-      {int sighash = BitcoinOpCodeConst.sighashDefault,
-      TaprootTree? treeScript,
-      List<int>? merkleRoot,
-      List<int>? tapTweakHash,
-      List<int>? aux,
-      bool tweak = true}) {
+  String signBip340(
+    List<int> txDigest, {
+    int sighash = BitcoinOpCodeConst.sighashDefault,
+    TaprootTree? treeScript,
+    List<int>? merkleRoot,
+    List<int>? tapTweakHash,
+    List<int>? aux,
+    bool tweak = true,
+  }) {
     if (!tweak &&
         (treeScript != null || merkleRoot != null || tapTweakHash != null)) {
       throw DartBitcoinPluginException(
-          "Invalid parameters: 'tweak' must be true when specifying 'treeScript', 'merkleRoot', or 'tapTweakHash'.");
+        "Invalid parameters: 'tweak' must be true when specifying 'treeScript', 'merkleRoot', or 'tapTweakHash'.",
+      );
     }
     if (merkleRoot != null && treeScript != null) {
       throw DartBitcoinPluginException(
-          "Use either merkleRoot or treeScript to generate merkle, not both.");
+        "Use either merkleRoot or treeScript to generate merkle, not both.",
+      );
     }
     if (tapTweakHash != null && (treeScript != null || merkleRoot != null)) {
       throw DartBitcoinPluginException(
-          "Use either tapTweakHash or (treeScript/merkleRoot), not both.");
+        "Use either tapTweakHash or (treeScript/merkleRoot), not both.",
+      );
     }
     final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
     List<int> signature = btcSigner.signBip340Const(
-        digest: txDigest,
-        aux: aux,
-        tapTweakHash: tweak
-            ? tapTweakHash ??
-                TaprootUtils.calculateTweek(getPublic().toXOnly(),
+      digest: txDigest,
+      aux: aux,
+      tapTweakHash:
+          tweak
+              ? tapTweakHash ??
+                  TaprootUtils.calculateTweek(
+                    getPublic().toXOnly(),
                     treeScript: merkleRoot != null ? null : treeScript,
-                    merkleRoot: merkleRoot)
-            : null);
+                    merkleRoot: merkleRoot,
+                  )
+              : null,
+    );
     if (sighash != BitcoinOpCodeConst.sighashDefault) {
       signature = <int>[...signature, sighash];
     }

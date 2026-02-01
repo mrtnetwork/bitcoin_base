@@ -10,8 +10,8 @@ const decentralizedApplication = {
       'icon': 'https://example.com/registry-icon.svg',
       'web': 'https://example.com/',
       'registry':
-          'https://example.com/.well-known/bitcoin-cash-metadata-registry.json'
-    }
+          'https://example.com/.well-known/bitcoin-cash-metadata-registry.json',
+    },
   },
   'identities': {
     '89cad9e3e34280eb1e8bc420542c00a7fcc01002b663dbf7f38bceddf80e680c': {
@@ -35,9 +35,9 @@ const decentralizedApplication = {
                   'type': 'number',
                   'aggregate': 'add',
                   'decimals': 8,
-                  'unit': 'BCH'
-                }
-              }
+                  'unit': 'BCH',
+                },
+              },
             },
             'parse': {
               'bytecode': '006b00cf6b',
@@ -51,12 +51,13 @@ const decentralizedApplication = {
                     'icon':
                         'ipfs://bafybeihnmh5bkbaspp3xfdanje74pekhsklhobzzraeyywq6gcpb3iuvey/0.svg',
                     'web': 'https://example.com/campaign',
-                    'custom-uri-identifier': 'protocol://data-for-some-protocol'
-                  }
-                }
-              }
-            }
-          }
+                    'custom-uri-identifier':
+                        'protocol://data-for-some-protocol',
+                  },
+                },
+              },
+            },
+          },
         },
         'uris': {
           'icon': 'https://example.com/campaign-icon.svg',
@@ -68,10 +69,10 @@ const decentralizedApplication = {
               'https://example.com/.well-known/bitcoin-cash-metadata-registry.json',
           'support': 'https://support.example.com/',
           'custom-uri-identifier':
-              'protocol://connection-info-for-some-protocol'
-        }
-      }
-    }
+              'protocol://connection-info-for-some-protocol',
+        },
+      },
+    },
   },
-  'license': 'CC0-1.0'
+  'license': 'CC0-1.0',
 };

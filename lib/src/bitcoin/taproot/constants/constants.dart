@@ -31,7 +31,7 @@ class TaprootConst {
     245,
     22,
     160,
-    21
+    21,
   ];
   static const List<int> tapTweakHashDomain = [
     232,
@@ -65,7 +65,7 @@ class TaprootConst {
     175,
     87,
     197,
-    233
+    233,
   ];
   static const List<int> tapLeafHashDomain = [
     174,
@@ -99,7 +99,7 @@ class TaprootConst {
     190,
     120,
     233,
-    238
+    238,
   ];
 
   static const List<int> tapSigHshDomain = [
@@ -134,6 +134,6 @@ class TaprootConst {
     40,
     228,
     160,
-    49
+    49,
   ];
 }

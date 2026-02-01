@@ -5,6 +5,8 @@ import 'package:blockchain_utils/service/models/params.dart';
 mixin ElectrumServiceProvider
     implements BaseServiceProvider<ElectrumRequestDetails> {
   @override
-  Future<BaseServiceResponse<T>> doRequest<T>(ElectrumRequestDetails params,
-      {Duration? timeout});
+  Future<BaseServiceResponse<T>> doRequest<T>(
+    ElectrumRequestDetails params, {
+    Duration? timeout,
+  });
 }

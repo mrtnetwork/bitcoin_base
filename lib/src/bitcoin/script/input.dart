@@ -14,61 +14,80 @@ import 'script.dart';
 /// [scriptSig] the script that satisfies the locking conditions
 /// [sequence] the input sequence (for timelocks, RBF, etc.)
 class TxInput {
-  TxInput._(
-      {required this.txId,
-      required this.txIndex,
-      Script? scriptSig,
-      List<int>? sequance})
-      : sequence =
-            (sequance ?? BitcoinOpCodeConst.defaultTxSequence).asImmutableBytes,
-        scriptSig = scriptSig ?? Script(script: []);
-  factory TxInput(
-      {required String txId,
-      required int txIndex,
-      Script? scriptSig,
-      List<int>? sequance}) {
+  TxInput._({
+    required this.txId,
+    required this.txIndex,
+    required this.coinbase,
+    Script? scriptSig,
+    List<int>? sequance,
+  }) : sequence =
+           (sequance ?? BitcoinOpCodeConst.defaultTxSequence).asImmutableBytes,
+       scriptSig = scriptSig ?? Script(script: []);
+  factory TxInput({
+    required String txId,
+    required int txIndex,
+    Script? scriptSig,
+    List<int>? sequance,
+  }) {
     if (sequance != null &&
         sequance.length != BitcoinOpCodeConst.sequenceLengthInBytes) {
       throw DartBitcoinPluginException(
-          "Invalid sequence length: expected ${BitcoinOpCodeConst.sequenceLengthInBytes}, but got ${sequance.length}.");
+        "Invalid sequence length: expected ${BitcoinOpCodeConst.sequenceLengthInBytes}, but got ${sequance.length}.",
+      );
     }
     final txBytes = BytesUtils.tryFromHexString(txId);
-    if (txBytes?.length != QuickCrypto.sha256DigestSize) {
+    if (txBytes == null || txBytes.length != QuickCrypto.sha256DigestSize) {
       throw DartBitcoinPluginException(
-          "Invalid transaction ID: Expected ${QuickCrypto.sha256DigestSize} bytes, but received a different length.",
-          details: {"transactionID": txId});
+        "Invalid transaction ID: Expected ${QuickCrypto.sha256DigestSize} bytes, but received a different length.",
+        details: {"transactionID": txId},
+      );
     }
     return TxInput._(
-        txId: StringUtils.strip0x(txId.toLowerCase()),
-        txIndex: txIndex,
-        sequance: sequance,
-        scriptSig: scriptSig);
+      txId: StringUtils.strip0x(txId.toLowerCase()),
+      txIndex: txIndex,
+      sequance: sequance,
+      scriptSig: scriptSig,
+      coinbase: txBytes.every((e) => e == 0),
+    );
   }
-  TxInput copyWith(
-      {String? txId, int? txIndex, Script? scriptSig, List<int>? sequence}) {
+  TxInput copyWith({
+    String? txId,
+    int? txIndex,
+    Script? scriptSig,
+    List<int>? sequence,
+  }) {
     return TxInput(
-        txId: txId ?? this.txId,
-        txIndex: txIndex ?? this.txIndex,
-        scriptSig: scriptSig ?? this.scriptSig,
-        sequance: sequence ?? this.sequence);
+      txId: txId ?? this.txId,
+      txIndex: txIndex ?? this.txIndex,
+      scriptSig: scriptSig ?? this.scriptSig,
+      sequance: sequence ?? this.sequence,
+    );
   }
 
   final String txId;
   final int txIndex;
+  final bool coinbase;
   Script scriptSig;
   List<int> sequence;
 
   /// creates a copy of the object
   TxInput clone() {
     return TxInput(
-        txId: txId, txIndex: txIndex, scriptSig: scriptSig, sequance: sequence);
+      txId: txId,
+      txIndex: txIndex,
+      scriptSig: scriptSig,
+      sequance: sequence,
+    );
   }
 
   /// serializes TxInput to bytes
   List<int> toBytes() {
     final txidBytes = BytesUtils.fromHexString(txId).reversed.toList();
-    final txoutBytes =
-        IntUtils.toBytes(txIndex, length: 4, byteOrder: Endian.little);
+    final txoutBytes = IntUtils.toBytes(
+      txIndex,
+      length: 4,
+      byteOrder: Endian.little,
+    );
     final scriptSigBytes = scriptSig.toBytes();
     final scriptSigLengthVarint = IntUtils.encodeVarint(scriptSigBytes.length);
     final data = List<int>.from([
@@ -76,31 +95,37 @@ class TxInput {
       ...txoutBytes,
       ...scriptSigLengthVarint,
       ...scriptSigBytes,
-      ...sequence
+      ...sequence,
     ]);
     return data;
   }
 
-  static Tuple<TxInput, int> deserialize(
-      {required List<int> bytes, int cursor = 0}) {
+  static (TxInput, int) deserialize({
+    required List<int> bytes,
+    int cursor = 0,
+  }) {
     final inpHash = bytes.sublist(cursor, cursor + 32).reversed.toList();
     cursor += 32;
-    final outputN = IntUtils.fromBytes(bytes.sublist(cursor, cursor + 4),
-        byteOrder: Endian.little);
+    final outputN = IntUtils.fromBytes(
+      bytes.sublist(cursor, cursor + 4),
+      byteOrder: Endian.little,
+    );
     cursor += 4;
     final vi = IntUtils.decodeVarint(bytes.sublist(cursor));
-    cursor += vi.item2;
-    final unlockingScript = bytes.sublist(cursor, cursor + vi.item1);
-    cursor += vi.item1;
+    cursor += vi.$2;
+    final unlockingScript = bytes.sublist(cursor, cursor + vi.$1);
+    cursor += vi.$1;
     final sequenceNumberData = bytes.sublist(cursor, cursor + 4);
     cursor += 4;
-    return Tuple(
-        TxInput(
-            txId: BytesUtils.toHexString(inpHash),
-            txIndex: outputN,
-            scriptSig: Script.deserialize(bytes: unlockingScript),
-            sequance: sequenceNumberData),
-        cursor);
+    return (
+      TxInput(
+        txId: BytesUtils.toHexString(inpHash),
+        txIndex: outputN,
+        scriptSig: Script.deserialize(bytes: unlockingScript),
+        sequance: sequenceNumberData,
+      ),
+      cursor,
+    );
   }
 
   List<int> txIdBytes() {

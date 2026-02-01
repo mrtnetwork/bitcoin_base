@@ -141,9 +141,11 @@ class MempoolTransaction {
       version: json['version'],
       locktime: json['locktime'],
       vin: List<MempoolVin>.from(
-          (json['vin'] as List).map((x) => MempoolVin.fromJson(x))),
+        (json['vin'] as List).map((x) => MempoolVin.fromJson(x)),
+      ),
       vout: List<MempoolVout>.from(
-          (json['vout'] as List).map((x) => MempoolVout.fromJson(x))),
+        (json['vout'] as List).map((x) => MempoolVout.fromJson(x)),
+      ),
       size: json['size'],
       weight: json['weight'],
       fee: json['fee'],
@@ -177,11 +179,12 @@ class MempolUtxo implements UTXO {
   @override
   BitcoinUtxo toUtxo(BitcoinAddressType addressType) {
     return BitcoinUtxo(
-        txHash: txid,
-        value: value,
-        vout: vout,
-        scriptType: addressType,
-        blockHeight: 1);
+      txHash: txid,
+      value: value,
+      vout: vout,
+      scriptType: addressType,
+      blockHeight: 1,
+    );
   }
 
   @override
@@ -192,16 +195,19 @@ class MempolUtxo implements UTXO {
 
 extension MempoolUtxoExtentions on List<MempolUtxo> {
   List<UtxoWithAddress> toUtxoWithOwnerList(UtxoAddressDetails owner) {
-    final utxos = map((e) => UtxoWithAddress(
-          utxo: BitcoinUtxo(
-            txHash: e.txid,
-            value: e.value,
-            vout: e.vout,
-            scriptType: owner.address.type,
-            blockHeight: 1,
+    final utxos =
+        map(
+          (e) => UtxoWithAddress(
+            utxo: BitcoinUtxo(
+              txHash: e.txid,
+              value: e.value,
+              vout: e.vout,
+              scriptType: owner.address.type,
+              blockHeight: 1,
+            ),
+            ownerDetails: owner,
           ),
-          ownerDetails: owner,
-        )).toList();
+        ).toList();
 
     return utxos;
   }

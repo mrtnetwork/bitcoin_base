@@ -15,8 +15,9 @@ abstract class TaprootTree {
   T cast<T extends TaprootTree>() {
     if (this is! T) {
       throw DartBitcoinPluginException(
-          "Invalid cast: expected ${T.runtimeType}, but found $runtimeType.",
-          details: {"expected": "$T", "type": runtimeType.toString()});
+        "Invalid cast: expected ${T.runtimeType}, but found $runtimeType.",
+        details: {"expected": "$T", "type": runtimeType.toString()},
+      );
     }
     return this as T;
   }
@@ -38,21 +39,21 @@ class TaprootLeaf extends TaprootTree {
 
   factory TaprootLeaf.fromJson(Map<String, dynamic> json) {
     return TaprootLeaf(
-        script: Script.fromJson(json["script"]),
-        leafVersion: IntUtils.parse(json["leaf_version"]));
+      script: Script.fromJson(json["script"]),
+      leafVersion: IntUtils.parse(json["leaf_version"]),
+    );
   }
-  TaprootLeaf(
-      {required this.script,
-      this.leafVersion = BitcoinOpCodeConst.leafVersionTapscript})
-      : _hash = TaprootUtils.tapleafTaggedHash(
-                script: script, leafVersion: leafVersion)
-            .asImmutableBytes;
+  TaprootLeaf({
+    required this.script,
+    this.leafVersion = BitcoinOpCodeConst.leafVersionTapscript,
+  }) : _hash =
+           TaprootUtils.tapleafTaggedHash(
+             script: script,
+             leafVersion: leafVersion,
+           ).asImmutableBytes;
   @override
   Map<String, dynamic> toJson() {
-    return {
-      "script": script.toJson(),
-      "leaf_version": leafVersion,
-    };
+    return {"script": script.toJson(), "leaf_version": leafVersion};
   }
 
   @override
@@ -80,7 +81,7 @@ class TaprootBranch extends TaprootTree {
   final TaprootTree b;
 
   TaprootBranch._({required this.a, required this.b, required List<int> branch})
-      : _branch = branch.asImmutableBytes;
+    : _branch = branch.asImmutableBytes;
   factory TaprootBranch({required TaprootTree a, required TaprootTree b}) {
     final aHash = a.hash();
     final bHash = b.hash();
@@ -92,7 +93,9 @@ class TaprootBranch extends TaprootTree {
   }
   factory TaprootBranch.fromJson(Map<String, dynamic> json) {
     return TaprootBranch(
-        a: TaprootTree.fromJson(json["a"]), b: TaprootTree.fromJson(json["b"]));
+      a: TaprootTree.fromJson(json["a"]),
+      b: TaprootTree.fromJson(json["b"]),
+    );
   }
   @override
   Map<String, dynamic> toJson() {
@@ -119,38 +122,48 @@ class TaprootBranch extends TaprootTree {
 }
 
 class TaprootControlBlock {
-  TaprootControlBlock._(
-      {required List<int> xOnly,
-      required List<int> merklePath,
-      required this.leafVersion})
-      : merklePath = merklePath.asImmutableBytes,
-        xOnly = xOnly.asImmutableBytes;
-  factory TaprootControlBlock(
-      {required List<int> xOnly,
-      required int leafVersion,
-      List<int>? merklePath}) {
+  TaprootControlBlock._({
+    required List<int> xOnly,
+    required List<int> merklePath,
+    required this.leafVersion,
+  }) : merklePath = merklePath.asImmutableBytes,
+       xOnly = xOnly.asImmutableBytes;
+  factory TaprootControlBlock({
+    required List<int> xOnly,
+    required int leafVersion,
+    List<int>? merklePath,
+  }) {
     if (merklePath != null &&
         merklePath.isNotEmpty &&
         (merklePath.length % QuickCrypto.sha256DigestSize != 0)) {
       throw DartBitcoinPluginException(
-          "Invalid Merkle path: Length (${merklePath.length}) is not a multiple of ${QuickCrypto.sha256DigestSize} bytes.");
+        "Invalid Merkle path: Length (${merklePath.length}) is not a multiple of ${QuickCrypto.sha256DigestSize} bytes.",
+      );
     }
     if (xOnly.length != EcdsaKeysConst.pointCoordByteLen) {
       throw DartBitcoinPluginException(
-          "Invalid x-only public key length: Expected ${EcdsaKeysConst.pointCoordByteLen} bytes, got ${xOnly.length} bytes.");
+        "Invalid x-only public key length: Expected ${EcdsaKeysConst.pointCoordByteLen} bytes, got ${xOnly.length} bytes.",
+      );
     }
     return TaprootControlBlock._(
-        xOnly: xOnly, merklePath: merklePath ?? [], leafVersion: leafVersion);
+      xOnly: xOnly,
+      merklePath: merklePath ?? [],
+      leafVersion: leafVersion,
+    );
   }
-  factory TaprootControlBlock.generate(
-      {required List<int> xOnlyOrInternalPubKey,
-      required TaprootLeaf leafScript,
-      required TaprootTree scriptTree}) {
+  factory TaprootControlBlock.generate({
+    required List<int> xOnlyOrInternalPubKey,
+    required TaprootLeaf leafScript,
+    required TaprootTree scriptTree,
+  }) {
     final proof = TaprootUtils.generateMerkleProof(
-        scriptTree: scriptTree, leafScript: leafScript);
+      scriptTree: scriptTree,
+      leafScript: leafScript,
+    );
     if (proof == null) {
       throw DartBitcoinPluginException(
-          "Leaf script not found in the provided Taproot script tree.");
+        "Leaf script not found in the provided Taproot script tree.",
+      );
     }
     List<int> xOnly;
     if (xOnlyOrInternalPubKey.length == EcdsaKeysConst.pointCoordByteLen) {
@@ -160,7 +173,8 @@ class TaprootControlBlock {
         xOnly = ECPublic.fromBytes(xOnlyOrInternalPubKey).toXOnly();
       } catch (_) {
         throw DartBitcoinPluginException(
-            "Invalid xOnlyOrInternalPubKey: It must be a valid x-only or secp256k1 public key.");
+          "Invalid xOnlyOrInternalPubKey: It must be a valid x-only or secp256k1 public key.",
+        );
       }
     }
     final keyBytes =
@@ -168,7 +182,10 @@ class TaprootControlBlock {
     final parity = keyBytes[0] & 1;
     final leafVersion = leafScript.leafVersion | parity;
     return TaprootControlBlock(
-        xOnly: xOnly, merklePath: proof, leafVersion: leafVersion);
+      xOnly: xOnly,
+      merklePath: proof,
+      leafVersion: leafVersion,
+    );
   }
 
   factory TaprootControlBlock.deserialize(List<int> bytes) {
@@ -178,12 +195,14 @@ class TaprootControlBlock {
     final path = bytes.sublist(EcdsaKeysConst.pubKeyCompressedByteLen);
     if (path.length % QuickCrypto.sha256DigestSize != 0) {
       throw DartBitcoinPluginException(
-          "Invalid control block: too short (must be at least 33 bytes, got ${bytes.length})");
+        "Invalid control block: too short (must be at least 33 bytes, got ${bytes.length})",
+      );
     }
     return TaprootControlBlock(
-        xOnly: bytes.sublist(1, EcdsaKeysConst.pubKeyCompressedByteLen),
-        leafVersion: bytes[0],
-        merklePath: path);
+      xOnly: bytes.sublist(1, EcdsaKeysConst.pubKeyCompressedByteLen),
+      leafVersion: bytes[0],
+      merklePath: path,
+    );
   }
 
   final List<int> xOnly;
@@ -203,22 +222,27 @@ class TapLeafMerkleProof {
   final TaprootLeaf script;
   final TaprootControlBlock controlBlock;
   const TapLeafMerkleProof({required this.script, required this.controlBlock});
-  factory TapLeafMerkleProof.generate(
-      {required List<int> xOnlyOrInternalPubKey,
-      required TaprootLeaf leafScript,
-      required TaprootTree scriptTree}) {
+  factory TapLeafMerkleProof.generate({
+    required List<int> xOnlyOrInternalPubKey,
+    required TaprootLeaf leafScript,
+    required TaprootTree scriptTree,
+  }) {
     return TapLeafMerkleProof(
-        script: leafScript,
-        controlBlock: TaprootControlBlock.generate(
-            xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
-            leafScript: leafScript,
-            scriptTree: scriptTree));
+      script: leafScript,
+      controlBlock: TaprootControlBlock.generate(
+        xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
+        leafScript: leafScript,
+        scriptTree: scriptTree,
+      ),
+    );
   }
   factory TapLeafMerkleProof.fromJson(Map<String, dynamic> json) {
     return TapLeafMerkleProof(
-        script: TaprootLeaf.fromJson(json['script']),
-        controlBlock: TaprootControlBlock.deserialize(
-            BytesUtils.fromHexString(json["control_block"])));
+      script: TaprootLeaf.fromJson(json['script']),
+      controlBlock: TaprootControlBlock.deserialize(
+        BytesUtils.fromHexString(json["control_block"]),
+      ),
+    );
   }
   Map<String, dynamic> toJson() {
     return {"script": script.toJson(), "control_block": controlBlock.toHex()};

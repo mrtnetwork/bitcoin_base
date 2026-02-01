@@ -5,8 +5,10 @@ import 'package:bitcoin_base/src/provider/core/params.dart';
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
 class ElectrumRequestVersion
     extends ElectrumRequest<List<String>, List<dynamic>> {
-  ElectrumRequestVersion(
-      {required this.clientName, required this.protocolVersion});
+  ElectrumRequestVersion({
+    required this.clientName,
+    required this.protocolVersion,
+  });
 
   /// A string identifying the connecting client software.
   final String clientName;

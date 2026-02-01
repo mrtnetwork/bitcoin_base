@@ -6,8 +6,10 @@ import 'package:bitcoin_base/src/provider/models/electrum/models.dart';
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
 class ElectrumRequestGetMerkle
     extends ElectrumRequest<ElectrumGetMerkleResponse, Map<String, dynamic>> {
-  ElectrumRequestGetMerkle(
-      {required this.transactionHash, required this.height});
+  ElectrumRequestGetMerkle({
+    required this.transactionHash,
+    required this.height,
+  });
 
   /// The transaction hash as a hexadecimal string.
   final String transactionHash;

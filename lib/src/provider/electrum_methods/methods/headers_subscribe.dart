@@ -4,8 +4,9 @@ import 'package:bitcoin_base/src/provider/models/electrum/models.dart';
 
 /// Subscribe to receive block headers when a new block is found.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
-class ElectrumRequestHeaderSubscribe extends ElectrumRequest<
-    ElectrumHeaderSubscribeResponse, Map<String, dynamic>> {
+class ElectrumRequestHeaderSubscribe
+    extends
+        ElectrumRequest<ElectrumHeaderSubscribeResponse, Map<String, dynamic>> {
   @override
   String get method => ElectrumRequestMethods.headersSubscribe.method;
 

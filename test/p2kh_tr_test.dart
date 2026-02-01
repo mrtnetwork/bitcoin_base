@@ -4,39 +4,49 @@ import 'package:test/test.dart';
 void main() {
   group('P2KH', () {
     final txin = TxInput(
-        txId:
-            'fb48f4e23bf6ddf606714141ac78c3e921c8c0bebeb7c8abb2c799e9ff96ce6c',
-        txIndex: 0);
+      txId: 'fb48f4e23bf6ddf606714141ac78c3e921c8c0bebeb7c8abb2c799e9ff96ce6c',
+      txIndex: 0,
+    );
     final addr = P2pkhAddress.fromAddress(
-        address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR',
-        network: BitcoinNetwork.testnet);
+      address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR',
+      network: BitcoinNetwork.testnet,
+    );
     final txout = TxOutput(
-        amount: BigInt.from(10000000),
-        scriptPubKey: Script(script: [
+      amount: BigInt.from(10000000),
+      scriptPubKey: Script(
+        script: [
           BitcoinOpcode.opDup,
           BitcoinOpcode.opHash160,
           addr.addressProgram,
           BitcoinOpcode.opEqualVerify,
           BitcoinOpcode.opCheckSig,
-        ]));
+        ],
+      ),
+    );
     final changeAddr = P2pkhAddress.fromAddress(
-        address: 'mytmhndz4UbEMeoSZorXXrLpPfeoFUDzEp',
-        network: BitcoinNetwork.testnet);
+      address: 'mytmhndz4UbEMeoSZorXXrLpPfeoFUDzEp',
+      network: BitcoinNetwork.testnet,
+    );
     final changeTxout = TxOutput(
-        amount: BigInt.from(29000000),
-        scriptPubKey: changeAddr.toScriptPubKey());
+      amount: BigInt.from(29000000),
+      scriptPubKey: changeAddr.toScriptPubKey(),
+    );
     final changeLowSAddr = P2pkhAddress.fromAddress(
-        address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w',
-        network: BitcoinNetwork.testnet);
+      address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w',
+      network: BitcoinNetwork.testnet,
+    );
     final changeLowSTxout = TxOutput(
-        amount: BigInt.from(29000000),
-        scriptPubKey: changeLowSAddr.toScriptPubKey());
+      amount: BigInt.from(29000000),
+      scriptPubKey: changeLowSAddr.toScriptPubKey(),
+    );
     final sk = ECPrivate.fromWif(
-        'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9',
-        netVersion: BitcoinNetwork.testnet.wifNetVer);
+      'cRvyLwCPLU88jsyj94L7iJjQX5C2f8koG4G2gevN4BeSGcEvfKe9',
+      netVersion: BitcoinNetwork.testnet.wifNetVer,
+    );
     final fromAddr = P2pkhAddress.fromAddress(
-        address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e',
-        network: BitcoinNetwork.testnet);
+      address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e',
+      network: BitcoinNetwork.testnet,
+    );
 
     const coreTxResult =
         '02000000016cce96ffe999c7b2abc8b7bebec0c821e9c378ac41417106f6ddf63be2f448fb0000000000ffffffff0280969800000000001976a914fd337ad3bf81e086d96a68e1f8d6a0a510f8c24a88ac4081ba01000000001976a914c992931350c9ba48538003706953831402ea34ea88ac00000000';
@@ -50,49 +60,61 @@ void main() {
         '105933681b0ca37ae0c0af43ae6f111803c899232b7fd586584b532dbe21ae6f';
 
     final sigTxin1 = TxInput(
-        txId:
-            '76464c2b9e2af4d63ef38a77964b3b77e629dddefc5cb9eb1a3645b1608b790f',
-        txIndex: 0);
+      txId: '76464c2b9e2af4d63ef38a77964b3b77e629dddefc5cb9eb1a3645b1608b790f',
+      txIndex: 0,
+    );
     final sigTxin2 = TxInput(
-        txId:
-            '76464c2b9e2af4d63ef38a77964b3b77e629dddefc5cb9eb1a3645b1608b790f',
-        txIndex: 1);
+      txId: '76464c2b9e2af4d63ef38a77964b3b77e629dddefc5cb9eb1a3645b1608b790f',
+      txIndex: 1,
+    );
     final sigFromAddr1 = P2pkhAddress.fromAddress(
-        address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR',
-        network: BitcoinNetwork.testnet);
+      address: 'n4bkvTyU1dVdzsrhWBqBw8fEMbHjJvtmJR',
+      network: BitcoinNetwork.testnet,
+    );
     final sigFromAddr2 = P2pkhAddress.fromAddress(
-        address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w',
-        network: BitcoinNetwork.testnet);
+      address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w',
+      network: BitcoinNetwork.testnet,
+    );
     final sigSk1 = ECPrivate.fromWif(
-        'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
-        netVersion: BitcoinNetwork.testnet.wifNetVer);
+      'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
+      netVersion: BitcoinNetwork.testnet.wifNetVer,
+    );
     final sigSk2 = ECPrivate.fromWif(
-        'cVf3kGh6552jU2rLaKwXTKq5APHPoZqCP4GQzQirWGHFoHQ9rEVt',
-        netVersion: BitcoinNetwork.testnet.wifNetVer);
+      'cVf3kGh6552jU2rLaKwXTKq5APHPoZqCP4GQzQirWGHFoHQ9rEVt',
+      netVersion: BitcoinNetwork.testnet.wifNetVer,
+    );
     final sigToAddr1 = P2pkhAddress.fromAddress(
-        address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e',
-        network: BitcoinNetwork.testnet);
+      address: 'myPAE9HwPeKHh8FjKwBNBaHnemApo3dw6e',
+      network: BitcoinNetwork.testnet,
+    );
     final sigTxout1 = TxOutput(
-        amount: BigInt.from(9000000),
-        scriptPubKey: Script(script: [
+      amount: BigInt.from(9000000),
+      scriptPubKey: Script(
+        script: [
           BitcoinOpcode.opDup,
           BitcoinOpcode.opHash160,
           sigToAddr1.addressProgram,
           BitcoinOpcode.opEqualVerify,
           BitcoinOpcode.opCheckSig,
-        ]));
+        ],
+      ),
+    );
     final sigToAddr2 = P2pkhAddress.fromAddress(
-        address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w',
-        network: BitcoinNetwork.testnet);
+      address: 'mmYNBho9BWQB2dSniP1NJvnPoj5EVWw89w',
+      network: BitcoinNetwork.testnet,
+    );
     final sigTxout2 = TxOutput(
-        amount: BigInt.from(900000),
-        scriptPubKey: Script(script: [
+      amount: BigInt.from(900000),
+      scriptPubKey: Script(
+        script: [
           BitcoinOpcode.opDup,
           BitcoinOpcode.opHash160,
           sigToAddr2.addressProgram,
           BitcoinOpcode.opEqualVerify,
           BitcoinOpcode.opCheckSig,
-        ]));
+        ],
+      ),
+    );
     const sigSighashSingleResult =
         '02000000010f798b60b145361aebb95cfcdedd29e6773b4b96778af33ed6f42a9e2b4c4676000000006a47304402202cfd7077fe8adfc5a65fb3953fa3482cad1413c28b53f12941c1082898d4935102201d393772c47f0699592268febb5b4f64dabe260f440d5d0f96dae5bc2b53e11e032102d82c9860e36f15d7b72aa59e29347f951277c21cd4d34822acdeeadbcff8a546ffffffff0240548900000000001976a914c3f8e5b0f8455a2b02c29c4488a550278209b66988aca0bb0d00000000001976a91442151d0c21442c2b038af0ad5ee64b9d6f4f4e4988ac00000000';
     const signSighashAll2in2outResult =
@@ -110,110 +132,153 @@ void main() {
     test('test2', () {
       final tx = BtcTransaction(inputs: [txin], outputs: [txout, changeTxout]);
       final digit = tx.getTransactionDigest(
-          txInIndex: 0,
-          script: Script(script: [
+        txInIndex: 0,
+        script: Script(
+          script: [
             BitcoinOpcode.opDup,
             BitcoinOpcode.opHash160,
             fromAddr.addressProgram,
             BitcoinOpcode.opEqualVerify,
             BitcoinOpcode.opCheckSig,
-          ]));
+          ],
+        ),
+      );
       final sig = sk.signECDSA(digit);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), coreTxSignedResult);
     });
     test('test3', () {
-      final tx =
-          BtcTransaction(inputs: [txin], outputs: [txout, changeLowSTxout]);
+      final tx = BtcTransaction(
+        inputs: [txin],
+        outputs: [txout, changeLowSTxout],
+      );
       final digit = tx.getTransactionDigest(
-          txInIndex: 0, script: fromAddr.toScriptPubKey());
+        txInIndex: 0,
+        script: fromAddr.toScriptPubKey(),
+      );
       final sig = sk.signECDSA(digit);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), coreTxSignedLowSSigallResult);
     });
     test('test4', () {
-      final tx =
-          BtcTransaction(inputs: [txin], outputs: [txout, changeLowSTxout]);
+      final tx = BtcTransaction(
+        inputs: [txin],
+        outputs: [txout, changeLowSTxout],
+      );
       final digit = tx.getTransactionDigest(
-          txInIndex: 0,
-          script: fromAddr.toScriptPubKey(),
-          sighash: BitcoinOpCodeConst.sighashNone);
+        txInIndex: 0,
+        script: fromAddr.toScriptPubKey(),
+        sighash: BitcoinOpCodeConst.sighashNone,
+      );
       final sig = sk.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashNone);
       txin.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), coreTxSignedLowSSignoneResult);
       expect(tx.txId(), coreTxSignedLowSSignoneTxid);
     });
     test('test5', () {
-      final tx =
-          BtcTransaction(inputs: [sigTxin1], outputs: [sigTxout1, sigTxout2]);
+      final tx = BtcTransaction(
+        inputs: [sigTxin1],
+        outputs: [sigTxout1, sigTxout2],
+      );
       final digit = tx.getTransactionDigest(
-          txInIndex: 0,
-          script: sigFromAddr1.toScriptPubKey(),
-          sighash: BitcoinOpCodeConst.sighashSingle);
-      final sig =
-          sigSk1.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashSingle);
+        txInIndex: 0,
+        script: sigFromAddr1.toScriptPubKey(),
+        sighash: BitcoinOpCodeConst.sighashSingle,
+      );
+      final sig = sigSk1.signECDSA(
+        digit,
+        sighash: BitcoinOpCodeConst.sighashSingle,
+      );
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       expect(tx.serialize(), sigSighashSingleResult);
     });
     test('test6', () {
       final tx = BtcTransaction(
-          inputs: [sigTxin1, sigTxin2], outputs: [sigTxout1, sigTxout2]);
+        inputs: [sigTxin1, sigTxin2],
+        outputs: [sigTxout1, sigTxout2],
+      );
       final digit = tx.getTransactionDigest(
-          txInIndex: 0,
-          script: sigFromAddr1.toScriptPubKey(),
-          sighash: BitcoinOpCodeConst.sighashAll);
-      final sig =
-          sigSk1.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashAll);
+        txInIndex: 0,
+        script: sigFromAddr1.toScriptPubKey(),
+        sighash: BitcoinOpCodeConst.sighashAll,
+      );
+      final sig = sigSk1.signECDSA(
+        digit,
+        sighash: BitcoinOpCodeConst.sighashAll,
+      );
       final digit2 = tx.getTransactionDigest(
-          txInIndex: 1,
-          script: sigFromAddr2.toScriptPubKey(),
-          sighash: BitcoinOpCodeConst.sighashAll);
-      final sig2 =
-          sigSk2.signECDSA(digit2, sighash: BitcoinOpCodeConst.sighashAll);
+        txInIndex: 1,
+        script: sigFromAddr2.toScriptPubKey(),
+        sighash: BitcoinOpCodeConst.sighashAll,
+      );
+      final sig2 = sigSk2.signECDSA(
+        digit2,
+        sighash: BitcoinOpCodeConst.sighashAll,
+      );
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       sigTxin2.scriptSig = Script(script: [sig2, sigSk2.getPublic().toHex()]);
       expect(tx.serialize(), signSighashAll2in2outResult);
     });
     test('test7', () {
       final tx = BtcTransaction(
-          inputs: [sigTxin1, sigTxin2], outputs: [sigTxout1, sigTxout2]);
+        inputs: [sigTxin1, sigTxin2],
+        outputs: [sigTxout1, sigTxout2],
+      );
       final digit = tx.getTransactionDigest(
-          txInIndex: 0,
-          script: sigFromAddr1.toScriptPubKey(),
-          sighash: BitcoinOpCodeConst.sighashNone);
-      final sig =
-          sigSk1.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashNone);
+        txInIndex: 0,
+        script: sigFromAddr1.toScriptPubKey(),
+        sighash: BitcoinOpCodeConst.sighashNone,
+      );
+      final sig = sigSk1.signECDSA(
+        digit,
+        sighash: BitcoinOpCodeConst.sighashNone,
+      );
       final digit2 = tx.getTransactionDigest(
-          txInIndex: 1,
-          script: sigFromAddr2.toScriptPubKey(),
-          sighash: BitcoinOpCodeConst.sighashNone);
-      final sig2 =
-          sigSk2.signECDSA(digit2, sighash: BitcoinOpCodeConst.sighashNone);
+        txInIndex: 1,
+        script: sigFromAddr2.toScriptPubKey(),
+        sighash: BitcoinOpCodeConst.sighashNone,
+      );
+      final sig2 = sigSk2.signECDSA(
+        digit2,
+        sighash: BitcoinOpCodeConst.sighashNone,
+      );
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       sigTxin2.scriptSig = Script(script: [sig2, sigSk2.getPublic().toHex()]);
       expect(tx.serialize(), signSighashNone2in2outResult);
     });
     test('test8', () {
       final tx = BtcTransaction(
-          inputs: [sigTxin1, sigTxin2], outputs: [sigTxout1, sigTxout2]);
+        inputs: [sigTxin1, sigTxin2],
+        outputs: [sigTxout1, sigTxout2],
+      );
       final digit = tx.getTransactionDigest(
-          txInIndex: 0,
-          script: sigFromAddr1.toScriptPubKey(),
-          sighash: BitcoinOpCodeConst.sighashAll |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
+        txInIndex: 0,
+        script: sigFromAddr1.toScriptPubKey(),
+        sighash:
+            BitcoinOpCodeConst.sighashAll |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
 
-      final sig = sigSk1.signECDSA(digit,
-          sighash: BitcoinOpCodeConst.sighashAll |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
+      final sig = sigSk1.signECDSA(
+        digit,
+        sighash:
+            BitcoinOpCodeConst.sighashAll |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
 
       final digit2 = tx.getTransactionDigest(
-          txInIndex: 1,
-          script: sigFromAddr2.toScriptPubKey(),
-          sighash: BitcoinOpCodeConst.sighashSingle |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
-      final sig2 = sigSk2.signECDSA(digit2,
-          sighash: BitcoinOpCodeConst.sighashSingle |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
+        txInIndex: 1,
+        script: sigFromAddr2.toScriptPubKey(),
+        sighash:
+            BitcoinOpCodeConst.sighashSingle |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
+      final sig2 = sigSk2.signECDSA(
+        digit2,
+        sighash:
+            BitcoinOpCodeConst.sighashSingle |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
       sigTxin1.scriptSig = Script(script: [sig, sigSk1.getPublic().toHex()]);
       sigTxin2.scriptSig = Script(script: [sig2, sigSk2.getPublic().toHex()]);
       expect(tx.serialize(), signSighashAllSingleAnyone2in2outResult);

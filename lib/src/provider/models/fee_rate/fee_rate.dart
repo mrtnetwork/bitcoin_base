@@ -3,12 +3,13 @@ import 'package:bitcoin_base/src/exception/exception.dart';
 enum BitcoinFeeRateType { low, medium, high }
 
 class BitcoinFeeRate {
-  BitcoinFeeRate(
-      {required this.high,
-      required this.medium,
-      required this.low,
-      this.economyFee,
-      this.hourFee});
+  BitcoinFeeRate({
+    required this.high,
+    required this.medium,
+    required this.low,
+    this.economyFee,
+    this.hourFee,
+  });
 
   /// High fee rate in satoshis per kilobyte
   final BigInt high;
@@ -47,9 +48,11 @@ class BitcoinFeeRate {
   //
   /// Returns:
   /// - BigInt: A BigInt containing the estimated fee in satoshis.
-  BigInt getEstimate(int trSize,
-      {BigInt? customFeeRatePerKb,
-      BitcoinFeeRateType feeRateType = BitcoinFeeRateType.medium}) {
+  BigInt getEstimate(
+    int trSize, {
+    BigInt? customFeeRatePerKb,
+    BitcoinFeeRateType feeRateType = BitcoinFeeRateType.medium,
+  }) {
     final feeRate = customFeeRatePerKb ?? _feeRatrete(feeRateType);
     final trSizeBigInt = BigInt.from(trSize);
     return (trSizeBigInt * feeRate) ~/ BigInt.from(1000);
@@ -68,9 +71,10 @@ class BitcoinFeeRate {
       high: _parseMempoolFees(json['fastestFee']),
       medium: _parseMempoolFees(json['halfHourFee']),
       low: _parseMempoolFees(json['minimumFee']),
-      economyFee: json['economyFee'] == null
-          ? null
-          : _parseMempoolFees(json['economyFee']),
+      economyFee:
+          json['economyFee'] == null
+              ? null
+              : _parseMempoolFees(json['economyFee']),
       hourFee:
           json['hourFee'] == null ? null : _parseMempoolFees(json['hourFee']),
     );
@@ -81,9 +85,10 @@ class BitcoinFeeRate {
   /// information for high, medium, and low fee levels.
   factory BitcoinFeeRate.fromBlockCypher(Map<String, dynamic> json) {
     return BitcoinFeeRate(
-        high: BigInt.from((json['high_fee_per_kb'] as int)),
-        medium: BigInt.from((json['medium_fee_per_kb'] as int)),
-        low: BigInt.from((json['low_fee_per_kb'] as int)));
+      high: BigInt.from((json['high_fee_per_kb'] as int)),
+      medium: BigInt.from((json['medium_fee_per_kb'] as int)),
+      low: BigInt.from((json['low_fee_per_kb'] as int)),
+    );
   }
 }
 
@@ -100,6 +105,7 @@ BigInt _parseMempoolFees(dynamic data) {
     return BigInt.from((data * kb));
   } else {
     throw DartBitcoinPluginException(
-        'cannot parse mempool fees expected double, string got ${data.runtimeType}');
+      'cannot parse mempool fees expected double, string got ${data.runtimeType}',
+    );
   }
 }

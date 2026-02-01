@@ -8,20 +8,23 @@ import 'package:blockchain_utils/utils/numbers/utils/int_utils.dart';
 class ElectrumUtxo implements UTXO {
   factory ElectrumUtxo.fromJson(Map<String, dynamic> json) {
     return ElectrumUtxo._(
-        height: IntUtils.parse(json['height']),
-        txId: json['tx_hash'],
-        vout: IntUtils.parse(json['tx_pos']),
-        value: BigintUtils.parse(json['value']),
-        token: json["token_data"] == null
-            ? null
-            : CashToken.fromJson(json['token_data']));
+      height: IntUtils.parse(json['height']),
+      txId: json['tx_hash'],
+      vout: IntUtils.parse(json['tx_pos']),
+      value: BigintUtils.parse(json['value']),
+      token:
+          json["token_data"] == null
+              ? null
+              : CashToken.fromJson(json['token_data']),
+    );
   }
-  const ElectrumUtxo._(
-      {required this.height,
-      required this.txId,
-      required this.vout,
-      required this.value,
-      this.token});
+  const ElectrumUtxo._({
+    required this.height,
+    required this.txId,
+    required this.vout,
+    required this.value,
+    this.token,
+  });
   final int height;
   final String txId;
   final int vout;
@@ -31,12 +34,13 @@ class ElectrumUtxo implements UTXO {
   @override
   BitcoinUtxo toUtxo(BitcoinAddressType addressType) {
     return BitcoinUtxo(
-        txHash: txId,
-        value: value,
-        vout: vout,
-        scriptType: addressType,
-        blockHeight: height,
-        token: token);
+      txHash: txId,
+      value: value,
+      vout: vout,
+      scriptType: addressType,
+      blockHeight: height,
+      token: token,
+    );
   }
 
   @override
@@ -46,7 +50,7 @@ class ElectrumUtxo implements UTXO {
       "height": height,
       "tx_hash": txId,
       "tx_pos": vout,
-      "value": value.toString()
+      "value": value.toString(),
     };
   }
 }
@@ -54,11 +58,15 @@ class ElectrumUtxo implements UTXO {
 class ElectrumHeaderSubscribeResponse {
   final int block;
   final String hex;
-  const ElectrumHeaderSubscribeResponse(
-      {required this.block, required this.hex});
+  const ElectrumHeaderSubscribeResponse({
+    required this.block,
+    required this.hex,
+  });
   factory ElectrumHeaderSubscribeResponse.fromJson(Map<String, dynamic> json) {
     return ElectrumHeaderSubscribeResponse(
-        block: IntUtils.parse(json["height"]), hex: json["hex"]);
+      block: IntUtils.parse(json["height"]),
+      hex: json["hex"],
+    );
   }
 }
 
@@ -98,30 +106,32 @@ class ElectrumVerbosTxResponse {
   final int? blocktime;
   factory ElectrumVerbosTxResponse.fromJson(Map<String, dynamic> json) {
     return ElectrumVerbosTxResponse(
-        txId: json["txid"],
-        hash: json["hash"],
-        version: IntUtils.tryParse(json["version"]),
-        size: IntUtils.tryParse(json["size"]),
-        vsize: IntUtils.tryParse(json["vsize"]),
-        weight: IntUtils.tryParse(json["weight"]),
-        locktime: IntUtils.tryParse(json["locktime"]),
-        hex: json["hex"],
-        blockhash: json["blockhash"],
-        confirmations: IntUtils.tryParse(json["confirmations"]),
-        blocktime: IntUtils.tryParse(json["blocktime"]),
-        time: IntUtils.tryParse(json["time"]));
+      txId: json["txid"],
+      hash: json["hash"],
+      version: IntUtils.tryParse(json["version"]),
+      size: IntUtils.tryParse(json["size"]),
+      vsize: IntUtils.tryParse(json["vsize"]),
+      weight: IntUtils.tryParse(json["weight"]),
+      locktime: IntUtils.tryParse(json["locktime"]),
+      hex: json["hex"],
+      blockhash: json["blockhash"],
+      confirmations: IntUtils.tryParse(json["confirmations"]),
+      blocktime: IntUtils.tryParse(json["blocktime"]),
+      time: IntUtils.tryParse(json["time"]),
+    );
   }
-  const ElectrumVerbosTxResponse(
-      {required this.txId,
-      this.hash,
-      this.version,
-      this.size,
-      this.vsize,
-      this.weight,
-      this.locktime,
-      this.hex,
-      this.blockhash,
-      this.confirmations,
-      this.time,
-      this.blocktime});
+  const ElectrumVerbosTxResponse({
+    required this.txId,
+    this.hash,
+    this.version,
+    this.size,
+    this.vsize,
+    this.weight,
+    this.locktime,
+    this.hex,
+    this.blockhash,
+    this.confirmations,
+    this.time,
+    this.blocktime,
+  });
 }

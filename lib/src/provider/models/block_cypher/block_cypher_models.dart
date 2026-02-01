@@ -52,18 +52,19 @@ class TxRef implements UTXO {
       "spent": spent,
       "confirmations": confirmations,
       "confirmed": confirmed.toString(),
-      "script": script
+      "script": script,
     };
   }
 
   @override
   BitcoinUtxo toUtxo(BitcoinAddressType addressType) {
     return BitcoinUtxo(
-        txHash: txHash,
-        value: value,
-        vout: txOutputN,
-        scriptType: addressType,
-        blockHeight: blockHeight);
+      txHash: txHash,
+      value: value,
+      vout: txOutputN,
+      scriptType: addressType,
+      blockHeight: blockHeight,
+    );
   }
 }
 
@@ -105,7 +106,8 @@ class BlockCypherUtxo {
       nTx: json['n_tx'],
       unconfirmedNTx: json['unconfirmed_n_tx'],
       finalNTx: json['final_n_tx'],
-      txRefs: (json['txrefs'] as List?)
+      txRefs:
+          (json['txrefs'] as List?)
               ?.map((ref) => TxRef.fromJson(ref))
               .toList() ??
           <TxRef>[],
@@ -114,12 +116,13 @@ class BlockCypherUtxo {
   }
 
   List<UtxoWithAddress> toUtxoWithOwner(UtxoAddressDetails owner) {
-    final utxos = txRefs.map((ref) {
-      return UtxoWithAddress(
-        utxo: ref.toUtxo(owner.address.type),
-        ownerDetails: owner,
-      );
-    }).toList();
+    final utxos =
+        txRefs.map((ref) {
+          return UtxoWithAddress(
+            utxo: ref.toUtxo(owner.address.type),
+            ownerDetails: owner,
+          );
+        }).toList();
     return utxos;
   }
 }
@@ -254,12 +257,14 @@ class BlockCypherTransaction {
       optInRBF: json['opt_in_rbf'],
       dataProtocol: json['data_protocol'],
       confirmations: json['confirmations'],
-      inputs: (json['inputs'] as List<dynamic>)
-          .map((input) => BlockCypherTransactionInput.fromJson(input))
-          .toList(),
-      outputs: (json['outputs'] as List<dynamic>)
-          .map((output) => BlockCypherTransactionOutput.fromJson(output))
-          .toList(),
+      inputs:
+          (json['inputs'] as List<dynamic>)
+              .map((input) => BlockCypherTransactionInput.fromJson(input))
+              .toList(),
+      outputs:
+          (json['outputs'] as List<dynamic>)
+              .map((output) => BlockCypherTransactionOutput.fromJson(output))
+              .toList(),
     );
   }
 }
@@ -300,9 +305,11 @@ class BlockCypherAddressInfo {
       numTransactions: json['n_tx'],
       unconfirmedNumTx: json['unconfirmed_n_tx'],
       finalNumTx: json['final_n_tx'],
-      txs: (json['txs'] as List?)
+      txs:
+          (json['txs'] as List?)
               ?.map(
-                  (transaction) => BlockCypherTransaction.fromJson(transaction))
+                (transaction) => BlockCypherTransaction.fromJson(transaction),
+              )
               .toList() ??
           [],
     );
@@ -323,36 +330,38 @@ class BlockCypherChainInfo {
   final BigInt? lowFeePerKb;
   final BigInt? latestForkHeight;
   final String? latestForkHash;
-  const BlockCypherChainInfo(
-      {required this.height,
-      required this.hash,
-      required this.time,
-      required this.latestUrl,
-      required this.previousHash,
-      required this.previousUrl,
-      required this.peerCount,
-      required this.unconfirmedCount,
-      required this.highFeePerKb,
-      required this.mediumFeePerKb,
-      required this.lowFeePerKb,
-      required this.latestForkHeight,
-      required this.latestForkHash});
+  const BlockCypherChainInfo({
+    required this.height,
+    required this.hash,
+    required this.time,
+    required this.latestUrl,
+    required this.previousHash,
+    required this.previousUrl,
+    required this.peerCount,
+    required this.unconfirmedCount,
+    required this.highFeePerKb,
+    required this.mediumFeePerKb,
+    required this.lowFeePerKb,
+    required this.latestForkHeight,
+    required this.latestForkHash,
+  });
 
   factory BlockCypherChainInfo.fromJson(Map<String, dynamic> json) {
     return BlockCypherChainInfo(
-        height: BigintUtils.parse(json["height"]),
-        hash: json["hash"],
-        time: json["time"],
-        latestUrl: json["latest_url"],
-        previousHash: json["previous_hash"],
-        previousUrl: json["previous_url"],
-        peerCount: IntUtils.tryParse(json["peer_count"]),
-        unconfirmedCount: IntUtils.tryParse(json["unconfirmed_count"]),
-        highFeePerKb: BigintUtils.tryParse(json["high_fee_per_kb"]),
-        mediumFeePerKb: BigintUtils.tryParse(json["medium_fee_per_kb"]),
-        lowFeePerKb: BigintUtils.tryParse(json["low_fee_per_kb"]),
-        latestForkHeight: BigintUtils.tryParse(json["last_fork_height"]),
-        latestForkHash: json["last_fork_hash"]);
+      height: BigintUtils.parse(json["height"]),
+      hash: json["hash"],
+      time: json["time"],
+      latestUrl: json["latest_url"],
+      previousHash: json["previous_hash"],
+      previousUrl: json["previous_url"],
+      peerCount: IntUtils.tryParse(json["peer_count"]),
+      unconfirmedCount: IntUtils.tryParse(json["unconfirmed_count"]),
+      highFeePerKb: BigintUtils.tryParse(json["high_fee_per_kb"]),
+      mediumFeePerKb: BigintUtils.tryParse(json["medium_fee_per_kb"]),
+      lowFeePerKb: BigintUtils.tryParse(json["low_fee_per_kb"]),
+      latestForkHeight: BigintUtils.tryParse(json["last_fork_height"]),
+      latestForkHash: json["last_fork_hash"],
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -369,7 +378,7 @@ class BlockCypherChainInfo {
       "medium_fee_per_kb": mediumFeePerKb?.toString(),
       "low_fee_per_kb": lowFeePerKb?.toString(),
       "last_fork_height": latestForkHeight?.toString(),
-      "last_fork_hash": latestForkHash
+      "last_fork_hash": latestForkHash,
     };
   }
 }

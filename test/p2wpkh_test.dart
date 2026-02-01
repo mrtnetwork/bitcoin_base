@@ -4,116 +4,145 @@ import 'package:test/test.dart';
 void main() {
   group('P2WPKH', () {
     final sk = ECPrivate.fromWif(
-        'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
-        netVersion: BitcoinNetwork.testnet.wifNetVer);
+      'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
+      netVersion: BitcoinNetwork.testnet.wifNetVer,
+    );
 
     final p2pkhAddr = sk.getPublic().toAddress();
 
     final p2wpkhAddr = sk.getPublic().toSegwitAddress();
 
     final txin1 = TxInput(
-        txId:
-            '5a7b3aaa66d6b7b7abcdc9f1d05db4eee94a700297a319e19454e143875e1078',
-        txIndex: 0);
+      txId: '5a7b3aaa66d6b7b7abcdc9f1d05db4eee94a700297a319e19454e143875e1078',
+      txIndex: 0,
+    );
 
     final txout1 = TxOutput(
-        amount: BigInt.from(990000), scriptPubKey: p2wpkhAddr.toScriptPubKey());
+      amount: BigInt.from(990000),
+      scriptPubKey: p2wpkhAddr.toScriptPubKey(),
+    );
 
     final txinSpend = TxInput(
-        txId:
-            'b3ca1c4cc778380d1e5376a5517445104e46e97176e40741508a3b07a6483ad3',
-        txIndex: 0);
+      txId: 'b3ca1c4cc778380d1e5376a5517445104e46e97176e40741508a3b07a6483ad3',
+      txIndex: 0,
+    );
     final txinSpendAmount = BigInt.from(990000);
     final txout2 = TxOutput(
-        amount: BigInt.from(980000), scriptPubKey: p2pkhAddr.toScriptPubKey());
-    final p2pkhRedeemScript = Script(script: [
-      BitcoinOpcode.opDup,
-      BitcoinOpcode.opHash160,
-      p2pkhAddr.addressProgram,
-      BitcoinOpcode.opEqualVerify,
-      BitcoinOpcode.opCheckSig,
-    ]);
+      amount: BigInt.from(980000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
+    final p2pkhRedeemScript = Script(
+      script: [
+        BitcoinOpcode.opDup,
+        BitcoinOpcode.opHash160,
+        p2pkhAddr.addressProgram,
+        BitcoinOpcode.opEqualVerify,
+        BitcoinOpcode.opCheckSig,
+      ],
+    );
 
     final txinSpendP2pkh = TxInput(
-        txId:
-            '1e2a5279c868d61fb2ff0b1c2b04aa3eff02cd74952a8b4e799532635a9132cc',
-        txIndex: 0);
+      txId: '1e2a5279c868d61fb2ff0b1c2b04aa3eff02cd74952a8b4e799532635a9132cc',
+      txIndex: 0,
+    );
 
     final txinSpendP2wpkh = TxInput(
-        txId:
-            'fff39047310fbf04bdd0e0bc75dde4267ae4d25219d8ad95e0ca1cee907a60da',
-        txIndex: 0);
+      txId: 'fff39047310fbf04bdd0e0bc75dde4267ae4d25219d8ad95e0ca1cee907a60da',
+      txIndex: 0,
+    );
     final txinSpendP2wpkhAmount = BigInt.from(950000);
 
     final txout3 = TxOutput(
-        amount: BigInt.from(1940000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(1940000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
 
     final txin1Signone = TxInput(
-        txId:
-            'fb4c338a00a75d73f9a6bd203ed4bd8884edeb111fac25a7946d5df6562f1942',
-        txIndex: 0);
+      txId: 'fb4c338a00a75d73f9a6bd203ed4bd8884edeb111fac25a7946d5df6562f1942',
+      txIndex: 0,
+    );
     final txin1SignoneAmount = BigInt.from(1000000);
 
     final txout1Signone = TxOutput(
-        amount: BigInt.from(800000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(800000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
     final txout2Signone = TxOutput(
-        amount: BigInt.from(190000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(190000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
 
     final txin1Sigsingle = TxInput(
-        txId:
-            'b04909d4b5239a56d676c1d9d722f325a86878c9aa535915aa0df97df47cedeb',
-        txIndex: 0);
+      txId: 'b04909d4b5239a56d676c1d9d722f325a86878c9aa535915aa0df97df47cedeb',
+      txIndex: 0,
+    );
     final txin1SigsingleAmount = BigInt.from(1930000);
 
     final txout1Sigsingle = TxOutput(
-        amount: BigInt.from(1000000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(1000000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
     final txout2Sigsingle = TxOutput(
-        amount: BigInt.from(920000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(920000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
 
     final txin1SiganyonecanpayAll = TxInput(
-        txId:
-            'f67e97a2564dceed405e214843e3c954b47dd4f8b26ea48f82382f51f7626036',
-        txIndex: 0);
+      txId: 'f67e97a2564dceed405e214843e3c954b47dd4f8b26ea48f82382f51f7626036',
+      txIndex: 0,
+    );
     final txin1SiganyonecanpayAllAmount = BigInt.from(180000);
 
     final txin2SiganyonecanpayAll = TxInput(
-        txId:
-            'f4afddb77cd11a79bed059463085382c50d60c7f9e4075d8469cfe60040f68eb',
-        txIndex: 0);
+      txId: 'f4afddb77cd11a79bed059463085382c50d60c7f9e4075d8469cfe60040f68eb',
+      txIndex: 0,
+    );
     final txin2SiganyonecanpayAllAmount = BigInt.from(180000);
 
     final txout1SiganyonecanpayAll = TxOutput(
-        amount: BigInt.from(180000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(180000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
     final txout2SiganyonecanpayAll = TxOutput(
-        amount: BigInt.from(170000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(170000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
 
     final txin1SiganyonecanpayNone = TxInput(
-        txId:
-            'd2ae5d4a3f390f108769139c9b5757846be6693b785c4e21eab777eec7289095',
-        txIndex: 0);
+      txId: 'd2ae5d4a3f390f108769139c9b5757846be6693b785c4e21eab777eec7289095',
+      txIndex: 0,
+    );
     final txin1SiganyonecanpayNoneAmount = BigInt.from(900000);
 
     final txin2SiganyonecanpayNone = TxInput(
-        txId:
-            'ee5062d426677372e6de96e2eb47d572af5deaaef3ef225f3179dfa1ece3f4f5',
-        txIndex: 0);
+      txId: 'ee5062d426677372e6de96e2eb47d572af5deaaef3ef225f3179dfa1ece3f4f5',
+      txIndex: 0,
+    );
     final txin2SiganyonecanpayNoneAmount = BigInt.from(700000);
 
     final txout1SiganyonecanpayNone = TxOutput(
-        amount: BigInt.from(800000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(800000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
     final txout2SiganyonecanpayNone = TxOutput(
-        amount: BigInt.from(700000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(700000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
 
     final txin1SiganyonecanpaySingle = TxInput(
-        txId:
-            'c7bb5672266c8a5b64fe91e953a9e23e3206e3b1a2ddc8e5999b607b82485042',
-        txIndex: 0);
+      txId: 'c7bb5672266c8a5b64fe91e953a9e23e3206e3b1a2ddc8e5999b607b82485042',
+      txIndex: 0,
+    );
     final txin1SiganyonecanpaySingleAmount = BigInt.from(1000000);
 
     final txout1SiganyonecanpaySingle = TxOutput(
-        amount: BigInt.from(500000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(500000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
     final txout2SiganyonecanpaySingle = TxOutput(
-        amount: BigInt.from(490000), scriptPubKey: p2pkhAddr.toScriptPubKey());
+      amount: BigInt.from(490000),
+      scriptPubKey: p2pkhAddr.toScriptPubKey(),
+    );
 
     const createSendToP2wpkhResult =
         '020000000178105e8743e15494e119a39702704ae9eeb45dd0f1c9cdabb7b7d666aa3a7b5a000000006a4730440220415155963673e5582aadfdb8d53874c9764cfd56c28be8d5f2838fdab6365f9902207bf28f875e15ff53e81f3245feb07c6120df4a653feabba3b7bf274790ea1fd1012102d82c9860e36f15d7b72aa59e29347f951277c21cd4d34822acdeeadbcff8a546ffffffff01301b0f0000000000160014fd337ad3bf81e086d96a68e1f8d6a0a510f8c24a00000000';
@@ -134,7 +163,9 @@ void main() {
     test('test_signed_send_to_p2wpkh', () {
       final tx = BtcTransaction(inputs: [txin1], outputs: [txout1]);
       final digit = tx.getTransactionDigest(
-          txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
+        txInIndex: 0,
+        script: p2pkhAddr.toScriptPubKey(),
+      );
       final sig = sk.signECDSA(digit);
       txin1.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       expect(tx.serialize(), createSendToP2wpkhResult);
@@ -142,11 +173,16 @@ void main() {
     test('test_spend_p2wpkh', () {
       var tx = BtcTransaction(inputs: [txinSpend], outputs: [txout2]);
       final digit = tx.getTransactionSegwitDigit(
-          txInIndex: 0, script: p2pkhRedeemScript, amount: txinSpendAmount);
+        txInIndex: 0,
+        script: p2pkhRedeemScript,
+        amount: txinSpendAmount,
+      );
       final sig = sk.signECDSA(digit);
-      tx = tx.copyWith(witnesses: [
-        TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
-      ]);
+      tx = tx.copyWith(
+        witnesses: [
+          TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
+        ],
+      );
       expect(tx.serialize(), spendP2pkhResult);
     });
     test('test_p2pkh_and_p2wpkh_to_p2pkh', () {
@@ -155,31 +191,39 @@ void main() {
         outputs: [txout3],
       );
       final digit = tx.getTransactionDigest(
-          txInIndex: 0, script: p2pkhAddr.toScriptPubKey());
+        txInIndex: 0,
+        script: p2pkhAddr.toScriptPubKey(),
+      );
       final sig = sk.signECDSA(digit);
       txinSpendP2pkh.scriptSig = Script(script: [sig, sk.getPublic().toHex()]);
       final segwitDigit = tx.getTransactionSegwitDigit(
-          amount: txinSpendP2wpkhAmount,
-          script: p2pkhRedeemScript,
-          txInIndex: 1);
+        amount: txinSpendP2wpkhAmount,
+        script: p2pkhRedeemScript,
+        txInIndex: 1,
+      );
       final sig2 = sk.signECDSA(segwitDigit);
-      tx = tx.copyWith(witnesses: [
-        TxWitnessInput(stack: []),
-        TxWitnessInput(stack: [sig2, sk.getPublic().toHex()])
-      ]);
+      tx = tx.copyWith(
+        witnesses: [
+          TxWitnessInput(stack: []),
+          TxWitnessInput(stack: [sig2, sk.getPublic().toHex()]),
+        ],
+      );
       expect(tx.serialize(), p2pkhAndP2wpkhToP2pkhResult);
     });
     test('test_signone_send', () {
       var tx = BtcTransaction(inputs: [txin1Signone], outputs: [txout1Signone]);
       final digit = tx.getTransactionSegwitDigit(
-          txInIndex: 0,
-          script: p2pkhRedeemScript,
-          amount: txin1SignoneAmount,
-          sighash: BitcoinOpCodeConst.sighashNone);
+        txInIndex: 0,
+        script: p2pkhRedeemScript,
+        amount: txin1SignoneAmount,
+        sighash: BitcoinOpCodeConst.sighashNone,
+      );
       final sig = sk.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashNone);
-      tx = tx.copyWith(witnesses: [
-        TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
-      ]);
+      tx = tx.copyWith(
+        witnesses: [
+          TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
+        ],
+      );
       tx = tx.copyWith(outputs: [...tx.outputs, txout2Signone]);
 
       expect(tx.serialize(), testSignoneSendResult);
@@ -190,15 +234,20 @@ void main() {
         outputs: [txout1Sigsingle],
       );
       final digit = tx.getTransactionSegwitDigit(
-          txInIndex: 0,
-          script: p2pkhRedeemScript,
-          amount: txin1SigsingleAmount,
-          sighash: BitcoinOpCodeConst.sighashSingle);
-      final sig =
-          sk.signECDSA(digit, sighash: BitcoinOpCodeConst.sighashSingle);
-      tx = tx.copyWith(witnesses: [
-        TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
-      ]);
+        txInIndex: 0,
+        script: p2pkhRedeemScript,
+        amount: txin1SigsingleAmount,
+        sighash: BitcoinOpCodeConst.sighashSingle,
+      );
+      final sig = sk.signECDSA(
+        digit,
+        sighash: BitcoinOpCodeConst.sighashSingle,
+      );
+      tx = tx.copyWith(
+        witnesses: [
+          TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
+        ],
+      );
       tx = tx.copyWith(outputs: [...tx.outputs, txout2Sigsingle]);
 
       expect(tx.serialize(), testSigsingleSendResult);
@@ -209,26 +258,34 @@ void main() {
         outputs: [txout1SiganyonecanpayAll, txout2SiganyonecanpayAll],
       );
       final digit = tx.getTransactionSegwitDigit(
-          txInIndex: 0,
-          script: p2pkhRedeemScript,
-          amount: txin1SiganyonecanpayAllAmount,
-          sighash: BitcoinOpCodeConst.sighashAll |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
-      final sig = sk.signECDSA(digit,
-          sighash: BitcoinOpCodeConst.sighashAll |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
+        txInIndex: 0,
+        script: p2pkhRedeemScript,
+        amount: txin1SiganyonecanpayAllAmount,
+        sighash:
+            BitcoinOpCodeConst.sighashAll |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
+      final sig = sk.signECDSA(
+        digit,
+        sighash:
+            BitcoinOpCodeConst.sighashAll |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
 
       tx = tx.copyWith(inputs: [...tx.inputs, txin2SiganyonecanpayAll]);
       final digit2 = tx.getTransactionSegwitDigit(
-          txInIndex: 1,
-          script: p2pkhRedeemScript,
-          amount: txin2SiganyonecanpayAllAmount,
-          sighash: BitcoinOpCodeConst.sighashAll);
+        txInIndex: 1,
+        script: p2pkhRedeemScript,
+        amount: txin2SiganyonecanpayAllAmount,
+        sighash: BitcoinOpCodeConst.sighashAll,
+      );
       final sig2 = sk.signECDSA(digit2, sighash: BitcoinOpCodeConst.sighashAll);
-      tx = tx.copyWith(witnesses: [
-        TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
-        TxWitnessInput(stack: [sig2, sk.getPublic().toHex()])
-      ]);
+      tx = tx.copyWith(
+        witnesses: [
+          TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
+          TxWitnessInput(stack: [sig2, sk.getPublic().toHex()]),
+        ],
+      );
 
       expect(tx.serialize(), testSiganyonecanpayAllSendResult);
     });
@@ -239,26 +296,34 @@ void main() {
         outputs: [txout1SiganyonecanpayNone],
       );
       final digit = tx.getTransactionSegwitDigit(
-          txInIndex: 0,
-          script: p2pkhRedeemScript,
-          amount: txin1SiganyonecanpayNoneAmount,
-          sighash: BitcoinOpCodeConst.sighashNone |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
-      final sig = sk.signECDSA(digit,
-          sighash: BitcoinOpCodeConst.sighashNone |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
+        txInIndex: 0,
+        script: p2pkhRedeemScript,
+        amount: txin1SiganyonecanpayNoneAmount,
+        sighash:
+            BitcoinOpCodeConst.sighashNone |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
+      final sig = sk.signECDSA(
+        digit,
+        sighash:
+            BitcoinOpCodeConst.sighashNone |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
       tx = tx.copyWith(inputs: [...tx.inputs, txin2SiganyonecanpayNone]);
       tx = tx.copyWith(outputs: [...tx.outputs, txout2SiganyonecanpayNone]);
       final digit2 = tx.getTransactionSegwitDigit(
-          txInIndex: 1,
-          script: p2pkhRedeemScript,
-          amount: txin2SiganyonecanpayNoneAmount,
-          sighash: BitcoinOpCodeConst.sighashAll);
+        txInIndex: 1,
+        script: p2pkhRedeemScript,
+        amount: txin2SiganyonecanpayNoneAmount,
+        sighash: BitcoinOpCodeConst.sighashAll,
+      );
       final sig2 = sk.signECDSA(digit2, sighash: BitcoinOpCodeConst.sighashAll);
-      tx = tx.copyWith(witnesses: [
-        TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
-        TxWitnessInput(stack: [sig2, sk.getPublic().toHex()])
-      ]);
+      tx = tx.copyWith(
+        witnesses: [
+          TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
+          TxWitnessInput(stack: [sig2, sk.getPublic().toHex()]),
+        ],
+      );
       expect(tx.serialize(), testSiganyonecanpayNoneSendResult);
       final deserialize = BtcTransaction.deserialize(tx.toBytes());
       expect(deserialize.serialize(), tx.serialize());
@@ -269,17 +334,24 @@ void main() {
         outputs: [txout1SiganyonecanpaySingle],
       );
       final digit = tx.getTransactionSegwitDigit(
-          txInIndex: 0,
-          script: p2pkhRedeemScript,
-          amount: txin1SiganyonecanpaySingleAmount,
-          sighash: BitcoinOpCodeConst.sighashSingle |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
-      final sig = sk.signECDSA(digit,
-          sighash: BitcoinOpCodeConst.sighashSingle |
-              BitcoinOpCodeConst.sighashAnyoneCanPay);
-      tx = tx.copyWith(witnesses: [
-        TxWitnessInput(stack: [sig, sk.getPublic().toHex()])
-      ]);
+        txInIndex: 0,
+        script: p2pkhRedeemScript,
+        amount: txin1SiganyonecanpaySingleAmount,
+        sighash:
+            BitcoinOpCodeConst.sighashSingle |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
+      final sig = sk.signECDSA(
+        digit,
+        sighash:
+            BitcoinOpCodeConst.sighashSingle |
+            BitcoinOpCodeConst.sighashAnyoneCanPay,
+      );
+      tx = tx.copyWith(
+        witnesses: [
+          TxWitnessInput(stack: [sig, sk.getPublic().toHex()]),
+        ],
+      );
       tx = tx.copyWith(outputs: [...tx.outputs, txout2SiganyonecanpaySingle]);
       expect(tx.serialize(), testSiganyonecanpaySingleSendResult);
       final deserialize = BtcTransaction.deserialize(tx.toBytes());

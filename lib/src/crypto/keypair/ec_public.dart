@@ -15,7 +15,8 @@ class ECPublic {
   factory ECPublic.fromBip32(Bip32PublicKey publicKey) {
     if (publicKey.curveType != EllipticCurveTypes.secp256k1) {
       throw const DartBitcoinPluginException(
-          'invalid public key curve for bitcoin');
+        'invalid public key curve for bitcoin',
+      );
     }
     return ECPublic._(publicKey.pubKey as Secp256k1PublicKey);
   }
@@ -83,36 +84,46 @@ class ECPublic {
   /// toP2pkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
   /// wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
-  P2shAddress toP2pkhInP2sh(
-      {PublicKeyType mode = PublicKeyType.compressed,
-      bool useBCHP2sh32 = false}) {
+  P2shAddress toP2pkhInP2sh({
+    PublicKeyType mode = PublicKeyType.compressed,
+    bool useBCHP2sh32 = false,
+  }) {
     final addr = toAddress(mode: mode);
     final script = addr.toScriptPubKey();
     if (useBCHP2sh32) {
       return P2shAddress.fromHash160(
-          addrHash: BytesUtils.toHexString(
-              QuickCrypto.sha256DoubleHash(script.toBytes())),
-          type: P2shAddressType.p2pkhInP2sh32);
+        addrHash: BytesUtils.toHexString(
+          QuickCrypto.sha256DoubleHash(script.toBytes()),
+        ),
+        type: P2shAddressType.p2pkhInP2sh32,
+      );
     }
     return P2shAddress.fromScript(
-        script: script, type: P2shAddressType.p2pkhInP2sh);
+      script: script,
+      type: P2shAddressType.p2pkhInP2sh,
+    );
   }
 
   /// toP2pkInP2sh generates a P2SH (Pay-to-Script-Hash) address
   /// wrapping a P2PK (Pay-to-Public-Key) script derived from the ECPublic key.
   /// If 'compressed' is true, the key is in compressed format.
-  P2shAddress toP2pkInP2sh(
-      {PublicKeyType mode = PublicKeyType.compressed,
-      bool useBCHP2sh32 = false}) {
+  P2shAddress toP2pkInP2sh({
+    PublicKeyType mode = PublicKeyType.compressed,
+    bool useBCHP2sh32 = false,
+  }) {
     final script = toRedeemScript(mode: mode);
     if (useBCHP2sh32) {
       return P2shAddress.fromHash160(
-          addrHash: BytesUtils.toHexString(
-              QuickCrypto.sha256DoubleHash(script.toBytes())),
-          type: P2shAddressType.p2pkInP2sh32);
+        addrHash: BytesUtils.toHexString(
+          QuickCrypto.sha256DoubleHash(script.toBytes()),
+        ),
+        type: P2shAddressType.p2pkInP2sh32,
+      );
     }
     return P2shAddress.fromScript(
-        script: script, type: P2shAddressType.p2pkInP2sh);
+      script: script,
+      type: P2shAddressType.p2pkInP2sh,
+    );
   }
 
   /// ToTaprootAddre.
@@ -121,8 +132,9 @@ class ECPublic {
   /// custom spending conditions.
   P2trAddress toTaprootAddress({TaprootTree? treeScript}) {
     return P2trAddress.fromInternalKey(
-        internalKey: publicKey.point.cast<ProjectiveECCPoint>().toXonly(),
-        treeScript: treeScript);
+      internalKey: publicKey.point.cast<ProjectiveECCPoint>().toXonly(),
+      treeScript: treeScript,
+    );
   }
 
   /// toP2wpkhInP2sh generates a P2SH (Pay-to-Script-Hash) address
@@ -131,18 +143,22 @@ class ECPublic {
   P2shAddress toP2wpkhInP2sh() {
     final addr = toSegwitAddress();
     return P2shAddress.fromScript(
-        script: addr.toScriptPubKey(), type: P2shAddressType.p2wpkhInP2sh);
+      script: addr.toScriptPubKey(),
+      type: P2shAddressType.p2wpkhInP2sh,
+    );
   }
 
   /// toP2wshScript generates a P2WSH (Pay-to-Witness-Script-Hash) script
   /// derived from the ECPublic key. If 'compressed' is true, the key is in compressed format.
   Script toP2wshScript() {
-    return Script(script: [
-      BitcoinOpcode.op1,
-      toHex(),
-      BitcoinOpcode.op1,
-      BitcoinOpcode.opCheckMultiSig
-    ]);
+    return Script(
+      script: [
+        BitcoinOpcode.op1,
+        toHex(),
+        BitcoinOpcode.op1,
+        BitcoinOpcode.opCheckMultiSig,
+      ],
+    );
   }
 
   /// toP2wshAddress generates a P2WSH (Pay-to-Witness-Script-Hash) address
@@ -157,7 +173,9 @@ class ECPublic {
   P2shAddress toP2wshInP2sh() {
     final p2sh = toP2wshAddress();
     return P2shAddress.fromScript(
-        script: p2sh.toScriptPubKey(), type: P2shAddressType.p2wshInP2sh);
+      script: p2sh.toScriptPubKey(),
+      type: P2shAddressType.p2wshInP2sh,
+    );
   }
 
   List<int> toBytes({PubKeyModes mode = PubKeyModes.uncompressed}) {
@@ -172,8 +190,9 @@ class ECPublic {
   /// returns the x coordinate only as hex string after tweaking (needed for taproot)
   String tweakPublicKey({TaprootTree? treeScript}) {
     final pubKey = TaprootUtils.tweakPublicKey(
-        toBytes(mode: PubKeyModes.compressed),
-        treeScript: treeScript);
+      toBytes(mode: PubKeyModes.compressed),
+      treeScript: treeScript,
+    );
     return BytesUtils.toHexString(pubKey.toXonly());
   }
 
@@ -195,13 +214,17 @@ class ECPublic {
   /// - [message]: The original message that was signed.
   /// - [signature]: The compact ECDSA signature to verify.
   /// - [messagePrefix]: The prefix used in Bitcoin's message signing.
-  bool verify(
-      {required List<int> message,
-      required List<int> signature,
-      String messagePrefix = BitcoinSignerUtils.signMessagePrefix}) {
+  bool verify({
+    required List<int> message,
+    required List<int> signature,
+    String messagePrefix = BitcoinSignerUtils.signMessagePrefix,
+  }) {
     final verifyKey = BitcoinSignatureVerifier.fromKeyBytes(toBytes());
     return verifyKey.verifyMessageSignature(
-        message: message, messagePrefix: messagePrefix, signature: signature);
+      message: message,
+      messagePrefix: messagePrefix,
+      signature: signature,
+    );
   }
 
   /// Recovers the BIP-137 public key from a signed message and signature.
@@ -212,16 +235,20 @@ class ECPublic {
   /// - [message]: The original message that was signed.
   /// - [signature]: The Base64-encoded signature.
   /// - [messagePrefix]: The prefix used in Bitcoin's message signing.
-  ECPublic getBip137PublicKey(
-      {required List<int> message,
-      required String signature,
-      String messagePrefix = BitcoinSignerUtils.signMessagePrefix}) {
-    final signatureBytes =
-        StringUtils.encode(signature, type: StringEncoding.base64);
+  ECPublic getBip137PublicKey({
+    required List<int> message,
+    required String signature,
+    String messagePrefix = BitcoinSignerUtils.signMessagePrefix,
+  }) {
+    final signatureBytes = StringUtils.encode(
+      signature,
+      type: StringEncoding.base64,
+    );
     final ecdsaPubKey = BitcoinSignatureVerifier.recoverPublicKey(
-        message: message,
-        signature: signatureBytes,
-        messagePrefix: messagePrefix);
+      message: message,
+      signature: signatureBytes,
+      messagePrefix: messagePrefix,
+    );
     return ECPublic.fromBytes(ecdsaPubKey.toBytes());
   }
 
@@ -239,24 +266,29 @@ class ECPublic {
   /// Returns the corresponding Bitcoin address derived from the recovered public key.
   /// The address type is determined by the recovery mode of the signature (e.g.,
   /// uncompressed, compressed, SegWit, or P2SH-wrapped SegWit).
-  BitcoinBaseAddress getBip137Address(
-      {required List<int> message,
-      required String signature,
-      String messagePrefix = BitcoinSignerUtils.signMessagePrefix}) {
-    final signatureBytes =
-        StringUtils.encode(signature, type: StringEncoding.base64);
+  BitcoinBaseAddress getBip137Address({
+    required List<int> message,
+    required String signature,
+    String messagePrefix = BitcoinSignerUtils.signMessagePrefix,
+  }) {
+    final signatureBytes = StringUtils.encode(
+      signature,
+      type: StringEncoding.base64,
+    );
     final ecdsaPubKey = BitcoinSignatureVerifier.recoverPublicKey(
-        message: message,
-        signature: signatureBytes,
-        messagePrefix: messagePrefix);
+      message: message,
+      signature: signatureBytes,
+      messagePrefix: messagePrefix,
+    );
     final publicKey = ECPublic.fromBytes(ecdsaPubKey.toBytes());
     final mode = BIP137Mode.findMode(signatureBytes[0]);
     return switch (mode) {
-      BIP137Mode.p2pkhUncompressed =>
-        publicKey.toAddress(mode: PubKeyModes.uncompressed),
+      BIP137Mode.p2pkhUncompressed => publicKey.toAddress(
+        mode: PubKeyModes.uncompressed,
+      ),
       BIP137Mode.p2pkhCompressed => publicKey.toAddress(),
       BIP137Mode.p2wpkh => publicKey.toSegwitAddress(),
-      BIP137Mode.p2shP2wpkh => publicKey.toP2wpkhInP2sh()
+      BIP137Mode.p2shP2wpkh => publicKey.toP2wpkhInP2sh(),
     };
   }
 
@@ -269,13 +301,17 @@ class ECPublic {
   /// - [signature]: The Base64-encoded signature to verify.
   /// - [address]: The expected Bitcoin address to compare against.
   /// - [messagePrefix]: The prefix used in Bitcoin's message signing
-  bool verifyBip137Address(
-      {required List<int> message,
-      required String signature,
-      required BitcoinBaseAddress address,
-      String messagePrefix = BitcoinSignerUtils.signMessagePrefix}) {
+  bool verifyBip137Address({
+    required List<int> message,
+    required String signature,
+    required BitcoinBaseAddress address,
+    String messagePrefix = BitcoinSignerUtils.signMessagePrefix,
+  }) {
     final signerAddress = getBip137Address(
-        message: message, signature: signature, messagePrefix: messagePrefix);
+      message: message,
+      signature: signature,
+      messagePrefix: messagePrefix,
+    );
     return address.toScriptPubKey() == signerAddress.toScriptPubKey();
   }
 
@@ -288,11 +324,15 @@ class ECPublic {
   /// - [signature]: The DER-encoded ECDSA signature to verify.
   ///
   /// Returns `true` if the signature is valid for the given digest, otherwise `false`.
-  bool verifyDerSignature(
-      {required List<int> digest, required List<int> signature}) {
+  bool verifyDerSignature({
+    required List<int> digest,
+    required List<int> signature,
+  }) {
     final verifyKey = BitcoinSignatureVerifier.fromKeyBytes(toBytes());
     return verifyKey.verifyECDSADerSignature(
-        digest: digest, signature: signature);
+      digest: digest,
+      signature: signature,
+    );
   }
 
   /// Verifies a BIP-340 Taproot signature for a given message.
@@ -303,36 +343,44 @@ class ECPublic {
   /// - [merkleRoot]: Merkle root for the Taproot tree. If provided, this overrides the default computation of the Merkle root from [treeScript].
   /// - [tweak]: If `true`, the internal key is tweaked, either with or without [treeScript] or [merkleRoot], before verifying.
   /// - [tapTweakHash]: If provided, it will be used directly instead of tweaking with the internal key.
-  bool verifyBip340Signature(
-      {required List<int> digest,
-      required List<int> signature,
-      TaprootTree? treeScript,
-      List<int>? merkleRoot,
-      List<int>? tapTweakHash,
-      bool tweak = true}) {
+  bool verifyBip340Signature({
+    required List<int> digest,
+    required List<int> signature,
+    TaprootTree? treeScript,
+    List<int>? merkleRoot,
+    List<int>? tapTweakHash,
+    bool tweak = true,
+  }) {
     if (!tweak &&
         (treeScript != null || merkleRoot != null || tapTweakHash != null)) {
       throw DartBitcoinPluginException(
-          "Invalid parameters: 'tweak' must be true when specifying 'treeScript', 'merkleRoot', or 'tapTweakHash'.");
+        "Invalid parameters: 'tweak' must be true when specifying 'treeScript', 'merkleRoot', or 'tapTweakHash'.",
+      );
     }
     if (merkleRoot != null && treeScript != null) {
       throw DartBitcoinPluginException(
-          "Use either merkleRoot or treeScript to generate merkle, not both.");
+        "Use either merkleRoot or treeScript to generate merkle, not both.",
+      );
     }
     if (tapTweakHash != null && (treeScript != null || merkleRoot != null)) {
       throw DartBitcoinPluginException(
-          "Use either tapTweakHash or (treeScript/merkleRoot), not both.");
+        "Use either tapTweakHash or (treeScript/merkleRoot), not both.",
+      );
     }
     final verifyKey = BitcoinSignatureVerifier.fromKeyBytes(toBytes());
     return verifyKey.verifyBip340Signature(
-        digest: digest,
-        signature: signature,
-        tapTweakHash: tweak
-            ? tapTweakHash ??
-                TaprootUtils.calculateTweek(toXOnly(),
+      digest: digest,
+      signature: signature,
+      tapTweakHash:
+          tweak
+              ? tapTweakHash ??
+                  TaprootUtils.calculateTweek(
+                    toXOnly(),
                     treeScript: merkleRoot != null ? null : treeScript,
-                    merkleRoot: merkleRoot)
-            : null);
+                    merkleRoot: merkleRoot,
+                  )
+              : null,
+    );
   }
 
   /// Verifies a Schnorr(old style) signature for a given digest.
@@ -344,11 +392,15 @@ class ECPublic {
   /// - [signature]: The Schnorr signature to verify.
   ///
   /// Returns `true` if the signature is valid for the given digest, otherwise `false`.
-  bool verifySchnorrSignature(
-      {required List<int> digest, required List<int> signature}) {
+  bool verifySchnorrSignature({
+    required List<int> digest,
+    required List<int> signature,
+  }) {
     final verifyKey = BitcoinSignatureVerifier.fromKeyBytes(toBytes());
     return verifyKey.verifySchnorrSignature(
-        digest: digest, signature: signature);
+      digest: digest,
+      signature: signature,
+    );
   }
 
   @override

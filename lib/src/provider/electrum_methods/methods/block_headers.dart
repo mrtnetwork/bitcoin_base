@@ -5,8 +5,11 @@ import 'package:bitcoin_base/src/provider/core/params.dart';
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
 class ElectrumRequestBlockHeaders
     extends ElectrumRequest<Map<String, dynamic>, Map<String, dynamic>> {
-  ElectrumRequestBlockHeaders(
-      {required this.startHeight, required this.count, required this.cpHeight});
+  ElectrumRequestBlockHeaders({
+    required this.startHeight,
+    required this.count,
+    required this.cpHeight,
+  });
 
   /// The height of the first header requested, a non-negative integer.
   final int startHeight;

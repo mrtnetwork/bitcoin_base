@@ -13,21 +13,27 @@ import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 class TxOutput {
   factory TxOutput.negativeOne() {
     return TxOutput._(
-        amount: BitcoinOpCodeConst.negativeSatoshi,
-        scriptPubKey: Script(script: []));
+      amount: BitcoinOpCodeConst.negativeSatoshi,
+      scriptPubKey: Script(script: []),
+    );
   }
   // BitcoinOpCodeConst.negativeSatoshi
-  const TxOutput._(
-      {required this.amount, required this.scriptPubKey, this.cashToken});
-  factory TxOutput(
-      {required BigInt amount,
-      required Script scriptPubKey,
-      CashToken? cashToken}) {
+  const TxOutput._({
+    required this.amount,
+    required this.scriptPubKey,
+    this.cashToken,
+  });
+  factory TxOutput({
+    required BigInt amount,
+    required Script scriptPubKey,
+    CashToken? cashToken,
+  }) {
     try {
       return TxOutput._(
-          amount: amount.asInt64,
-          scriptPubKey: scriptPubKey,
-          cashToken: cashToken);
+        amount: amount.asI64,
+        scriptPubKey: scriptPubKey,
+        cashToken: cashToken,
+      );
     } catch (_) {
       throw DartBitcoinPluginException("Invalid output amount.");
     }
@@ -39,52 +45,61 @@ class TxOutput {
   ///  creates a copy of the object
   TxOutput clone() {
     return TxOutput(
-        amount: amount,
-        scriptPubKey: Script(script: List.from(scriptPubKey.script)),
-        cashToken: cashToken);
+      amount: amount,
+      scriptPubKey: Script(script: List.from(scriptPubKey.script)),
+      cashToken: cashToken,
+    );
   }
 
   List<int> toBytes() {
-    final amountBytes =
-        BigintUtils.toBytes(amount, length: 8, order: Endian.little);
+    final amountBytes = BigintUtils.toBytes(
+      amount,
+      length: 8,
+      order: Endian.little,
+    );
     final scriptBytes = <int>[
       ...cashToken?.toBytes() ?? <int>[],
-      ...scriptPubKey.toBytes()
+      ...scriptPubKey.toBytes(),
     ];
     final data = [
       ...amountBytes,
       ...IntUtils.encodeVarint(scriptBytes.length),
-      ...scriptBytes
+      ...scriptBytes,
     ];
     return data;
   }
 
-  static Tuple<TxOutput, int> deserialize(
-      {required List<int> bytes, required int cursor}) {
-    final value = BigintUtils.fromBytes(bytes.sublist(cursor, cursor + 8),
-            byteOrder: Endian.little)
-        .toSigned(64);
+  static (TxOutput, int) deserialize({
+    required List<int> bytes,
+    required int cursor,
+  }) {
+    final value = BigintUtils.fromBytes(
+      bytes.sublist(cursor, cursor + 8),
+      byteOrder: Endian.little,
+    ).toSigned(64);
     cursor += 8;
 
     final vi = IntUtils.decodeVarint(bytes.sublist(cursor));
-    cursor += vi.item2;
+    cursor += vi.$2;
     final token = CashToken.deserialize(bytes.sublist(cursor));
 
-    final lockScript = bytes.sublist(cursor + token.item2, cursor + vi.item1);
-    cursor += vi.item1;
-    return Tuple(
-        TxOutput(
-            amount: value,
-            cashToken: token.item1,
-            scriptPubKey: Script.deserialize(bytes: lockScript)),
-        cursor);
+    final lockScript = bytes.sublist(cursor + token.$2, cursor + vi.$1);
+    cursor += vi.$1;
+    return (
+      TxOutput(
+        amount: value,
+        cashToken: token.$1,
+        scriptPubKey: Script.deserialize(bytes: lockScript),
+      ),
+      cursor,
+    );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'cashToken': cashToken?.toJson(),
       'amount': amount.toString(),
-      'scriptPubKey': scriptPubKey.script
+      'scriptPubKey': scriptPubKey.script,
     };
   }
 

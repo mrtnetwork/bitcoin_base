@@ -28,27 +28,38 @@ abstract class PsbtBuilderImpl {
   /// Retrieves the PSBT representation of a transaction output at the specified index.
   PsbtTransactionOutput psbtOutput(int index) {
     return PsbtTransactionOutput.generateFromOutput(
-        psbtOutput: _psbt.output, output: txOutput(index), index: index);
+      psbtOutput: _psbt.output,
+      output: txOutput(index),
+      index: index,
+    );
   }
 
   /// Retrieves the PSBT representation of a transaction input at the specified index.
   PsbtTransactionInput psbtInput(int index) {
     final txInputs = this.txInputs();
     PsbtUtils.validateTxInputs(
-        psbInput: _psbt.input,
-        inputIndex: index,
-        inputsLength: txInputs.length);
+      psbInput: _psbt.input,
+      inputIndex: index,
+      inputsLength: txInputs.length,
+    );
     return PsbtTransactionInput.generateFromInput(
-        index: index, input: _psbt.input, txInput: txInputs[index]);
+      index: index,
+      input: _psbt.input,
+      txInput: txInputs[index],
+    );
   }
 
   /// Retrieves a list of all PSBT transaction inputs.
   List<PsbtTransactionInput> psbtInputs() {
     final inputs = txInputs();
     return List.generate(
-        inputs.length,
-        (index) => PsbtTransactionInput.generateFromInput(
-            index: index, input: _psbt.input, txInput: inputs[index]));
+      inputs.length,
+      (index) => PsbtTransactionInput.generateFromInput(
+        index: index,
+        input: _psbt.input,
+        txInput: inputs[index],
+      ),
+    );
   }
 
   /// Retrieves a list of all PSBT transaction outputs.
@@ -76,10 +87,14 @@ abstract class PsbtBuilderImpl {
   ///
   /// Returns `true` if the input at the given index is finalized, otherwise `false`.
   bool indexFinalized(int index) {
-    bool alreadyFinalized =
-        _psbt.input.hasInput(index, PsbtInputTypes.finalizedScriptSig);
-    return alreadyFinalized |=
-        _psbt.input.hasInput(index, PsbtInputTypes.finalizedWitness);
+    bool alreadyFinalized = _psbt.input.hasInput(
+      index,
+      PsbtInputTypes.finalizedScriptSig,
+    );
+    return alreadyFinalized |= _psbt.input.hasInput(
+      index,
+      PsbtInputTypes.finalizedWitness,
+    );
   }
 
   /// Determines the current transaction type (Legacy, WitnessV0, or WitnessV1).
@@ -113,17 +128,21 @@ abstract class PsbtBuilderImpl {
   }
 
   void _musig2AddPubKeyNonce(
-      int index, PsbtInputMuSig2PublicNonce pubKeyNonce) {
+    int index,
+    PsbtInputMuSig2PublicNonce pubKeyNonce,
+  ) {
     List<TxInput> txInputs = this.txInputs();
     PsbtUtils.validateTxInputs(
-        psbInput: _psbt.input,
-        inputIndex: index,
-        inputsLength: txInputs.length);
+      psbInput: _psbt.input,
+      inputIndex: index,
+      inputsLength: txInputs.length,
+    );
     PsbtUtils.validateAddMusig2PubKeyNonce(
-        inputIndex: index,
-        psbt: _psbt,
-        txInputs: txInputs,
-        pubKeyNonce: pubKeyNonce);
+      inputIndex: index,
+      psbt: _psbt,
+      txInputs: txInputs,
+      pubKeyNonce: pubKeyNonce,
+    );
     _psbt.input.updateInputs(index, [pubKeyNonce]);
   }
 
@@ -152,17 +171,24 @@ abstract class PsbtBuilderImpl {
   /// For SegWit transactions, it returns the estimated virtual size (vsize).
   int getUnSafeTransactionSize({ONFINALIZEINPUT? onFinalizeInput}) {
     final fakeSignature = PsbtGlobalProprietaryUseType(
-        identifier: PsbtUtils.fakeFinalizeGlobalIdentifier,
-        subkeydata: [],
-        data: const []);
+      identifier: PsbtUtils.fakeFinalizeGlobalIdentifier,
+      subkeydata: [],
+      data: const [],
+    );
     final Psbt psbt = Psbt(
-        global: PsbtGlobal(
-            version: _psbt.version,
-            entries: [..._psbt.global.entries.clone(), fakeSignature]),
-        input: PsbtInput(
-            version: _psbt.version, entries: _psbt.input.entries.clone()),
-        output: PsbtOutput(
-            version: _psbt.version, entries: _psbt.output.entries.clone()));
+      global: PsbtGlobal(
+        version: _psbt.version,
+        entries: [..._psbt.global.entries.clone(), fakeSignature],
+      ),
+      input: PsbtInput(
+        version: _psbt.version,
+        entries: _psbt.input.entries.clone(),
+      ),
+      output: PsbtOutput(
+        version: _psbt.version,
+        entries: _psbt.output.entries.clone(),
+      ),
+    );
     final builder = PsbtBuilder.fromPsbt(psbt);
     final tx = builder.finalizeAll(onFinalizeInput: onFinalizeInput);
     return tx.getSize();
@@ -184,7 +210,10 @@ abstract class PsbtBuilderImpl {
 
   void _updateTxOutput(int index, PsbtTransactionOutput output) {
     PsbtUtils.validateTxOutputs(
-        psbtOutput: _psbt.output, outputIndex: index, outputs: txOutputs());
+      psbtOutput: _psbt.output,
+      outputIndex: index,
+      outputs: txOutputs(),
+    );
     final currentOutput = txOutput(index);
     final newOutPut = output.toTxOutput();
     if (newOutPut != currentOutput) {
@@ -195,25 +224,33 @@ abstract class PsbtBuilderImpl {
   void _removeOutput(int index) {
     final outputs = txOutputs();
     PsbtUtils.validateTxOutputs(
-        psbtOutput: _psbt.output, outputIndex: index, outputs: outputs);
+      psbtOutput: _psbt.output,
+      outputIndex: index,
+      outputs: outputs,
+    );
     PsbtUtils.validateCanAddOrUpdateOutput(
-        psbt: _psbt, outputIndex: index, isUpdate: false);
+      psbt: _psbt,
+      outputIndex: index,
+      isUpdate: false,
+    );
   }
 
   void _removeTxInput(int index) {
     PsbtUtils.validateTxInputs(
-        psbInput: _psbt.input,
-        inputIndex: index,
-        inputsLength: txInputs().length);
+      psbInput: _psbt.input,
+      inputIndex: index,
+      inputsLength: txInputs().length,
+    );
     PsbtUtils.validateCanAddOrUpdateInput(psbt: _psbt, inputIndex: index);
   }
 
   void _updateTxInput(int index, PsbtTransactionInput input) {
     List<TxInput> txInputs = this.txInputs();
     PsbtUtils.validateTxInputs(
-        psbInput: _psbt.input,
-        inputIndex: index,
-        inputsLength: txInputs.length);
+      psbInput: _psbt.input,
+      inputIndex: index,
+      inputsLength: txInputs.length,
+    );
     PsbtUtils.validateCanAddOrUpdateInput(psbt: _psbt, inputIndex: index);
     txInputs = List.generate(txInputs.length, (i) {
       if (i == index) return input.txInput;
@@ -224,11 +261,13 @@ abstract class PsbtBuilderImpl {
 
   void _addNewTxInput(PsbtTransactionInput input) {
     List<TxInput> inputs = txInputs();
-    if (inputs.any((e) =>
-        e.txId == input.txInput.txId && e.txIndex == input.txInput.txIndex)) {
+    if (inputs.any(
+      (e) => e.txId == input.txInput.txId && e.txIndex == input.txInput.txIndex,
+    )) {
       throw DartBitcoinPluginException(
-          "Duplicate input detected: Transaction ID (${input.txInput.txId}), Output Index (${input.txInput.txIndex})"
-          "Each input in a transaction must be unique.");
+        "Duplicate input detected: Transaction ID (${input.txInput.txId}), Output Index (${input.txInput.txIndex})"
+        "Each input in a transaction must be unique.",
+      );
     }
     PsbtUtils.validateCanAddOrUpdateInput(psbt: _psbt);
     PsbtUtils.validateNewInputLocktime(inputs: inputs, newInput: input.txInput);
@@ -262,11 +301,13 @@ abstract class PsbtBuilder extends PsbtBuilderImpl
   /// - Returns the correct `PsbtBuilder` subtype based on the PSBT version.
   ///
   static PSBTBUILDER fromBase64<PSBTBUILDER extends PsbtBuilder>(
-      String base64) {
+    String base64,
+  ) {
     final decode = StringUtils.tryEncode(base64, type: StringEncoding.base64);
     if (decode == null) {
       throw DartBitcoinPluginException(
-          "Invalid PSBT base64: Decoding failed or malformed input.");
+        "Invalid PSBT base64: Decoding failed or malformed input.",
+      );
     }
     return fromBytes(decode);
   }
@@ -282,7 +323,8 @@ abstract class PsbtBuilder extends PsbtBuilderImpl
     final decode = BytesUtils.tryFromHexString(psbtHex);
     if (decode == null) {
       throw DartBitcoinPluginException(
-          "Invalid PSBT Hex: Decoding failed or malformed input.");
+        "Invalid PSBT Hex: Decoding failed or malformed input.",
+      );
     }
     return fromBytes(decode);
   }
@@ -294,7 +336,8 @@ abstract class PsbtBuilder extends PsbtBuilderImpl
   /// - Returns the correct `PsbtBuilder` subtype based on the PSBT version.
   ///
   static PSBTBUILDER fromBytes<PSBTBUILDER extends PsbtBuilder>(
-      List<int> bytes) {
+    List<int> bytes,
+  ) {
     PsbtBuilder builder;
     try {
       final psbt = Psbt.deserialize(bytes);

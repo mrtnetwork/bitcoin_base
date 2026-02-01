@@ -15,16 +15,16 @@ class TxWitnessInput {
 
   factory TxWitnessInput.deserialize(List<int> bytes) {
     final length = IntUtils.decodeVarint(bytes);
-    int offset = length.item2;
+    int offset = length.$2;
     final List<String> stack = [];
-    for (int n = 0; n < length.item1; n++) {
+    for (int n = 0; n < length.$1; n++) {
       List<int> witness = [];
       final itemLen = IntUtils.decodeVarint(bytes.sublist(offset));
-      offset += itemLen.item2;
-      if (itemLen.item1 != 0) {
-        witness = bytes.sublist(offset, offset + itemLen.item1);
+      offset += itemLen.$2;
+      if (itemLen.$1 != 0) {
+        witness = bytes.sublist(offset, offset + itemLen.$1);
       }
-      offset += itemLen.item1;
+      offset += itemLen.$1;
       stack.add(BytesUtils.toHexString(witness));
     }
 

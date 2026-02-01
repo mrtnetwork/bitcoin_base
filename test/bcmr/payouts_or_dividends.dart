@@ -10,8 +10,8 @@ const payoutsOrDividends = {
       'icon': 'https://example.com/registry-icon.svg',
       'web': 'https://example.com/',
       'registry':
-          'https://example.com/.well-known/bitcoin-cash-metadata-registry.json'
-    }
+          'https://example.com/.well-known/bitcoin-cash-metadata-registry.json',
+    },
   },
   'identities': {
     '978306aa4e02fd06e251b38d2e961f78f4af2ea6524a3e4531126776276a6af1': {
@@ -24,7 +24,7 @@ const payoutsOrDividends = {
           'category':
               '89cad9e3e34280eb1e8bc420542c00a7fcc01002b663dbf7f38bceddf80e680c',
           'decimals': 6,
-          'symbol': 'XAMPL-23Q3'
+          'symbol': 'XAMPL-23Q3',
         },
         'uris': {
           'icon': 'https://example.com/asset-icon.svg',
@@ -37,8 +37,8 @@ const payoutsOrDividends = {
               'https://example.com/.well-known/bitcoin-cash-metadata-registry.json',
           'support': 'https://support.example.com/',
           'custom-uri-identifier':
-              'protocol://connection-info-for-some-protocol'
-        }
+              'protocol://connection-info-for-some-protocol',
+        },
       },
       '2023-03-31T00:00:00.000Z': {
         'name': 'Example Payout Shares',
@@ -49,7 +49,7 @@ const payoutsOrDividends = {
           'category':
               'b1a35cadd5ddb1bd18787eeb99ee061f34b946f0db375d84caadd8ab621c10f5',
           'decimals': 6,
-          'symbol': 'XAMPL-23Q2'
+          'symbol': 'XAMPL-23Q2',
         },
         'uris': {
           'icon': 'https://example.com/asset-icon.svg',
@@ -62,8 +62,8 @@ const payoutsOrDividends = {
               'https://example.com/.well-known/bitcoin-cash-metadata-registry.json',
           'support': 'https://support.example.com/',
           'custom-uri-identifier':
-              'protocol://connection-info-for-some-protocol'
-        }
+              'protocol://connection-info-for-some-protocol',
+        },
       },
       '2022-12-31T00:00:00.000Z': {
         'name': 'Example Payout Shares (2023Q1)',
@@ -74,14 +74,14 @@ const payoutsOrDividends = {
           'category':
               '978306aa4e02fd06e251b38d2e961f78f4af2ea6524a3e4531126776276a6af1',
           'decimals': 6,
-          'symbol': 'XAMPL-23Q1'
+          'symbol': 'XAMPL-23Q1',
         },
         'uris': {
           'icon': 'https://example.com/asset-icon-pending-payout.svg',
-          'web': 'https://blog.example.com/payout-2023Q1'
-        }
-      }
-    }
+          'web': 'https://blog.example.com/payout-2023Q1',
+        },
+      },
+    },
   },
-  'license': 'CC0-1.0'
+  'license': 'CC0-1.0',
 };

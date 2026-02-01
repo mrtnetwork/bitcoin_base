@@ -84,11 +84,12 @@ mixin PsbtInputImpl on PsbtBuilderImpl {
     }
 
     final inputs = PsbtUtils.finalizeInput(
-        psbt: _psbt,
-        index: index,
-        txInputs: txInputs,
-        userFinalizedInput: userFinalizedInput,
-        unsignedTx: buildUnsignedTransaction());
+      psbt: _psbt,
+      index: index,
+      txInputs: txInputs,
+      userFinalizedInput: userFinalizedInput,
+      unsignedTx: buildUnsignedTransaction(),
+    );
     _psbt.input.updateInputs(index, inputs.toPsbtInput());
     _cleanFinalizedInput(index);
   }
@@ -102,8 +103,10 @@ mixin PsbtInputImpl on PsbtBuilderImpl {
   /// - If you are spending a custom script, you must provide an
   ///   `onFinalizeInput` callback to handle the finalization manually;
   ///   otherwise, the operation will fail.
-  Future<void> finalizeInputAsync(int index,
-      {ONFINALIZEINPUTASYNC? onFinalizeInput}) async {
+  Future<void> finalizeInputAsync(
+    int index, {
+    ONFINALIZEINPUTASYNC? onFinalizeInput,
+  }) async {
     if (indexFinalized(index)) return;
     final txInputs = this.txInputs();
     PsbtFinalizeResponse? userFinalizedInput;
@@ -112,11 +115,12 @@ mixin PsbtInputImpl on PsbtBuilderImpl {
       userFinalizedInput = await onFinalizeInput(params);
     }
     final inputs = PsbtUtils.finalizeInput(
-        psbt: _psbt,
-        index: index,
-        txInputs: txInputs,
-        userFinalizedInput: userFinalizedInput,
-        unsignedTx: buildUnsignedTransaction());
+      psbt: _psbt,
+      index: index,
+      txInputs: txInputs,
+      userFinalizedInput: userFinalizedInput,
+      unsignedTx: buildUnsignedTransaction(),
+    );
     _psbt.input.updateInputs(index, inputs.toPsbtInput());
     _cleanFinalizedInput(index);
   }
@@ -151,8 +155,9 @@ mixin PsbtInputImpl on PsbtBuilderImpl {
   ///   the operation may fail.
   ///
   /// Returns the finalized [BtcTransaction] if successful.
-  Future<BtcTransaction> finalizeAllAsync(
-      {ONFINALIZEINPUTASYNC? onFinalizeInput}) async {
+  Future<BtcTransaction> finalizeAllAsync({
+    ONFINALIZEINPUTASYNC? onFinalizeInput,
+  }) async {
     for (int i = 0; i < _psbt.input.entries.length; i++) {
       if (indexFinalized(i)) continue;
       await finalizeInputAsync(i, onFinalizeInput: onFinalizeInput);
@@ -160,8 +165,10 @@ mixin PsbtInputImpl on PsbtBuilderImpl {
     return _finalizeInputTx();
   }
 
-  PsbtFinalizeParams _generateFinalizeParams(
-      {required int index, required List<TxInput> txInputs}) {
+  PsbtFinalizeParams _generateFinalizeParams({
+    required int index,
+    required List<TxInput> txInputs,
+  }) {
     final inputData = psbtInput(index);
     return PsbtFinalizeParams(index: index, inputData: inputData);
   }
@@ -191,10 +198,14 @@ mixin PsbtInputImpl on PsbtBuilderImpl {
       final input = finalTx.inputs[i];
       final finalizedScriptSig = _psbt.input
           .getInput<PsbtInputFinalizedScriptSig>(
-              i, PsbtInputTypes.finalizedScriptSig);
+            i,
+            PsbtInputTypes.finalizedScriptSig,
+          );
       final finalizedWitness = _psbt.input
           .getInput<PsbtInputFinalizedScriptWitness>(
-              i, PsbtInputTypes.finalizedWitness);
+            i,
+            PsbtInputTypes.finalizedWitness,
+          );
       if (finalizedScriptSig != null) {
         input.scriptSig = finalizedScriptSig.finalizedScriptSig;
       }

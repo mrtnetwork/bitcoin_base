@@ -195,8 +195,11 @@ void main() {
     for (final i in bitcoinCashAddresses.keys.toList()) {
       final info = Map.from(bitcoinCashAddresses[i]!);
       const network = BitcoinCashNetwork.mainnet;
-      final address =
-          BitcoinCashAddress(i, network: network, validateNetworkPrefix: false);
+      final address = BitcoinCashAddress(
+        i,
+        network: network,
+        validateNetworkPrefix: false,
+      );
       expect(address.baseAddress.addressProgram, info['programBytes']);
       final hrp = i.substring(0, i.indexOf(':'));
       expect(i, address.toAddress(network, hrp));

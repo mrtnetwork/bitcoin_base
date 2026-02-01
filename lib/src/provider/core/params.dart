@@ -2,13 +2,14 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// Represents details of an Electrum request, including id, method, and parameters.
 class ElectrumRequestDetails extends BaseServiceRequestParams {
-  const ElectrumRequestDetails(
-      {required super.requestID,
-      this.path,
-      required this.method,
-      required this.params,
-      required super.type,
-      super.headers = ServiceConst.defaultPostHeaders});
+  const ElectrumRequestDetails({
+    required super.requestID,
+    this.path,
+    required this.method,
+    required this.params,
+    required super.type,
+    super.headers = ServiceConst.defaultPostHeaders,
+  });
 
   final String? path;
   final String method;
@@ -30,10 +31,7 @@ class ElectrumRequestDetails extends BaseServiceRequestParams {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'method': method,
-      'body': params,
-    };
+    return {'method': method, 'body': params};
   }
 
   @override
@@ -53,12 +51,16 @@ abstract class ElectrumRequest<RESULT, RESPONSE>
     final inJson = toJson();
     inJson.removeWhere((v) => v == null);
     final params = ServiceProviderUtils.buildJsonRPCParams(
-        requestId: requestID, method: method, params: inJson);
+      requestId: requestID,
+      method: method,
+      params: inJson,
+    );
     return ElectrumRequestDetails(
-        requestID: requestID,
-        params: params,
-        method: method,
-        type: RequestServiceType.post);
+      requestID: requestID,
+      params: params,
+      method: method,
+      type: RequestServiceType.post,
+    );
   }
 
   @override

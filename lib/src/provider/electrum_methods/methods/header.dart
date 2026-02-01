@@ -4,8 +4,10 @@ import 'package:bitcoin_base/src/provider/core/params.dart';
 /// Return the block header at the given height.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
 class ElectrumRequestBlockHeader extends ElectrumRequest<dynamic, dynamic> {
-  ElectrumRequestBlockHeader(
-      {required this.startHeight, required this.cpHeight});
+  ElectrumRequestBlockHeader({
+    required this.startHeight,
+    required this.cpHeight,
+  });
   final int startHeight;
   final int cpHeight;
 

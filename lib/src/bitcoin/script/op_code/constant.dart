@@ -1,6 +1,97 @@
 import 'package:blockchain_utils/helper/extensions/extensions.dart';
 
-enum BitcoinOpcode {
+abstract class BaseBitcoinOpcode {
+  abstract final String name;
+  abstract final int value;
+  static BaseBitcoinOpcode? findByName(String name) {
+    final operations = BitcoinOpcode.findByName(name);
+    if (operations != null) return operations;
+    final bad = BadBitcoinOpcode.findByName(name);
+    if (bad != null) return bad;
+    return DisabledBitcoinOpcode.findByName(name);
+  }
+
+  static BaseBitcoinOpcode? findByValue(int value) {
+    final operations = BitcoinOpcode.findByValue(value);
+    if (operations != null) return operations;
+    final bad = BadBitcoinOpcode.findByValue(value);
+    if (bad != null) return bad;
+    return DisabledBitcoinOpcode.findByValue(value);
+  }
+
+  bool get isOpPushData => false;
+  @override
+  String toString() {
+    return name;
+  }
+}
+
+enum BadBitcoinOpcode implements BaseBitcoinOpcode {
+  opReserved("OP_RESERVED", 0x50),
+  opReserved1("OP_RESERVED1", 0x89),
+  opReserved2("OP_RESERVED2", 0x8a),
+  opVer("OP_VER", 0x62),
+  opVerif("OP_VERIF", 0x65),
+  opVernotif("OP_VERNOTIF", 0x66);
+
+  @override
+  final String name;
+  @override
+  final int value;
+
+  const BadBitcoinOpcode(this.name, this.value);
+
+  static BadBitcoinOpcode? findByName(String name) {
+    return values.firstWhereNullable((e) => e.name == name);
+  }
+
+  static BadBitcoinOpcode? findByValue(int value) {
+    return values.firstWhereNullable((e) => e.value == value);
+  }
+
+  @override
+  bool get isOpPushData => false;
+}
+
+enum DisabledBitcoinOpcode implements BaseBitcoinOpcode {
+  opCat("OP_CAT", 0x7e),
+  opSubstr("OP_SUBSTR", 0x7f),
+  opLeft("OP_LEFT", 0x80),
+  opRight("OP_RIGHT", 0x81),
+  opInvert("OP_INVERT", 0x83),
+  opAnd("OP_AND", 0x84),
+  opOr("OP_OR", 0x85),
+  opXor("OP_XOR", 0x86),
+
+  op2Mul("OP_2MUL", 0x8d),
+  op2Div("OP_2DIV", 0x8e),
+
+  opMul("OP_MUL", 0x95),
+  opDiv("OP_DIV", 0x96),
+  opMod("OP_MOD", 0x97),
+  opLshift("OP_LSHIFT", 0x98),
+  opRshift("OP_RSHIFT", 0x99);
+
+  @override
+  final String name;
+  @override
+  final int value;
+
+  const DisabledBitcoinOpcode(this.name, this.value);
+
+  static DisabledBitcoinOpcode? findByName(String name) {
+    return values.firstWhereNullable((e) => e.name == name);
+  }
+
+  static DisabledBitcoinOpcode? findByValue(int value) {
+    return values.firstWhereNullable((e) => e.value == value);
+  }
+
+  @override
+  bool get isOpPushData => false;
+}
+
+enum BitcoinOpcode implements BaseBitcoinOpcode {
   op0("OP_0", 0x00),
   opFalse("OP_FALSE", 0x00),
   opPushData1("OP_PUSHDATA1", 0x4c),
@@ -93,9 +184,19 @@ enum BitcoinOpcode {
   opCheckMultiSigVerify("OP_CHECKMULTISIGVERIFY", 0xaf),
   opCheckSigAdd("OP_CHECKSIGADD", 0xba),
   opCheckLockTimeVerify("OP_CHECKLOCKTIMEVERIFY", 0xb1),
-  opCheckSequenceVerify("OP_CHECKSEQUENCEVERIFY", 0xb2);
+  opCheckSequenceVerify("OP_CHECKSEQUENCEVERIFY", 0xb2),
+  opNop1("OP_NOP1", 0xb0),
+  opNop4("OP_NOP4", 0xb3),
+  opNop5("OP_NOP5", 0xb4),
+  opNop6("OP_NOP6", 0xb5),
+  opNop7("OP_NOP7", 0xb6),
+  opNop8("OP_NOP8", 0xb7),
+  opNop9("OP_NOP9", 0xb8),
+  opNop10("OP_NOP10", 0xb9);
 
+  @override
   final String name;
+  @override
   final int value;
 
   const BitcoinOpcode(this.name, this.value);
@@ -108,6 +209,7 @@ enum BitcoinOpcode {
     return values.firstWhereNullable((e) => e.value == value);
   }
 
+  @override
   bool get isOpPushData =>
       this == BitcoinOpcode.opPushData1 ||
       this == BitcoinOpcode.opPushData2 ||
@@ -134,6 +236,7 @@ class BitcoinOpCodeConst {
   static const int sighashTest = 0x00000041;
   static const int sighashNone = 0x02;
   static const int sighashDefault = 0x00;
+  static const int sighashMask = 0x1F;
 
   static const int sighashAllAnyOneCanPay = 0x81;
   static const int sighashNoneAnyOneCanPay = 0x82;

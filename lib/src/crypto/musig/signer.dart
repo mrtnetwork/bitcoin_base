@@ -8,6 +8,8 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// A signer class for MuSig2, handling key aggregation, nonce generation,
 /// signing, and partial signature aggregation.
 class Musig2Signer {
+  final Musig2Bsae lib;
+
   /// A list of private keys for signing. This can be empty for public-only operations.
   final List<ECPrivate> privateKeys;
 
@@ -21,16 +23,21 @@ class Musig2Signer {
   Musig2Signer._({
     required List<ECPrivate> privateKeys,
     required List<ECPublic> publicKeys,
+    required this.lib,
     required this.aggPublicKey,
-  })  : privateKeys = privateKeys.immutable,
-        publicKeys = publicKeys.immutable;
+  }) : privateKeys = privateKeys.immutable,
+       publicKeys = publicKeys.immutable;
 
   /// Generates a new `Musig2Signer` instance by aggregating the provided public keys.
   ///
   /// - If `sortKeys` is `true`, the public keys will be lexicographically sorted before aggregation.
   /// - If `privateKeys` are provided, they will be used for signing.
-  factory Musig2Signer.generate(List<ECPublic> publicKeys,
-      {List<ECPrivate> privateKeys = const [], bool sortKeys = false}) {
+  factory Musig2Signer.generate(
+    List<ECPublic> publicKeys, {
+    List<ECPrivate> privateKeys = const [],
+    bool sortKeys = false,
+    Musig2Bsae lib = const Musig2Const(),
+  }) {
     List<List<int>> publicKeysBytes =
         publicKeys.map((e) => e.toBytes(mode: PubKeyModes.compressed)).toList();
 
@@ -38,13 +45,15 @@ class Musig2Signer {
       publicKeysBytes = MuSig2Utils.sortPublicKeys(publicKeysBytes);
     }
 
-    final aggKey = MuSig2.aggPublicKeys(keys: publicKeysBytes);
+    final aggKey = lib.aggPublicKeys(keys: publicKeysBytes);
 
     return Musig2Signer._(
+      lib: lib,
       privateKeys: privateKeys,
-      publicKeys: sortKeys
-          ? publicKeysBytes.map((e) => ECPublic.fromBytes(e)).toList()
-          : publicKeys,
+      publicKeys:
+          sortKeys
+              ? publicKeysBytes.map((e) => ECPublic.fromBytes(e)).toList()
+              : publicKeys,
       aggPublicKey: ECPublic.fromBytes(aggKey.publicKey.toBytes()),
     );
   }
@@ -54,7 +63,9 @@ class Musig2Signer {
   /// - If a `scriptTree` is provided, it will be included in the Taproot address.
   P2trAddress toAddress({TaprootTree? scriptTree}) {
     return P2trAddress.fromInternalKey(
-        internalKey: aggPublicKey.toXOnly(), treeScript: scriptTree);
+      internalKey: aggPublicKey.toXOnly(),
+      treeScript: scriptTree,
+    );
   }
 
   /// Generates a list of MuSig2 nonces for signing.
@@ -64,20 +75,24 @@ class Musig2Signer {
   /// - `aggPubKey` is the aggregate public key.
   /// - `msg` is the message being signed.
   /// - `extra` is additional data used in nonce generation.
-  List<MuSig2Nonce> generateNonces(
-      {List<int>? rand,
-      List<int>? sk,
-      List<int>? aggPubKey,
-      List<int>? msg,
-      List<int>? extra}) {
+  List<MuSig2Nonce> generateNonces({
+    List<int>? rand,
+    List<int>? sk,
+    List<int>? aggPubKey,
+    List<int>? msg,
+    List<int>? extra,
+  }) {
     return publicKeys
-        .map((e) => MuSig2.nonceGenerate(
+        .map(
+          (e) => lib.nonceGenerate(
             publicKey: e.toBytes(mode: PubKeyModes.compressed),
             aggPubKey: aggPubKey,
             extra: extra,
             msg: msg,
             rand: rand,
-            sk: sk))
+            sk: sk,
+          ),
+        )
         .toList();
   }
 
@@ -91,24 +106,27 @@ class Musig2Signer {
   /// - `extra`: Optional additional data to include in the nonce generation.
   ///
   /// Returns a `MuSig2Nonce` object containing the generated nonce data.
-  MuSig2Nonce generateNonce(ECPublic publicKey,
-      {List<int>? rand,
-      List<int>? sk,
-      List<int>? aggPubKey,
-      List<int>? msg,
-      List<int>? extra}) {
-    return MuSig2.nonceGenerate(
-        publicKey: publicKey.toBytes(mode: PubKeyModes.compressed),
-        aggPubKey: aggPubKey,
-        extra: extra,
-        msg: msg,
-        rand: rand,
-        sk: sk);
+  MuSig2Nonce generateNonce(
+    ECPublic publicKey, {
+    List<int>? rand,
+    List<int>? sk,
+    List<int>? aggPubKey,
+    List<int>? msg,
+    List<int>? extra,
+  }) {
+    return lib.nonceGenerate(
+      publicKey: publicKey.toBytes(mode: PubKeyModes.compressed),
+      aggPubKey: aggPubKey,
+      extra: extra,
+      msg: msg,
+      rand: rand,
+      sk: sk,
+    );
   }
 
   /// Aggregates multiple MuSig2 nonces into a single aggregated nonce.
   List<int> aggNonce(List<MuSig2Nonce> nonces) {
-    return MuSig2.nonceAgg(nonces.map((e) => e.pubnonce).toList());
+    return lib.nonceAgg(nonces.map((e) => e.pubnonce).toList());
   }
 
   /// Signs a message using the provided MuSig2 secret nonces.
@@ -118,47 +136,60 @@ class Musig2Signer {
   /// - Returns a list of partial signatures.
   ///
   /// Throws an exception if a corresponding private key is not found.
-  List<List<int>> partialSign(
-      {required List<MuSig2Nonce> secNonces,
-      required List<int> message,
-      List<int>? merkleRoot,
-      TaprootTree? treeScript,
-      bool tweak = true,
-      List<ECPrivate> extraKeys = const []}) {
+  List<List<int>> partialSign({
+    required List<MuSig2Nonce> secNonces,
+    required List<int> message,
+    List<int>? merkleRoot,
+    TaprootTree? treeScript,
+    bool tweak = true,
+    List<ECPrivate> extraKeys = const [],
+  }) {
     final aggNonce = this.aggNonce(secNonces);
     final session = MuSig2Session(
-        aggnonce: aggNonce,
-        publicKeys: publicKeys
-            .map((e) => e.toBytes(mode: PubKeyModes.compressed))
-            .toList(),
-        msg: message,
-        tweaks: [
-          if (tweak)
-            MuSig2Tweak(
-                tweak: TaprootUtils.calculateTweek(aggPublicKey.toXOnly(),
-                    treeScript: merkleRoot != null ? null : treeScript,
-                    merkleRoot: merkleRoot))
-        ]);
+      aggnonce: aggNonce,
+      publicKeys:
+          publicKeys
+              .map((e) => e.toBytes(mode: PubKeyModes.compressed))
+              .toList(),
+      msg: message,
+      tweaks: [
+        if (tweak)
+          MuSig2Tweak(
+            tweak: TaprootUtils.calculateTweek(
+              aggPublicKey.toXOnly(),
+              treeScript: merkleRoot != null ? null : treeScript,
+              merkleRoot: merkleRoot,
+            ),
+          ),
+      ],
+    );
     List<List<int>> signatures = [];
     final privateKeys = [...this.privateKeys, ...extraKeys];
     for (final i in secNonces) {
       final pubKey = publicKeys.firstWhere(
         (e) => e.point == i.publicKey,
-        orElse: () => throw DartBitcoinPluginException(
-            "Unable to find nonce public key in MuSig2 public keys."),
+        orElse:
+            () =>
+                throw DartBitcoinPluginException(
+                  "Unable to find nonce public key in MuSig2 public keys.",
+                ),
       );
 
       final key = privateKeys.firstWhere(
         (e) => e.prive.publicKey.point == pubKey.point,
         orElse: () {
           throw DartBitcoinPluginException(
-              "Unable to find private key for the given public nonce.",
-              details: {"publicKey": pubKey.toHex()});
+            "Unable to find private key for the given public nonce.",
+            details: {"publicKey": pubKey.toHex()},
+          );
         },
       );
 
-      final sig = MuSig2.sign(
-          secnonce: i.secnonce, sk: key.toBytes(), session: session);
+      final sig = lib.sign(
+        secnonce: i.secnonce,
+        sk: key.toBytes(),
+        session: session,
+      );
       signatures.add(sig);
     }
 
@@ -172,31 +203,39 @@ class Musig2Signer {
   /// - `message`: The message that was signed.
   ///
   /// Returns the final aggregated signature.
-  List<int> aggSigs(
-      {required List<List<int>> signatures,
-      required List<MuSig2Nonce> secNonces,
-      required List<int> message,
-      int? sighash = BitcoinOpCodeConst.sighashDefault,
-      List<int>? merkleRoot,
-      TaprootTree? treeScript,
-      bool tweak = true,
-      List<ECPrivate> extraKeys = const []}) {
+  List<int> aggSigs({
+    required List<List<int>> signatures,
+    required List<MuSig2Nonce> secNonces,
+    required List<int> message,
+    int? sighash = BitcoinOpCodeConst.sighashDefault,
+    List<int>? merkleRoot,
+    TaprootTree? treeScript,
+    bool tweak = true,
+    List<ECPrivate> extraKeys = const [],
+  }) {
     final aggNonce = this.aggNonce(secNonces);
     final session = MuSig2Session(
-        aggnonce: aggNonce,
-        tweaks: [
-          if (tweak)
-            MuSig2Tweak(
-                tweak: TaprootUtils.calculateTweek(aggPublicKey.toXOnly(),
-                    treeScript: merkleRoot != null ? null : treeScript,
-                    merkleRoot: merkleRoot))
-        ],
-        publicKeys: publicKeys
-            .map((e) => e.toBytes(mode: PubKeyModes.compressed))
-            .toList(),
-        msg: message);
-    final aggSignature =
-        MuSig2.partialSigAgg(signatures: signatures, session: session);
+      aggnonce: aggNonce,
+      tweaks: [
+        if (tweak)
+          MuSig2Tweak(
+            tweak: TaprootUtils.calculateTweek(
+              aggPublicKey.toXOnly(),
+              treeScript: merkleRoot != null ? null : treeScript,
+              merkleRoot: merkleRoot,
+            ),
+          ),
+      ],
+      publicKeys:
+          publicKeys
+              .map((e) => e.toBytes(mode: PubKeyModes.compressed))
+              .toList(),
+      msg: message,
+    );
+    final aggSignature = lib.partialSigAgg(
+      signatures: signatures,
+      session: session,
+    );
     if (sighash != null && sighash != BitcoinOpCodeConst.sighashDefault) {
       return [...aggSignature, sighash];
     }
@@ -219,19 +258,21 @@ class Musig2Signer {
   }) {
     final nonces = generateNonces();
     final signatures = partialSign(
-        secNonces: nonces,
-        message: digest,
-        merkleRoot: merkleRoot,
-        treeScript: treeScript,
-        tweak: tweak,
-        extraKeys: extraKeys);
+      secNonces: nonces,
+      message: digest,
+      merkleRoot: merkleRoot,
+      treeScript: treeScript,
+      tweak: tweak,
+      extraKeys: extraKeys,
+    );
     return aggSigs(
-        signatures: signatures,
-        secNonces: nonces,
-        message: digest,
-        merkleRoot: merkleRoot,
-        treeScript: treeScript,
-        tweak: tweak);
+      signatures: signatures,
+      secNonces: nonces,
+      message: digest,
+      merkleRoot: merkleRoot,
+      treeScript: treeScript,
+      tweak: tweak,
+    );
   }
 
   /// Verifies a MuSig2 partial signature.
@@ -243,23 +284,27 @@ class Musig2Signer {
   /// - `digest`: The message digest that was signed.
   ///
   /// Returns `true` if the partial signature is valid, otherwise `false`.
-  bool partialSigVerify(
-      {required List<int> signature,
-      required List<int> pubNonce,
-      required ECPublic publicKey,
-      required List<int> aggNonce,
-      required List<int> digest}) {
+  bool partialSigVerify({
+    required List<int> signature,
+    required List<int> pubNonce,
+    required ECPublic publicKey,
+    required List<int> aggNonce,
+    required List<int> digest,
+  }) {
     final session = MuSig2Session(
-        aggnonce: aggNonce,
-        publicKeys: publicKeys
-            .map((e) => e.toBytes(mode: PubKeyModes.compressed))
-            .toList(),
-        msg: digest);
+      aggnonce: aggNonce,
+      publicKeys:
+          publicKeys
+              .map((e) => e.toBytes(mode: PubKeyModes.compressed))
+              .toList(),
+      msg: digest,
+    );
 
-    return MuSig2.partialSigVerify(
-        signature: signature,
-        pubnonce: pubNonce,
-        pk: publicKey.toBytes(mode: PubKeyModes.compressed),
-        session: session);
+    return lib.partialSigVerify(
+      signature: signature,
+      pubnonce: pubNonce,
+      pk: publicKey.toBytes(mode: PubKeyModes.compressed),
+      session: session,
+    );
   }
 }

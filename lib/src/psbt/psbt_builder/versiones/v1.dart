@@ -9,31 +9,41 @@ class PsbtBuilderV0 extends PsbtBuilder {
   }
 
   /// Creates a new `PsbtBuilderV0` instance with default values for the transaction locktime and version.
-  factory PsbtBuilderV0.create(
-      {List<int> txLocktime = BitcoinOpCodeConst.defaultTxLocktime,
-      List<int> txVersion = BitcoinOpCodeConst.defaultTxVersion}) {
+  factory PsbtBuilderV0.create({
+    List<int> txLocktime = BitcoinOpCodeConst.defaultTxLocktime,
+    List<int> txVersion = BitcoinOpCodeConst.defaultTxVersion,
+  }) {
     final version = PsbtVersion.v0;
-    return PsbtBuilderV0._(Psbt(
-        global: PsbtGlobal(entries: [
-          PsbtGlobalPSBTVersionNumber(version),
-          PsbtGlobalUnsignedTransaction(
-              BtcTransaction(locktime: txLocktime, version: txVersion))
-        ], version: version),
+    return PsbtBuilderV0._(
+      Psbt(
+        global: PsbtGlobal(
+          entries: [
+            PsbtGlobalPSBTVersionNumber(version),
+            PsbtGlobalUnsignedTransaction(
+              BtcTransaction(locktime: txLocktime, version: txVersion),
+            ),
+          ],
+          version: version,
+        ),
         input: PsbtInput(version: version),
-        output: PsbtOutput(version: version)));
+        output: PsbtOutput(version: version),
+      ),
+    );
   }
 
-  BtcTransaction get _tx => _psbt.global.entries
-      .whereType<PsbtGlobalUnsignedTransaction>()
-      .first
-      .transaction;
+  BtcTransaction get _tx =>
+      _psbt.global.entries
+          .whereType<PsbtGlobalUnsignedTransaction>()
+          .first
+          .transaction;
   @override
   TxInput txInput(int index) {
     final unsignedTx = _tx;
     PsbtUtils.validateTxInputs(
-        psbInput: _psbt.input,
-        inputIndex: index,
-        inputsLength: unsignedTx.inputs.length);
+      psbInput: _psbt.input,
+      inputIndex: index,
+      inputsLength: unsignedTx.inputs.length,
+    );
     return _tx.inputs[index];
   }
 
@@ -133,7 +143,8 @@ class PsbtBuilderV0 extends PsbtBuilder {
     _psbt.input.addInputs(input.toPsbtInputs(psbtVersion));
     BtcTransaction tx = _tx;
     final locktime = PsbtUtils.buildTransactionLocktime(
-        inputs: [...tx.inputs, input.txInput]);
+      inputs: [...tx.inputs, input.txInput],
+    );
     tx = tx.copyWith(inputs: [...tx.inputs, input.txInput], locktime: locktime);
     _updateUnsignedTx(tx);
   }

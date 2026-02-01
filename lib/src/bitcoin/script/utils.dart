@@ -28,14 +28,18 @@ enum ScriptPubKeyType {
 
 class BitcoinScriptUtils {
   static Script buildOpReturn(List<List<int>> data) {
-    return Script(script: [
-      BitcoinOpcode.opReturn,
-      ...data.map((e) => BytesUtils.toHexString(e))
-    ]);
+    return Script(
+      script: [
+        BitcoinOpcode.opReturn,
+        ...data.map((e) => BytesUtils.toHexString(e)),
+      ],
+    );
   }
 
-  static bool scriptContains(
-      {required Script script, required List<dynamic> elements}) {
+  static bool scriptContains({
+    required Script script,
+    required List<dynamic> elements,
+  }) {
     if (elements.length != script.script.length) return false;
     for (int i = 0; i < script.script.length; i++) {
       final element = elements[i];
@@ -53,13 +57,16 @@ class BitcoinScriptUtils {
   }
 
   static bool isP2pkh(Script script) {
-    if (scriptContains(script: script, elements: [
-      BitcoinOpcode.opDup,
-      BitcoinOpcode.opHash160,
-      null,
-      BitcoinOpcode.opEqualVerify,
-      BitcoinOpcode.opCheckSig
-    ])) {
+    if (scriptContains(
+      script: script,
+      elements: [
+        BitcoinOpcode.opDup,
+        BitcoinOpcode.opHash160,
+        null,
+        BitcoinOpcode.opEqualVerify,
+        BitcoinOpcode.opCheckSig,
+      ],
+    )) {
       final addressProgram = script.script[2];
       return (addressProgram is String && addressProgram.length == 40);
     }
@@ -68,8 +75,9 @@ class BitcoinScriptUtils {
 
   static bool isP2sh(Script script) {
     if (scriptContains(
-        script: script,
-        elements: [BitcoinOpcode.opHash160, null, BitcoinOpcode.opEqual])) {
+      script: script,
+      elements: [BitcoinOpcode.opHash160, null, BitcoinOpcode.opEqual],
+    )) {
       final pubKeyBytes = BytesUtils.tryFromHexString(script.script[1]);
       return pubKeyBytes?.length == P2shAddressType.p2pkInP2sh.hashLength;
     }
@@ -78,8 +86,9 @@ class BitcoinScriptUtils {
 
   static bool isP2sh32(Script script) {
     if (scriptContains(
-        script: script,
-        elements: [BitcoinOpcode.opHash256, null, BitcoinOpcode.opEqual])) {
+      script: script,
+      elements: [BitcoinOpcode.opHash256, null, BitcoinOpcode.opEqual],
+    )) {
       final pubKeyBytes = BytesUtils.tryFromHexString(script.script[1]);
       return pubKeyBytes?.length == P2shAddressType.p2pkhInP2sh32.hashLength;
     }
@@ -88,7 +97,9 @@ class BitcoinScriptUtils {
 
   static bool isP2pk(Script script) {
     if (scriptContains(
-        script: script, elements: [null, BitcoinOpcode.opCheckSig])) {
+      script: script,
+      elements: [null, BitcoinOpcode.opCheckSig],
+    )) {
       final pubKeyBytes = BytesUtils.tryFromHexString(script.script[0]);
       return pubKeyBytes?.length == EcdsaKeysConst.pubKeyCompressedByteLen ||
           pubKeyBytes?.length == EcdsaKeysConst.pubKeyUncompressedByteLen;
@@ -114,8 +125,9 @@ class BitcoinScriptUtils {
 
   static bool isRipemd160(Script script) {
     if (scriptContains(
-        script: script,
-        elements: [BitcoinOpcode.opRipemd160, null, BitcoinOpcode.opEqual])) {
+      script: script,
+      elements: [BitcoinOpcode.opRipemd160, null, BitcoinOpcode.opEqual],
+    )) {
       final toBytes = BytesUtils.tryFromHexString(script.script[1]);
       return toBytes?.length == QuickCrypto.hash160DigestSize;
     }
@@ -124,8 +136,9 @@ class BitcoinScriptUtils {
 
   static bool isSha256(Script script) {
     if (scriptContains(
-        script: script,
-        elements: [BitcoinOpcode.opSha256, null, BitcoinOpcode.opEqual])) {
+      script: script,
+      elements: [BitcoinOpcode.opSha256, null, BitcoinOpcode.opEqual],
+    )) {
       final toBytes = BytesUtils.tryFromHexString(script.script[1]);
       return toBytes?.length == QuickCrypto.sha256DigestSize;
     }
@@ -134,8 +147,9 @@ class BitcoinScriptUtils {
 
   static bool isHash256(Script script) {
     if (scriptContains(
-        script: script,
-        elements: [BitcoinOpcode.opHash256, null, BitcoinOpcode.opEqual])) {
+      script: script,
+      elements: [BitcoinOpcode.opHash256, null, BitcoinOpcode.opEqual],
+    )) {
       final toBytes = BytesUtils.tryFromHexString(script.script[1]);
       return toBytes?.length == QuickCrypto.sha256DigestSize;
     }
@@ -144,8 +158,9 @@ class BitcoinScriptUtils {
 
   static bool isHash160(Script script) {
     if (scriptContains(
-        script: script,
-        elements: [BitcoinOpcode.opHash160, null, BitcoinOpcode.opEqual])) {
+      script: script,
+      elements: [BitcoinOpcode.opHash160, null, BitcoinOpcode.opEqual],
+    )) {
       final toBytes = BytesUtils.tryFromHexString(script.script[1]);
       return toBytes?.length == QuickCrypto.hash160DigestSize;
     }
@@ -162,7 +177,9 @@ class BitcoinScriptUtils {
 
   static bool isXOnlyOpChecksig(Script script) {
     if (scriptContains(
-        script: script, elements: [null, BitcoinOpcode.opCheckSig])) {
+      script: script,
+      elements: [null, BitcoinOpcode.opCheckSig],
+    )) {
       final xOnlyKey = BytesUtils.tryFromHexString(script.script[0]);
       return xOnlyKey?.length == EcdsaKeysConst.pointCoordByteLen;
     }
@@ -201,7 +218,9 @@ class BitcoinScriptUtils {
 
   static bool isPubKeyOpCheckSig(Script script) {
     if (scriptContains(
-        script: script, elements: [null, BitcoinOpcode.opCheckSig])) {
+      script: script,
+      elements: [null, BitcoinOpcode.opCheckSig],
+    )) {
       final pubKeyBytes = BytesUtils.tryFromHexString(script.script[0]);
       return pubKeyBytes?.length == EcdsaKeysConst.pubKeyCompressedByteLen ||
           pubKeyBytes?.length == EcdsaKeysConst.pubKeyUncompressedByteLen;
@@ -347,7 +366,9 @@ class BitcoinScriptUtils {
       address = P2shAddress.fromHash160(addrHash: script.script[1]);
     } else if (BitcoinScriptUtils.isP2sh32(script)) {
       address = P2shAddress.fromHash160(
-          addrHash: script.script[1], type: P2shAddressType.p2pkInP2sh32);
+        addrHash: script.script[1],
+        type: P2shAddressType.p2pkInP2sh32,
+      );
     } else if (BitcoinScriptUtils.isP2wsh(script)) {
       address = P2wshAddress.fromProgram(program: script.script[1]);
     } else if (BitcoinScriptUtils.isP2tr(script)) {
@@ -355,7 +376,8 @@ class BitcoinScriptUtils {
     }
     if (address == null || address.toScriptPubKey() != script) {
       throw DartBitcoinPluginException(
-          "Unknown scriptPubKey: Unable to generate a valid address.");
+        "Unknown scriptPubKey: Unable to generate a valid address.",
+      );
     }
     return address;
   }
@@ -371,26 +393,34 @@ class BitcoinScriptUtils {
   static List<int> opPushData(List<int> dataBytes) {
     if (dataBytes.length < BitcoinOpCodeConst.opPushData1) {
       return [dataBytes.length, ...dataBytes];
-    } else if (dataBytes.length < mask8) {
+    } else if (dataBytes.length < BinaryOps.mask8) {
       return [BitcoinOpCodeConst.opPushData1, dataBytes.length, ...dataBytes];
-    } else if (dataBytes.length < mask16) {
-      final lengthBytes = IntUtils.toBytes(dataBytes.length,
-          length: 2, byteOrder: Endian.little);
+    } else if (dataBytes.length < BinaryOps.mask16) {
+      final lengthBytes = IntUtils.toBytes(
+        dataBytes.length,
+        length: 2,
+        byteOrder: Endian.little,
+      );
       return [BitcoinOpCodeConst.opPushData2, ...lengthBytes, ...dataBytes];
-    } else if (dataBytes.length < mask32) {
-      final lengthBytes = IntUtils.toBytes(dataBytes.length,
-          length: 4, byteOrder: Endian.little);
+    } else if (dataBytes.length < BinaryOps.mask32) {
+      final lengthBytes = IntUtils.toBytes(
+        dataBytes.length,
+        length: 4,
+        byteOrder: Endian.little,
+      );
       return [BitcoinOpCodeConst.opPushData4, ...lengthBytes, ...dataBytes];
     } else {
       throw const DartBitcoinPluginException(
-          'Data too large. Cannot push into script');
+        'Data too large. Cannot push into script',
+      );
     }
   }
 
   static List<int> pushInteger(int integer) {
     if (integer < 0) {
       throw const DartBitcoinPluginException(
-          'Integer is currently required to be positive.');
+        'Integer is currently required to be positive.',
+      );
     }
 
     /// Calculate the number of bytes required to represent the integer
@@ -399,7 +429,7 @@ class BitcoinScriptUtils {
     /// Convert to little-endian bytes
     List<int> integerBytes = List<int>.filled(numberOfBytes, 0);
     for (var i = 0; i < numberOfBytes; i++) {
-      integerBytes[i] = (integer >> (i * 8)) & mask8;
+      integerBytes[i] = (integer >> (i * 8)) & BinaryOps.mask8;
     }
 
     /// If the last bit is set, add a sign byte to signify a positive integer

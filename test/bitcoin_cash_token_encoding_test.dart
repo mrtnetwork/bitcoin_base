@@ -9,8 +9,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '1',
       'category':
-          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-    }
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    },
   },
   {
     'prefix':
@@ -18,8 +18,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '1',
       'category':
-          '1234000000000000000000000000000000000000000000000000000000004321'
-    }
+          '1234000000000000000000000000000000000000000000000000000000004321',
+    },
   },
   {
     'prefix':
@@ -27,8 +27,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '1',
       'category':
-          '1234567890000000000000000000000000000000000000000000000987654321'
-    }
+          '1234567890000000000000000000000000000000000000000000000987654321',
+    },
   },
   {
     'prefix':
@@ -36,8 +36,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '1',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -45,8 +45,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '252',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -54,8 +54,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '253',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -63,8 +63,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '65535',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -72,8 +72,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '65536',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -81,8 +81,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '65537',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -90,8 +90,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '4294967295',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -99,8 +99,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '4294967296',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -108,8 +108,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '4294967297',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -117,8 +117,8 @@ final List<Map<String, dynamic>> _validTestVector = [
     'data': {
       'amount': '9223372036854775807',
       'category':
-          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
-    }
+          'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
   },
   {
     'prefix':
@@ -127,8 +127,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '0',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'none'}
-    }
+      'nft': {'commitment': '', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -137,8 +137,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '1',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'none'}
-    }
+      'nft': {'commitment': '', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -147,8 +147,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '252',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'none'}
-    }
+      'nft': {'commitment': '', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -157,8 +157,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '253',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'none'}
-    }
+      'nft': {'commitment': '', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -167,8 +167,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '65535',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'none'}
-    }
+      'nft': {'commitment': '', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -177,8 +177,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '65536',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'none'}
-    }
+      'nft': {'commitment': '', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -187,8 +187,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '4294967295',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'none'}
-    }
+      'nft': {'commitment': '', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -197,8 +197,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '4294967296',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'none'}
-    }
+      'nft': {'commitment': '', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -207,8 +207,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '9223372036854775807',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'none'}
-    }
+      'nft': {'commitment': '', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -217,8 +217,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '0',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -227,8 +227,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '0',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '1234567890', 'capability': 'none'}
-    }
+      'nft': {'commitment': '1234567890', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -237,8 +237,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '1',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -247,8 +247,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '252',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -257,8 +257,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '253',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -267,8 +267,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '65535',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -277,8 +277,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '65536',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -287,8 +287,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '4294967295',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -297,8 +297,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '4294967296',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -307,8 +307,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '9223372036854775807',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
@@ -317,13 +317,13 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '65535',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cccccccccccccccccccc', 'capability': 'none'}
-    }
+      'nft': {'commitment': 'cccccccccccccccccccc', 'capability': 'none'},
+    },
   },
   {
     'prefix':
         'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb7028cccccccccccccccccccccccccccccc'
-            'ccccccccccccccccccccccccccccccccccccccccccccccccccfe00000100',
+        'ccccccccccccccccccccccccccccccccccccccccccccccccccfe00000100',
     'data': {
       'amount': '65536',
       'category':
@@ -331,14 +331,14 @@ final List<Map<String, dynamic>> _validTestVector = [
       'nft': {
         'commitment':
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'none'
-      }
-    }
+        'capability': 'none',
+      },
+    },
   },
   {
     'prefix':
         'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb7029cccccccccccccccccccccccccccccc'
-            'ccccccccccccccccccccccccccccccccccccccccccccccccccccfe00000100',
+        'ccccccccccccccccccccccccccccccccccccccccccccccccccccfe00000100',
     'data': {
       'amount': '65536',
       'category':
@@ -346,12 +346,13 @@ final List<Map<String, dynamic>> _validTestVector = [
       'nft': {
         'commitment':
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'none'
-      }
-    }
+        'capability': 'none',
+      },
+    },
   },
   {
-    'prefix': 'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb60fdfd00cccccccccccccccccccccccccc'
+    'prefix':
+        'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb60fdfd00cccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
@@ -362,18 +363,20 @@ final List<Map<String, dynamic>> _validTestVector = [
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       'nft': {
-        'commitment': 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+        'commitment':
+            'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'none'
-      }
-    }
+        'capability': 'none',
+      },
+    },
   },
   {
-    'prefix': 'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb70fdfd00cccccccccccccccccccccccccc'
+    'prefix':
+        'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb70fdfd00cccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
@@ -384,18 +387,20 @@ final List<Map<String, dynamic>> _validTestVector = [
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       'nft': {
-        'commitment': 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+        'commitment':
+            'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'none'
-      }
-    }
+        'capability': 'none',
+      },
+    },
   },
   {
-    'prefix': 'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb70fde903cccccccccccccccccccccccccc'
+    'prefix':
+        'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb70fde903cccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
@@ -421,7 +426,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       'nft': {
-        'commitment': 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+        'commitment':
+            'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
@@ -444,9 +450,9 @@ final List<Map<String, dynamic>> _validTestVector = [
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'none'
-      }
-    }
+        'capability': 'none',
+      },
+    },
   },
   {
     'prefix':
@@ -455,8 +461,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '0',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'mutable'}
-    }
+      'nft': {'commitment': '', 'capability': 'mutable'},
+    },
   },
   {
     'prefix':
@@ -465,8 +471,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '4294967295',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'mutable'}
-    }
+      'nft': {'commitment': '', 'capability': 'mutable'},
+    },
   },
   {
     'prefix':
@@ -475,8 +481,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '0',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'mutable'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'mutable'},
+    },
   },
   {
     'prefix':
@@ -485,8 +491,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '4294967296',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'mutable'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'mutable'},
+    },
   },
   {
     'prefix':
@@ -495,8 +501,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '9223372036854775807',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cccc', 'capability': 'mutable'}
-    }
+      'nft': {'commitment': 'cccc', 'capability': 'mutable'},
+    },
   },
   {
     'prefix':
@@ -505,13 +511,13 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '1',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cccccccccccccccccccc', 'capability': 'mutable'}
-    }
+      'nft': {'commitment': 'cccccccccccccccccccc', 'capability': 'mutable'},
+    },
   },
   {
     'prefix':
         'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb7128cccccccccccccccccccccccccccccc'
-            'ccccccccccccccccccccccccccccccccccccccccccccccccccfc',
+        'ccccccccccccccccccccccccccccccccccccccccccccccccccfc',
     'data': {
       'amount': '252',
       'category':
@@ -519,14 +525,14 @@ final List<Map<String, dynamic>> _validTestVector = [
       'nft': {
         'commitment':
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'mutable'
-      }
-    }
+        'capability': 'mutable',
+      },
+    },
   },
   {
     'prefix':
         'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb7129cccccccccccccccccccccccccccccc'
-            'ccccccccccccccccccccccccccccccccccccccccccccccccccccfc',
+        'ccccccccccccccccccccccccccccccccccccccccccccccccccccfc',
     'data': {
       'amount': '252',
       'category':
@@ -534,12 +540,13 @@ final List<Map<String, dynamic>> _validTestVector = [
       'nft': {
         'commitment':
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'mutable'
-      }
-    }
+        'capability': 'mutable',
+      },
+    },
   },
   {
-    'prefix': 'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb71fdfd00cccccccccccccccccccccccccc'
+    'prefix':
+        'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb71fdfd00cccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
@@ -550,15 +557,16 @@ final List<Map<String, dynamic>> _validTestVector = [
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       'nft': {
-        'commitment': 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+        'commitment':
+            'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'mutable'
-      }
-    }
+        'capability': 'mutable',
+      },
+    },
   },
   {
     'prefix':
@@ -567,8 +575,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '0',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'minting'}
-    }
+      'nft': {'commitment': '', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
@@ -577,8 +585,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '1',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'minting'}
-    }
+      'nft': {'commitment': '', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
@@ -587,8 +595,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '253',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'minting'}
-    }
+      'nft': {'commitment': '', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
@@ -597,8 +605,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '65536',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'minting'}
-    }
+      'nft': {'commitment': '', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
@@ -607,8 +615,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '4294967296',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'minting'}
-    }
+      'nft': {'commitment': '', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
@@ -617,8 +625,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '9223372036854775807',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': '', 'capability': 'minting'}
-    }
+      'nft': {'commitment': '', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
@@ -627,13 +635,13 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '0',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'minting'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
         'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb6229cccccccccccccccccccccccccccccc'
-            'cccccccccccccccccccccccccccccccccccccccccccccccccccc',
+        'cccccccccccccccccccccccccccccccccccccccccccccccccccc',
     'data': {
       'amount': '0',
       'category':
@@ -641,9 +649,9 @@ final List<Map<String, dynamic>> _validTestVector = [
       'nft': {
         'commitment':
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'minting'
-      }
-    }
+        'capability': 'minting',
+      },
+    },
   },
   {
     'prefix':
@@ -652,8 +660,8 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '65535',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cc', 'capability': 'minting'}
-    }
+      'nft': {'commitment': 'cc', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
@@ -662,24 +670,24 @@ final List<Map<String, dynamic>> _validTestVector = [
       'amount': '65536',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cccc', 'capability': 'minting'}
-    }
+      'nft': {'commitment': 'cccc', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
         'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb720accccccccccccccccccccff01000000'
-            '01000000',
+        '01000000',
     'data': {
       'amount': '4294967297',
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-      'nft': {'commitment': 'cccccccccccccccccccc', 'capability': 'minting'}
-    }
+      'nft': {'commitment': 'cccccccccccccccccccc', 'capability': 'minting'},
+    },
   },
   {
     'prefix':
         'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb7228cccccccccccccccccccccccccccccc'
-            'ccccccccccccccccccccccccccccccccccccccccccccccccccffffffffffffffff7f',
+        'ccccccccccccccccccccccccccccccccccccccccccccccccccffffffffffffffff7f',
     'data': {
       'amount': '9223372036854775807',
       'category':
@@ -687,14 +695,14 @@ final List<Map<String, dynamic>> _validTestVector = [
       'nft': {
         'commitment':
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'minting'
-      }
-    }
+        'capability': 'minting',
+      },
+    },
   },
   {
     'prefix':
         'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb7229cccccccccccccccccccccccccccccc'
-            'ccccccccccccccccccccccccccccccccccccccccccccccccccccffffffffffffffff7f',
+        'ccccccccccccccccccccccccccccccccccccccccccccccccccccffffffffffffffff7f',
     'data': {
       'amount': '9223372036854775807',
       'category':
@@ -702,12 +710,13 @@ final List<Map<String, dynamic>> _validTestVector = [
       'nft': {
         'commitment':
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'minting'
-      }
-    }
+        'capability': 'minting',
+      },
+    },
   },
   {
-    'prefix': 'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb62fdfd00cccccccccccccccccccccccccc'
+    'prefix':
+        'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb62fdfd00cccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
@@ -718,18 +727,20 @@ final List<Map<String, dynamic>> _validTestVector = [
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       'nft': {
-        'commitment': 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+        'commitment':
+            'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'minting'
-      }
-    }
+        'capability': 'minting',
+      },
+    },
   },
   {
-    'prefix': 'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb72fdfd00cccccccccccccccccccccccccc'
+    'prefix':
+        'efbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb72fdfd00cccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
         'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
@@ -740,16 +751,17 @@ final List<Map<String, dynamic>> _validTestVector = [
       'category':
           'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       'nft': {
-        'commitment': 'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
+        'commitment':
+            'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc'
             'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
-        'capability': 'minting'
-      }
-    }
-  }
+        'capability': 'minting',
+      },
+    },
+  },
 ];
 void main() {
   test('cash token encoding', () {
@@ -765,12 +777,12 @@ void main() {
           data['nft'] == null ? null : Map<String, dynamic>.from(data['nft']);
       final capability =
           nft == null ? null : CashTokenCapability.fromName(nft['capability']);
-      final commitment = BytesUtils.toHexString(decode.item1!.commitment);
-      expect(capability, decode.item1!.capability);
-      expect(decode.item1?.toHex(), i['prefix']!);
+      final commitment = BytesUtils.toHexString(decode.$1!.commitment);
+      expect(capability, decode.$1!.capability);
+      expect(decode.$1?.toHex(), i['prefix']!);
       expect(commitment, (nft?['commitment'] ?? ''));
-      expect(amount, decode.item1!.amount);
-      expect(combine.sublist(decode.item2), appendBytes);
+      expect(amount, decode.$1!.amount);
+      expect(combine.sublist(decode.$2), appendBytes);
     }
   });
 }

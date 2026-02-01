@@ -78,21 +78,22 @@ class APIConfig {
         break;
       default:
         throw DartBitcoinPluginException(
-            'blockcypher does not support ${network.conf.coinName.name}, u must use your own provider');
+          'blockcypher does not support ${network.conf.coinName.name}, u must use your own provider',
+        );
     }
 
     return APIConfig(
-        url:
-            '$baseUrl/addrs/###/?unspentOnly=true&includeScript=true&limit=2000',
-        feeRate: baseUrl,
-        transaction: '$baseUrl/txs/###',
-        rawTransaction: '$baseUrl/txs/###',
-        sendTransaction: '$baseUrl/txs/push',
-        apiType: APIType.blockCypher,
-        transactions: '$baseUrl/addrs/###/full?limit=200',
-        network: network,
-        blockHeight: '$baseUrl/blocks/###',
-        latestBlockHeight: "$baseUrl/");
+      url: '$baseUrl/addrs/###/?unspentOnly=true&includeScript=true&limit=2000',
+      feeRate: baseUrl,
+      transaction: '$baseUrl/txs/###',
+      rawTransaction: '$baseUrl/txs/###',
+      sendTransaction: '$baseUrl/txs/push',
+      apiType: APIType.blockCypher,
+      transactions: '$baseUrl/addrs/###/full?limit=200',
+      network: network,
+      blockHeight: '$baseUrl/blocks/###',
+      latestBlockHeight: "$baseUrl/",
+    );
   }
 
   factory APIConfig.mempool(BasedUtxoNetwork network, {String? baseUrl}) {
@@ -111,31 +112,34 @@ class APIConfig {
         break;
       default:
         throw DartBitcoinPluginException(
-            'mempool does not support ${network.conf.coinName.name}');
+          'mempool does not support ${network.conf.coinName.name}',
+        );
     }
 
     return APIConfig(
-        url: '$baseUrl/address/###/utxo',
-        feeRate: '$baseUrl/v1/fees/recommended',
-        transaction: '$baseUrl/tx/###',
-        rawTransaction: '$baseUrl/tx/###/hex',
-        sendTransaction: '$baseUrl/tx',
-        apiType: APIType.mempool,
-        transactions: '$baseUrl/address/###/txs',
-        network: network,
-        blockHeight: '$baseUrl/block-height/###',
-        latestBlockHeight: "$baseUrl/blocks/tip/height");
+      url: '$baseUrl/address/###/utxo',
+      feeRate: '$baseUrl/v1/fees/recommended',
+      transaction: '$baseUrl/tx/###',
+      rawTransaction: '$baseUrl/tx/###/hex',
+      sendTransaction: '$baseUrl/tx',
+      apiType: APIType.mempool,
+      transactions: '$baseUrl/address/###/txs',
+      network: network,
+      blockHeight: '$baseUrl/block-height/###',
+      latestBlockHeight: "$baseUrl/blocks/tip/height",
+    );
   }
 
-  APIConfig(
-      {required this.url,
-      required this.feeRate,
-      required this.transaction,
-      required this.transactions,
-      required this.sendTransaction,
-      required this.apiType,
-      required this.network,
-      required this.blockHeight,
-      required this.rawTransaction,
-      required this.latestBlockHeight});
+  APIConfig({
+    required this.url,
+    required this.feeRate,
+    required this.transaction,
+    required this.transactions,
+    required this.sendTransaction,
+    required this.apiType,
+    required this.network,
+    required this.blockHeight,
+    required this.rawTransaction,
+    required this.latestBlockHeight,
+  });
 }

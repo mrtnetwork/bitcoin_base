@@ -8,14 +8,14 @@ import 'package:bitcoin_base/src/psbt/types/types/types.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 typedef ONBTCSIGNER = PsbtSignerResponse? Function(PsbtSignerParams);
-typedef ONBTCSIGNERASYNC<INPUT extends PsbtTransactionInput>
-    = Future<PsbtSignerResponse?> Function(PsbtSignerParams);
-typedef ONUPDATEPSBTINPUT<INPUT extends PsbtTransactionInput> = INPUT Function(
-    INPUT);
-typedef ONFINALIZEINPUT<INPUT extends PsbtTransactionInput>
-    = PsbtFinalizeResponse? Function(PsbtFinalizeParams params);
-typedef ONFINALIZEINPUTASYNC<INPUT extends PsbtTransactionInput>
-    = Future<PsbtFinalizeResponse>? Function(PsbtFinalizeParams);
+typedef ONBTCSIGNERASYNC<INPUT extends PsbtTransactionInput> =
+    Future<PsbtSignerResponse?> Function(PsbtSignerParams);
+typedef ONUPDATEPSBTINPUT<INPUT extends PsbtTransactionInput> =
+    INPUT Function(INPUT);
+typedef ONFINALIZEINPUT<INPUT extends PsbtTransactionInput> =
+    PsbtFinalizeResponse? Function(PsbtFinalizeParams params);
+typedef ONFINALIZEINPUTASYNC<INPUT extends PsbtTransactionInput> =
+    Future<PsbtFinalizeResponse>? Function(PsbtFinalizeParams);
 
 class PsbtTransactionInput {
   final TxInput txInput;
@@ -42,13 +42,13 @@ class PsbtTransactionInput {
   final List<PsbtInputTaprootScriptSpendSignature>? taprootScriptSpendSignature;
   final PsbtInputTaprootMerkleRoot? taprootMerkleRoot;
   final List<PsbtInputTaprootKeyBip32DerivationPath>?
-      taprootKeyBip32DerivationPath;
+  taprootKeyBip32DerivationPath;
 
   // MuSig2 (Optional, for multisig Taproot)
   final List<PsbtInputMuSig2ParticipantPublicKeys>? muSig2ParticipantPublicKeys;
   final List<PsbtInputMuSig2PublicNonce>? muSig2PublicNonce;
   final List<PsbtInputMuSig2ParticipantPartialSignature>?
-      muSig2ParticipantPartialSignature;
+  muSig2ParticipantPartialSignature;
 
   // Optional (hashes & commitments)
   final PsbtInputPorCommitments? porCommitments;
@@ -117,89 +117,99 @@ class PsbtTransactionInput {
     }
   }
 
-  PsbtTransactionInput._(
-      {required this.txInput,
-      required this.address,
-      required this.scriptPubKey,
-      this.sigHashType,
-      this.nonWitnessUtxo,
-      this.witnessUtxo,
-      this.redeemScript,
-      this.witnessScript,
-      this.bip32derivationPath,
-      this.taprootInternalKey,
-      this.taprootLeafScript,
-      this.taprootKeySpendSignature,
-      this.taprootScriptSpendSignature,
-      this.taprootMerkleRoot,
-      this.taprootKeyBip32DerivationPath,
-      this.muSig2ParticipantPublicKeys,
-      this.muSig2PublicNonce,
-      this.muSig2ParticipantPartialSignature,
-      this.porCommitments,
-      this.ripemd160,
-      this.sha256,
-      this.hash160,
-      this.hash256,
-      this.proprietaryUseType,
-      this.partialSigs,
-      this.finalizedScriptSig,
-      this.finalizedScriptWitness,
-      this.silentPaymentInputDLEQProof,
-      this.silentPaymentInputECDHShare});
-  factory PsbtTransactionInput.legacy(
-      {required int outIndex,
-      required String txId,
-      List<int>? sequence,
-      Script? scriptPubKey,
-      Script? redeemScript,
-      BitcoinBaseAddress? address,
-      int? sigHashType,
-      BtcTransaction? nonWitnessUtxo,
-      BigInt? amount,
-      List<PsbtInputBip32DerivationPath>? bip32derivationPath,
-      PsbtInputPorCommitments? porCommitments,
-      List<PsbtInputRipemd160>? ripemd160,
-      List<PsbtInputSha256>? sha256,
-      List<PsbtInputHash160>? hash160,
-      List<PsbtInputHash256>? hash256,
-      List<PsbtInputProprietaryUseType>? proprietaryUseType,
-      List<PsbtInputPartialSig>? partialSigs,
-      PsbtInputFinalizedScriptSig? finalizedScriptSig}) {
+  PsbtTransactionInput._({
+    required this.txInput,
+    required this.address,
+    required this.scriptPubKey,
+    this.sigHashType,
+    this.nonWitnessUtxo,
+    this.witnessUtxo,
+    this.redeemScript,
+    this.witnessScript,
+    this.bip32derivationPath,
+    this.taprootInternalKey,
+    this.taprootLeafScript,
+    this.taprootKeySpendSignature,
+    this.taprootScriptSpendSignature,
+    this.taprootMerkleRoot,
+    this.taprootKeyBip32DerivationPath,
+    this.muSig2ParticipantPublicKeys,
+    this.muSig2PublicNonce,
+    this.muSig2ParticipantPartialSignature,
+    this.porCommitments,
+    this.ripemd160,
+    this.sha256,
+    this.hash160,
+    this.hash256,
+    this.proprietaryUseType,
+    this.partialSigs,
+    this.finalizedScriptSig,
+    this.finalizedScriptWitness,
+    this.silentPaymentInputDLEQProof,
+    this.silentPaymentInputECDHShare,
+  });
+  factory PsbtTransactionInput.legacy({
+    required int outIndex,
+    required String txId,
+    List<int>? sequence,
+    Script? scriptPubKey,
+    Script? redeemScript,
+    BitcoinBaseAddress? address,
+    int? sigHashType,
+    BtcTransaction? nonWitnessUtxo,
+    BigInt? amount,
+    List<PsbtInputBip32DerivationPath>? bip32derivationPath,
+    PsbtInputPorCommitments? porCommitments,
+    List<PsbtInputRipemd160>? ripemd160,
+    List<PsbtInputSha256>? sha256,
+    List<PsbtInputHash160>? hash160,
+    List<PsbtInputHash256>? hash256,
+    List<PsbtInputProprietaryUseType>? proprietaryUseType,
+    List<PsbtInputPartialSig>? partialSigs,
+    PsbtInputFinalizedScriptSig? finalizedScriptSig,
+  }) {
     scriptPubKey ??= address?.toScriptPubKey();
     if (nonWitnessUtxo == null) {
       throw DartBitcoinPluginException("Missing input non-witness UTXOs.");
     }
     nonWitnessUtxo = PsbtUtils.cleanUpAndValidateNonUtxoWitness(
-        transaction: nonWitnessUtxo, outIndex: outIndex, txId: txId);
+      transaction: nonWitnessUtxo,
+      outIndex: outIndex,
+      txId: txId,
+    );
 
     final output = nonWitnessUtxo.outputs[outIndex];
     if (scriptPubKey != null && output.scriptPubKey != scriptPubKey) {
       throw DartBitcoinPluginException(
-          "Mismatch detected: The provided scriptPubKey does not match the nonWitnessUtxo output scriptPubKey.");
+        "Mismatch detected: The provided scriptPubKey does not match the nonWitnessUtxo output scriptPubKey.",
+      );
     }
     final type = PsbtUtils.findScriptType(output.scriptPubKey);
     if (type.isP2tr) {
       throw DartBitcoinPluginException(
-          "Incorrect legacy scriptPubKey. Use `witnessV1` constractor instead of `legacy` for taproot spending.",
-          details: {"type": type.name});
+        "Incorrect legacy scriptPubKey. Use `witnessV1` constractor instead of `legacy` for taproot spending.",
+        details: {"type": type.name},
+      );
     }
     if (type.isSegwit) {
       throw DartBitcoinPluginException(
-          "Incorrect legacy scriptPubKey. Use `witnessV0` constractor instead of `legacy` for segwit spending.",
-          details: {"type": type.name});
+        "Incorrect legacy scriptPubKey. Use `witnessV0` constractor instead of `legacy` for segwit spending.",
+        details: {"type": type.name},
+      );
     }
     if (type.isP2sh) {
       if (redeemScript == null) {
         throw DartBitcoinPluginException(
-            "redeemScript is required to spend P2SH scripts.",
-            details: {"script": scriptPubKey?.script.join(", ")});
+          "redeemScript is required to spend P2SH scripts.",
+          details: {"script": scriptPubKey?.script.join(", ")},
+        );
       }
       if (BitcoinScriptUtils.isP2wsh(redeemScript) ||
           BitcoinScriptUtils.isP2wpkh(redeemScript)) {
         throw DartBitcoinPluginException(
-            "Incorrect legacy scriptPubKey. Use `witnessV1` constractor instead of `legacy` for nested segwit p2sh spending.",
-            details: {"type": type.name});
+          "Incorrect legacy scriptPubKey. Use `witnessV1` constractor instead of `legacy` for nested segwit p2sh spending.",
+          details: {"type": type.name},
+        );
       }
       P2shAddress addr;
       if (type.isP2sh32) {
@@ -208,29 +218,33 @@ class PsbtTransactionInput {
         addr = P2shAddress.fromScript(script: redeemScript);
       }
       if (addr.toScriptPubKey() != output.scriptPubKey) {
-        throw DartBitcoinPluginException("Incorrect redeem script.",
-            details: {"type": type.name});
+        throw DartBitcoinPluginException(
+          "Incorrect redeem script.",
+          details: {"type": type.name},
+        );
       }
     }
-    address ??=
-        BitcoinScriptUtils.generateAddressFromScriptPubKey(output.scriptPubKey);
+    address ??= BitcoinScriptUtils.generateAddressFromScriptPubKey(
+      output.scriptPubKey,
+    );
     return PsbtTransactionInput._(
-        txInput: TxInput(txId: txId, txIndex: outIndex, sequance: sequence),
-        sigHashType: sigHashType == null ? null : PsbtInputSigHash(sigHashType),
-        nonWitnessUtxo: PsbtInputNonWitnessUtxo(nonWitnessUtxo),
-        redeemScript:
-            redeemScript == null ? null : PsbtInputRedeemScript(redeemScript),
-        bip32derivationPath: bip32derivationPath,
-        porCommitments: porCommitments,
-        ripemd160: ripemd160,
-        sha256: sha256,
-        hash160: hash160,
-        hash256: hash256,
-        proprietaryUseType: proprietaryUseType,
-        partialSigs: partialSigs,
-        finalizedScriptSig: finalizedScriptSig,
-        scriptPubKey: output.scriptPubKey,
-        address: address);
+      txInput: TxInput(txId: txId, txIndex: outIndex, sequance: sequence),
+      sigHashType: sigHashType == null ? null : PsbtInputSigHash(sigHashType),
+      nonWitnessUtxo: PsbtInputNonWitnessUtxo(nonWitnessUtxo),
+      redeemScript:
+          redeemScript == null ? null : PsbtInputRedeemScript(redeemScript),
+      bip32derivationPath: bip32derivationPath,
+      porCommitments: porCommitments,
+      ripemd160: ripemd160,
+      sha256: sha256,
+      hash160: hash160,
+      hash256: hash256,
+      proprietaryUseType: proprietaryUseType,
+      partialSigs: partialSigs,
+      finalizedScriptSig: finalizedScriptSig,
+      scriptPubKey: output.scriptPubKey,
+      address: address,
+    );
   }
 
   /// **Factory method with validation**
@@ -249,7 +263,7 @@ class PsbtTransactionInput {
     List<PsbtInputMuSig2ParticipantPublicKeys>? muSig2ParticipantPublicKeys,
     List<PsbtInputMuSig2PublicNonce>? muSig2PublicNonce,
     List<PsbtInputMuSig2ParticipantPartialSignature>?
-        muSig2ParticipantPartialSignature,
+    muSig2ParticipantPartialSignature,
     PsbtInputPorCommitments? porCommitments,
     List<PsbtInputRipemd160>? ripemd160,
     List<PsbtInputSha256>? sha256,
@@ -264,26 +278,32 @@ class PsbtTransactionInput {
     if (nonWitnessUtxo == null) {
       if (scriptPubKey == null || amount == null) {
         throw DartBitcoinPluginException(
-            "either 'nonWitnessUtxo' or both scriptPubKey and amount required.");
+          "either 'nonWitnessUtxo' or both scriptPubKey and amount required.",
+        );
       }
     }
 
     if (nonWitnessUtxo != null) {
       nonWitnessUtxo = PsbtUtils.cleanUpAndValidateNonUtxoWitness(
-          transaction: nonWitnessUtxo, outIndex: outIndex, txId: txId);
+        transaction: nonWitnessUtxo,
+        outIndex: outIndex,
+        txId: txId,
+      );
 
       final output = nonWitnessUtxo.outputs[outIndex];
       if (scriptPubKey != null) {
         if (scriptPubKey != output.scriptPubKey) {
           throw DartBitcoinPluginException(
-              "Mismatch between scriptPubKey and nonWitnessUtxo output scriptPubKey.");
+            "Mismatch between scriptPubKey and nonWitnessUtxo output scriptPubKey.",
+          );
         }
       }
       scriptPubKey ??= output.scriptPubKey;
       amount ??= output.amount;
       if (amount != output.amount) {
         throw DartBitcoinPluginException(
-            "Mismatch between amount and nonWitnessUtxo output amount.");
+          "Mismatch between amount and nonWitnessUtxo output amount.",
+        );
       }
     }
     final type = PsbtUtils.findScriptType(scriptPubKey!);
@@ -293,78 +313,92 @@ class PsbtTransactionInput {
       }
       if (redeemScript == null) {
         throw DartBitcoinPluginException(
-            "RedeemScript required for type P2SH.");
+          "RedeemScript required for type P2SH.",
+        );
       }
       final p2shAddress = P2shAddress.fromScript(script: redeemScript);
       if (p2shAddress.toScriptPubKey() != scriptPubKey) {
         throw DartBitcoinPluginException(
-            "Mismatched scriptPubKey: The provided scriptPubKey does not match the one derived from the RedeemScript.");
+          "Mismatched scriptPubKey: The provided scriptPubKey does not match the one derived from the RedeemScript.",
+        );
       }
       if (witnessScript != null) {
         final addr = P2wshAddress.fromScript(script: witnessScript);
-        P2shAddress p2shAddress =
-            P2shAddress.fromScript(script: addr.toScriptPubKey());
+        P2shAddress p2shAddress = P2shAddress.fromScript(
+          script: addr.toScriptPubKey(),
+        );
         if (p2shAddress.toScriptPubKey() != scriptPubKey) {
           throw DartBitcoinPluginException(
-              "Mismatched scriptPubKey: The provided scriptPubKey does not match the one derived from the WitnessScript.");
+            "Mismatched scriptPubKey: The provided scriptPubKey does not match the one derived from the WitnessScript.",
+          );
         }
       }
     } else if (type.isP2tr) {
       throw DartBitcoinPluginException(
-          "Use addP2trInput instead addWitnessV0Input for p2tr scriptPubKey.");
+        "Use addP2trInput instead addWitnessV0Input for p2tr scriptPubKey.",
+      );
     } else if (!type.isSegwit) {
       throw DartBitcoinPluginException(
-          "Invalid segwit scriptPubKey. type: ${type.name}");
+        "Invalid segwit scriptPubKey. type: ${type.name}",
+      );
     } else {
       if (redeemScript != null) {
         throw DartBitcoinPluginException(
-            "RedeemScript cannot be used to spend P2WPKH.");
+          "RedeemScript cannot be used to spend P2WPKH.",
+        );
       }
     }
     if (type == ScriptPubKeyType.p2wsh) {
       if (witnessScript == null) {
         throw DartBitcoinPluginException(
-            "WitnessScript is required for P2WSH scriptPubKey.");
+          "WitnessScript is required for P2WSH scriptPubKey.",
+        );
       }
       final addr = P2wshAddress.fromScript(script: witnessScript);
       if (addr.toScriptPubKey() != scriptPubKey) {
         throw DartBitcoinPluginException(
-            "Mismatched scriptPubKey: The provided scriptPubKey does not match the one derived from the WitnessScript.");
+          "Mismatched scriptPubKey: The provided scriptPubKey does not match the one derived from the WitnessScript.",
+        );
       }
     } else if (!type.isP2sh && witnessScript != null) {
       throw DartBitcoinPluginException(
-          "WitnessScript cannot be used to spend P2WPKH.");
+        "WitnessScript cannot be used to spend P2WPKH.",
+      );
     }
-    address ??=
-        BitcoinScriptUtils.generateAddressFromScriptPubKey(scriptPubKey);
+    address ??= BitcoinScriptUtils.generateAddressFromScriptPubKey(
+      scriptPubKey,
+    );
     return PsbtTransactionInput._(
-        txInput: TxInput(txId: txId, txIndex: outIndex, sequance: sequence),
-        sigHashType: sigHashType == null ? null : PsbtInputSigHash(sigHashType),
-        nonWitnessUtxo: nonWitnessUtxo == null
-            ? null
-            : PsbtInputNonWitnessUtxo(nonWitnessUtxo),
-        witnessUtxo:
-            PsbtInputWitnessUtxo(amount: amount!, scriptPubKey: scriptPubKey),
-        redeemScript:
-            redeemScript == null ? null : PsbtInputRedeemScript(redeemScript),
-        witnessScript: witnessScript == null
-            ? null
-            : PsbtInputWitnessScript(witnessScript),
-        bip32derivationPath: bip32derivationPath,
-        muSig2ParticipantPublicKeys: muSig2ParticipantPublicKeys,
-        muSig2PublicNonce: muSig2PublicNonce,
-        muSig2ParticipantPartialSignature: muSig2ParticipantPartialSignature,
-        porCommitments: porCommitments,
-        ripemd160: ripemd160,
-        sha256: sha256,
-        hash160: hash160,
-        hash256: hash256,
-        proprietaryUseType: proprietaryUseType,
-        finalizedScriptSig: finalizedScriptSig,
-        partialSigs: partialSigs,
-        finalizedScriptWitness: finalizedScriptWitness,
+      txInput: TxInput(txId: txId, txIndex: outIndex, sequance: sequence),
+      sigHashType: sigHashType == null ? null : PsbtInputSigHash(sigHashType),
+      nonWitnessUtxo:
+          nonWitnessUtxo == null
+              ? null
+              : PsbtInputNonWitnessUtxo(nonWitnessUtxo),
+      witnessUtxo: PsbtInputWitnessUtxo(
+        amount: amount!,
         scriptPubKey: scriptPubKey,
-        address: address);
+      ),
+      redeemScript:
+          redeemScript == null ? null : PsbtInputRedeemScript(redeemScript),
+      witnessScript:
+          witnessScript == null ? null : PsbtInputWitnessScript(witnessScript),
+      bip32derivationPath: bip32derivationPath,
+      muSig2ParticipantPublicKeys: muSig2ParticipantPublicKeys,
+      muSig2PublicNonce: muSig2PublicNonce,
+      muSig2ParticipantPartialSignature: muSig2ParticipantPartialSignature,
+      porCommitments: porCommitments,
+      ripemd160: ripemd160,
+      sha256: sha256,
+      hash160: hash160,
+      hash256: hash256,
+      proprietaryUseType: proprietaryUseType,
+      finalizedScriptSig: finalizedScriptSig,
+      partialSigs: partialSigs,
+      finalizedScriptWitness: finalizedScriptWitness,
+      scriptPubKey: scriptPubKey,
+      address: address,
+    );
   }
 
   /// **Factory method with validation**
@@ -389,7 +423,7 @@ class PsbtTransactionInput {
     List<PsbtInputMuSig2ParticipantPublicKeys>? muSig2ParticipantPublicKeys,
     List<PsbtInputMuSig2PublicNonce>? muSig2PublicNonce,
     List<PsbtInputMuSig2ParticipantPartialSignature>?
-        muSig2ParticipantPartialSignature,
+    muSig2ParticipantPartialSignature,
     PsbtInputPorCommitments? porCommitments,
     List<PsbtInputRipemd160>? ripemd160,
     List<PsbtInputSha256>? sha256,
@@ -403,165 +437,222 @@ class PsbtTransactionInput {
     if (nonWitnessUtxo == null) {
       if (scriptPubKey == null || amount == null) {
         throw DartBitcoinPluginException(
-            "either 'nonWitnessUtxo' or both scriptPubKey and amount required.");
+          "either 'nonWitnessUtxo' or both scriptPubKey and amount required.",
+        );
       }
     }
     if (nonWitnessUtxo != null) {
       nonWitnessUtxo = PsbtUtils.cleanUpAndValidateNonUtxoWitness(
-          transaction: nonWitnessUtxo, outIndex: outIndex, txId: txId);
+        transaction: nonWitnessUtxo,
+        outIndex: outIndex,
+        txId: txId,
+      );
       final output = nonWitnessUtxo.outputs[outIndex];
       if (scriptPubKey != null) {
         if (scriptPubKey != output.scriptPubKey) {
           throw DartBitcoinPluginException(
-              "Mismatch between scriptPubKey and nonWitnessUtxo output scriptPubKey.");
+            "Mismatch between scriptPubKey and nonWitnessUtxo output scriptPubKey.",
+          );
         }
       }
       scriptPubKey ??= output.scriptPubKey;
       amount ??= output.amount;
       if (amount != output.amount) {
         throw DartBitcoinPluginException(
-            "Mismatch between amount and nonWitnessUtxo output amount.");
+          "Mismatch between amount and nonWitnessUtxo output amount.",
+        );
       }
     }
 
     final type = PsbtUtils.findScriptType(scriptPubKey!);
     if (!type.isP2tr) {
       throw DartBitcoinPluginException(
-          "Invalid P2TR scriptPubKey detected: ${type.name}.");
+        "Invalid P2TR scriptPubKey detected: ${type.name}.",
+      );
     }
     xOnlyOrInternalPubKey ??= merkleProof?.controlBlock.xOnly;
 
     if (xOnlyOrInternalPubKey == null) {
       throw DartBitcoinPluginException(
-          "xOnlyOrInternalPubKey is required for spending Taproot UTXOs but was not found.");
+        "xOnlyOrInternalPubKey is required for spending Taproot UTXOs but was not found.",
+      );
     }
     xOnlyOrInternalPubKey = TaprootUtils.toXOnly(xOnlyOrInternalPubKey);
-    final isScriptPath = leafScript != null ||
+    final isScriptPath =
+        leafScript != null ||
         treeScript != null ||
         merkleProof != null ||
         merkleRoot != null;
     if (merkleRoot != null) {
       final addr = P2trAddress.fromInternalKey(
-          internalKey: xOnlyOrInternalPubKey, merkleRoot: merkleRoot);
+        internalKey: xOnlyOrInternalPubKey,
+        merkleRoot: merkleRoot,
+      );
       if (addr.toScriptPubKey() != scriptPubKey) {
         throw DartBitcoinPluginException(
-            "Mismatch between scriptPubKey and the one derived from x-only key and merkle root.");
+          "Mismatch between scriptPubKey and the one derived from x-only key and merkle root.",
+        );
       }
     }
     List<PsbtInputTaprootLeafScript>? leafScripts;
     if (isScriptPath) {
       if (merkleProof == null && treeScript == null) {
         throw DartBitcoinPluginException(
-            "Script path spending requires merkleProof. Provide merkleProof or treeScript to generate all possible proofs.");
+          "Script path spending requires merkleProof. Provide merkleProof or treeScript to generate all possible proofs.",
+        );
       }
       if (merkleRoot == null && treeScript == null) {
         throw DartBitcoinPluginException(
-            "Script path spending requires merkleRoot. Provide merkleRoot or treeScript to generate one.");
+          "Script path spending requires merkleRoot. Provide merkleRoot or treeScript to generate one.",
+        );
       }
       merkleRoot ??= treeScript!.hash();
       if (merkleProof == null && leafScript != null) {
         merkleProof = TapLeafMerkleProof.generate(
-            xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
-            leafScript: leafScript,
-            scriptTree: treeScript!);
+          xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
+          leafScript: leafScript,
+          scriptTree: treeScript!,
+        );
       }
       if (merkleProof != null) {
         leafScripts = [
           PsbtInputTaprootLeafScript(
-              controllBlock: merkleProof.controlBlock.toBytes(),
-              script: merkleProof.script.script,
-              leafVersion: merkleProof.script.leafVersion)
+            controllBlock: merkleProof.controlBlock.toBytes(),
+            script: merkleProof.script.script,
+            leafVersion: merkleProof.script.leafVersion,
+          ),
         ];
       } else {
         final leafs = TaprootUtils.generateAllPossibleProofs(
-            xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
-            treeScript: treeScript!);
-        leafScripts = leafs
-            .map((e) => PsbtInputTaprootLeafScript(
-                controllBlock: e.controlBlock.toBytes(),
-                script: e.script.script,
-                leafVersion: e.script.leafVersion))
-            .toList();
+          xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
+          treeScript: treeScript!,
+        );
+        leafScripts =
+            leafs
+                .map(
+                  (e) => PsbtInputTaprootLeafScript(
+                    controllBlock: e.controlBlock.toBytes(),
+                    script: e.script.script,
+                    leafVersion: e.script.leafVersion,
+                  ),
+                )
+                .toList();
       }
     }
-    address ??=
-        BitcoinScriptUtils.generateAddressFromScriptPubKey(scriptPubKey);
+    address ??= BitcoinScriptUtils.generateAddressFromScriptPubKey(
+      scriptPubKey,
+    );
     return PsbtTransactionInput._(
+      scriptPubKey: scriptPubKey,
+      txInput: TxInput(txId: txId, txIndex: outIndex, sequance: sequence),
+      witnessUtxo: PsbtInputWitnessUtxo(
+        amount: amount!,
         scriptPubKey: scriptPubKey,
-        txInput: TxInput(txId: txId, txIndex: outIndex, sequance: sequence),
-        witnessUtxo:
-            PsbtInputWitnessUtxo(amount: amount!, scriptPubKey: scriptPubKey),
-        bip32derivationPath: bip32derivationPath,
-        taprootInternalKey: PsbtInputTaprootInternalKey(xOnlyOrInternalPubKey),
-        taprootLeafScript: leafScripts,
-        taprootKeySpendSignature: taprootKeySpendSignature,
-        taprootScriptSpendSignature: taprootScriptSpendSignature,
-        taprootMerkleRoot:
-            merkleRoot == null ? null : PsbtInputTaprootMerkleRoot(merkleRoot),
-        taprootKeyBip32DerivationPath: taprootKeyBip32DerivationPath,
-        muSig2ParticipantPublicKeys: muSig2ParticipantPublicKeys,
-        muSig2PublicNonce: muSig2PublicNonce,
-        muSig2ParticipantPartialSignature: muSig2ParticipantPartialSignature,
-        porCommitments: porCommitments,
-        ripemd160: ripemd160,
-        sha256: sha256,
-        sigHashType: sigHashType == null ? null : PsbtInputSigHash(sigHashType),
-        hash160: hash160,
-        hash256: hash256,
-        proprietaryUseType: proprietaryUseType,
-        silentPaymentInputDLEQProof: silentPaymentInputDLEQProof,
-        silentPaymentInputECDHShare: silentPaymentInputECDHShare,
-        address: address);
+      ),
+      bip32derivationPath: bip32derivationPath,
+      taprootInternalKey: PsbtInputTaprootInternalKey(xOnlyOrInternalPubKey),
+      taprootLeafScript: leafScripts,
+      taprootKeySpendSignature: taprootKeySpendSignature,
+      taprootScriptSpendSignature: taprootScriptSpendSignature,
+      taprootMerkleRoot:
+          merkleRoot == null ? null : PsbtInputTaprootMerkleRoot(merkleRoot),
+      taprootKeyBip32DerivationPath: taprootKeyBip32DerivationPath,
+      muSig2ParticipantPublicKeys: muSig2ParticipantPublicKeys,
+      muSig2PublicNonce: muSig2PublicNonce,
+      muSig2ParticipantPartialSignature: muSig2ParticipantPartialSignature,
+      porCommitments: porCommitments,
+      ripemd160: ripemd160,
+      sha256: sha256,
+      sigHashType: sigHashType == null ? null : PsbtInputSigHash(sigHashType),
+      hash160: hash160,
+      hash256: hash256,
+      proprietaryUseType: proprietaryUseType,
+      silentPaymentInputDLEQProof: silentPaymentInputDLEQProof,
+      silentPaymentInputECDHShare: silentPaymentInputECDHShare,
+      address: address,
+    );
   }
-  factory PsbtTransactionInput.generateFromInput(
-      {required int index,
-      required PsbtInput input,
-      required TxInput txInput}) {
+  factory PsbtTransactionInput.generateFromInput({
+    required int index,
+    required PsbtInput input,
+    required TxInput txInput,
+  }) {
     final scriptPubKey = PsbtUtils.getInputScriptPubKey(
-        psbtInput: input, input: txInput, index: index);
-    final address =
-        BitcoinScriptUtils.generateAddressFromScriptPubKey(scriptPubKey);
+      psbtInput: input,
+      input: txInput,
+      index: index,
+    );
+    final address = BitcoinScriptUtils.generateAddressFromScriptPubKey(
+      scriptPubKey,
+    );
     return PsbtTransactionInput._(
-        txInput: txInput,
-        bip32derivationPath:
-            input.getInputs(index, PsbtInputTypes.bip32DerivationPath),
-        hash160: input.getInputs(index, PsbtInputTypes.hash160),
-        hash256: input.getInputs(index, PsbtInputTypes.hash256),
-        muSig2ParticipantPartialSignature: input.getInputs(
-            index, PsbtInputTypes.muSig2ParticipantPartialSignature),
-        muSig2ParticipantPublicKeys:
-            input.getInputs(index, PsbtInputTypes.muSig2ParticipantPublicKeys),
-        muSig2PublicNonce:
-            input.getInputs(index, PsbtInputTypes.muSig2PublicNonce),
-        partialSigs: input.getInputs(index, PsbtInputTypes.partialSignature),
-        nonWitnessUtxo: input.getInput(index, PsbtInputTypes.nonWitnessUTXO),
-        porCommitments: input.getInput(index, PsbtInputTypes.porCommitments),
-        redeemScript: input.getInput(index, PsbtInputTypes.redeemScript),
-        ripemd160: input.getInputs(index, PsbtInputTypes.ripemd160),
-        sha256: input.getInputs(index, PsbtInputTypes.sha256),
-        proprietaryUseType:
-            input.getInputs(index, PsbtInputTypes.proprietaryUseType),
-        sigHashType: input.getInput(index, PsbtInputTypes.sighashType),
-        taprootInternalKey:
-            input.getInput(index, PsbtInputTypes.taprootInternalKey),
-        taprootKeyBip32DerivationPath:
-            input.getInputs(index, PsbtInputTypes.bip32DerivationPath),
-        taprootLeafScript:
-            input.getInputs(index, PsbtInputTypes.taprootLeafScript),
-        taprootScriptSpendSignature:
-            input.getInputs(index, PsbtInputTypes.taprootScriptSpentSignature),
-        witnessUtxo: input.getInput(index, PsbtInputTypes.witnessUTXO),
-        witnessScript: input.getInput(index, PsbtInputTypes.witnessScript),
-        taprootMerkleRoot:
-            input.getInput(index, PsbtInputTypes.taprootMerkleRoot),
-        taprootKeySpendSignature:
-            input.getInput(index, PsbtInputTypes.taprootKeySpentSignature),
-        finalizedScriptSig:
-            input.getInput(index, PsbtInputTypes.finalizedScriptSig),
-        finalizedScriptWitness:
-            input.getInput(index, PsbtInputTypes.finalizedWitness),
-        address: address,
-        scriptPubKey: scriptPubKey);
+      txInput: txInput,
+      bip32derivationPath: input.getInputs(
+        index,
+        PsbtInputTypes.bip32DerivationPath,
+      ),
+      hash160: input.getInputs(index, PsbtInputTypes.hash160),
+      hash256: input.getInputs(index, PsbtInputTypes.hash256),
+      muSig2ParticipantPartialSignature: input.getInputs(
+        index,
+        PsbtInputTypes.muSig2ParticipantPartialSignature,
+      ),
+      muSig2ParticipantPublicKeys: input.getInputs(
+        index,
+        PsbtInputTypes.muSig2ParticipantPublicKeys,
+      ),
+      muSig2PublicNonce: input.getInputs(
+        index,
+        PsbtInputTypes.muSig2PublicNonce,
+      ),
+      partialSigs: input.getInputs(index, PsbtInputTypes.partialSignature),
+      nonWitnessUtxo: input.getInput(index, PsbtInputTypes.nonWitnessUTXO),
+      porCommitments: input.getInput(index, PsbtInputTypes.porCommitments),
+      redeemScript: input.getInput(index, PsbtInputTypes.redeemScript),
+      ripemd160: input.getInputs(index, PsbtInputTypes.ripemd160),
+      sha256: input.getInputs(index, PsbtInputTypes.sha256),
+      proprietaryUseType: input.getInputs(
+        index,
+        PsbtInputTypes.proprietaryUseType,
+      ),
+      sigHashType: input.getInput(index, PsbtInputTypes.sighashType),
+      taprootInternalKey: input.getInput(
+        index,
+        PsbtInputTypes.taprootInternalKey,
+      ),
+      taprootKeyBip32DerivationPath: input.getInputs(
+        index,
+        PsbtInputTypes.bip32DerivationPath,
+      ),
+      taprootLeafScript: input.getInputs(
+        index,
+        PsbtInputTypes.taprootLeafScript,
+      ),
+      taprootScriptSpendSignature: input.getInputs(
+        index,
+        PsbtInputTypes.taprootScriptSpentSignature,
+      ),
+      witnessUtxo: input.getInput(index, PsbtInputTypes.witnessUTXO),
+      witnessScript: input.getInput(index, PsbtInputTypes.witnessScript),
+      taprootMerkleRoot: input.getInput(
+        index,
+        PsbtInputTypes.taprootMerkleRoot,
+      ),
+      taprootKeySpendSignature: input.getInput(
+        index,
+        PsbtInputTypes.taprootKeySpentSignature,
+      ),
+      finalizedScriptSig: input.getInput(
+        index,
+        PsbtInputTypes.finalizedScriptSig,
+      ),
+      finalizedScriptWitness: input.getInput(
+        index,
+        PsbtInputTypes.finalizedWitness,
+      ),
+      address: address,
+      scriptPubKey: scriptPubKey,
+    );
   }
 
   List<PsbtInputData> toPsbtInputs(PsbtVersion version) {
@@ -593,7 +684,7 @@ class PsbtTransactionInput {
       ...sha256 ?? [],
       ...hash160 ?? [],
       ...hash256 ?? [],
-      ...proprietaryUseType ?? []
+      ...proprietaryUseType ?? [],
     ];
     return inputs.whereType<PsbtInputData>().toList();
   }
@@ -649,50 +740,61 @@ class PsbtUtxo {
   final List<PsbtInputHash160>? hash160;
   final List<PsbtInputHash256>? hash256;
 
-  const PsbtUtxo(
-      {required this.utxo,
-      this.tx,
-      required this.scriptPubKey,
-      this.xOnlyOrInternalPubKey,
-      this.p2shRedeemScript,
-      this.p2wshWitnessScript,
-      this.leafScripts,
-      this.merkleRoot,
-      this.leafScript,
-      this.merkleProof,
-      this.treeScript,
-      this.muSig2ParticipantPublicKeys,
-      this.ripemd160,
-      this.hash160,
-      this.hash256,
-      this.sha256});
+  const PsbtUtxo({
+    required this.utxo,
+    this.tx,
+    required this.scriptPubKey,
+    this.xOnlyOrInternalPubKey,
+    this.p2shRedeemScript,
+    this.p2wshWitnessScript,
+    this.leafScripts,
+    this.merkleRoot,
+    this.leafScript,
+    this.merkleProof,
+    this.treeScript,
+    this.muSig2ParticipantPublicKeys,
+    this.ripemd160,
+    this.hash160,
+    this.hash256,
+    this.sha256,
+  });
   factory PsbtUtxo.fromJson(Map<String, dynamic> json) {
     return PsbtUtxo(
-        utxo: BitcoinUtxo.fromJson(json["utxo"]),
-        tx: json["tx"] == null
-            ? null
-            : BtcTransaction.deserialize(BytesUtils.fromHexString(json["tx"])),
-        scriptPubKey: Script.fromJson(json["scriptpubkey"]),
-        p2shRedeemScript: json["p2sh_redeem_script"] == null
-            ? null
-            : Script.fromJson(json["p2sh_redeem_script"]),
-        p2wshWitnessScript: json["p2wsh_witness_script"] == null
-            ? null
-            : Script.fromJson(json["p2wsh_witness_script"]),
-        merkleProof: json["merkle_proof"] == null
-            ? null
-            : TapLeafMerkleProof.fromJson(json["merkle_proof"]),
-        treeScript: json["tree_script"] == null
-            ? null
-            : TaprootTree.fromJson(json["tree_script"]),
-        leafScript: json["leaf_script"] == null
-            ? null
-            : TaprootLeaf.fromJson(json["leaf_script"]),
-        xOnlyOrInternalPubKey: BytesUtils.tryFromHexString(json["xonly"]),
-        merkleRoot: BytesUtils.tryFromHexString(json["merkle_root"]),
-        leafScripts: (json["leaf_scripts"] as List?)
-            ?.map((e) => TapLeafMerkleProof.fromJson(e))
-            .toList());
+      utxo: BitcoinUtxo.fromJson(json["utxo"]),
+      tx:
+          json["tx"] == null
+              ? null
+              : BtcTransaction.deserialize(
+                BytesUtils.fromHexString(json["tx"]),
+              ),
+      scriptPubKey: Script.fromJson(json["scriptpubkey"]),
+      p2shRedeemScript:
+          json["p2sh_redeem_script"] == null
+              ? null
+              : Script.fromJson(json["p2sh_redeem_script"]),
+      p2wshWitnessScript:
+          json["p2wsh_witness_script"] == null
+              ? null
+              : Script.fromJson(json["p2wsh_witness_script"]),
+      merkleProof:
+          json["merkle_proof"] == null
+              ? null
+              : TapLeafMerkleProof.fromJson(json["merkle_proof"]),
+      treeScript:
+          json["tree_script"] == null
+              ? null
+              : TaprootTree.fromJson(json["tree_script"]),
+      leafScript:
+          json["leaf_script"] == null
+              ? null
+              : TaprootLeaf.fromJson(json["leaf_script"]),
+      xOnlyOrInternalPubKey: BytesUtils.tryFromHexString(json["xonly"]),
+      merkleRoot: BytesUtils.tryFromHexString(json["merkle_root"]),
+      leafScripts:
+          (json["leaf_scripts"] as List?)
+              ?.map((e) => TapLeafMerkleProof.fromJson(e))
+              .toList(),
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -737,10 +839,8 @@ class PsbtFinalizeResponse {
   /// - Required if the input is a Tapscript with multiple leaf scripts.
   /// - You must specify the correct leaf script to sign.
   final List<int>? tapleafHash;
-  PsbtFinalizeResponse({
-    this.finalizeInput,
-    List<int>? tapleafHash,
-  }) : tapleafHash = tapleafHash?.asImmutableBytes;
+  PsbtFinalizeResponse({this.finalizeInput, List<int>? tapleafHash})
+    : tapleafHash = tapleafHash?.asImmutableBytes;
 }
 
 /// Represents the finalized script signature and witness data for a PSBT input.
@@ -780,48 +880,57 @@ class BipOrTaprootKeyDerivationRequest {
     return Bip32Path(elems: indexes).toString();
   }
 
-  BipOrTaprootKeyDerivationRequest._(
-      {required List<int> pubKeyOrXonly,
-      required List<Bip32KeyIndex> indexes,
-      required List<int> fingerprint,
-      List<List<int>>? leavesHashes})
-      : pubKeyOrXonly = pubKeyOrXonly.asImmutableBytes,
-        indexes = indexes.immutable,
-        fingerprint = fingerprint.asImmutableBytes,
-        leavesHashes =
-            leavesHashes?.map((e) => e.asImmutableBytes).toImutableList;
-  factory BipOrTaprootKeyDerivationRequest(
-      {required List<int> pubKeyOrXonly,
-      required List<Bip32KeyIndex> indexes,
-      required List<int> fingerprint,
-      List<List<int>>? leavesHashes}) {
+  BipOrTaprootKeyDerivationRequest._({
+    required List<int> pubKeyOrXonly,
+    required List<Bip32KeyIndex> indexes,
+    required List<int> fingerprint,
+    List<List<int>>? leavesHashes,
+  }) : pubKeyOrXonly = pubKeyOrXonly.asImmutableBytes,
+       indexes = indexes.immutable,
+       fingerprint = fingerprint.asImmutableBytes,
+       leavesHashes =
+           leavesHashes?.map((e) => e.asImmutableBytes).toImutableList;
+  factory BipOrTaprootKeyDerivationRequest({
+    required List<int> pubKeyOrXonly,
+    required List<Bip32KeyIndex> indexes,
+    required List<int> fingerprint,
+    List<List<int>>? leavesHashes,
+  }) {
     if (leavesHashes != null) {
       if (pubKeyOrXonly.length != EcdsaKeysConst.pointCoordByteLen) {
-        throw DartBitcoinPluginException("Invalid Public key XOnly key length.",
-            details: {
-              "excpected": EcdsaKeysConst.pointCoordByteLen,
-              "length": pubKeyOrXonly.length
-            });
+        throw DartBitcoinPluginException(
+          "Invalid Public key XOnly key length.",
+          details: {
+            "excpected": EcdsaKeysConst.pointCoordByteLen,
+            "length": pubKeyOrXonly.length,
+          },
+        );
       }
     } else if (pubKeyOrXonly.length != EcdsaKeysConst.pubKeyCompressedByteLen &&
         pubKeyOrXonly.length != EcdsaKeysConst.pubKeyUncompressedByteLen) {
-      throw DartBitcoinPluginException("Invalid Public key length.", details: {
-        "excpected": EcdsaKeysConst.pubKeyCompressedByteLen,
-        "length": pubKeyOrXonly.length
-      });
+      throw DartBitcoinPluginException(
+        "Invalid Public key length.",
+        details: {
+          "excpected": EcdsaKeysConst.pubKeyCompressedByteLen,
+          "length": pubKeyOrXonly.length,
+        },
+      );
     }
     if (fingerprint.length != Bip32KeyDataConst.fingerprintByteLen) {
-      throw DartBitcoinPluginException("Invalid Fingerprint key length.",
-          details: {
-            "excpected": Bip32KeyDataConst.fingerprintByteLen,
-            "length": pubKeyOrXonly.length
-          });
+      throw DartBitcoinPluginException(
+        "Invalid Fingerprint key length.",
+        details: {
+          "excpected": Bip32KeyDataConst.fingerprintByteLen,
+          "length": pubKeyOrXonly.length,
+        },
+      );
     }
     return BipOrTaprootKeyDerivationRequest._(
-        pubKeyOrXonly: pubKeyOrXonly,
-        indexes: indexes,
-        fingerprint: fingerprint,
-        leavesHashes: leavesHashes);
+      pubKeyOrXonly: pubKeyOrXonly,
+      indexes: indexes,
+      fingerprint: fingerprint,
+      leavesHashes: leavesHashes,
+    );
   }
   Bip32Slip10Secp256k1 derive(Bip32Slip10Secp256k1 masterKey) {
     if (masterKey.curveType != EllipticCurveTypes.secp256k1) {
@@ -832,16 +941,22 @@ class BipOrTaprootKeyDerivationRequest {
       key = key.childKey(i);
     }
     if (pubKeyOrXonly.length == EcdsaKeysConst.pointCoordByteLen) {
-      if (!BytesUtils.bytesEqual(pubKeyOrXonly,
-          key.publicKey.key.point.cast<ProjectiveECCPoint>().toXonly())) {
+      if (!BytesUtils.bytesEqual(
+        pubKeyOrXonly,
+        key.publicKey.key.point.cast<ProjectiveECCPoint>().toXonly(),
+      )) {
         throw DartBitcoinPluginException(
-            "Mismatch between derived key public key (x-only) and expected x-only.");
+          "Mismatch between derived key public key (x-only) and expected x-only.",
+        );
       }
     } else if (IPublicKey.fromBytes(
-            pubKeyOrXonly, EllipticCurveTypes.secp256k1) !=
+          pubKeyOrXonly,
+          EllipticCurveTypes.secp256k1,
+        ) !=
         key.publicKey.key) {
       throw DartBitcoinPluginException(
-          "Mismatch between derived key public key and expected public key.");
+        "Mismatch between derived key public key and expected public key.",
+      );
     }
     return key;
   }
@@ -867,8 +982,8 @@ class PsbtSignerResponse {
     required List<PsbtBtcSigner> signers,
     List<int>? tapleafHash,
     this.sighash,
-  })  : signers = signers.immutable,
-        tapleafHash = tapleafHash?.asImmutableBytes;
+  }) : signers = signers.immutable,
+       tapleafHash = tapleafHash?.asImmutableBytes;
 }
 
 class PsbtSignerParams {
@@ -899,7 +1014,7 @@ class PsbtTransactionOutput {
         PsbtOutputScript(scriptPubKey),
         PsbtOutputAmount(amount),
         silentPaymentData,
-        silentPaymentLabel
+        silentPaymentLabel,
       ],
       if (redeemScript != null) PsbtOutputRedeemScript(redeemScript!),
       if (witnessScript != null) PsbtOutputWitnessScript(witnessScript!),
@@ -908,7 +1023,7 @@ class PsbtTransactionOutput {
         PsbtOutputTaprootInternalKey(taprootInternalKey!),
       ...taprootKeyBip32DerivationPath ?? [],
       ...muSig2ParticipantPublicKeys ?? [],
-      ...proprietaryUseType ?? []
+      ...proprietaryUseType ?? [],
       // if(taprootTree!= null) PsbtOutputTaprootTree(taprootTrees)
     ].whereType<PsbtOutputData>().toList();
   }
@@ -926,44 +1041,51 @@ class PsbtTransactionOutput {
   final List<int>? taprootInternalKey;
   final List<PsbtTapTree>? taprootTree;
   final List<PsbtOutputTaprootKeyBip32DerivationPath>?
-      taprootKeyBip32DerivationPath;
+  taprootKeyBip32DerivationPath;
   final List<PsbtOutputMuSig2ParticipantPublicKeys>?
-      muSig2ParticipantPublicKeys;
+  muSig2ParticipantPublicKeys;
   final PsbtOutputBIP353DNSSECProof? proof;
   final List<PsbtOutputProprietaryUseType>? proprietaryUseType;
   final PsbtOutputSilentPaymentData? silentPaymentData;
   final PsbtOutputSilentPaymentLabel? silentPaymentLabel;
 
-  factory PsbtTransactionOutput(
-      {required BigInt amount,
-      Script? scriptPubKey,
-      BitcoinBaseAddress? address}) {
+  factory PsbtTransactionOutput({
+    required BigInt amount,
+    Script? scriptPubKey,
+    BitcoinBaseAddress? address,
+  }) {
     scriptPubKey ??= address?.toScriptPubKey();
     if (scriptPubKey == null) {
       throw DartBitcoinPluginException(
-          "Either scriptPubKey or address must be provided.");
+        "Either scriptPubKey or address must be provided.",
+      );
     }
-    address ??=
-        BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(scriptPubKey);
+    address ??= BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(
+      scriptPubKey,
+    );
     return PsbtTransactionOutput._(
-        scriptPubKey: scriptPubKey, amount: amount, address: address);
+      scriptPubKey: scriptPubKey,
+      amount: amount,
+      address: address,
+    );
   }
 
-  PsbtTransactionOutput._(
-      {required this.scriptPubKey,
-      required this.amount,
-      required this.address,
-      this.redeemScript,
-      this.witnessScript,
-      this.bip32derivationPath,
-      this.taprootInternalKey,
-      this.taprootTree,
-      this.taprootKeyBip32DerivationPath,
-      this.muSig2ParticipantPublicKeys,
-      this.proof,
-      this.proprietaryUseType,
-      this.silentPaymentData,
-      this.silentPaymentLabel});
+  PsbtTransactionOutput._({
+    required this.scriptPubKey,
+    required this.amount,
+    required this.address,
+    this.redeemScript,
+    this.witnessScript,
+    this.bip32derivationPath,
+    this.taprootInternalKey,
+    this.taprootTree,
+    this.taprootKeyBip32DerivationPath,
+    this.muSig2ParticipantPublicKeys,
+    this.proof,
+    this.proprietaryUseType,
+    this.silentPaymentData,
+    this.silentPaymentLabel,
+  });
 
   // Factory constructor for Legacy outputs (P2PKH, P2SH)
   factory PsbtTransactionOutput.legacy({
@@ -978,15 +1100,18 @@ class PsbtTransactionOutput {
     scriptPubKey ??= address?.toScriptPubKey();
     if (scriptPubKey == null) {
       throw DartBitcoinPluginException(
-          "Either scriptPubKey or address must be provided.");
+        "Either scriptPubKey or address must be provided.",
+      );
     }
-    address ??=
-        BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(scriptPubKey);
+    address ??= BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(
+      scriptPubKey,
+    );
     if (redeemScript != null) {
       final p2shAddress = P2shAddress.fromScript(script: redeemScript);
       if (p2shAddress.toScriptPubKey() != scriptPubKey) {
         throw DartBitcoinPluginException(
-            "scriptPubKey does not match redeemScript-derived script.");
+          "scriptPubKey does not match redeemScript-derived script.",
+        );
       }
     }
     if (amount.isNegative) {
@@ -994,17 +1119,19 @@ class PsbtTransactionOutput {
     }
     if (address?.type.isSegwit ?? false) {
       throw DartBitcoinPluginException(
-          "Invalid legacy address. Use the WitnessV0 or WitnessV1 factory constructor instead.");
+        "Invalid legacy address. Use the WitnessV0 or WitnessV1 factory constructor instead.",
+      );
     }
 
     return PsbtTransactionOutput._(
-        scriptPubKey: scriptPubKey,
-        amount: amount,
-        redeemScript: redeemScript,
-        bip32derivationPath: bip32derivationPath,
-        proprietaryUseType: proprietaryUseType,
-        address: address,
-        proof: proof);
+      scriptPubKey: scriptPubKey,
+      amount: amount,
+      redeemScript: redeemScript,
+      bip32derivationPath: bip32derivationPath,
+      proprietaryUseType: proprietaryUseType,
+      address: address,
+      proof: proof,
+    );
   }
 
   // Factory constructor for SegWit v0 outputs (P2WPKH, P2WSH, P2SH-P2WPKH, P2SH-P2WSH)
@@ -1021,10 +1148,12 @@ class PsbtTransactionOutput {
     scriptPubKey ??= address?.toScriptPubKey();
     if (scriptPubKey == null) {
       throw DartBitcoinPluginException(
-          "Either scriptPubKey or address must be provided.");
+        "Either scriptPubKey or address must be provided.",
+      );
     }
-    address ??=
-        BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(scriptPubKey);
+    address ??= BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(
+      scriptPubKey,
+    );
     if (amount.isNegative) {
       throw DartBitcoinPluginException("Amount cannot be negative.");
     }
@@ -1033,12 +1162,14 @@ class PsbtTransactionOutput {
       if (redeemScript != null) {
         if (addr.toScriptPubKey() != redeemScript) {
           throw DartBitcoinPluginException(
-              "redeemScript does not match witnessScript-derived script.");
+            "redeemScript does not match witnessScript-derived script.",
+          );
         }
       } else {
         if (addr.toScriptPubKey() != scriptPubKey) {
           throw DartBitcoinPluginException(
-              "scriptPubKey does not match witnessScript-derived script.");
+            "scriptPubKey does not match witnessScript-derived script.",
+          );
         }
       }
     }
@@ -1047,28 +1178,32 @@ class PsbtTransactionOutput {
       final p2shAddress = P2shAddress.fromScript(script: redeemScript);
       if (p2shAddress.toScriptPubKey() != scriptPubKey) {
         throw DartBitcoinPluginException(
-            "scriptPubKey does not match redeemScript-derived address.");
+          "scriptPubKey does not match redeemScript-derived address.",
+        );
       }
     }
     if (address != null) {
       if (address.type.isP2tr) {
         throw DartBitcoinPluginException(
-            "Invalid Witness V0 address. Use the witnessV1 factory constructor instead.");
+          "Invalid Witness V0 address. Use the witnessV1 factory constructor instead.",
+        );
       } else if (!address.type.isSegwit && !address.type.isP2sh) {
         throw DartBitcoinPluginException(
-            "Invalid Witness V0 address. Use the legacy factory constructor instead.");
+          "Invalid Witness V0 address. Use the legacy factory constructor instead.",
+        );
       }
     }
 
     return PsbtTransactionOutput._(
-        scriptPubKey: scriptPubKey,
-        amount: amount,
-        redeemScript: redeemScript,
-        witnessScript: witnessScript,
-        bip32derivationPath: bip32derivationPath,
-        proprietaryUseType: proprietaryUseType,
-        address: address,
-        proof: proof);
+      scriptPubKey: scriptPubKey,
+      amount: amount,
+      redeemScript: redeemScript,
+      witnessScript: witnessScript,
+      bip32derivationPath: bip32derivationPath,
+      proprietaryUseType: proprietaryUseType,
+      address: address,
+      proof: proof,
+    );
   }
 
   // Factory constructor for SegWit v1 (Taproot) outputs
@@ -1079,7 +1214,7 @@ class PsbtTransactionOutput {
     List<int>? taprootInternalKey,
     List<PsbtTapTree>? taprootTree,
     List<PsbtOutputTaprootKeyBip32DerivationPath>?
-        taprootKeyBip32DerivationPath,
+    taprootKeyBip32DerivationPath,
     List<PsbtOutputMuSig2ParticipantPublicKeys>? muSig2ParticipantPublicKeys,
     PsbtOutputBIP353DNSSECProof? proof,
     List<PsbtOutputProprietaryUseType>? proprietaryUseType,
@@ -1089,65 +1224,95 @@ class PsbtTransactionOutput {
     scriptPubKey ??= address?.toScriptPubKey();
     if (scriptPubKey == null) {
       throw DartBitcoinPluginException(
-          "Either scriptPubKey or address must be provided.");
+        "Either scriptPubKey or address must be provided.",
+      );
     }
-    address ??=
-        BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(scriptPubKey);
+    address ??= BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(
+      scriptPubKey,
+    );
     if (amount.isNegative) {
       throw DartBitcoinPluginException("Amount cannot be negative.");
     }
     return PsbtTransactionOutput._(
-        scriptPubKey: scriptPubKey,
-        address: address,
-        amount: amount,
-        taprootInternalKey: taprootInternalKey,
-        taprootTree: taprootTree,
-        taprootKeyBip32DerivationPath: taprootKeyBip32DerivationPath,
-        muSig2ParticipantPublicKeys: muSig2ParticipantPublicKeys,
-        proof: proof,
-        proprietaryUseType: proprietaryUseType,
-        silentPaymentData: silentPaymentData,
-        silentPaymentLabel: silentPaymentLabel);
+      scriptPubKey: scriptPubKey,
+      address: address,
+      amount: amount,
+      taprootInternalKey: taprootInternalKey,
+      taprootTree: taprootTree,
+      taprootKeyBip32DerivationPath: taprootKeyBip32DerivationPath,
+      muSig2ParticipantPublicKeys: muSig2ParticipantPublicKeys,
+      proof: proof,
+      proprietaryUseType: proprietaryUseType,
+      silentPaymentData: silentPaymentData,
+      silentPaymentLabel: silentPaymentLabel,
+    );
   }
 
-  factory PsbtTransactionOutput.generateFromOutput(
-      {required PsbtOutput psbtOutput,
-      required TxOutput output,
-      required int index}) {
+  factory PsbtTransactionOutput.generateFromOutput({
+    required PsbtOutput psbtOutput,
+    required TxOutput output,
+    required int index,
+  }) {
     return PsbtTransactionOutput._(
-        scriptPubKey: output.scriptPubKey,
-        amount: output.amount,
-        address: BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(
-            output.scriptPubKey),
-        bip32derivationPath:
-            psbtOutput.getOutputs(index, PsbtOutputTypes.bip32DerivationPath),
-        muSig2ParticipantPublicKeys: psbtOutput.getOutputs(
-            index, PsbtOutputTypes.muSig2ParticipantPublicKeys),
-        taprootKeyBip32DerivationPath: psbtOutput.getOutputs(
-            index, PsbtOutputTypes.taprootBip32Derivation),
-        proprietaryUseType:
-            psbtOutput.getOutputs(index, PsbtOutputTypes.proprietaryUseType),
-        proof: psbtOutput.getOutput(index, PsbtOutputTypes.bip353DNSSECProof),
-        redeemScript: psbtOutput
-            .getOutput<PsbtOutputRedeemScript>(
-                index, PsbtOutputTypes.redeemScript)
-            ?.redeemScript,
-        witnessScript: psbtOutput
-            .getOutput<PsbtOutputWitnessScript>(
-                index, PsbtOutputTypes.witnessScript)
-            ?.witnessScript,
-        silentPaymentData:
-            psbtOutput.getOutput(index, PsbtOutputTypes.silentPaymentData),
-        silentPaymentLabel:
-            psbtOutput.getOutput(index, PsbtOutputTypes.silentPaymentLabel),
-        taprootInternalKey: psbtOutput
-            .getOutput<PsbtOutputTaprootInternalKey>(
-                index, PsbtOutputTypes.taprootInternalKey)
-            ?.xOnlyPubKey,
-        taprootTree: psbtOutput
-            .getOutput<PsbtOutputTaprootTree>(
-                index, PsbtOutputTypes.taprootTree)
-            ?.taprootTrees);
+      scriptPubKey: output.scriptPubKey,
+      amount: output.amount,
+      address: BitcoinScriptUtils.tryGenerateAddressFromScriptPubKey(
+        output.scriptPubKey,
+      ),
+      bip32derivationPath: psbtOutput.getOutputs(
+        index,
+        PsbtOutputTypes.bip32DerivationPath,
+      ),
+      muSig2ParticipantPublicKeys: psbtOutput.getOutputs(
+        index,
+        PsbtOutputTypes.muSig2ParticipantPublicKeys,
+      ),
+      taprootKeyBip32DerivationPath: psbtOutput.getOutputs(
+        index,
+        PsbtOutputTypes.taprootBip32Derivation,
+      ),
+      proprietaryUseType: psbtOutput.getOutputs(
+        index,
+        PsbtOutputTypes.proprietaryUseType,
+      ),
+      proof: psbtOutput.getOutput(index, PsbtOutputTypes.bip353DNSSECProof),
+      redeemScript:
+          psbtOutput
+              .getOutput<PsbtOutputRedeemScript>(
+                index,
+                PsbtOutputTypes.redeemScript,
+              )
+              ?.redeemScript,
+      witnessScript:
+          psbtOutput
+              .getOutput<PsbtOutputWitnessScript>(
+                index,
+                PsbtOutputTypes.witnessScript,
+              )
+              ?.witnessScript,
+      silentPaymentData: psbtOutput.getOutput(
+        index,
+        PsbtOutputTypes.silentPaymentData,
+      ),
+      silentPaymentLabel: psbtOutput.getOutput(
+        index,
+        PsbtOutputTypes.silentPaymentLabel,
+      ),
+      taprootInternalKey:
+          psbtOutput
+              .getOutput<PsbtOutputTaprootInternalKey>(
+                index,
+                PsbtOutputTypes.taprootInternalKey,
+              )
+              ?.xOnlyPubKey,
+      taprootTree:
+          psbtOutput
+              .getOutput<PsbtOutputTaprootTree>(
+                index,
+                PsbtOutputTypes.taprootTree,
+              )
+              ?.taprootTrees,
+    );
   }
 }
 
@@ -1165,12 +1330,18 @@ class PsbtInputSighashInfo {
   final int inputIndex;
   final int sighashType;
   PsbtInputSighashInfo({required this.inputIndex, required this.sighashType});
-  late final bool isSighashAll =
-      PsbtUtils.isSighash(sighashType, BitcoinOpCodeConst.sighashAll);
-  late final bool isSighashSingle =
-      PsbtUtils.isSighash(sighashType, BitcoinOpCodeConst.sighashSingle);
-  late final bool isSighashNone =
-      PsbtUtils.isSighash(sighashType, BitcoinOpCodeConst.sighashNone);
+  late final bool isSighashAll = PsbtUtils.isSighash(
+    sighashType,
+    BitcoinOpCodeConst.sighashAll,
+  );
+  late final bool isSighashSingle = PsbtUtils.isSighash(
+    sighashType,
+    BitcoinOpCodeConst.sighashSingle,
+  );
+  late final bool isSighashNone = PsbtUtils.isSighash(
+    sighashType,
+    BitcoinOpCodeConst.sighashNone,
+  );
   late final bool isAnyOneCanPay = PsbtUtils.isAnyoneCanPay(sighashType);
 
   @override
@@ -1194,10 +1365,11 @@ class PsbtInputSighashInfo {
     return false;
   }
 
-  bool canModifyOutput(
-      {required int outputIndex,
-      required bool isUpdate,
-      required List<PsbtInputSighashInfo> allSigashes}) {
+  bool canModifyOutput({
+    required int outputIndex,
+    required bool isUpdate,
+    required List<PsbtInputSighashInfo> allSigashes,
+  }) {
     if (isSighashAll) return false;
     if (isSighashNone) return true;
     if (isSighashSingle) {

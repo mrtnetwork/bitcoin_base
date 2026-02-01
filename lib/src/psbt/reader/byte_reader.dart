@@ -23,7 +23,7 @@ class PsbtByteReader {
 
   int readLength() {
     final length = IntUtils.decodeVarint(bytes.sublist(_offset));
-    _offset += length.item2;
-    return length.item1;
+    _offset += length.$2;
+    return length.$1;
   }
 }

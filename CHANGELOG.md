@@ -1,3 +1,9 @@
+## 7.1.0
+
+- Update dependencies.
+- Minimum required Dart SDK version updated to 3.7.
+- Fixed parsing of scripts with disabled or invalid opcodes
+
 ## 7.0.0
 
 - Update dependencies.

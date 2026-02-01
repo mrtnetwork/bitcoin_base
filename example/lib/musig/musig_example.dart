@@ -63,12 +63,13 @@ BtcTransaction _spendWithLeafA(
     required List<P2trAddress> existsUtxosScriptPubKeys,
     required List<BigInt> existsUtxosAmounts,
     required TaprootTree treeScript}) {
+  const musig = MuSig2();
   final internalKey = _getInternalPubKey();
   final key1 = _getPrivateKey(path: "m/86'/1'/0'/0/2");
   final key3 = _getPrivateKey(path: "m/86'/1'/0'/0/4");
   final pk1 = key1.getPublic();
   final pk3 = key3.getPublic();
-  final musigSigner = MuSig2.aggPublicKeys(
+  final musigSigner = musig.aggPublicKeys(
       keys: [pk1.publicKey.compressed, pk3.publicKey.compressed]);
   final tapleafScript1 = TaprootLeaf(
       script: Script(script: [
@@ -83,11 +84,11 @@ BtcTransaction _spendWithLeafA(
               existsUtxosScriptPubKeys.map((e) => e.toScriptPubKey()).toList(),
           amounts: existsUtxosAmounts)
       .asImmutableBytes;
-  final nonce1 = MuSig2.nonceGenerate(
+  final nonce1 = musig.nonceGenerate(
       publicKey: pk1.toBytes(mode: PubKeyModes.compressed), msg: digest);
-  final nonce3 = MuSig2.nonceGenerate(
+  final nonce3 = musig.nonceGenerate(
       publicKey: pk3.toBytes(mode: PubKeyModes.compressed), msg: digest);
-  final aggNonce = MuSig2.nonceAgg([nonce1.pubnonce, nonce3.pubnonce]);
+  final aggNonce = musig.nonceAgg([nonce1.pubnonce, nonce3.pubnonce]);
   final session = MuSig2Session(
       aggnonce: aggNonce,
       publicKeys: [
@@ -96,12 +97,12 @@ BtcTransaction _spendWithLeafA(
       ],
       tweaks: [],
       msg: digest);
-  final sig1 = MuSig2.sign(
+  final sig1 = musig.sign(
       secnonce: nonce1.secnonce, sk: key1.toBytes(), session: session);
-  final sig3 = MuSig2.sign(
+  final sig3 = musig.sign(
       secnonce: nonce3.secnonce, sk: key3.toBytes(), session: session);
   final signature =
-      MuSig2.partialSigAgg(signatures: [sig1, sig3], session: session);
+      musig.partialSigAgg(signatures: [sig1, sig3], session: session);
   final controlBlock = TaprootControlBlock.generate(
       xOnlyOrInternalPubKey: internalKey.toXOnly(),
       leafScript: tapleafScript1,
@@ -162,7 +163,7 @@ Bip32Slip10Secp256k1 _deriveKey(
     String path = "m/86'/1'/0'/0/1"}) {
   Bip32Slip10Secp256k1 secp = Bip32Slip10Secp256k1.fromExtendedKey(
       key, Bip44Coins.bitcoinTestnet.conf.keyNetVer);
-  return secp.derivePath(path) as Bip32Slip10Secp256k1;
+  return secp.derivePath(path);
 }
 
 ECPublic _getPubKey({String path = "m/86'/1'/0'/0/1"}) {

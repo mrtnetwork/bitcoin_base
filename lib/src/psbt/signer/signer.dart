@@ -2,8 +2,10 @@ import 'package:bitcoin_base/src/crypto/keypair/ec_private.dart';
 import 'package:bitcoin_base/src/crypto/keypair/ec_public.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
-abstract class PsbtBtcSigner<SIGNINGRESPONSE extends SignInputResponse,
-    DIGEST extends PsbtSignInputDigest> {
+abstract class PsbtBtcSigner<
+  SIGNINGRESPONSE extends SignInputResponse,
+  DIGEST extends PsbtSignInputDigest
+> {
   const PsbtBtcSigner();
   abstract final ECPublic signerPublicKey;
   SIGNINGRESPONSE btcSignInput(DIGEST digest);
@@ -20,11 +22,9 @@ abstract class PsbtBtcMusig2Signer
 abstract class PsbtSignInputDigest {
   final List<int> digest;
   final List<int>? tweak;
-  PsbtSignInputDigest({
-    required List<int> digest,
-    required List<int>? tweak,
-  })  : digest = digest.asImmutableBytes,
-        tweak = tweak?.asImmutableBytes;
+  PsbtSignInputDigest({required List<int> digest, required List<int>? tweak})
+    : digest = digest.asImmutableBytes,
+      tweak = tweak?.asImmutableBytes;
 }
 
 class PsbtSigningInputDigest extends PsbtSignInputDigest {
@@ -48,12 +48,18 @@ class PsbtMusig2SigningInputDigest extends PsbtSignInputDigest {
 }
 
 class SignInputResponse extends PsbtSigningResponse {
-  SignInputResponse._(
-      {required super.signature, required super.signerPublicKey});
-  factory SignInputResponse(
-      {required List<int> signature, required ECPublic signerPublicKey}) {
+  SignInputResponse._({
+    required super.signature,
+    required super.signerPublicKey,
+  });
+  factory SignInputResponse({
+    required List<int> signature,
+    required ECPublic signerPublicKey,
+  }) {
     return SignInputResponse._(
-        signature: signature, signerPublicKey: signerPublicKey);
+      signature: signature,
+      signerPublicKey: signerPublicKey,
+    );
   }
 }
 
@@ -78,22 +84,30 @@ class PsbtDefaultSigner
   SignInputResponse btcSignInput(PsbtSigningInputDigest digest) {
     if (digest.isTaproot) {
       return SignInputResponse(
-          signature: BytesUtils.fromHexString(privateKey.signBip340(
-              digest.digest,
-              tapTweakHash: digest.tweak,
-              tweak: digest.tweak != null)),
-          signerPublicKey: signerPublicKey);
+        signature: BytesUtils.fromHexString(
+          privateKey.signBip340(
+            digest.digest,
+            tapTweakHash: digest.tweak,
+            tweak: digest.tweak != null,
+          ),
+        ),
+        signerPublicKey: signerPublicKey,
+      );
     }
-    final signature =
-        privateKey.signECDSA(digest.digest, sighash: digest.sighash);
+    final signature = privateKey.signECDSA(
+      digest.digest,
+      sighash: digest.sighash,
+    );
     return SignInputResponse(
-        signature: BytesUtils.fromHexString(signature),
-        signerPublicKey: signerPublicKey);
+      signature: BytesUtils.fromHexString(signature),
+      signerPublicKey: signerPublicKey,
+    );
   }
 
   @override
   Future<SignInputResponse> btcSignInputAsync(
-      PsbtSigningInputDigest digest) async {
+    PsbtSigningInputDigest digest,
+  ) async {
     return btcSignInput(digest);
   }
 }
@@ -105,11 +119,15 @@ class PsbtMusig2DefaultSigner implements PsbtBtcMusig2Signer {
   @override
   final List<ECPublic> publicKeys;
   final MuSig2Nonce nonce;
-  PsbtMusig2DefaultSigner(
-      {required this.privateKey,
-      required this.aggPublicKey,
-      required this.publicKeys,
-      required this.nonce});
+  final Musig2Bsae lib;
+
+  PsbtMusig2DefaultSigner({
+    required this.privateKey,
+    required this.aggPublicKey,
+    required this.publicKeys,
+    required this.nonce,
+    this.lib = const Musig2Const(),
+  });
 
   @override
   late final ECPublic signerPublicKey = privateKey.getPublic();
@@ -117,21 +135,29 @@ class PsbtMusig2DefaultSigner implements PsbtBtcMusig2Signer {
   @override
   SignInputResponse btcSignInput(PsbtMusig2SigningInputDigest digest) {
     final session = MuSig2Session(
-        aggnonce: digest.aggNonce,
-        publicKeys: publicKeys
-            .map((e) => e.toBytes(mode: PubKeyModes.compressed))
-            .toList(),
-        msg: digest.digest,
-        tweaks: [if (digest.tweak != null) MuSig2Tweak(tweak: digest.tweak!)]);
-    final signature = MuSig2.sign(
-        secnonce: nonce.secnonce, sk: privateKey.toBytes(), session: session);
+      aggnonce: digest.aggNonce,
+      publicKeys:
+          publicKeys
+              .map((e) => e.toBytes(mode: PubKeyModes.compressed))
+              .toList(),
+      msg: digest.digest,
+      tweaks: [if (digest.tweak != null) MuSig2Tweak(tweak: digest.tweak!)],
+    );
+    final signature = lib.sign(
+      secnonce: nonce.secnonce,
+      sk: privateKey.toBytes(),
+      session: session,
+    );
     return SignInputResponse._(
-        signature: signature, signerPublicKey: signerPublicKey);
+      signature: signature,
+      signerPublicKey: signerPublicKey,
+    );
   }
 
   @override
   Future<SignInputResponse> btcSignInputAsync(
-      PsbtMusig2SigningInputDigest digest) async {
+    PsbtMusig2SigningInputDigest digest,
+  ) async {
     return btcSignInput(digest);
   }
 }

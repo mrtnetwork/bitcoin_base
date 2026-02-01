@@ -6,8 +6,10 @@ import 'package:bitcoin_base/src/provider/core/params.dart';
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
 class ElectrumRequestScriptHashListUnspent
     extends ElectrumRequest<List<ElectrumUtxo>, List<dynamic>> {
-  ElectrumRequestScriptHashListUnspent(
-      {required this.scriptHash, this.includeTokens = false});
+  ElectrumRequestScriptHashListUnspent({
+    required this.scriptHash,
+    this.includeTokens = false,
+  });
 
   /// The script hash as a hexadecimal string (BitcoinBaseAddress.pubKeyHash())
   final String scriptHash;

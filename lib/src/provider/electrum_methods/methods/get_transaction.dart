@@ -4,8 +4,10 @@ import 'package:bitcoin_base/src/provider/core/params.dart';
 /// Return a raw transaction.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
 class ElectrumRequestGetTransaction extends ElectrumRequest<dynamic, dynamic> {
-  ElectrumRequestGetTransaction(
-      {required this.transactionHash, this.verbose = false});
+  ElectrumRequestGetTransaction({
+    required this.transactionHash,
+    this.verbose = false,
+  });
 
   /// The transaction hash as a hexadecimal string.
   final String transactionHash;

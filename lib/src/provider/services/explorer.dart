@@ -12,7 +12,9 @@ abstract class ApiService {
   /// Optional parameters:
   /// - [headers]: A map of headers to be included in the request.
   /// - [body]: The request body, typically in JSON format.
-  Future<T> post<T>(String url,
-      {Map<String, String> headers = const {'Content-Type': 'application/json'},
-      Object? body});
+  Future<T> post<T>(
+    String url, {
+    Map<String, String> headers = const {'Content-Type': 'application/json'},
+    Object? body,
+  });
 }
