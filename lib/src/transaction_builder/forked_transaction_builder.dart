@@ -264,10 +264,12 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
       });
     }
     final inputs = sortedUtxos.map((e) => e.utxo.toInput()).toList();
-    if (enableRBF && inputs.isNotEmpty) {
-      inputs[0] = inputs[0].copyWith(
-        sequence: BitcoinOpCodeConst.replaceByFeeSequence,
-      );
+    if (enableRBF) {
+      for (int i = 0; i < inputs.length; i++) {
+        inputs[i] = inputs[i].copyWith(
+          sequence: BitcoinOpCodeConst.replaceByFeeSequence,
+        );
+      }
     }
     return (
       List<TxInput>.unmodifiable(inputs),
