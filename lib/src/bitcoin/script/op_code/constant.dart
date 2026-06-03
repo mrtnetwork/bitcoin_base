@@ -253,7 +253,7 @@ class BitcoinOpCodeConst {
   static const List<int> emptyTxSequence = [0x00, 0x00, 0x00, 0x00];
 
   static const List<int> absoluteTimelockSequence = [0xfe, 0xff, 0xff, 0xff];
-  static const List<int> replaceByFeeSequence = [0x01, 0x00, 0x00, 0x00];
+  static const List<int> replaceByFeeSequence = [0xfd, 0xff, 0xff, 0xff];
 
   /// Script version and Bitcoin-related identifiers
   static const int leafVersionTapscript = 0xc0;
