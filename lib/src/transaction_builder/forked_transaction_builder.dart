@@ -27,6 +27,7 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   final String? memo;
   final bool enableRBF;
   final bool isFakeTransaction;
+  final List<int> locktime;
 
   ForkedTransactionBuilder({
     required super.outPuts,
@@ -38,6 +39,7 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
     this.memo,
     this.enableRBF = false,
     this.isFakeTransaction = false,
+    this.locktime = BitcoinOpCodeConst.defaultTxLocktime,
   }) {
     _validateBuilder();
   }
@@ -496,7 +498,7 @@ be retrieved by anyone who examines the blockchain's history.
     );
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
-    final transaction = BtcTransaction(inputs: inputs, outputs: outputs);
+    final transaction = BtcTransaction(inputs: inputs, outputs: outputs, locktime: locktime);
     const sighash =
         BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked;
 
@@ -608,7 +610,7 @@ be retrieved by anyone who examines the blockchain's history.
     );
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
-    final transaction = BtcTransaction(inputs: inputs, outputs: outputs);
+    final transaction = BtcTransaction(inputs: inputs, outputs: outputs, locktime: locktime);
 
     const sighash =
         BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked;
