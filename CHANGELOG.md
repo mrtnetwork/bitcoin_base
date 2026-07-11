@@ -1,6 +1,7 @@
 ## 7.2.0
 
 - Update dependencies.
+- Redesigned the Mempool and BlockCypher API service interfaces to align with the ElectrumService API.
 
 ## 7.1.0
 

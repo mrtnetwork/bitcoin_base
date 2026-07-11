@@ -370,6 +370,7 @@ class BitcoinUtxo with CborTagSerializable, PartialEquality {
       "vout": vout,
       "script_type": scriptType.name,
       "block_height": blockHeight,
+      "coinbase": coinbase,
     };
   }
 

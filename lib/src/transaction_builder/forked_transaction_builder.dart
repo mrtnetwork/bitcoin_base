@@ -498,7 +498,11 @@ be retrieved by anyone who examines the blockchain's history.
     );
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
-    final transaction = BtcTransaction(inputs: inputs, outputs: outputs, locktime: locktime);
+    final transaction = BtcTransaction(
+      inputs: inputs,
+      outputs: outputs,
+      locktime: locktime,
+    );
     const sighash =
         BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked;
 
@@ -610,7 +614,11 @@ be retrieved by anyone who examines the blockchain's history.
     );
 
     /// create new transaction with inputs and outputs and isSegwit transaction or not
-    final transaction = BtcTransaction(inputs: inputs, outputs: outputs, locktime: locktime);
+    final transaction = BtcTransaction(
+      inputs: inputs,
+      outputs: outputs,
+      locktime: locktime,
+    );
 
     const sighash =
         BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked;

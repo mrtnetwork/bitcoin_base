@@ -15,7 +15,10 @@ class ElectrumRequestDetails extends BitcoinRequestDetails {
          path: null,
          api: BitcoinProviderApi.electrum,
        );
-  factory ElectrumRequestDetails.deserialize({List<int>? bytes, CborObject? object}) {
+  factory ElectrumRequestDetails.deserialize({
+    List<int>? bytes,
+    CborObject? object,
+  }) {
     final values = CborTagSerializable.decodeTaggedValue(
       identifier: BlockchainNetwork.bitcoinAndRelated.identifier,
       cborBytes: bytes,
@@ -58,7 +61,10 @@ class ElectrumRequestDetails extends BitcoinRequestDetails {
 
   @override
   Map<String, dynamic> toJson() {
-    return {'body': bodyString ?? BytesUtils.tryToHexString(bodyBytes), "method": method};
+    return {
+      'body': bodyString ?? BytesUtils.tryToHexString(bodyBytes),
+      "method": method,
+    };
   }
 
   @override
