@@ -52,11 +52,7 @@ class TxOutput {
   }
 
   List<int> toBytes() {
-    final amountBytes = BigintUtils.toBytes(
-      amount,
-      length: 8,
-      order: Endian.little,
-    );
+    final amountBytes = amount.toI64LeBytes();
     final scriptBytes = <int>[
       ...cashToken?.toBytes() ?? <int>[],
       ...scriptPubKey.toBytes(),

@@ -194,6 +194,7 @@ void main() {
   test('decode encode address', () {
     for (final i in bitcoinCashAddresses.keys.toList()) {
       final info = Map.from(bitcoinCashAddresses[i]!);
+      final hrp = i.substring(0, i.indexOf(':'));
       const network = BitcoinCashNetwork.mainnet;
       final address = BitcoinCashAddress(
         i,
@@ -201,7 +202,6 @@ void main() {
         validateNetworkPrefix: false,
       );
       expect(address.baseAddress.addressProgram, info['programBytes']);
-      final hrp = i.substring(0, i.indexOf(':'));
       expect(i, address.toAddress(network, hrp));
     }
   });

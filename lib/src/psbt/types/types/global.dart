@@ -410,11 +410,7 @@ class PsbtGlobalTransactionVersion extends PsbtGlobalData {
       keyPair: PsbtKeyPair(
         key: PsbtKey(PsbtGlobalTypes.version.flag!),
         value: PsbtValue(
-          IntUtils.toBytes(
-            version,
-            length: BitcoinOpCodeConst.versionLengthInBytes,
-            byteOrder: Endian.little,
-          ),
+          version.toLeBytes(length: BitcoinOpCodeConst.versionLengthInBytes),
         ),
       ),
     );
@@ -447,11 +443,7 @@ class PsbtGlobalTransactionVersion extends PsbtGlobalData {
   }
 
   List<int> versionBytes() {
-    return IntUtils.toBytes(
-      version,
-      length: BitcoinOpCodeConst.versionLengthInBytes,
-      byteOrder: Endian.little,
-    );
+    return version.toLeBytes(length: BitcoinOpCodeConst.versionLengthInBytes);
   }
 
   @override
@@ -474,11 +466,7 @@ class PsbtGlobalFallbackLocktime extends PsbtGlobalData {
       keyPair: PsbtKeyPair(
         key: PsbtKey(PsbtGlobalTypes.fallBackLockTime.flag!),
         value: PsbtValue(
-          IntUtils.toBytes(
-            locktime,
-            length: BitcoinOpCodeConst.locktimeLengthInBytes,
-            byteOrder: Endian.little,
-          ),
+          locktime.toLeBytes(length: BitcoinOpCodeConst.locktimeLengthInBytes),
         ),
       ),
     );
@@ -511,11 +499,7 @@ class PsbtGlobalFallbackLocktime extends PsbtGlobalData {
   }
 
   List<int> locktimeBytes() {
-    return IntUtils.toBytes(
-      locktime,
-      length: BitcoinOpCodeConst.locktimeLengthInBytes,
-      byteOrder: Endian.little,
-    );
+    return locktime.toLeBytes(length: BitcoinOpCodeConst.locktimeLengthInBytes);
   }
 
   @override
@@ -788,10 +772,8 @@ class PsbtGlobalPSBTVersionNumber extends PsbtGlobalData {
       keyPair: PsbtKeyPair(
         key: PsbtKey(PsbtGlobalTypes.psbtVersion.flag!),
         value: PsbtValue(
-          IntUtils.toBytes(
-            version.version,
+          version.version.toLeBytes(
             length: BitcoinOpCodeConst.versionLengthInBytes,
-            byteOrder: Endian.little,
           ),
         ),
       ),

@@ -1,16 +1,15 @@
 // ignore_for_file: unused_local_variable
 
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:example/services_examples/explorer_service/explorer_service.dart';
+import 'package:example/services_examples/electrum/http_service_provider.dart';
 
 import 'spending_builders.dart';
 
 // Define the network as the Testnet (used for testing and development purposes).
 const network = BitcoinNetwork.testnet;
-final service = BitcoinApiService();
 
 // Initialize an API provider for interacting with the Testnet's blockchain data.
-final api = ApiProvider.fromMempool(network, service);
+final api = BitcoinProvider(HttpServiceProvider.mempoolTestnet());
 
 // In these tutorials, you will learn how to spend various types of UTXOs.
 // Each method is specific to a type of UTXO.
@@ -28,8 +27,9 @@ Future<void> spendingP2WPKH(ECPrivate sWallet, ECPrivate rWallet) async {
   // P2WPKH
   final sender = publicKey.toSegwitAddress();
   // Read UTXOs of accounts from the BlockCypher API.
-  final utxo = await api.getAccountUtxo(
-      UtxoAddressDetails(address: sender, publicKey: publicKey.toHex()));
+  final utxo = await api.request(MempoolRequestGetAccountUtxos(
+      owner: UtxoAddressDetails(address: sender, publicKey: publicKey.toHex()),
+      address: sender.toAddress(network)));
   // The total amount of UTXOs that we can spend.
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
@@ -37,7 +37,7 @@ Future<void> spendingP2WPKH(ECPrivate sWallet, ECPrivate rWallet) async {
         "account does not have any unspent transaction or mybe no confirmed");
   }
   // Receive network fees
-  final feeRate = await api.getNetworkFeeRate();
+  final feeRate = await api.request(const MempoolRequestGetNetworkFeeRate());
   // feeRate.medium, feeRate.high ,feeRate.low P/KB
 
   // In this section, we select the transaction outputs; the number and type of addresses are not important
@@ -99,7 +99,7 @@ Future<void> spendingP2WPKH(ECPrivate sWallet, ECPrivate rWallet) async {
   final id = transaction.txId();
 
   // send transaction to the network
-  final result = await api.sendRawTransaction(ser);
+  final result = await api.request(MempoolRequestSendRawTransaction(ser));
 }
 
 // Spend P2WSH: Please note that all input addresses must be of P2WSH type; otherwise, the transaction will fail.
@@ -112,15 +112,16 @@ Future<void> spendingP2WSH(ECPrivate sWallet, ECPrivate rWallet) async {
   final addr = sWallet.getPublic();
   // P2WSH ADDRESS
   final sender = addr.toP2wshAddress();
-  final utxo = await api.getAccountUtxo(
-      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
+  final utxo = await api.request(MempoolRequestGetAccountUtxos(
+      owner: UtxoAddressDetails(address: sender, publicKey: addr.toHex()),
+      address: sender.toAddress(network)));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
         "account does not have any unspent transaction or mybe no confirmed");
   }
 
-  final feeRate = await api.getNetworkFeeRate();
+  final feeRate = await api.request(const MempoolRequestGetNetworkFeeRate());
   final prive = sWallet;
 
   final recPub = rWallet.getPublic();
@@ -150,7 +151,7 @@ Future<void> spendingP2WSH(ECPrivate sWallet, ECPrivate rWallet) async {
   );
   final ser = transaction.serialize();
   final id = transaction.txId();
-  await api.sendRawTransaction(ser);
+  await api.request(MempoolRequestSendRawTransaction(ser));
 }
 
 // Spend P2PKH: Please note that all input addresses must be of P2PKH type; otherwise, the transaction will fail.
@@ -161,15 +162,16 @@ Future<void> spendingP2PKH(ECPrivate sWallet, ECPrivate rWallet) async {
   final addr = sWallet.getPublic();
   // P2PKH
   final sender = addr.toAddress();
-  final utxo = await api.getAccountUtxo(
-      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
+  final utxo = await api.request(MempoolRequestGetAccountUtxos(
+      owner: UtxoAddressDetails(address: sender, publicKey: addr.toHex()),
+      address: sender.toAddress(network)));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
         "account does not have any unspent transaction or mybe no confirmed");
   }
 
-  final feeRate = await api.getNetworkFeeRate();
+  final feeRate = await api.request(const MempoolRequestGetNetworkFeeRate());
   final prive = sWallet;
 
   final recPub = rWallet.getPublic();
@@ -199,7 +201,7 @@ Future<void> spendingP2PKH(ECPrivate sWallet, ECPrivate rWallet) async {
   );
   final ser = transaction.serialize();
   final id = transaction.txId();
-  await api.sendRawTransaction(ser);
+  await api.request(MempoolRequestSendRawTransaction(ser));
 }
 
 // Spend P2SH(P2PKH) or P2SH(P2PK): Please note that all input addresses must be of P2SH(P2PKH) or P2SH(P2PK) type; otherwise, the transaction will fail.
@@ -213,15 +215,16 @@ Future<void> spendingP2SHNoneSegwit(
   final addr = sWallet.getPublic();
   // P2SH(P2PK)
   final sender = addr.toP2pkInP2sh();
-  final utxo = await api.getAccountUtxo(
-      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
+  final utxo = await api.request(MempoolRequestGetAccountUtxos(
+      owner: UtxoAddressDetails(address: sender, publicKey: addr.toHex()),
+      address: sender.toAddress(network)));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
         "account does not have any unspent transaction or mybe no confirmed");
   }
 
-  final feeRate = await api.getNetworkFeeRate();
+  final feeRate = await api.request(const MempoolRequestGetNetworkFeeRate());
   final prive = sWallet;
 
   final recPub = rWallet.getPublic();
@@ -250,7 +253,7 @@ Future<void> spendingP2SHNoneSegwit(
   );
   final ser = transaction.serialize();
   final id = transaction.txId();
-  await api.sendRawTransaction(ser);
+  await api.request(MempoolRequestSendRawTransaction(ser));
 }
 
 // Spend P2SH(P2WPKH) or P2SH(P2WSH): Please note that all input addresses must be of P2SH(P2WPKH) or P2SH(P2WSH) type; otherwise, the transaction will fail.
@@ -263,15 +266,16 @@ Future<void> spendingP2shSegwit(ECPrivate sWallet, ECPrivate rWallet) async {
   final addr = sWallet.getPublic();
   // P2SH(P2PWKH)
   final sender = addr.toP2wpkhInP2sh();
-  final utxo = await api.getAccountUtxo(
-      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
+  final utxo = await api.request(MempoolRequestGetAccountUtxos(
+      owner: UtxoAddressDetails(address: sender, publicKey: addr.toHex()),
+      address: sender.toAddress(network)));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
         "account does not have any unspent transaction or mybe no confirmed");
   }
 
-  final feeRate = await api.getNetworkFeeRate();
+  final feeRate = await api.request(const MempoolRequestGetNetworkFeeRate());
   final prive = sWallet;
 
   final recPub = rWallet.getPublic();
@@ -303,7 +307,7 @@ Future<void> spendingP2shSegwit(ECPrivate sWallet, ECPrivate rWallet) async {
   );
   final ser = transaction.serialize();
   final id = transaction.txId();
-  await api.sendRawTransaction(ser);
+  await api.request(MempoolRequestSendRawTransaction(ser));
 }
 
 // Spend P2TR: Please note that all input addresses must be of P2TR type; otherwise, the transaction will fail.
@@ -315,15 +319,16 @@ Future<void> spendingP2TR(ECPrivate sWallet, ECPrivate rWallet) async {
   final addr = sWallet.getPublic();
   // P2TR address
   final sender = addr.toTaprootAddress();
-  final utxo = await api.getAccountUtxo(
-      UtxoAddressDetails(address: sender, publicKey: addr.toHex()));
+  final utxo = await api.request(MempoolRequestGetAccountUtxos(
+      owner: UtxoAddressDetails(address: sender, publicKey: addr.toHex()),
+      address: sender.toAddress(network)));
   final sumOfUtxo = utxo.sumOfUtxosValue();
   if (sumOfUtxo == BigInt.zero) {
     throw Exception(
         "account does not have any unspent transaction or mybe no confirmed");
   }
 
-  final feeRate = await api.getNetworkFeeRate();
+  final feeRate = await api.request(const MempoolRequestGetNetworkFeeRate());
   final prive = sWallet;
 
   final recPub = rWallet.getPublic();
@@ -354,5 +359,5 @@ Future<void> spendingP2TR(ECPrivate sWallet, ECPrivate rWallet) async {
   );
   final ser = transaction.serialize();
   final id = transaction.txId();
-  await api.sendRawTransaction(ser);
+  await api.request(MempoolRequestSendRawTransaction(ser));
 }

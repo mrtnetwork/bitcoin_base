@@ -2,7 +2,7 @@
 
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
-import 'package:example/services_examples/explorer_service/explorer_service.dart';
+import 'package:example/services_examples/electrum/http_service_provider.dart';
 
 /// Calculates the change value based on the sum of all provided values.
 ///
@@ -38,8 +38,7 @@ void _spendFromP2pkhTo10DifferentType() async {
   const network = BitcoinNetwork.testnet;
 
   /// Define http provider and api provider
-  final service = BitcoinApiService();
-  final api = ApiProvider.fromBlocCypher(network, service);
+  final api = BitcoinProvider(HttpServiceProvider.mempoolTestnet());
 
   /// Define a seed using a hex string
   final seed = BytesUtils.fromHexString(
@@ -129,6 +128,8 @@ void _spendFromP2pkhTo10DifferentType() async {
 
             /// Create a UTXO using a BitcoinUtxo with specific details
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "b06f4ed0b49a5092a9ea206553ddc5fc469be694d0d28c95598c653e66cdeb5e",
@@ -149,6 +150,7 @@ void _spendFromP2pkhTo10DifferentType() async {
                 address: examplePublicKey2.toAddress())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
               txHash:
                   "6ff0bdb2966f62f5e202c924e1cab1368b0258833e48986cc0a70fbca624ba93",
               value: BigInt.from(812830),
@@ -185,7 +187,7 @@ void _spendFromP2pkhTo10DifferentType() async {
 
   /// broadcast transaction
   /// https://mempool.space/testnet/tx/05411dce1a1c9e3f44b54413bdf71e7ab3eff1e2f94818a3568c39814c27b258
-  await api.sendRawTransaction(tr.serialize());
+  await api.request(MempoolRequestSendRawTransaction(tr.serialize()));
 
   /// In the [_spendFrom10DifferentTypeToP2pkh] example, our objective is to spend 10 entries from this transaction.
 }
@@ -195,8 +197,7 @@ void _spendFrom10DifferentTypeToP2pkh() async {
   const network = BitcoinNetwork.testnet;
 
   /// Define http provider and api provider
-  final service = BitcoinApiService();
-  final api = ApiProvider.fromBlocCypher(network, service);
+  final api = BitcoinProvider(HttpServiceProvider.mempoolTestnet());
 
   /// Define a seed using a hex string
   final seed = BytesUtils.fromHexString(
@@ -271,6 +272,8 @@ void _spendFrom10DifferentTypeToP2pkh() async {
       utxos: [
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "05411dce1a1c9e3f44b54413bdf71e7ab3eff1e2f94818a3568c39814c27b258",
@@ -291,6 +294,7 @@ void _spendFrom10DifferentTypeToP2pkh() async {
                 address: childKey1PublicKey.toAddress())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
               txHash:
                   "05411dce1a1c9e3f44b54413bdf71e7ab3eff1e2f94818a3568c39814c27b258",
               value: BtcUtils.toSatoshi("0.001"),
@@ -302,6 +306,7 @@ void _spendFrom10DifferentTypeToP2pkh() async {
                 address: childKey1PublicKey.toTaprootAddress())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
               txHash:
                   "05411dce1a1c9e3f44b54413bdf71e7ab3eff1e2f94818a3568c39814c27b258",
               value: BtcUtils.toSatoshi("0.001"),
@@ -313,6 +318,7 @@ void _spendFrom10DifferentTypeToP2pkh() async {
                 address: childKey1PublicKey.toSegwitAddress())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
               txHash:
                   "05411dce1a1c9e3f44b54413bdf71e7ab3eff1e2f94818a3568c39814c27b258",
               value: BtcUtils.toSatoshi("0.001"),
@@ -324,6 +330,7 @@ void _spendFrom10DifferentTypeToP2pkh() async {
                 address: examplePublicKey.toP2pkAddress())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
               txHash:
                   "05411dce1a1c9e3f44b54413bdf71e7ab3eff1e2f94818a3568c39814c27b258",
               value: BtcUtils.toSatoshi("0.001"),
@@ -335,6 +342,7 @@ void _spendFrom10DifferentTypeToP2pkh() async {
                 address: examplePublicKey.toP2pkInP2sh())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
               txHash:
                   "05411dce1a1c9e3f44b54413bdf71e7ab3eff1e2f94818a3568c39814c27b258",
               value: BtcUtils.toSatoshi("0.001"),
@@ -431,5 +439,5 @@ void _spendFrom10DifferentTypeToP2pkh() async {
 
   /// broadcast transaction
   /// https://mempool.space/testnet/tx/3e697e0993a6882689ff9b66ff73cdf53e4a3029664ec4a516da2b291e1cd8a6
-  await api.sendRawTransaction(tr.serialize());
+  await api.request(MempoolRequestSendRawTransaction(tr.serialize()));
 }

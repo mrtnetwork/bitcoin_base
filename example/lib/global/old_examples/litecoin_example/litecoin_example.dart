@@ -104,6 +104,8 @@ void _spendLTCP2pkhAddress() async {
 
             /// Create a UTXO using a BitcoinUtxo with specific details
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "f28d3ce9befa466533ba0f4c03fb2b561b809a41053a2ae76296be72c4f2c28d",
@@ -220,6 +222,8 @@ void _spendFrom2P2shAddressAndOneMultiSigP2shAddress() async {
 
             /// Create a UTXO using a BitcoinUtxo with specific details
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "cdb6281e8bd1062adad50dac8ca45248118f6b59f93d9f3ced963958948ca5a2",
@@ -240,6 +244,7 @@ void _spendFrom2P2shAddressAndOneMultiSigP2shAddress() async {
                 address: examplePublicKey.toP2wpkhInP2sh())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
               txHash:
                   "cdb6281e8bd1062adad50dac8ca45248118f6b59f93d9f3ced963958948ca5a2",
               value: BtcUtils.toSatoshi("0.0001"),
@@ -251,6 +256,7 @@ void _spendFrom2P2shAddressAndOneMultiSigP2shAddress() async {
                 address: examplePublicKey.toP2wpkhInP2sh())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
               txHash:
                   "cdb6281e8bd1062adad50dac8ca45248118f6b59f93d9f3ced963958948ca5a2",
               value: BtcUtils.toSatoshi("0.000088"),
@@ -356,6 +362,8 @@ void _spendFromNestedSegwitP2WPKHInP2SH() async {
 
             /// Create a UTXO using a BitcoinUtxo with specific details
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "f2d2a37b90dd7d51002fae6684ebbbea58430e5b59d7c96271c5d3ef58c72a9d",
@@ -476,6 +484,8 @@ void _spendFromSegwitP2WPKHAddress() async {
 
             /// Create a UTXO using a BitcoinUtxo with specific details
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "a5ae31becf95c8a109cedec4cdde5b05edda14593876f97864e59fd1db970e6b",

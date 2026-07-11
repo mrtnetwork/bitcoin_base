@@ -37,7 +37,7 @@ void main() async {
       "testnet4-electrumx.wakiyamap.dev:51002");
 
   /// create provider with service
-  final provider = ElectrumProvider(service);
+  final provider = BitcoinProvider(service);
 
   final addrOne =
       one.getPublic().toP2pkAddress(mode: PublicKeyType.uncompressed);

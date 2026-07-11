@@ -19,7 +19,7 @@ void main() async {
       await ElectrumSSLService.connect("testnet.aranguren.org:51002");
 
   /// create provider with service
-  final provider = ElectrumProvider(service);
+  final provider = BitcoinProvider(service);
 
   /// spender details
   final privateKey = ECPrivate.fromHex(

@@ -164,7 +164,7 @@ class CashTokenUtils {
       final bytes = List<int>.filled(9, 0);
       bytes[0] = 0xff;
       BinaryOps.writeUint32LE(i.toInt(), bytes, 1);
-      return [0xff, ...BigintUtils.toBytes(i, length: 8, order: Endian.little)];
+      return [0xff, ...i.toI64LeBytes()];
     }
   }
 

@@ -1,14 +1,34 @@
 part of 'package:bitcoin_base/src/bitcoin/address/address.dart';
 
 /// An abstract class representing a forked address for a specific network.
-abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork> {
+abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
+    with Equality, CborTagSerializable
+    implements IAddress {
   const BitcoinNetworkAddress._({
     required this.address,
     required this.network,
     required this.baseAddress,
   });
 
-  static ADDRESS fromBaseAddress<ADDRESS extends BitcoinNetworkAddress>({
+  factory BitcoinNetworkAddress.deserializeIAddress({
+    List<int>? bytes,
+    CborObject? object,
+  }) {
+    final values = CborTagSerializable.decodeTaggedValue(
+      identifier: BlockchainNetwork.bitcoinAndRelated.identifier,
+      cborBytes: bytes,
+      cborObject: object,
+    );
+    final network = BasedUtxoNetwork.fromTag(values.rawValueAt(0));
+    return BitcoinNetworkAddress.fromBaseAddress(
+      address: BitcoinBaseAddress.deserializeIAddress(
+        object: values.objectAt(1),
+      ),
+      network: network,
+    );
+  }
+
+  factory BitcoinNetworkAddress.fromBaseAddress({
     required BitcoinBaseAddress address,
     required BasedUtxoNetwork network,
   }) {
@@ -64,17 +84,12 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork> {
           network: network as ElectraProtocolNetwork,
         );
       default:
-        throw DartBitcoinPluginException("Unknown network. ${network.value}");
+        throw DartBitcoinPluginException("Unknown network. ${network.name}");
     }
-    if (baseAddress is! ADDRESS) {
-      throw DartBitcoinPluginException(
-        "Invalid cast: expected ${ADDRESS.runtimeType}, but found ${baseAddress.runtimeType}.",
-      );
-    }
-    return baseAddress;
+    return baseAddress.cast();
   }
 
-  static ADDRESS parse<ADDRESS extends BitcoinNetworkAddress>({
+  factory BitcoinNetworkAddress.parse({
     required String address,
     required BasedUtxoNetwork network,
   }) {
@@ -121,22 +136,16 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork> {
           network: network as ElectraProtocolNetwork,
         );
       default:
-        throw DartBitcoinPluginException("Unknown network. ${network.value}");
+        throw DartBitcoinPluginException("Unknown network. ${network.name}");
     }
-    if (baseAddress is! ADDRESS) {
-      throw DartBitcoinPluginException(
-        "Invalid cast: expected ${ADDRESS.runtimeType}, but found ${baseAddress.runtimeType}.",
-      );
-    }
-    return baseAddress;
+    return baseAddress.cast();
   }
 
-  static ADDRESS? tryParse<ADDRESS extends BitcoinNetworkAddress>({
-    required String address,
-    required BasedUtxoNetwork network,
-  }) {
+  static BitcoinNetworkAddress? tryParse<
+    ADDRESS extends BitcoinNetworkAddress
+  >({required String address, required BasedUtxoNetwork network}) {
     try {
-      return parse(address: address, network: network);
+      return BitcoinNetworkAddress.parse(address: address, network: network);
     } catch (_) {
       return null;
     }
@@ -144,6 +153,8 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork> {
 
   /// The underlying Bitcoin base address.
   final BitcoinBaseAddress baseAddress;
+
+  String pubKeyHash() => baseAddress.pubKeyHash();
 
   /// Converts the address to a string representation for the specified network [T].
   String toAddress([T? updateNetwork]) {
@@ -156,9 +167,49 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork> {
   BitcoinAddressType get type => baseAddress.type;
 
   /// The string representation of the address.
+  @override
   final String address;
 
   final T network;
+
+  Script toScriptPubKey() => baseAddress.toScriptPubKey();
+
+  @override
+  BlockchainNetwork get blockchainNetwork =>
+      BlockchainNetwork.bitcoinAndRelated;
+
+  @override
+  SerializationIdentifier get serializationIdentifier =>
+      blockchainNetwork.identifier;
+
+  @override
+  List<CborObject?> get serializationItems => [
+    network.tag.toCbor(),
+    baseAddress.toCbor(),
+  ];
+
+  @override
+  List<int> encodeAsIAddress() {
+    return toCbor().encode();
+  }
+
+  @override
+  String get viewType => type.name;
+
+  @override
+  List<dynamic> get variables => [address, network, type.isP2sh ? null : type];
+
+  E cast<E extends BitcoinNetworkAddress>() {
+    if (this is! E) {
+      throw CastFailedException(value: this);
+    }
+    return this as E;
+  }
+
+  @override
+  String toString() {
+    return "$runtimeType({address:$address, type:$type, ${network.name}})";
+  }
 }
 
 /// A concrete implementation of [BitcoinNetworkAddress] for Bitcoin network.
@@ -291,7 +342,7 @@ class BitcoinCashAddress extends BitcoinNetworkAddress<BitcoinCashNetwork> {
       validateNetworkHRP: validateNetworkPrefix,
     );
     if (decodeAddress == null) {
-      throw DartBitcoinPluginException('Invalid ${network.value} address.');
+      throw DartBitcoinPluginException('Invalid ${network.name} address.');
     }
     return BitcoinCashAddress._(decodeAddress, address, network);
   }

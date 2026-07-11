@@ -1,6 +1,8 @@
 part of 'package:bitcoin_base/src/bitcoin/address/address.dart';
 
-abstract class SegwitAddress implements BitcoinBaseAddress {
+abstract class SegwitAddress
+    with CborTagSerializable, Equality
+    implements BitcoinBaseAddress {
   SegwitAddress.fromAddress({
     required String address,
     required BasedUtxoNetwork network,
@@ -8,7 +10,7 @@ abstract class SegwitAddress implements BitcoinBaseAddress {
   }) {
     if (!network.supportedAddress.contains(type)) {
       throw DartBitcoinPluginException(
-        'network does not support ${type.value} address',
+        'network does not support ${type.name} address',
       );
     }
     addressProgram = BitcoinAddressUtils.toSegwitProgramWithVersionAndNetwork(
@@ -39,7 +41,7 @@ abstract class SegwitAddress implements BitcoinBaseAddress {
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
       throw DartBitcoinPluginException(
-        'network does not support ${type.value} address',
+        'network does not support ${type.name} address',
       );
     }
     return BitcoinAddressUtils.segwitToAddress(
@@ -55,18 +57,17 @@ abstract class SegwitAddress implements BitcoinBaseAddress {
   }
 
   @override
-  operator ==(other) {
-    if (identical(this, other)) return true;
-    if (other is! SegwitAddress) return false;
-    if (runtimeType != other.runtimeType) return false;
-    if (type != other.type) return false;
-    return addressProgram == other.addressProgram &&
-        segwitVersion == other.segwitVersion;
-  }
+  SerializationIdentifier get serializationIdentifier =>
+      BlockchainNetwork.bitcoinAndRelated.identifier;
 
   @override
-  int get hashCode =>
-      HashCodeGenerator.generateHashCode([addressProgram, segwitVersion, type]);
+  List<CborObject?> get serializationItems => [
+    type.id.toCbor(),
+    CborBytesValue(BytesUtils.fromHexString(addressProgram)),
+  ];
+
+  @override
+  List<dynamic> get variables => [addressProgram, type, segwitVersion];
 }
 
 class P2wpkhAddress extends SegwitAddress {

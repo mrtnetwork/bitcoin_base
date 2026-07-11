@@ -242,7 +242,7 @@ class ECPublic {
   }) {
     final signatureBytes = StringUtils.encode(
       signature,
-      type: StringEncoding.base64,
+      encoding: StringEncoding.base64,
     );
     final ecdsaPubKey = BitcoinSignatureVerifier.recoverPublicKey(
       message: message,
@@ -273,7 +273,7 @@ class ECPublic {
   }) {
     final signatureBytes = StringUtils.encode(
       signature,
-      type: StringEncoding.base64,
+      encoding: StringEncoding.base64,
     );
     final ecdsaPubKey = BitcoinSignatureVerifier.recoverPublicKey(
       message: message,

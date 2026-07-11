@@ -16,7 +16,6 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// - [outPuts]: List of Bitcoin outputs to be included in the transaction.
 /// - [fee]: Transaction fee (BigInt) for processing the transaction.
 /// - [network]: The target Bitcoin network (Bitcoin Cash or Bitcoin SV).
-/// - [utxosInfo]: List of UtxoWithAddress objects providing information about Unspent Transaction Outputs (UTXOs).
 /// - [memo]: Optional memo or additional information associated with the transaction.
 /// - [enableRBF]: Flag indicating whether Replace-By-Fee (RBF) is enabled. Default is false.
 /// - [isFakeTransaction]: Flag indicating whether the transaction is a fake/mock transaction. Default is false.
@@ -44,10 +43,15 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   }
 
   void _validateBuilder() {
-    if (network is! BitcoinCashNetwork && network is! BitcoinSVNetwork) {
-      throw const DartBitcoinPluginException(
-        'invalid network. use ForkedTransactionBuilder for BitcoinCashNetwork and BSVNetwork otherwise use BitcoinTransactionBuilder',
-      );
+    switch (network) {
+      case BitcoinCashNetwork _:
+      case BitcoinSVNetwork _:
+        break;
+      default:
+        throw DartBitcoinPluginException(
+          'invalid network. use ForkedTransactionBuilder for BitcoinCashNetwork and BSVNetwork otherwise use BitcoinTransactionBuilder',
+          details: {"network": network.name},
+        );
     }
 
     /// validate every address is related to network
@@ -352,9 +356,9 @@ be retrieved by anyone who examines the blockchain's history.
       throw DartBitcoinPluginException(
         'Sum value of utxo not spending',
         details: {
-          'inputAmount': sumUtxoAmount,
-          'fee': fee,
-          'outputAmount': sumOutputAmounts,
+          'inputAmount': sumUtxoAmount.toString(),
+          'fee': fee.toString(),
+          'outputAmount': sumOutputAmounts.toString(),
         },
       );
     }
@@ -380,8 +384,8 @@ be retrieved by anyone who examines the blockchain's history.
             'Sum token value of UTXOs not spending. use BitcoinBurnableOutput if you want to burn tokens.',
             details: {
               'token': i.key,
-              'inputValue': i.value,
-              'outputValue': amount,
+              'inputValue': i.value.toString(),
+              'outputValue': amount.toString(),
             },
           );
         }

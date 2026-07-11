@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
@@ -1067,10 +1066,8 @@ class PsbtUtils {
     if (lock == null) {
       return locktimeFallBack ?? BitcoinOpCodeConst.defaultTxLocktime;
     }
-    return IntUtils.toBytes(
-      lock.timelock,
+    return lock.timelock.toLeBytes(
       length: BitcoinOpCodeConst.locktimeLengthInBytes,
-      byteOrder: Endian.little,
     );
   }
 

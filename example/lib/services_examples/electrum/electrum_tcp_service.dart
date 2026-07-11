@@ -1,13 +1,12 @@
 /// Simple example how to send request to electurm  with tcp
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:blockchain_utils/service/models/params.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:example/services_examples/electrum/request_completer.dart';
 
-class ElectrumTCPService with ElectrumServiceProvider {
+class ElectrumTCPService with BitcoinServiceProvider {
   ElectrumTCPService._(
     this.url,
     Socket channel, {
@@ -31,7 +30,7 @@ class ElectrumTCPService with ElectrumServiceProvider {
     if (_isDiscounnect) {
       throw StateError("socket has been discounected");
     }
-    _socket?.add(params);
+    _socket?.add([...params, ..."\n".codeUnits]);
   }
 
   void _onClose(Object? error) {
@@ -59,28 +58,32 @@ class ElectrumTCPService with ElectrumServiceProvider {
     final parts = url.split(":");
     final channel = await Socket.connect(parts[0], int.parse(parts[1]))
         .timeout(connectionTimeOut);
-
     return ElectrumTCPService._(url, channel,
         defaultRequestTimeOut: defaultRequestTimeOut);
   }
 
+  String data = '';
   void _onMessge(List<int> event) {
-    final Map<String, dynamic> decode = json.decode(utf8.decode(event));
-    if (decode.containsKey("id")) {
-      final int id = int.parse(decode["id"]!.toString());
-      final request = requests.remove(id);
-      request?.completer.complete(decode);
+    data += StringUtils.decode(event);
+    final Map<String, dynamic>? decode =
+        StringUtils.tryToJson<Map<String, dynamic>>(data);
+    if (decode != null) {
+      data = '';
+      if (decode.containsKey("id")) {
+        final int id = int.parse(decode["id"]!.toString());
+        final request = requests.remove(id);
+        request?.completer.complete(decode);
+      }
     }
   }
 
   @override
-  Future<BaseServiceResponse<T>> doRequest<T>(ElectrumRequestDetails params,
+  Future<BaseServiceResponse> doRequest(BitcoinRequestDetails params,
       {Duration? timeout}) async {
-    final AsyncRequestCompleter compeleter =
-        AsyncRequestCompleter(params.params);
+    final AsyncRequestCompleter compeleter = AsyncRequestCompleter();
     try {
       requests[params.requestID] = compeleter;
-      add(params.toTCPParams());
+      add(params.encodeBody(protocol: ServiceProtocol.tcp) ?? []);
       final result = await compeleter.completer.future
           .timeout(timeout ?? defaultRequestTimeOut);
       return params.toResponse(result);

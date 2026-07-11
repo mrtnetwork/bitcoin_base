@@ -303,7 +303,10 @@ abstract class PsbtBuilder extends PsbtBuilderImpl
   static PSBTBUILDER fromBase64<PSBTBUILDER extends PsbtBuilder>(
     String base64,
   ) {
-    final decode = StringUtils.tryEncode(base64, type: StringEncoding.base64);
+    final decode = StringUtils.tryEncode(
+      base64,
+      encoding: StringEncoding.base64,
+    );
     if (decode == null) {
       throw DartBitcoinPluginException(
         "Invalid PSBT base64: Decoding failed or malformed input.",

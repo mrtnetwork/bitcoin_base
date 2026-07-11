@@ -1,9 +1,11 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/cash_token/cash_token.dart';
-import 'package:bitcoin_base/src/provider/api_provider.dart';
+import 'package:bitcoin_base/src/provider/models/models.dart';
 import 'package:blockchain_utils/helper/extensions/extensions.dart';
+import 'package:blockchain_utils/utils/json/json.dart';
 import 'package:blockchain_utils/utils/numbers/utils/bigint_utils.dart';
 import 'package:blockchain_utils/utils/numbers/utils/int_utils.dart';
+import 'package:blockchain_utils/utils/string/string.dart';
 
 class ElectrumUtxo implements UTXO {
   factory ElectrumUtxo.fromJson(Map<String, dynamic> json) {
@@ -18,13 +20,13 @@ class ElectrumUtxo implements UTXO {
               : CashToken.fromJson(json['token_data']),
     );
   }
-  const ElectrumUtxo._({
+  ElectrumUtxo._({
     required this.height,
-    required this.txId,
+    required String txId,
     required this.vout,
     required this.value,
     this.token,
-  });
+  }) : txId = StringUtils.normalizeHex(txId);
   final int height;
   final String txId;
   final int vout;
@@ -88,9 +90,6 @@ class ElectrumGetMerkleResponse {
   }
 }
 
-/// txid, hash, version, size, vsize, weight, locktime, vin, vout, hex, blockhash, confirmations, time, blocktime
-/// txid, hash, version, size, vsize, weight, locktime, vin, vout, hex
-
 class ElectrumVerbosTxResponse {
   final String txId;
   final String? hash;
@@ -104,24 +103,28 @@ class ElectrumVerbosTxResponse {
   final int? confirmations;
   final int? time;
   final int? blocktime;
+  final bool isCoinbase;
   factory ElectrumVerbosTxResponse.fromJson(Map<String, dynamic> json) {
+    final inputs = json.valueAsList<List<Map<String, dynamic>>>("vin");
     return ElectrumVerbosTxResponse(
-      txId: json["txid"],
-      hash: json["hash"],
-      version: IntUtils.tryParse(json["version"]),
-      size: IntUtils.tryParse(json["size"]),
-      vsize: IntUtils.tryParse(json["vsize"]),
-      weight: IntUtils.tryParse(json["weight"]),
-      locktime: IntUtils.tryParse(json["locktime"]),
-      hex: json["hex"],
-      blockhash: json["blockhash"],
-      confirmations: IntUtils.tryParse(json["confirmations"]),
-      blocktime: IntUtils.tryParse(json["blocktime"]),
-      time: IntUtils.tryParse(json["time"]),
+      txId: json.valueAs("txid"),
+      hash: json.valueAs("hash"),
+      version: json.valueAsInt("version"),
+      size: json.valueAsInt("size"),
+      vsize: json.valueAsInt("vsize"),
+      weight: json.valueAsInt("weight"),
+      locktime: json.valueAsInt("locktime"),
+      hex: json.valueAs("hex"),
+      blockhash: json.valueAs("blockhash"),
+      confirmations: json.valueAsInt("confirmations"),
+      blocktime: json.valueAsInt("blocktime"),
+      time: json.valueAsInt("time"),
+      isCoinbase: inputs.length == 1 && inputs[0].hasValue("coinbase"),
     );
   }
-  const ElectrumVerbosTxResponse({
-    required this.txId,
+  ElectrumVerbosTxResponse({
+    required String txId,
+    required this.isCoinbase,
     this.hash,
     this.version,
     this.size,
@@ -133,5 +136,5 @@ class ElectrumVerbosTxResponse {
     this.confirmations,
     this.time,
     this.blocktime,
-  });
+  }) : txId = StringUtils.normalizeHex(txId);
 }

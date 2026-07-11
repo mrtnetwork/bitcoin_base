@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
 import 'package:bitcoin_base/src/cash_token/cash_token.dart';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
@@ -211,10 +210,7 @@ class BtcTransaction {
     }
     List<int> txForSign = tx.toBytes(allowWitness: false);
 
-    txForSign = [
-      ...txForSign,
-      ...IntUtils.toBytes(sighash, length: 4, byteOrder: Endian.little),
-    ];
+    txForSign = [...txForSign, ...sighash.toU32LeBytes()];
     return QuickCrypto.sha256DoubleHash(txForSign);
   }
 
@@ -278,11 +274,7 @@ class BtcTransaction {
         hashPrevouts = [
           ...hashPrevouts,
           ...txidBytes,
-          ...IntUtils.toBytes(
-            txin.txIndex,
-            length: 4,
-            byteOrder: Endian.little,
-          ),
+          ...txin.txIndex.toU32LeBytes(),
         ];
       }
       hashPrevouts = QuickCrypto.sha256DoubleHash(hashPrevouts);
@@ -305,11 +297,7 @@ class BtcTransaction {
     if (basicSigHashType == BitcoinOpCodeConst.sighashSingle &&
         txInIndex < tx.outputs.length) {
       final out = tx.outputs[txInIndex];
-      final packedAmount = BigintUtils.toBytes(
-        out.amount,
-        length: 8,
-        order: Endian.little,
-      );
+      final packedAmount = out.amount.toI64LeBytes();
       final scriptBytes = IntUtils.prependVarint(out.scriptPubKey.toBytes());
       hashOutputs = [...packedAmount, ...scriptBytes];
       hashOutputs = QuickCrypto.sha256DoubleHash(hashOutputs);
@@ -322,28 +310,19 @@ class BtcTransaction {
     final txIn = inputs[txInIndex];
 
     final txidBytes = BytesUtils.fromHexString(txIn.txId).reversed.toList();
-    txForSigning.add([
-      ...txidBytes,
-      ...IntUtils.toBytes(txIn.txIndex, length: 4, byteOrder: Endian.little),
-    ]);
+    txForSigning.add([...txidBytes, ...txIn.txIndex.toU32LeBytes()]);
     if (token != null) {
       txForSigning.add(token.toBytes());
     }
     final varintBytes = IntUtils.prependVarint(script.toBytes());
 
     txForSigning.add(varintBytes);
-    final packedAmount = BigintUtils.toBytes(
-      amount,
-      length: 8,
-      order: Endian.little,
-    );
+    final packedAmount = amount.toI64LeBytes();
     txForSigning.add(packedAmount);
     txForSigning.add(txIn.sequence);
     txForSigning.add(hashOutputs);
     txForSigning.add(locktime);
-    txForSigning.add(
-      IntUtils.toBytes(sighash, length: 4, byteOrder: Endian.little),
-    );
+    txForSigning.add(sighash.toU32LeBytes());
     return QuickCrypto.sha256DoubleHash(txForSigning.toBytes());
   }
 
@@ -382,18 +361,14 @@ class BtcTransaction {
         hashPrevouts = [
           ...hashPrevouts,
           ...txidBytes,
-          ...IntUtils.toBytes(
-            txin.txIndex,
-            length: 4,
-            byteOrder: Endian.little,
-          ),
+          ...txin.txIndex.toU32LeBytes(),
         ];
       }
       hashPrevouts = QuickCrypto.sha256Hash(hashPrevouts);
       txForSign.add(hashPrevouts);
 
       for (final i in amounts) {
-        final bytes = BigintUtils.toBytes(i, length: 8, order: Endian.little);
+        final bytes = i.toI64LeBytes();
         hashAmounts = [...hashAmounts, ...bytes];
       }
       hashAmounts = QuickCrypto.sha256Hash(hashAmounts);
@@ -414,11 +389,7 @@ class BtcTransaction {
     }
     if (!(sighashNone || sighashSingle)) {
       for (final txOut in newTx.outputs) {
-        final packedAmount = BigintUtils.toBytes(
-          txOut.amount,
-          length: 8,
-          order: Endian.little,
-        );
+        final packedAmount = txOut.amount.toI64LeBytes();
         final scriptBytes = IntUtils.prependVarint(
           txOut.scriptPubKey.toBytes(),
         );
@@ -437,25 +408,16 @@ class BtcTransaction {
     if (anyoneCanPay) {
       final txin = newTx.inputs[txIndex];
       final txidBytes = BytesUtils.fromHexString(txin.txId).reversed.toList();
-      final result = [
-        ...txidBytes,
-        ...IntUtils.toBytes(txin.txIndex, length: 4, byteOrder: Endian.little),
-      ];
+      final result = [...txidBytes, ...txin.txIndex.toU32LeBytes()];
       txForSign.add(result);
-      txForSign.add(
-        BigintUtils.toBytes(amounts[txIndex], length: 8, order: Endian.little),
-      );
+      txForSign.add(amounts[txIndex].toI64LeBytes());
       final scriptBytes = IntUtils.prependVarint(
         scriptPubKeys[txIndex].toBytes(),
       );
       txForSign.add(scriptBytes);
       txForSign.add(txin.sequence);
     } else {
-      final indexBytes = IntUtils.toBytes(
-        txIndex,
-        length: 4,
-        byteOrder: Endian.little,
-      );
+      final indexBytes = txIndex.toU32LeBytes();
       txForSign.add(indexBytes);
     }
     if (annex != null) {
@@ -466,11 +428,7 @@ class BtcTransaction {
     ///
     if (sighashSingle && txIndex < newTx.outputs.length) {
       final txOut = newTx.outputs[txIndex];
-      final packedAmount = BigintUtils.toBytes(
-        txOut.amount,
-        length: 8,
-        order: Endian.little,
-      );
+      final packedAmount = txOut.amount.toI64LeBytes();
       final scriptBytes = IntUtils.prependVarint(txOut.scriptPubKey.toBytes());
       final hashOut = [...packedAmount, ...scriptBytes];
       txForSign.add(QuickCrypto.sha256Hash(hashOut));

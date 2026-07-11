@@ -45,10 +45,19 @@ class BitcoinTransactionBuilder extends BasedBitcoinTransacationBuilder {
 
   /// validate network and address suport before create transaction
   void _validateBuilder() {
-    if (network is BitcoinCashNetwork || network is BitcoinSVNetwork) {
-      throw const DartBitcoinPluginException(
-        'invalid network for BitcoinCashNetwork and BSVNetwork use ForkedTransactionBuilder',
-      );
+    switch (network) {
+      case BitcoinCashNetwork _:
+      case BitcoinSVNetwork _:
+        throw const DartBitcoinPluginException(
+          'invalid network for BitcoinCashNetwork and BSVNetwork use ForkedTransactionBuilder.',
+        );
+      case ZcashNetworkTransparent _:
+        throw DartBitcoinPluginException(
+          'Unsupported network.',
+          details: {"network": network.name},
+        );
+      default:
+        break;
     }
     final token = utxos.any((element) => element.utxo.token != null);
     final tokenInput = outPuts.whereType<BitcoinTokenOutput>();
@@ -247,8 +256,12 @@ class BitcoinTransactionBuilder extends BasedBitcoinTransacationBuilder {
           return senderPub.toP2pkInP2sh(mode: utxo.keyType).toScriptPubKey();
         }
         return senderPub.toRedeemScript(mode: utxo.keyType);
+      default:
+        throw DartBitcoinPluginException(
+          'Unsupported ${network.name} address type.',
+          details: {"type": utxo.utxo.scriptType.name},
+        );
     }
-    throw const DartBitcoinPluginException('invalid bitcoin address type');
   }
 
   /// generateTransactionDigest generates and returns a transaction digest for a given input in the context of a Bitcoin
@@ -334,7 +347,7 @@ class BitcoinTransactionBuilder extends BasedBitcoinTransacationBuilder {
           return [p2wsh.toScriptPubKey().toHex()];
         default:
           throw DartBitcoinPluginException(
-            'Invalid p2sh nested segwit type ${utxo.utxo.scriptType.value}',
+            'Invalid p2sh nested segwit type ${utxo.utxo.scriptType.name}',
           );
       }
     }
@@ -348,7 +361,7 @@ class BitcoinTransactionBuilder extends BasedBitcoinTransacationBuilder {
         return [script.toHex()];
       default:
         throw DartBitcoinPluginException(
-          'Invalid p2sh nested segwit type ${utxo.utxo.scriptType.value}',
+          'Invalid p2sh nested segwit type ${utxo.utxo.scriptType.name}',
         );
     }
   }
@@ -375,7 +388,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           return [signedDigest, senderPub.toHex()];
         default:
           throw DartBitcoinPluginException(
-            'invalid segwit address type ${utx.utxo.scriptType.value}',
+            'invalid segwit address type ${utx.utxo.scriptType.name}',
           );
       }
     } else {
@@ -393,7 +406,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
           return [signedDigest, script.toHex()];
         default:
           throw DartBitcoinPluginException(
-            'invalid address type ${utx.utxo.scriptType.value}',
+            'invalid address type ${utx.utxo.scriptType.name}',
           );
       }
     }
@@ -453,7 +466,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
       if (i.amount.isNegative) {
         throw DartBitcoinPluginException(
           'Some output has negative amount.',
-          details: {'output': i.amount},
+          details: {'output': i.amount.toString()},
         );
       }
     }
@@ -527,12 +540,12 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
     if (hasTaproot) {
       taprootAmounts =
           utxos
-              .where((e) => !e.utxo.coinbase)
+              // .where((e) => !(e.utxo.coinbase ?? false))
               .map((e) => e.utxo.value)
               .toList();
       taprootScripts =
           utxos
-              .where((e) => !e.utxo.coinbase)
+              // .where((e) => !(e.utxo.coinbase ?? false))
               .map((e) => _findLockingScript(e, true))
               .toList();
     }

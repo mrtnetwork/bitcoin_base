@@ -901,8 +901,8 @@ class BipOrTaprootKeyDerivationRequest {
         throw DartBitcoinPluginException(
           "Invalid Public key XOnly key length.",
           details: {
-            "excpected": EcdsaKeysConst.pointCoordByteLen,
-            "length": pubKeyOrXonly.length,
+            "excpected": EcdsaKeysConst.pointCoordByteLen.toString(),
+            "length": pubKeyOrXonly.length.toString(),
           },
         );
       }
@@ -911,8 +911,8 @@ class BipOrTaprootKeyDerivationRequest {
       throw DartBitcoinPluginException(
         "Invalid Public key length.",
         details: {
-          "excpected": EcdsaKeysConst.pubKeyCompressedByteLen,
-          "length": pubKeyOrXonly.length,
+          "excpected": EcdsaKeysConst.pubKeyCompressedByteLen.toString(),
+          "length": pubKeyOrXonly.length.toString(),
         },
       );
     }
@@ -920,8 +920,8 @@ class BipOrTaprootKeyDerivationRequest {
       throw DartBitcoinPluginException(
         "Invalid Fingerprint key length.",
         details: {
-          "excpected": Bip32KeyDataConst.fingerprintByteLen,
-          "length": pubKeyOrXonly.length,
+          "excpected": Bip32KeyDataConst.fingerprintByteLen.toString(),
+          "length": pubKeyOrXonly.length.toString(),
         },
       );
     }

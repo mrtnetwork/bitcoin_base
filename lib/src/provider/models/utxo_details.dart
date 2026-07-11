@@ -3,6 +3,7 @@ import 'package:bitcoin_base/src/cash_token/cash_token.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/provider/models/models.dart';
+import 'package:bitcoin_base/src/serialization/identifier.dart';
 import 'package:bitcoin_base/src/utils/btc_utils.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
@@ -212,14 +213,15 @@ class BitcoinBurnableOutput extends BitcoinBaseOutput {
   }) : value = value ?? BigInt.zero;
 
   @override
-  TxOutput get toOutput => throw UnimplementedError();
+  TxOutput get toOutput =>
+      throw DartBitcoinPluginException("Unsupported method.");
 }
 
 /// BitcoinUtxo represents an unspent transaction output (UTXO) on the Bitcoin blockchain.
 /// It includes details such as the transaction hash (TxHash), the amount of bitcoins (Value),
 /// the output index (Vout), the script type (ScriptType), and the block height at which the UTXO
 /// was confirmed (BlockHeight).
-class BitcoinUtxo {
+class BitcoinUtxo with CborTagSerializable, PartialEquality {
   final CashToken? token;
 
   /// TxHash is the unique identifier of the transaction containing this UTXO.
@@ -235,28 +237,78 @@ class BitcoinUtxo {
   final BitcoinAddressType scriptType;
 
   /// BlockHeight represents the block height at which this UTXO was confirmed.
-  final int? blockHeight;
+  final int blockHeight;
+
+  final bool? coinbase;
+
+  BitcoinUtxo copyWith({
+    CashToken? token,
+    String? txHash,
+    BigInt? value,
+    int? vout,
+    int? blockHeight,
+    bool? coinbase,
+    BitcoinAddressType? scriptType,
+  }) {
+    return BitcoinUtxo(
+      txHash: txHash ?? this.txHash,
+      value: value ?? this.value,
+      vout: vout ?? this.vout,
+      scriptType: scriptType ?? this.scriptType,
+      blockHeight: blockHeight ?? this.blockHeight,
+      coinbase: coinbase ?? this.coinbase,
+      token: token ?? this.token,
+    );
+  }
 
   BitcoinUtxo._({
-    required this.txHash,
+    required String txHash,
     required this.value,
     required this.vout,
     required this.scriptType,
-    this.blockHeight,
+    required this.blockHeight,
     this.token,
     required this.isP2tr,
     required this.isP2shSegwit,
     required this.isSegwit,
     required this.coinbase,
-  });
+  }) : txHash = StringUtils.normalizeHex(txHash);
+  factory BitcoinUtxo.deserialize({CborObject? object, List<int>? bytes}) {
+    final CborListValue values = CborTagSerializable.decodeTaggedValue(
+      cborObject: object,
+      cborBytes: bytes,
+      identifier: BitcoinSerializationIdentifiers.bitcoinUtxo,
+    );
+    return BitcoinUtxo(
+      txHash: values.rawValueAt(0),
+      value: values.rawValueAt(1),
+      vout: values.rawValueAt(2),
+      token: values.maybeObjectAt<CashToken, CborBytesValue>(3, (e) {
+        final data = CashToken.deserialize(e.value);
+        final token = data.$1;
+        if (token == null) {
+          throw DartBitcoinPluginException("Invalid cashtoken bytes.");
+        }
+        return token;
+      }),
+      scriptType: BitcoinAddressType.fromTag(values.rawValueAt(4)),
+      blockHeight: values.rawValueAt(5),
+      coinbase: values.rawValueAt(6),
+    );
+  }
+
   factory BitcoinUtxo.fromJson(Map<String, dynamic> json) {
     return BitcoinUtxo(
-      txHash: json["tx_hash"],
-      value: BigintUtils.parse(json["value"]),
-      vout: json["vout"],
-      scriptType: BitcoinAddressType.fromValue(json["script_type"]),
-      blockHeight: IntUtils.tryParse(json["block_height"]),
-      token: json["token"] == null ? null : CashToken.fromJson(json["token"]),
+      txHash: json.valueAs("tx_hash"),
+      value: json.valueAsBigInt("value"),
+      vout: json.valueAs("vout"),
+      scriptType: BitcoinAddressType.fromName(json.valueAs("script_type")),
+      blockHeight: json.valueAs("block_height"),
+      token: json.valueTo<CashToken?, Map<String, dynamic>>(
+        key: "token",
+        parse: CashToken.fromJson,
+      ),
+      coinbase: json.valueAs("coinbase"),
     );
   }
   factory BitcoinUtxo({
@@ -264,7 +316,8 @@ class BitcoinUtxo {
     required BigInt value,
     required int vout,
     required BitcoinAddressType scriptType,
-    int? blockHeight,
+    required int blockHeight,
+    bool? coinbase,
     CashToken? token,
   }) {
     final isP2shSegwit =
@@ -277,7 +330,7 @@ class BitcoinUtxo {
       token: token,
       vout: vout,
       scriptType: scriptType,
-      coinbase: RegExp(r'^0+$').hasMatch(StringUtils.normalizeHex(txHash)),
+      coinbase: coinbase,
       isP2tr: scriptType == SegwitAddressType.p2tr,
       isP2shSegwit: isP2shSegwit,
       isSegwit: isP2shSegwit || scriptType.isSegwit,
@@ -293,12 +346,21 @@ class BitcoinUtxo {
   /// check if utxos is p2sh neasted segwit
   final bool isP2shSegwit;
 
-  final bool coinbase;
-
   /// convert utxos to transaction input with specify sequence like ReplaceByeFee (4Bytes)
   TxInput toInput([List<int>? sequence]) {
     return TxInput(txId: txHash, txIndex: vout, sequance: sequence);
   }
+
+  @override
+  List<CborObject?> get serializationItems => [
+    txHash.toCbor(),
+    value.toCbor(),
+    vout.toCbor(),
+    token?.toBytes().toCborBytes(),
+    scriptType.id.toCbor(),
+    blockHeight.toCbor(),
+    coinbase?.toCbor(),
+  ];
 
   Map<String, dynamic> toJson() {
     return {
@@ -306,19 +368,28 @@ class BitcoinUtxo {
       "tx_hash": txHash,
       "value": value.toString(),
       "vout": vout,
-      "script_type": scriptType.value,
+      "script_type": scriptType.name,
       "block_height": blockHeight,
     };
   }
 
   @override
   String toString() {
-    return 'txid: $txHash vout: $vout script: ${scriptType.value} value: $value blockHeight: $blockHeight';
+    return 'txid: $txHash vout: $vout script: ${scriptType.name} value: $value blockHeight: $blockHeight';
   }
+
+  @override
+  SerializationIdentifier get serializationIdentifier =>
+      BitcoinSerializationIdentifiers.bitcoinUtxo;
+
+  @override
+  List<dynamic> get parts => [txHash, vout];
+
+  bool confirmed() => blockHeight > 0;
 }
 
 /// extenstion for calculation on list of utxos
-extension Calculate on List<UtxoWithAddress> {
+extension ExtUtxoCalculate on List<UtxoWithAddress> {
   /// sum of utxos network values
   BigInt sumOfUtxosValue() {
     var sum = BigInt.zero;

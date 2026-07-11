@@ -71,7 +71,7 @@ class TaprootUtils {
     if (merkleRoot != null && merkleRoot.length != 32) {
       throw DartBitcoinPluginException(
         "Invalid Merkle root: must be exactly 32 bytes.",
-        details: {"length": merkleRoot.length},
+        details: {"length": merkleRoot.length.toString()},
       );
     }
     List<int>? xKey = pubKey.clone();
@@ -99,7 +99,7 @@ class TaprootUtils {
     if (xKey.length != 32) {
       throw DartBitcoinPluginException(
         "Invalid XOnlyKey length.",
-        details: {"excpected": 32, "length": xKey.length},
+        details: {"excpected": "32", "length": xKey.length.toString()},
       );
     }
     final tweek = tapTweakTaggedHash([

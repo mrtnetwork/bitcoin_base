@@ -11,7 +11,7 @@ void main() async {
       await ElectrumWebSocketService.connect("wss://tbch4.loping.net:62004");
 
   /// create provider with service
-  final provider = ElectrumProvider(service);
+  final provider = BitcoinProvider(service);
 
   /// initialize private key
   final privateKey = ECPrivate.fromBytes(BytesUtils.fromHexString(

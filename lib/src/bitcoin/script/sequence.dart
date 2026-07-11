@@ -1,7 +1,6 @@
-import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/exception/exception.dart';
-import 'package:blockchain_utils/utils/utils.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// Helps setting up appropriate sequence. Used to provide the sequence to transaction inputs and to scripts.
 ///
@@ -40,7 +39,7 @@ class Sequence {
         seq |= 1 << 22;
       }
       seq |= value;
-      return IntUtils.toBytes(seq, length: 4, byteOrder: Endian.little);
+      return seq.toU32LeBytes();
     }
 
     throw const DartBitcoinPluginException('Invalid seqType');

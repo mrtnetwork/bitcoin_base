@@ -6,7 +6,7 @@ import 'package:blockchain_utils/service/models/params.dart';
 import 'package:example/services_examples/cross_platform_websocket/core.dart';
 import 'package:example/services_examples/electrum/request_completer.dart';
 
-class ElectrumWebSocketService with ElectrumServiceProvider {
+class ElectrumWebSocketService with BitcoinServiceProvider {
   ElectrumWebSocketService._(
     this.url,
     WebSocketCore channel, {
@@ -73,13 +73,12 @@ class ElectrumWebSocketService with ElectrumServiceProvider {
   }
 
   @override
-  Future<BaseServiceResponse<T>> doRequest<T>(ElectrumRequestDetails params,
+  Future<BaseServiceResponse> doRequest(BitcoinRequestDetails params,
       {Duration? timeout}) async {
-    final AsyncRequestCompleter compeleter =
-        AsyncRequestCompleter(params.params);
+    final AsyncRequestCompleter compeleter = AsyncRequestCompleter();
     try {
       requests[params.requestID] = compeleter;
-      add(params.toWebSocketParams());
+      add(params.encodeBody() ?? []);
       final result = await compeleter.completer.future
           .timeout(timeout ?? defaultRequestTimeOut);
       return params.toResponse(result);

@@ -127,6 +127,8 @@ void _spendFrom2P2SHAnd2P2PKHAddress() async {
 
             /// Create a UTXO using a BitcoinUtxo with specific details
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "fffd7bd09acdf87d383bb60d698f170fc4c3e74ebf50700e3724ae9a566d1b9b",
@@ -273,6 +275,8 @@ void _spendFrom2P2SHAnd1P2PKHAddress() async {
 
             /// Create a UTXO using a BitcoinUtxo with specific details
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "ece972a6d5d1b07062ed5aaab786b528b04a3cf675affdda8cb79ec805c53ce2",
@@ -293,6 +297,8 @@ void _spendFrom2P2SHAnd1P2PKHAddress() async {
                 address: childKey1PublicKey.toP2pkInP2sh())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "ece972a6d5d1b07062ed5aaab786b528b04a3cf675affdda8cb79ec805c53ce2",
@@ -313,6 +319,8 @@ void _spendFrom2P2SHAnd1P2PKHAddress() async {
                 address: childKey1PublicKey.toP2pkhInP2sh())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "ece972a6d5d1b07062ed5aaab786b528b04a3cf675affdda8cb79ec805c53ce2",
@@ -333,6 +341,8 @@ void _spendFrom2P2SHAnd1P2PKHAddress() async {
                 address: examplePublicKey.toAddress())),
         UtxoWithAddress(
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "ece972a6d5d1b07062ed5aaab786b528b04a3cf675affdda8cb79ec805c53ce2",

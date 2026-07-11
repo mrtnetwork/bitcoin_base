@@ -67,10 +67,11 @@ class ECPrivate {
 
   /// creates an object from a WIF of WIFC format (string)
   factory ECPrivate.fromWif(String wif, {List<int>? netVersion}) {
-    final decode = WifDecoder.decode(
-      wif,
-      netVer: netVersion ?? BitcoinNetwork.mainnet.wifNetVer,
-    );
+    netVersion ??= BitcoinNetwork.mainnet.wifNetVer;
+    if (netVersion == null) {
+      throw DartBitcoinPluginException("Missing wif prefix.");
+    }
+    final decode = WifDecoder.decode(wif, netVer: netVersion);
     return ECPrivate.fromBytes(decode.$1);
   }
 
@@ -79,11 +80,14 @@ class ECPrivate {
     PubKeyModes pubKeyMode = PubKeyModes.compressed,
     BitcoinNetwork network = BitcoinNetwork.mainnet,
   }) {
-    return WifEncoder.encode(
-      toBytes(),
-      netVer: network.wifNetVer,
-      pubKeyMode: pubKeyMode,
-    );
+    final wif = network.wifNetVer;
+    if (wif == null) {
+      throw DartBitcoinPluginException(
+        "Missing network wif prefix.",
+        details: {"network": network.name},
+      );
+    }
+    return WifEncoder.encode(toBytes(), netVer: wif, pubKeyMode: pubKeyMode);
   }
 
   /// returns the key's raw bytes
@@ -125,7 +129,7 @@ class ECPrivate {
     return StringUtils.decode([
       rId,
       ...signature.sublist(1),
-    ], type: StringEncoding.base64);
+    ], encoding: StringEncoding.base64);
   }
 
   /// Signs a message using Bitcoin's message signing format.

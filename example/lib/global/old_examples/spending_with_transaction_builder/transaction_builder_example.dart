@@ -1,16 +1,15 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
-import 'package:example/services_examples/explorer_service/explorer_service.dart';
+import 'package:example/services_examples/electrum/http_service_provider.dart';
 
 // spend from 8 different address type to 10 different output
 void main() async {
-  final service = BitcoinApiService();
   // select network
   const BitcoinNetwork network = BitcoinNetwork.testnet;
 
   // select api for read accounts UTXOs and send transaction
   // Mempool or BlockCypher
-  final api = ApiProvider.fromBlocCypher(network, service);
+  final api = BitcoinProvider(HttpServiceProvider.mempoolTestnet());
 
   final mnemonic = Bip39SeedGenerator(Mnemonic.fromString(
           "spy often critic spawn produce volcano depart fire theory fog turn retire"))
@@ -82,7 +81,8 @@ void main() async {
   for (final spender in spenders) {
     try {
       // read each address utxo from mempool
-      final spenderUtxos = await api.getAccountUtxo(spender);
+      final spenderUtxos = await api.request(MempoolRequestGetAccountUtxos(
+          owner: spender, address: spender.address.toAddress(network)));
       // check if account have any utxo for spending (balance)
       if (!spenderUtxos.canSpend()) {
         // address does not have any satoshi for spending:
@@ -248,7 +248,7 @@ void main() async {
   try {
     // now we send transaction to network
     // ignore: unused_local_variable
-    final txId = await api.sendRawTransaction(digest);
+    final txId = await api.request(MempoolRequestSendRawTransaction(digest));
     // Yes, we did :)  2625cd75f6576c38445deb2a9573c12ccc3438c3a6dd16fd431162d3f2fbb6c8
     // Now we check Mempol for what happened https://mempool.space/testnet/tx/2625cd75f6576c38445deb2a9573c12ccc3438c3a6dd16fd431162d3f2fbb6c8
   } on Exception {

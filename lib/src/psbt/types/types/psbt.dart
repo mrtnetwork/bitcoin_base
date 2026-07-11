@@ -148,7 +148,10 @@ class Psbt {
   }
 
   factory Psbt.fromBase64(String base64) {
-    final decode = StringUtils.tryEncode(base64, type: StringEncoding.base64);
+    final decode = StringUtils.tryEncode(
+      base64,
+      encoding: StringEncoding.base64,
+    );
     if (decode == null) {
       throw DartBitcoinPluginException(
         "Invalid PSBT base64: Decoding failed or malformed input.",
@@ -279,7 +282,7 @@ class Psbt {
   }
 
   String toBase64() {
-    return StringUtils.decode(serialize(), type: StringEncoding.base64);
+    return StringUtils.decode(serialize(), encoding: StringEncoding.base64);
   }
 
   /// Serializes the full PSBT

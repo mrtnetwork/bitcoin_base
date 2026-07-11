@@ -1,6 +1,8 @@
 part of 'package:bitcoin_base/src/bitcoin/address/address.dart';
 
-abstract class LegacyAddress implements BitcoinBaseAddress {
+abstract class LegacyAddress
+    with CborTagSerializable, Equality
+    implements BitcoinBaseAddress {
   /// Represents a Bitcoin address
   ///
   /// [addressProgram] the addressProgram string representation of the address; hash160 represents
@@ -35,7 +37,11 @@ abstract class LegacyAddress implements BitcoinBaseAddress {
 
   @override
   String get addressProgram {
-    if (type == PubKeyAddressType.p2pk) throw UnimplementedError();
+    if (type == PubKeyAddressType.p2pk) {
+      throw DartBitcoinPluginException(
+        "addressProgram not supported by p2pk address.",
+      );
+    }
     return _addressProgram;
   }
 
@@ -54,17 +60,14 @@ abstract class LegacyAddress implements BitcoinBaseAddress {
   }
 
   @override
-  operator ==(other) {
-    if (identical(this, other)) return true;
-    if (other is! LegacyAddress) return false;
-    if (runtimeType != other.runtimeType) return false;
-    if (type != other.type) return false;
-    return _addressProgram == other._addressProgram;
-  }
+  SerializationIdentifier get serializationIdentifier =>
+      BlockchainNetwork.bitcoinAndRelated.identifier;
 
   @override
-  int get hashCode =>
-      HashCodeGenerator.generateHashCode([_addressProgram, type]);
+  List<CborObject?> get serializationItems => [
+    type.id.toCbor(),
+    CborBytesValue(BytesUtils.fromHexString(addressProgram)),
+  ];
 }
 
 class P2shAddress extends LegacyAddress {
@@ -104,7 +107,7 @@ class P2shAddress extends LegacyAddress {
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
       throw DartBitcoinPluginException(
-        'network does not support ${type.value} address.',
+        'network does not support ${type.name} address.',
       );
     }
     return super.toAddress(network);
@@ -128,15 +131,7 @@ class P2shAddress extends LegacyAddress {
   }
 
   @override
-  operator ==(other) {
-    if (identical(this, other)) return true;
-    if (other is! LegacyAddress) return false;
-    if (runtimeType != other.runtimeType) return false;
-    return _addressProgram == other._addressProgram;
-  }
-
-  @override
-  int get hashCode => HashCodeGenerator.generateHashCode([_addressProgram]);
+  List<dynamic> get variables => [_addressProgram];
 }
 
 class P2pkhAddress extends LegacyAddress {
@@ -169,6 +164,9 @@ class P2pkhAddress extends LegacyAddress {
 
   @override
   final P2pkhAddressType type;
+
+  @override
+  List<dynamic> get variables => [addressProgram];
 }
 
 class P2pkAddress extends LegacyAddress {
@@ -199,12 +197,11 @@ class P2pkAddress extends LegacyAddress {
   @override
   final PubKeyAddressType type = PubKeyAddressType.p2pk;
   @override
-  operator ==(other) {
-    if (identical(this, other)) return true;
-    if (other is! P2pkAddress) return false;
-    return publicKey == other.publicKey;
-  }
+  List<dynamic> get variables => [publicKey];
 
   @override
-  int get hashCode => HashCodeGenerator.generateHashCode([publicKey, type]);
+  List<CborObject?> get serializationItems => [
+    type.id.toCbor(),
+    CborBytesValue(BytesUtils.fromHexString(publicKey)),
+  ];
 }

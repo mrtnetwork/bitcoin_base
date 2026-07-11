@@ -470,9 +470,7 @@ class PsbtOutputAmount extends PsbtOutputData {
       amount: amount,
       keyPair: PsbtKeyPair(
         key: PsbtKey(PsbtOutputTypes.amount.flag!),
-        value: PsbtValue(
-          BigintUtils.toBytes(amount, length: 8, order: Endian.little),
-        ),
+        value: PsbtValue(amount.toI64LeBytes()),
       ),
     );
   }
@@ -1004,9 +1002,7 @@ class PsbtOutputSilentPaymentLabel extends PsbtOutputData {
       label: label,
       keyPair: PsbtKeyPair(
         key: PsbtKey(PsbtOutputTypes.silentPaymentLabel.flag!),
-        value: PsbtValue(
-          IntUtils.toBytes(label, length: 4, byteOrder: Endian.little),
-        ),
+        value: PsbtValue(label.toU32LeBytes()),
       ),
     );
   }

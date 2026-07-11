@@ -12,7 +12,7 @@ void main() async {
       await ElectrumSSLService.connect("chipnet.imaginary.cash:50002");
 
   /// create provider with service
-  final provider = ElectrumProvider(service);
+  final provider = BitcoinProvider(service);
 
   /// initialize private key
   final privateKey = ECPrivate.fromBytes(BytesUtils.fromHexString(

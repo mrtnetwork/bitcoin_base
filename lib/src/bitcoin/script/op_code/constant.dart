@@ -209,6 +209,11 @@ enum BitcoinOpcode implements BaseBitcoinOpcode {
     return values.firstWhereNullable((e) => e.value == value);
   }
 
+  static BitcoinOpcode? opNum(int value) {
+    final n = "OP_$value";
+    return values.firstWhereNullable((e) => e.name == n);
+  }
+
   @override
   bool get isOpPushData =>
       this == BitcoinOpcode.opPushData1 ||

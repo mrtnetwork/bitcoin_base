@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
@@ -451,11 +450,7 @@ class PsbtInputWitnessUtxo extends PsbtInputData {
       amount: amount,
       scriptPubKey: scriptPubKey,
       keyPair: () {
-        final amountBytes = BigintUtils.toBytes(
-          amount,
-          length: 8,
-          order: Endian.little,
-        );
+        final amountBytes = amount.toI64LeBytes();
         final scriptBytes = IntUtils.prependVarint(scriptPubKey.toBytes());
         return PsbtKeyPair(
           key: PsbtKey(PsbtInputTypes.witnessUTXO.flag!),
@@ -592,10 +587,8 @@ class PsbtInputSigHash extends PsbtInputData {
     return PsbtInputSigHash._(
       sighash: sighash,
       keyPair: () {
-        final sighashBytes = IntUtils.toBytes(
-          sighash,
+        final sighashBytes = sighash.toLeBytes(
           length: BitcoinOpCodeConst.sighashByteLength,
-          byteOrder: Endian.little,
         );
         return PsbtKeyPair(
           key: PsbtKey(PsbtInputTypes.sighashType.flag!),
@@ -1327,10 +1320,8 @@ class PsbtInputSpentOutputIndex extends PsbtInputData {
     return PsbtInputSpentOutputIndex._(
       index: index,
       keyPair: () {
-        final indexBytes = IntUtils.toBytes(
-          index,
+        final indexBytes = index.toLeBytes(
           length: BitcoinOpCodeConst.outputIndexBytesLength,
-          byteOrder: Endian.little,
         );
         return PsbtKeyPair(
           key: PsbtKey(PsbtInputTypes.spentOutputIndex.flag!),
@@ -1392,10 +1383,8 @@ class PsbtInputSequenceNumber extends PsbtInputData {
     return PsbtInputSequenceNumber._(
       sequence: sequence,
       keyPair: () {
-        final sequenceBytes = IntUtils.toBytes(
-          sequence,
+        final sequenceBytes = sequence.toLeBytes(
           length: BitcoinOpCodeConst.sequenceLengthInBytes,
-          byteOrder: Endian.little,
         );
         return PsbtKeyPair(
           key: PsbtKey(PsbtInputTypes.sequenceNumber.flag!),
@@ -1430,11 +1419,7 @@ class PsbtInputSequenceNumber extends PsbtInputData {
   }
 
   List<int> sequenceBytes() {
-    return IntUtils.toBytes(
-      sequence,
-      length: BitcoinOpCodeConst.locktimeLengthInBytes,
-      byteOrder: Endian.little,
-    );
+    return sequence.toLeBytes(length: BitcoinOpCodeConst.locktimeLengthInBytes);
   }
 
   @override
@@ -1462,10 +1447,8 @@ class PsbtInputRequiredTimeBasedLockTime extends PsbtInputData {
     return PsbtInputRequiredTimeBasedLockTime._(
       locktime: locktime,
       keyPair: () {
-        final locktimeBytes = IntUtils.toBytes(
-          locktime,
+        final locktimeBytes = locktime.toLeBytes(
           length: BitcoinOpCodeConst.locktimeLengthInBytes,
-          byteOrder: Endian.little,
         );
         return PsbtKeyPair(
           key: PsbtKey(PsbtInputTypes.requiredTimeBasedLockTime.flag!),
@@ -1515,11 +1498,7 @@ class PsbtInputRequiredTimeBasedLockTime extends PsbtInputData {
   }
 
   List<int> sequenceBytes() {
-    return IntUtils.toBytes(
-      locktime,
-      length: BitcoinOpCodeConst.sequenceLengthInBytes,
-      byteOrder: Endian.little,
-    );
+    return locktime.toLeBytes(length: BitcoinOpCodeConst.sequenceLengthInBytes);
   }
 }
 
@@ -1542,10 +1521,8 @@ class PsbtInputRequiredHeightBasedLockTime extends PsbtInputData {
     return PsbtInputRequiredHeightBasedLockTime._(
       height: height,
       keyPair: () {
-        final locktimeBytes = IntUtils.toBytes(
-          height,
+        final locktimeBytes = height.toLeBytes(
           length: BitcoinOpCodeConst.locktimeLengthInBytes,
-          byteOrder: Endian.little,
         );
         return PsbtKeyPair(
           key: PsbtKey(PsbtInputTypes.requiredHeightBasedLockTime.flag!),
@@ -1597,11 +1574,7 @@ class PsbtInputRequiredHeightBasedLockTime extends PsbtInputData {
   }
 
   List<int> sequenceBytes() {
-    return IntUtils.toBytes(
-      height,
-      length: BitcoinOpCodeConst.locktimeLengthInBytes,
-      byteOrder: Endian.little,
-    );
+    return height.toLeBytes(length: BitcoinOpCodeConst.locktimeLengthInBytes);
   }
 }
 

@@ -8,7 +8,7 @@ import 'package:blockchain_utils/service/models/params.dart';
 import 'package:blockchain_utils/utils/string/string.dart';
 import 'package:example/services_examples/electrum/request_completer.dart';
 
-class ElectrumSSLService with ElectrumServiceProvider {
+class ElectrumSSLService with BitcoinServiceProvider {
   ElectrumSSLService._(
     this.url,
     SecureSocket channel, {
@@ -33,6 +33,7 @@ class ElectrumSSLService with ElectrumServiceProvider {
       throw StateError("socket has been discounected");
     }
     _socket?.add(params);
+    _socket?.add("\n".codeUnits);
   }
 
   void _onClose(Object? error) {
@@ -85,13 +86,12 @@ class ElectrumSSLService with ElectrumServiceProvider {
   }
 
   @override
-  Future<BaseServiceResponse<T>> doRequest<T>(ElectrumRequestDetails params,
+  Future<BaseServiceResponse> doRequest(BitcoinRequestDetails params,
       {Duration? timeout}) async {
-    final AsyncRequestCompleter compeleter =
-        AsyncRequestCompleter(params.params);
+    final AsyncRequestCompleter compeleter = AsyncRequestCompleter();
     try {
       requests[params.requestID] = compeleter;
-      add(params.toTCPParams());
+      add(params.encodeBody(protocol: ServiceProtocol.ssl) ?? []);
       final result = await compeleter.completer.future
           .timeout(timeout ?? defaultRequestTimeOut);
       return params.toResponse(result);

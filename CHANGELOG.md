@@ -1,3 +1,7 @@
+## 7.2.0
+
+- Update dependencies.
+
 ## 7.1.0
 
 - Update dependencies.

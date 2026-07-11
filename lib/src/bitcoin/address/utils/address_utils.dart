@@ -141,7 +141,7 @@ class BitcoinAddressUtils {
   ///
   /// Returns the validated Bitcoin base address if it belongs to a supported type for the given network.
   ///
-  /// Throws a [MessageException] if the address type is not supported by the specified network.
+  /// Throws a [DartBitcoinPluginException] if the address type is not supported by the specified network.
   static BitcoinBaseAddress validateAddress(
     BitcoinBaseAddress address,
     BasedUtxoNetwork network,
@@ -150,7 +150,7 @@ class BitcoinAddressUtils {
       return address;
     }
     throw DartBitcoinPluginException(
-      '${network.value} does not support ${address.type.value} address',
+      '${network.name} does not support ${address.type.name} address',
     );
   }
 
@@ -162,7 +162,7 @@ class BitcoinAddressUtils {
   ///
   /// Returns a BitcoinBaseAddress instance representing the decoded address.
   ///
-  /// Throws a [MessageException] if the address is invalid or not supported by the network.
+  /// Throws a [DartBitcoinPluginException] if the address is invalid or not supported by the network.
   static BitcoinBaseAddress decodeAddress(
     String address,
     BasedUtxoNetwork network,
@@ -216,11 +216,14 @@ class BitcoinAddressUtils {
     bool validateNetworkHRP = false,
   }) {
     try {
-      final hrp =
-          validateNetworkHRP
-              ? network.networkHRP
-              : address.substring(0, address.indexOf(':'));
-      final decode = BchBech32Decoder.decode(hrp, address);
+      final nHrp = network.networkHRP;
+      if (validateNetworkHRP && nHrp == null) {
+        return null;
+      }
+      final decode = BchBech32Decoder.decode(
+        validateNetworkHRP ? nHrp : null,
+        address,
+      );
       final scriptBytes = decode.$2;
       final version = decode.$1;
       return _validateBchScriptBytes(
@@ -228,9 +231,8 @@ class BitcoinAddressUtils {
         scriptBytes: scriptBytes,
         version: version,
       );
-    } catch (_) {
-      return null;
-    }
+    } catch (_) {}
+    return null;
   }
 
   /// Validates Bitcoin Cash (BCH) script bytes and version to determine the appropriate LegacyAddress type.
@@ -306,7 +308,7 @@ class BitcoinAddressUtils {
   }) {
     if (!network.supportedAddress.contains(type)) {
       throw DartBitcoinPluginException(
-        '${network.value} does not support ${type.value} address type',
+        '${network.name} does not support ${type.name} address type',
       );
     }
     if (network is BitcoinCashNetwork) {
@@ -365,12 +367,15 @@ class BitcoinAddressUtils {
     required BasedUtxoNetwork network,
     required int segwitVersion,
   }) {
+    final hrp = network.p2wpkhHrp;
+    if (hrp == null) {
+      throw DartBitcoinPluginException(
+        "Missing network hrp config.",
+        details: {"network": network.name},
+      );
+    }
     final programBytes = BytesUtils.fromHexString(addressProgram);
-    return SegwitBech32Encoder.encode(
-      network.p2wpkhHrp,
-      segwitVersion,
-      programBytes,
-    );
+    return SegwitBech32Encoder.encode(hrp, segwitVersion, programBytes);
   }
 
   /// Converts a Bitcoin legacy address program to its corresponding Bitcoin Cash (BCH) address.
@@ -385,18 +390,26 @@ class BitcoinAddressUtils {
     required String addressProgram,
     required BitcoinAddressType type,
   }) {
+    final hrp = network.networkHRP;
+    if (hrp == null) {
+      throw DartBitcoinPluginException(
+        "Missing network hrp.",
+        details: {"network": network.name},
+      );
+    }
     final programBytes = BytesUtils.fromHexString(addressProgram);
     final netVersion = _getBchNetVersion(
       network: network,
       type: type,
       secriptLength: programBytes.length,
     );
-
-    return BchBech32Encoder.encode(
-      network.networkHRP,
-      netVersion,
-      programBytes,
-    );
+    if (netVersion == null) {
+      throw DartBitcoinPluginException(
+        "Missing network address prefix.",
+        details: {"network": network.name},
+      );
+    }
+    return BchBech32Encoder.encode(hrp, netVersion, programBytes);
   }
 
   /// Helper method to obtain the Bitcoin Cash network version bytes based on the address type and script length.
@@ -406,12 +419,12 @@ class BitcoinAddressUtils {
   /// [secriptLength]: The length of the script associated with the address.
   ///
   /// Returns the network version bytes for the specified address type and script length.
-  static List<int> _getBchNetVersion({
+  static List<int>? _getBchNetVersion({
     required BitcoinCashNetwork network,
     required BitcoinAddressType type,
     int secriptLength = hash160DigestLength,
   }) {
-    final isToken = type.value.contains('WT');
+    final isToken = type.withToken;
     if (!type.isP2sh) {
       if (!isToken) return network.p2pkhNetVer;
       return network.p2pkhWtNetVer;
@@ -457,11 +470,26 @@ class BitcoinAddressUtils {
       case P2shAddressType.p2wshInP2sh:
       case P2shAddressType.p2pkhInP2sh:
       case P2shAddressType.p2pkInP2sh:
-        programBytes = [...network.p2shNetVer, ...programBytes];
+        final netVersion = network.p2shNetVer;
+        if (netVersion == null) {
+          throw DartBitcoinPluginException(
+            "Missing network p2sh prefix config.",
+            details: {"network": network.name},
+          );
+        }
+
+        programBytes = [...netVersion, ...programBytes];
         break;
       case P2pkhAddressType.p2pkh:
       case PubKeyAddressType.p2pk:
-        programBytes = [...network.p2pkhNetVer, ...programBytes];
+        final netVersion = network.p2pkhNetVer;
+        if (netVersion == null) {
+          throw DartBitcoinPluginException(
+            "Missing network p2pkh prefix config.",
+            details: {"network": network.name},
+          );
+        }
+        programBytes = [...netVersion, ...programBytes];
         break;
       default:
     }

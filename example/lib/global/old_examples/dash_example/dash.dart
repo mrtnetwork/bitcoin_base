@@ -101,6 +101,8 @@ void _spendFromTwoP2shAndOneP2PKH() async {
 
             /// Create a UTXO using a BitcoinUtxo with specific details
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "5ffb1ab349d4c844da4c7995658edfba8bf5aa28aa1c57d69f5dcc17a49a019e",
@@ -200,6 +202,8 @@ void _spendP2SH() async {
 
             /// Create a UTXO using a BitcoinUtxo with specific details
             utxo: BitcoinUtxo(
+              blockHeight: 0,
+
               /// Transaction hash uniquely identifies the referenced transaction
               txHash:
                   "65e21f67d58272b9baf582e81b3ba25dfaa8129dfcbe90e3d7d4a42f25cea372",

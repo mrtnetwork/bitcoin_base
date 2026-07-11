@@ -1,5 +1,6 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
+import 'package:blockchain_utils/utils/json/json.dart';
 import 'package:blockchain_utils/utils/numbers/numbers.dart';
 
 class TxRef implements UTXO {
@@ -63,7 +64,7 @@ class TxRef implements UTXO {
       value: value,
       vout: txOutputN,
       scriptType: addressType,
-      blockHeight: blockHeight,
+      blockHeight: blockHeight.isNegative ? 0 : blockHeight,
     );
   }
 }
@@ -117,7 +118,7 @@ class BlockCypherUtxo {
 
   List<UtxoWithAddress> toUtxoWithOwner(UtxoAddressDetails owner) {
     final utxos =
-        txRefs.map((ref) {
+        txRefs.where((e) => e.spent == false && e.txOutputN >= 0).map((ref) {
           return UtxoWithAddress(
             utxo: ref.toUtxo(owner.address.type),
             ownerDetails: owner,
@@ -128,14 +129,16 @@ class BlockCypherUtxo {
 }
 
 class BlockCypherTransactionInput {
-  final String prevHash;
-  final int outputIndex;
-  final int outputValue;
+  final String? prevHash;
+  final int? outputIndex;
+  final int? outputValue;
   final int sequence;
   final List<String> addresses;
   final String scriptType;
   final int age;
   final List<String>? witness;
+
+  bool isCoinbase() => prevHash == null;
 
   BlockCypherTransactionInput({
     required this.prevHash,
@@ -150,11 +153,11 @@ class BlockCypherTransactionInput {
 
   factory BlockCypherTransactionInput.fromJson(Map<String, dynamic> json) {
     return BlockCypherTransactionInput(
-      prevHash: json['prev_hash'],
-      outputIndex: json['output_index'],
-      outputValue: json['output_value'],
-      sequence: json['sequence'],
-      addresses: List<String>.from(json['addresses']),
+      prevHash: json.valueAs("prev_hash"),
+      outputIndex: json.valueAs("output_index"),
+      outputValue: json.valueAs("output_value"),
+      sequence: json.valueAs("sequence"),
+      addresses: json.valueAsList<List<String>?>("addresses") ?? [],
       scriptType: json['script_type'],
       age: json['age'],
       witness: (json['witness'] as List?)?.cast(),
@@ -267,6 +270,8 @@ class BlockCypherTransaction {
               .toList(),
     );
   }
+
+  bool isCoinbase() => inputs.length == 1 && inputs[0].isCoinbase();
 }
 
 class BlockCypherAddressInfo {
@@ -317,7 +322,7 @@ class BlockCypherAddressInfo {
 }
 
 class BlockCypherChainInfo {
-  final BigInt height;
+  final int height;
   final String? hash;
   final String? time;
   final String? latestUrl;
@@ -348,19 +353,19 @@ class BlockCypherChainInfo {
 
   factory BlockCypherChainInfo.fromJson(Map<String, dynamic> json) {
     return BlockCypherChainInfo(
-      height: BigintUtils.parse(json["height"]),
-      hash: json["hash"],
-      time: json["time"],
-      latestUrl: json["latest_url"],
-      previousHash: json["previous_hash"],
-      previousUrl: json["previous_url"],
-      peerCount: IntUtils.tryParse(json["peer_count"]),
-      unconfirmedCount: IntUtils.tryParse(json["unconfirmed_count"]),
+      height: json.valueAs("height"),
+      hash: json.valueAs("hash"),
+      time: json.valueAs("time"),
+      latestUrl: json.valueAs("latest_url"),
+      previousHash: json.valueAs("previous_hash"),
+      previousUrl: json.valueAs("previous_url"),
+      peerCount: json.valueAs("peer_count"),
+      unconfirmedCount: json.valueAs("unconfirmed_count"),
       highFeePerKb: BigintUtils.tryParse(json["high_fee_per_kb"]),
       mediumFeePerKb: BigintUtils.tryParse(json["medium_fee_per_kb"]),
       lowFeePerKb: BigintUtils.tryParse(json["low_fee_per_kb"]),
       latestForkHeight: BigintUtils.tryParse(json["last_fork_height"]),
-      latestForkHash: json["last_fork_hash"],
+      latestForkHash: json.valueAs("last_fork_hash"),
     );
   }
 

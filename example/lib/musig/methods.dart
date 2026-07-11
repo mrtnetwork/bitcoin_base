@@ -1,14 +1,14 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:example/services_examples/electrum/electrum_ssl_service.dart';
 
-Future<ElectrumProvider> getProvider(
+Future<BitcoinProvider> getProvider(
     {String url = "testnet4-electrumx.wakiyamap.dev:51002"}) async {
   // final service = await ElectrumSSLService.connect(
   //     "testnet4-electrumx.wakiyamap.dev:51002");
 
   final service =
       await ElectrumSSLService.connect("testnet.aranguren.org:51002");
-  return ElectrumProvider(service);
+  return BitcoinProvider(service);
 }
 
 class PsbtUtxoRequest {

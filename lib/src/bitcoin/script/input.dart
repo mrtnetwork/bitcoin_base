@@ -83,11 +83,7 @@ class TxInput {
   /// serializes TxInput to bytes
   List<int> toBytes() {
     final txidBytes = BytesUtils.fromHexString(txId).reversed.toList();
-    final txoutBytes = IntUtils.toBytes(
-      txIndex,
-      length: 4,
-      byteOrder: Endian.little,
-    );
+    final txoutBytes = txIndex.toU32LeBytes();
     final scriptSigBytes = scriptSig.toBytes();
     final scriptSigLengthVarint = IntUtils.encodeVarint(scriptSigBytes.length);
     final data = List<int>.from([

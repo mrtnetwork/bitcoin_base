@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
@@ -216,6 +215,22 @@ class BitcoinScriptUtils {
             BitcoinOpcode.opTrue.value;
   }
 
+  static String? getOpRetrunContent(Script script) {
+    if (!isOpReturn(script)) return null;
+    final data = script.script.sublist(1);
+
+    return data.map((e) {
+      if (e == BitcoinOpcode.op0 || e == BitcoinOpcode.op0.name) return "";
+      return e;
+    }).join();
+  }
+
+  static List<int>? getOpRetrunContentBytes(Script script) {
+    final content = getOpRetrunContent(script);
+    if (content == null) return null;
+    return BytesUtils.fromHexString(content);
+  }
+
   static bool isPubKeyOpCheckSig(Script script) {
     if (scriptContains(
       script: script,
@@ -396,18 +411,10 @@ class BitcoinScriptUtils {
     } else if (dataBytes.length < BinaryOps.mask8) {
       return [BitcoinOpCodeConst.opPushData1, dataBytes.length, ...dataBytes];
     } else if (dataBytes.length < BinaryOps.mask16) {
-      final lengthBytes = IntUtils.toBytes(
-        dataBytes.length,
-        length: 2,
-        byteOrder: Endian.little,
-      );
+      final lengthBytes = dataBytes.length.toU16LeBytes();
       return [BitcoinOpCodeConst.opPushData2, ...lengthBytes, ...dataBytes];
     } else if (dataBytes.length < BinaryOps.mask32) {
-      final lengthBytes = IntUtils.toBytes(
-        dataBytes.length,
-        length: 4,
-        byteOrder: Endian.little,
-      );
+      final lengthBytes = dataBytes.length.toU32LeBytes();
       return [BitcoinOpCodeConst.opPushData4, ...lengthBytes, ...dataBytes];
     } else {
       throw const DartBitcoinPluginException(
