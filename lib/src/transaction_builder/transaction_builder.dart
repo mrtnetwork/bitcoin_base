@@ -28,6 +28,7 @@ class BitcoinTransactionBuilder extends BasedBitcoinTransacationBuilder {
   final String? memo;
   final bool enableRBF;
   final bool isFakeTransaction;
+  final List<int> locktime;
 
   BitcoinTransactionBuilder({
     required super.outPuts,
@@ -39,6 +40,7 @@ class BitcoinTransactionBuilder extends BasedBitcoinTransacationBuilder {
     this.memo,
     this.enableRBF = false,
     this.isFakeTransaction = false,
+    this.locktime = BitcoinOpCodeConst.defaultTxLocktime,
   }) {
     _validateBuilder();
   }
@@ -514,6 +516,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
     BtcTransaction transaction = BtcTransaction(
       inputs: inputs,
       outputs: outputs,
+      locktime: locktime,
     );
 
     /// we define empty witnesses. maybe the transaction is segwit and We need this
@@ -715,6 +718,7 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
     BtcTransaction transaction = BtcTransaction(
       inputs: inputs,
       outputs: outputs,
+      locktime: locktime,
     );
 
     /// we define empty witnesses. maybe the transaction is segwit and We need this
