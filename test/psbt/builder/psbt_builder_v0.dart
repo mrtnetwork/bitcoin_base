@@ -2,10 +2,6 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
-void main() {
-  _test1();
-}
-
 void _addP2PkhInout(PsbtBuilder psbt) {
   final address = P2pkhAddress.fromAddress(
     address: "modADgm9UHadfWLQVKeHapbHjETkwwY6zs",
@@ -32,7 +28,7 @@ void _addP2PkhInout(PsbtBuilder psbt) {
   );
 }
 
-void _test1() {
+void psbtTest7() {
   test("PSBT", () {
     void checkBuilder(PsbtBuilderV0 builder) {
       final inputs = builder.txInputs();

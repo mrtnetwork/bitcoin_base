@@ -1,15 +1,10 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/utils/binary/utils.dart';
 import 'package:test/test.dart';
-import 'psbt_builder_v0_test.dart';
+import 'psbt_builder_v0.dart';
 import 'utxos_vector2.dart';
 
-void main() {
-  _test2();
-  _test();
-}
-
-void _test() {
+void psbtTest5() {
   void test_(PsbtBuilder builder) {
     final expandUtxos = utxosVector2.expand((e) => e).toList();
     final psbtUtxos = expandUtxos.map((e) => PsbtUtxo.fromJson(e)).toList();
@@ -187,7 +182,7 @@ PsbtBuilder sign({
   return PsbtBuilder.fromBase64(builder.toBase64());
 }
 
-void _test2() {
+void psbtTest6() {
   void test_(PsbtBuilder builder) {
     final utxos = utxosVector2.expand((e) => e).toList();
     final psbtUtxos = utxos.map((e) => PsbtUtxo.fromJson(e)).toList();

@@ -8,7 +8,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// A signer class for MuSig2, handling key aggregation, nonce generation,
 /// signing, and partial signature aggregation.
 class Musig2Signer {
-  final Musig2Bsae lib;
+  final Musig2Const lib;
 
   /// A list of private keys for signing. This can be empty for public-only operations.
   final List<ECPrivate> privateKeys;
@@ -36,7 +36,7 @@ class Musig2Signer {
     List<ECPublic> publicKeys, {
     List<ECPrivate> privateKeys = const [],
     bool sortKeys = false,
-    Musig2Bsae lib = const Musig2Const(),
+    Musig2Const lib = const Musig2Const(),
   }) {
     List<List<int>> publicKeysBytes =
         publicKeys.map((e) => e.toBytes(mode: PubKeyModes.compressed)).toList();

@@ -119,7 +119,7 @@ class PsbtMusig2DefaultSigner implements PsbtBtcMusig2Signer {
   @override
   final List<ECPublic> publicKeys;
   final MuSig2Nonce nonce;
-  final Musig2Bsae lib;
+  final Musig2Const lib;
 
   PsbtMusig2DefaultSigner({
     required this.privateKey,

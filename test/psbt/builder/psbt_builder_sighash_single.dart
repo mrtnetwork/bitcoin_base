@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 
 import 'utxos_vector.dart';
 
-void main() {
+void psbtTest2() {
   test("PSBT", () {
     _test(PsbtBuilderV0.create());
     _test(PsbtBuilderV2.create());
