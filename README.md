@@ -25,7 +25,7 @@ through Rust. Rust core:
 | Bitcoin Cash | P2PK, P2PKH, P2SH, P2SH32, token-aware (P2PKHWT, P2SH32WT), CashTokens, BCMR |
 | Bitcoin SV | P2PK, P2PKH |
 
-## Futures
+## Features
 
 ### Transactions
 
