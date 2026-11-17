@@ -14,7 +14,7 @@ class BlockCypherRequestGetNetworkFeeRate
       BlockCypherRequestMethods.feeRecommended;
 
   @override
-  BitcoinFeeRate onResonse(Map<String, dynamic> result) {
+  BitcoinFeeRate onResponse(Map<String, dynamic> result) {
     return BitcoinFeeRate.fromBlockCypher(result);
   }
 }

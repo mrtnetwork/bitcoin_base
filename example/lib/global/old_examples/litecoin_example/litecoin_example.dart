@@ -166,10 +166,14 @@ void _spendFrom2P2shAddressAndOneMultiSigP2shAddress() async {
   final childKey = bip32.childKey(Bip32KeyIndex(3));
 
   /// Convert child key public keys to ECPublic objects
-  final childKey1PrivateKey = ECPrivate.fromBytes(childKey1.privateKey.raw);
-  final childKey1PublicKey = ECPublic.fromBytes(childKey1.publicKey.compressed);
-  final childKey2PrivateKey = ECPrivate.fromBytes(childKey.privateKey.raw);
-  final examplePublicKey = ECPublic.fromBytes(childKey.publicKey.compressed);
+  final childKey1PrivateKey =
+      ECPrivate.fromBytes(childKey1.privateKey.toBytes());
+  final childKey1PublicKey =
+      ECPublic.fromBytes(childKey1.publicKey.toPublicKeyBytes());
+  final childKey2PrivateKey =
+      ECPrivate.fromBytes(childKey.privateKey.toBytes());
+  final examplePublicKey =
+      ECPublic.fromBytes(childKey.publicKey.toPublicKeyBytes());
   final ECPrivate examplePrivateKey = ECPrivate.fromWif(
       'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
       netVersion: BitcoinNetwork.testnet.wifNetVer);
@@ -317,12 +321,16 @@ void _spendFromNestedSegwitP2WPKHInP2SH() async {
   final childKey = bip32.childKey(Bip32KeyIndex(3));
 
   /// Convert child key private keys to ECPrivate objects
-  final childKey1PrivateKey = ECPrivate.fromBytes(childKey1.privateKey.raw);
-  final childKey2PrivateKey = ECPrivate.fromBytes(childKey.privateKey.raw);
+  final childKey1PrivateKey =
+      ECPrivate.fromBytes(childKey1.privateKey.toBytes());
+  final childKey2PrivateKey =
+      ECPrivate.fromBytes(childKey.privateKey.toBytes());
 
   /// Convert child key public keys to ECPublic objects
-  final childKey1PublicKey = ECPublic.fromBytes(childKey1.publicKey.compressed);
-  final examplePublicKey = ECPublic.fromBytes(childKey.publicKey.compressed);
+  final childKey1PublicKey =
+      ECPublic.fromBytes(childKey1.publicKey.toPublicKeyBytes());
+  final examplePublicKey =
+      ECPublic.fromBytes(childKey.publicKey.toPublicKeyBytes());
 
   /// Define other private key from wif
   final ECPrivate examplePrivateKey = ECPrivate.fromWif(
@@ -431,12 +439,16 @@ void _spendFromSegwitP2WPKHAddress() async {
   final childKey = bip32.childKey(Bip32KeyIndex(3));
 
   /// Convert child key private keys to ECPrivate objects
-  final childKey1PrivateKey = ECPrivate.fromBytes(childKey1.privateKey.raw);
-  final childKey2PrivateKey = ECPrivate.fromBytes(childKey.privateKey.raw);
+  final childKey1PrivateKey =
+      ECPrivate.fromBytes(childKey1.privateKey.toBytes());
+  final childKey2PrivateKey =
+      ECPrivate.fromBytes(childKey.privateKey.toBytes());
 
   /// Convert child key public keys to ECPublic objects
-  final childKey1PublicKey = ECPublic.fromBytes(childKey1.publicKey.compressed);
-  final examplePublicKey = ECPublic.fromBytes(childKey.publicKey.compressed);
+  final childKey1PublicKey =
+      ECPublic.fromBytes(childKey1.publicKey.toPublicKeyBytes());
+  final examplePublicKey =
+      ECPublic.fromBytes(childKey.publicKey.toPublicKeyBytes());
 
   /// add another private key using wif
   final ECPrivate examplePrivateKey = ECPrivate.fromWif(

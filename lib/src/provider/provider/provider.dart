@@ -23,7 +23,7 @@ class BitcoinProvider<SERVICE extends IServiceProvider>
       request,
       timeout: timeout,
     );
-    return request.onResonse(r);
+    return request.onResponse(r);
   }
 
   /// Sends a request to the Electrum server using the specified [request] parameter.
@@ -34,7 +34,7 @@ class BitcoinProvider<SERVICE extends IServiceProvider>
     IServiceRequest<RESULT, SERVICERESPONSE, BitcoinRequestDetails> request, {
     Duration? timeout,
   }) async {
-    final params = request.buildRequest(_id++);
+    final params = await request.buildRequest(_id++);
     final response = await service.doRequest(params, timeout: timeout);
     return parseResponse<SERVICERESPONSE>(params: params, response: response);
   }

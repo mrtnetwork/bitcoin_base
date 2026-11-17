@@ -1,5 +1,4 @@
-import 'package:blockchain_utils/helper/extensions/extensions.dart';
-import 'package:blockchain_utils/utils/utils.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// A list of the witness items required to satisfy the locking conditions of a segwit input (aka witness stack).
 ///
@@ -32,17 +31,17 @@ class TxWitnessInput {
   }
 
   /// returns a serialized byte version of the witness items list
-  List<int> toBytes() {
-    final bytes = DynamicByteTracker();
+  BuBytes toBytes() {
+    final bytes = BuBytes.empty();
     final length = IntUtils.encodeVarint(stack.length);
-    bytes.add(length);
+    bytes.addAll(length);
     for (final item in stack) {
       final itemBytes = BytesUtils.fromHexString(item);
       final varint = IntUtils.prependVarint(itemBytes);
-      bytes.add(varint);
+      bytes.addAll(varint);
     }
 
-    return bytes.toBytes();
+    return bytes;
   }
 
   Map<String, dynamic> toJson() {

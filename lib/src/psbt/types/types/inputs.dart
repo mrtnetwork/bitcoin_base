@@ -5,7 +5,6 @@ import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
 import 'package:bitcoin_base/src/bitcoin/script/witness.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/psbt/psbt_builder/types/types.dart';
 import 'package:bitcoin_base/src/psbt/types/types/psbt.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
@@ -102,10 +101,10 @@ class PsbtInput {
 
   /// Constructs a [PsbtInput] instance with a given version and input entries.
   ///
-  /// Throws a [DartBitcoinPluginException] if any of the following conditions are met:
+  /// Throws a [BuError] if any of the following conditions are met:
   /// - Duplicate entries are found.
-  /// - A input entry is not allowed for the specified PSBT version.
-  /// - A required input entry is missing for the PSBT version
+  /// - An input entry is not allowed for the specified PSBT version.
+  /// - A required input entry is missing for the PSBT version.
   factory PsbtInput({
     List<List<PsbtInputData>> entries = const [],
     required PsbtVersion version,
@@ -118,14 +117,16 @@ class PsbtInput {
     for (final e in entries) {
       final keys = e.map((e) => e.keyPair.key).toList();
       if (keys.toSet().length != keys.length) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Invalid PSBT Input: Duplicate entry detected.",
         );
       }
       for (final i in e) {
         if (i.type.allowedVersion == null) continue;
         if (version != i.type.allowedVersion) {
-          throw DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.unsupported,
             "Invalid PSBT Input: ${i.type.psbtName} is not allowed in PSBT version ${version.name}.",
           );
         }
@@ -136,7 +137,8 @@ class PsbtInput {
           (e) => e.type == i,
           orElse:
               () =>
-                  throw DartBitcoinPluginException(
+                  throw BuError(
+                    DefaultErrorType.invalidArgument,
                     "Invalid PSBT Input: Missing required field ${i.psbtName} for PSBT version ${version.name}.",
                   ),
         );
@@ -161,18 +163,20 @@ class PsbtInput {
 
   int get length => _entries.length;
 
-  /// Validates if the provided entries is not duplicate and allowed by the PSBT version.
+  /// Validates that the provided entries are not duplicated and are allowed by the PSBT version.
   void _itemsAllowed(List<PsbtInputData> items) {
     final keys = items.map((e) => e.keyPair.key).toSet();
     if (keys.length != items.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Input: Duplicate entry detected.",
       );
     }
     for (final i in items) {
       if (i.type.allowedVersion == null) continue;
       if (version != i.type.allowedVersion) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.unsupported,
           "Invalid PSBT Input: ${i.type.psbtName} is not allowed in PSBT version ${version.name}.",
         );
       }
@@ -186,8 +190,9 @@ class PsbtInput {
   }
 
   List<PsbtInputData> _validateIndex(int inputIndex) {
-    if (inputIndex >= _entries.length) {
-      throw DartBitcoinPluginException(
+    if (inputIndex < 0 || inputIndex >= _entries.length) {
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid input index: $inputIndex. The index exceeds the number of available entries.",
       );
     }
@@ -200,7 +205,8 @@ class PsbtInput {
     final data = input.where((e) => e.type == type);
     if (data.isEmpty) return null;
     if (data.length != 1) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Multiple inputs with type '${type.name}' found. Use 'getInputs' to retrieve data for multiple globals",
       );
     }
@@ -371,7 +377,8 @@ abstract class PsbtInputData {
 
   T cast<T extends PsbtInputData>() {
     if (this is! T) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.castFailed,
         "Invalid cast: expected ${T.runtimeType}, but found $runtimeType.",
         details: {"expected": "$T", "type": runtimeType.toString()},
       );
@@ -404,12 +411,14 @@ class PsbtInputNonWitnessUtxo extends PsbtInputData {
       );
   factory PsbtInputNonWitnessUtxo.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.nonWitnessUTXO.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Non-Witness UTXO type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Non-Witness UTXO key data.",
       );
     }
@@ -420,7 +429,10 @@ class PsbtInputNonWitnessUtxo extends PsbtInputData {
         keyPair: keypair,
       );
     } catch (_) {
-      throw DartBitcoinPluginException("Invalid PSBT Non-Witness UTXO data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Non-Witness UTXO data.",
+      );
     }
   }
 
@@ -462,27 +474,55 @@ class PsbtInputWitnessUtxo extends PsbtInputData {
 
   factory PsbtInputWitnessUtxo.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.witnessUTXO.flag) {
-      throw DartBitcoinPluginException("Invalid PSBT Witness UTXO type flag");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Witness UTXO type flag",
+      );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException("Invalid PSBT Witness UTXO key data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Witness UTXO key data.",
+      );
     }
     final bytes = keypair.value.data;
-    final amount = BigintUtils.fromBytes(
-      bytes.sublist(0, 8),
-      byteOrder: Endian.little,
-    );
-    final scriptLength = IntUtils.decodeVarint(bytes.sublist(8));
-    final int offset = 8 + scriptLength.$2;
-    final int length = scriptLength.$1;
-    final script = Script.deserialize(
-      bytes: bytes.sublist(offset, offset + length),
-    );
-    return PsbtInputWitnessUtxo._(
-      amount: amount,
-      scriptPubKey: script,
-      keyPair: keypair,
-    );
+
+    try {
+      if (bytes.length < 9) {
+        throw BuError(
+          DefaultErrorType.invalidArgument,
+          "Invalid PSBT Witness UTXO data length.",
+        );
+      }
+      final amount = BigintUtils.fromBytes(
+        bytes.sublist(0, 8),
+        byteOrder: Endian.little,
+      );
+      final scriptLength = IntUtils.decodeVarint(bytes.sublist(8));
+      final int offset = 8 + scriptLength.$2;
+      final int length = scriptLength.$1;
+      if (offset + length != bytes.length) {
+        throw BuError(
+          DefaultErrorType.invalidArgument,
+          "Invalid PSBT Witness UTXO data length.",
+        );
+      }
+      final script = Script.deserialize(
+        bytes: bytes.sublist(offset, offset + length),
+      );
+      return PsbtInputWitnessUtxo._(
+        amount: amount,
+        scriptPubKey: script,
+        keyPair: keypair,
+      );
+    } on BuError {
+      rethrow;
+    } catch (_) {
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Witness UTXO data.",
+      );
+    }
   }
 
   @override
@@ -498,9 +538,9 @@ class PsbtInputWitnessUtxo extends PsbtInputData {
 class PsbtInputPartialSig extends PsbtInputDataSignature {
   /// The public key which corresponds to this signature.
   final ECPublic publicKey;
-  final List<int> publicKeyBytes;
+  final BuBytes publicKeyBytes;
 
-  final PubKeyModes mode;
+  final CryptoKeyEncoding mode;
 
   PsbtInputPartialSig._({
     required super.signature,
@@ -519,8 +559,8 @@ class PsbtInputPartialSig extends PsbtInputDataSignature {
       final pubKey = ECPublic.fromBytes(publicKey);
       final mode =
           publicKey.length == EcdsaKeysConst.pubKeyCompressedByteLen
-              ? PubKeyModes.compressed
-              : PubKeyModes.uncompressed;
+              ? CryptoKeyEncoding.base
+              : CryptoKeyEncoding.uncompressed;
       return PsbtInputPartialSig._(
         signature: signature,
         publicKey: pubKey,
@@ -535,12 +575,16 @@ class PsbtInputPartialSig extends PsbtInputDataSignature {
         mode: mode,
       );
     }
-    throw DartBitcoinPluginException("Invalid PSBT Partial Signature data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Partial Signature data.",
+    );
   }
 
   factory PsbtInputPartialSig.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.partialSignature.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Partial Signature type flag.",
       );
     }
@@ -550,8 +594,8 @@ class PsbtInputPartialSig extends PsbtInputDataSignature {
         final mode =
             keypair.key.extraData?.length ==
                     EcdsaKeysConst.pubKeyCompressedByteLen
-                ? PubKeyModes.compressed
-                : PubKeyModes.uncompressed;
+                ? CryptoKeyEncoding.base
+                : CryptoKeyEncoding.uncompressed;
         return PsbtInputPartialSig._(
           signature: keypair.value.data,
           publicKey: ECPublic.fromBytes(keypair.key.extraData!),
@@ -561,7 +605,10 @@ class PsbtInputPartialSig extends PsbtInputDataSignature {
         );
       } catch (_) {}
     }
-    throw DartBitcoinPluginException("Invalid PSBT Partial Signature data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Partial Signature data.",
+    );
   }
 
   @override
@@ -599,10 +646,16 @@ class PsbtInputSigHash extends PsbtInputData {
   }
   factory PsbtInputSigHash.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.sighashType.flag) {
-      throw DartBitcoinPluginException("Invalid PSBT sighash type flag");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT sighash type flag",
+      );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException("Invalid PSBT sighash type key data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT sighash type key data.",
+      );
     }
 
     try {
@@ -617,7 +670,10 @@ class PsbtInputSigHash extends PsbtInputData {
         );
       }
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT sighash type data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT sighash type data.",
+    );
   }
 
   @override
@@ -641,16 +697,25 @@ class PsbtInputRedeemScript extends PsbtInputData {
       );
   factory PsbtInputRedeemScript.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.redeemScript.flag) {
-      throw DartBitcoinPluginException("Invalid PSBT Redeem Script type flag");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Redeem Script type flag",
+      );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException("Invalid PSBT Redeem Script key data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Redeem Script key data.",
+      );
     }
     Script redeemScript;
     try {
       redeemScript = Script.deserialize(bytes: keypair.value.data);
     } catch (_) {
-      throw DartBitcoinPluginException("Invalid PSBT Redeem Script data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Redeem Script data.",
+      );
     }
     return PsbtInputRedeemScript._(
       keyPair: keypair,
@@ -681,16 +746,25 @@ class PsbtInputWitnessScript extends PsbtInputData {
       );
   factory PsbtInputWitnessScript.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.witnessScript.flag) {
-      throw DartBitcoinPluginException("Invalid PSBT Witness Script type flag");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Witness Script type flag",
+      );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException("Invalid PSBT Witness Script key data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Witness Script key data.",
+      );
     }
     Script witnessScript;
     try {
       witnessScript = Script.deserialize(bytes: keypair.value.data);
     } catch (_) {
-      throw DartBitcoinPluginException("Invalid PSBT Witness Script data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Witness Script data.",
+      );
     }
     return PsbtInputWitnessScript._(
       witnessScript: witnessScript,
@@ -708,11 +782,11 @@ class PsbtInputBip32DerivationPath extends PsbtInputData {
   /// The master key fingerprint as defined by BIP 32 concatenated with the derivation path of the public key.
   /// The derivation path is represented as 32 bit unsigned integer indexes concatenated with each other.
   /// Public keys are those that will be needed to sign this input.
-  final List<int> fingerprint;
+  final BuBytes fingerprint;
   final List<Bip32KeyIndex> indexes;
 
   /// The public key
-  final List<int> publicKey;
+  final BuBytes publicKey;
 
   String get path {
     return Bip32Path(elems: indexes).toString();
@@ -762,24 +836,27 @@ class PsbtInputBip32DerivationPath extends PsbtInputData {
         }(),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT BIP 32 Derivation Path data.",
     );
   }
 
   factory PsbtInputBip32DerivationPath.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.bip32DerivationPath.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT BIP 32 Derivation Path type flag",
       );
     }
     if (keypair.value.data.length < Bip32KeyDataConst.fingerprintByteLen ||
         keypair.value.data.length % Bip32KeyDataConst.fingerprintByteLen != 0) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT BIP 32 Derivation Path fingerprint or bip32 index.",
       );
     }
-    final List<int> fingerPrint = keypair.value.data.sublist(
+    final fingerPrint = keypair.value.data.sublist(
       0,
       Bip32KeyDataConst.fingerprintByteLen,
     );
@@ -808,7 +885,10 @@ class PsbtInputBip32DerivationPath extends PsbtInputData {
         );
       }
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid BIP 32 Derivation Path indexes.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid BIP 32 Derivation Path indexes.",
+    );
   }
 
   factory PsbtInputBip32DerivationPath.fromBip32({
@@ -818,9 +898,11 @@ class PsbtInputBip32DerivationPath extends PsbtInputData {
     final derive = masterKey.derivePath(path);
     final indexes = Bip32PathParser.parse(path).elems;
     return PsbtInputBip32DerivationPath(
-      fingerprint: derive.fingerPrint.toBytes(),
+      fingerprint: masterKey.fingerPrint.toBytes(),
       indexes: indexes,
-      publicKey: derive.publicKey.compressed,
+      publicKey: derive.publicKey.toPublicKeyBytes(
+        mode: CryptoKeyEncoding.base,
+      ),
     );
   }
 
@@ -853,12 +935,14 @@ class PsbtInputFinalizedScriptSig extends PsbtInputData {
       );
   factory PsbtInputFinalizedScriptSig.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.finalizedScriptSig.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Finalized scriptSig type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Finalized scriptSig key data.",
       );
     }
@@ -869,7 +953,10 @@ class PsbtInputFinalizedScriptSig extends PsbtInputData {
         finalizedScriptSig: finalizedScriptSig,
       );
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Finalized scriptSig data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Finalized scriptSig data.",
+    );
   }
 
   @override
@@ -899,12 +986,14 @@ class PsbtInputFinalizedScriptWitness extends PsbtInputData {
       );
   factory PsbtInputFinalizedScriptWitness.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.finalizedWitness.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Finalized scriptWitness type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Finalized scriptWitness key data.",
       );
     }
@@ -917,7 +1006,8 @@ class PsbtInputFinalizedScriptWitness extends PsbtInputData {
         keyPair: keypair,
       );
     } catch (_) {}
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Finalized scriptWitness data.",
     );
   }
@@ -949,12 +1039,14 @@ class PsbtInputPorCommitments extends PsbtInputData {
       );
   factory PsbtInputPorCommitments.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.porCommitments.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Proof-of-reserves commitment type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Proof-of-reserves commitment key data.",
       );
     }
@@ -965,7 +1057,8 @@ class PsbtInputPorCommitments extends PsbtInputData {
         keyPair: keypair,
       );
     } catch (_) {}
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Proof-of-reserves commitment data.",
     );
   }
@@ -978,10 +1071,10 @@ class PsbtInputPorCommitments extends PsbtInputData {
 
 class PsbtInputRipemd160 extends PsbtInputData {
   /// The hash preimage, encoded as a byte vector, which must equal the key when run through the RIPEMD160 algorithm
-  final List<int> preimage;
+  final BuBytes preimage;
 
   /// The resulting hash of the preimage
-  final List<int> hash;
+  final BuBytes hash;
   String preImageHex() {
     return BytesUtils.toHexString(preimage);
   }
@@ -1007,11 +1100,15 @@ class PsbtInputRipemd160 extends PsbtInputData {
         ),
       );
     }
-    throw DartBitcoinPluginException("Invalid PSBT RIPEMD160 hash length.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT RIPEMD160 hash length.",
+    );
   }
   factory PsbtInputRipemd160.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.ripemd160.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT RIPEMD160 preimage type flag",
       );
     }
@@ -1022,7 +1119,10 @@ class PsbtInputRipemd160 extends PsbtInputData {
         keyPair: keypair,
       );
     }
-    throw DartBitcoinPluginException("Invalid PSBT RIPEMD160 preimage date");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT RIPEMD160 preimage data.",
+    );
   }
 
   factory PsbtInputRipemd160.fromPreImage(List<int> preimage) {
@@ -1044,10 +1144,10 @@ class PsbtInputRipemd160 extends PsbtInputData {
 
 class PsbtInputSha256 extends PsbtInputData {
   /// The hash preimage, encoded as a byte vector, which must equal the key when run through the SHA256 algorithm
-  final List<int> preimage;
+  final BuBytes preimage;
 
   /// The resulting hash of the preimage
-  final List<int> hash;
+  final BuBytes hash;
 
   String preImageHex() {
     return BytesUtils.toHexString(preimage);
@@ -1074,13 +1174,15 @@ class PsbtInputSha256 extends PsbtInputData {
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT SHA256 preimage hash length.",
     );
   }
   factory PsbtInputSha256.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.sha256.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT SHA256 preimage type flag",
       );
     }
@@ -1091,7 +1193,10 @@ class PsbtInputSha256 extends PsbtInputData {
         keyPair: keypair,
       );
     }
-    throw DartBitcoinPluginException("Invalid PSBT SHA256 preimage data");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT SHA256 preimage data",
+    );
   }
   factory PsbtInputSha256.fromPreImage(List<int> preimage) {
     return PsbtInputSha256(
@@ -1113,10 +1218,10 @@ class PsbtInputSha256 extends PsbtInputData {
 class PsbtInputHash160 extends PsbtInputData {
   /// The hash preimage, encoded as a byte vector, which must equal the key when run through the
   ///  SHA256 algorithm followed by the RIPEMD160 algorithm
-  final List<int> preimage;
+  final BuBytes preimage;
 
   /// The resulting hash of the preimage
-  final List<int> hash;
+  final BuBytes hash;
   String preImageHex() {
     return BytesUtils.toHexString(preimage);
   }
@@ -1142,13 +1247,15 @@ class PsbtInputHash160 extends PsbtInputData {
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT HASH160 preimage hash length.",
     );
   }
   factory PsbtInputHash160.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.hash160.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT HASH160 preimage type flag",
       );
     }
@@ -1160,7 +1267,10 @@ class PsbtInputHash160 extends PsbtInputData {
       );
     }
 
-    throw DartBitcoinPluginException("Invalid PSBT HASH160 preimage type flag");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT HASH160 preimage type flag",
+    );
   }
   factory PsbtInputHash160.fromPreImage(List<int> preimage) {
     return PsbtInputHash160(
@@ -1181,10 +1291,10 @@ class PsbtInputHash160 extends PsbtInputData {
 
 class PsbtInputHash256 extends PsbtInputData {
   /// The hash preimage, encoded as a byte vector, which must equal the key when run through the SHA256 algorithm twice
-  final List<int> preimage;
+  final BuBytes preimage;
 
   /// The resulting hash of the preimage
-  final List<int> hash;
+  final BuBytes hash;
   String preImageHex() {
     return BytesUtils.toHexString(preimage);
   }
@@ -1210,13 +1320,15 @@ class PsbtInputHash256 extends PsbtInputData {
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT HASH256 preimage hash length.",
     );
   }
   factory PsbtInputHash256.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.hash256.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT HASH256 preimage type flag",
       );
     }
@@ -1227,7 +1339,10 @@ class PsbtInputHash256 extends PsbtInputData {
         keyPair: keypair,
       );
     }
-    throw DartBitcoinPluginException("Invalid PSBT HASH256 preimage data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT HASH256 preimage data.",
+    );
   }
   factory PsbtInputHash256.fromPreImage(List<int> preimage) {
     return PsbtInputHash256(
@@ -1248,7 +1363,7 @@ class PsbtInputHash256 extends PsbtInputData {
 
 class PsbtInputPreviousTXID extends PsbtInputData {
   /// 32 byte txid of the previous transaction whose output at PSBT_IN_OUTPUT_INDEX is being spent.
-  final List<int> txId;
+  final BuBytes txId;
   PsbtInputPreviousTXID._({required List<int> txId, required super.keyPair})
     : txId = txId.asImmutableBytes,
       super(type: PsbtInputTypes.previousTxId);
@@ -1262,7 +1377,8 @@ class PsbtInputPreviousTXID extends PsbtInputData {
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Previous TXID transaction id bytes length.",
     );
   }
@@ -1273,10 +1389,16 @@ class PsbtInputPreviousTXID extends PsbtInputData {
   }
   factory PsbtInputPreviousTXID.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.previousTxId.flag) {
-      throw DartBitcoinPluginException("Invalid PSBT Previous TXID type flag");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Previous TXID type flag",
+      );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException("Invalid PSBT Previous TXID key data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Previous TXID key data.",
+      );
     }
     if (keypair.value.data.length == QuickCrypto.sha256DigestSize) {
       return PsbtInputPreviousTXID._(
@@ -1284,7 +1406,10 @@ class PsbtInputPreviousTXID extends PsbtInputData {
         txId: keypair.value.data,
       );
     }
-    throw DartBitcoinPluginException("Invalid PSBT Previous TXID key data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Previous TXID value data.",
+    );
   }
 
   @override
@@ -1332,12 +1457,14 @@ class PsbtInputSpentOutputIndex extends PsbtInputData {
   }
   factory PsbtInputSpentOutputIndex.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.spentOutputIndex.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Spent Output Index type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Spent Output Index key data.",
       );
     }
@@ -1352,7 +1479,10 @@ class PsbtInputSpentOutputIndex extends PsbtInputData {
         );
       }
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Spent Output Index data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Spent Output Index data.",
+    );
   }
 
   @override
@@ -1395,12 +1525,14 @@ class PsbtInputSequenceNumber extends PsbtInputData {
   }
   factory PsbtInputSequenceNumber.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.sequenceNumber.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Sequence Number type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Sequence Number key data.",
       );
     }
@@ -1415,10 +1547,13 @@ class PsbtInputSequenceNumber extends PsbtInputData {
         );
       }
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Sequence Number data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Sequence Number data.",
+    );
   }
 
-  List<int> sequenceBytes() {
+  BuBytes sequenceBytes() {
     return sequence.toLeBytes(length: BitcoinOpCodeConst.locktimeLengthInBytes);
   }
 
@@ -1440,7 +1575,8 @@ class PsbtInputRequiredTimeBasedLockTime extends PsbtInputData {
        super(type: PsbtInputTypes.requiredTimeBasedLockTime);
   factory PsbtInputRequiredTimeBasedLockTime(int locktime) {
     if (locktime < 500000000 || locktime > BinaryOps.maxUint32) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Required Time-based Locktime data.",
       );
     }
@@ -1459,12 +1595,14 @@ class PsbtInputRequiredTimeBasedLockTime extends PsbtInputData {
   }
   factory PsbtInputRequiredTimeBasedLockTime.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.requiredTimeBasedLockTime.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Required Time-based Locktime type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Required Time-based Locktime key data.",
       );
     }
@@ -1477,7 +1615,8 @@ class PsbtInputRequiredTimeBasedLockTime extends PsbtInputData {
               byteOrder: Endian.little,
             ).asU32;
         if (locktime < 500000000 || locktime > BinaryOps.maxUint32) {
-          throw DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.invalidArgument,
             "Invalid PSBT Required Time-based Locktime data.",
           );
         }
@@ -1487,7 +1626,8 @@ class PsbtInputRequiredTimeBasedLockTime extends PsbtInputData {
         );
       }
     } catch (_) {}
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Required Time-based Locktime data.",
     );
   }
@@ -1497,7 +1637,7 @@ class PsbtInputRequiredTimeBasedLockTime extends PsbtInputData {
     return {"type": type.name, "locktime": locktime};
   }
 
-  List<int> sequenceBytes() {
+  BuBytes sequenceBytes() {
     return locktime.toLeBytes(length: BitcoinOpCodeConst.sequenceLengthInBytes);
   }
 }
@@ -1514,7 +1654,8 @@ class PsbtInputRequiredHeightBasedLockTime extends PsbtInputData {
        super(type: PsbtInputTypes.requiredHeightBasedLockTime);
   factory PsbtInputRequiredHeightBasedLockTime(int height) {
     if (height.isNegative || height >= 500000000) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Required Height-based Locktime data.",
       );
     }
@@ -1535,12 +1676,14 @@ class PsbtInputRequiredHeightBasedLockTime extends PsbtInputData {
     PsbtKeyPair keypair,
   ) {
     if (keypair.key.type != PsbtInputTypes.requiredHeightBasedLockTime.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Required Height-based Locktime type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Required Height-based Locktime key data.",
       );
     }
@@ -1553,7 +1696,8 @@ class PsbtInputRequiredHeightBasedLockTime extends PsbtInputData {
               byteOrder: Endian.little,
             ).asU32;
         if (height.isNegative || height >= 500000000) {
-          throw DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.invalidArgument,
             "Invalid PSBT Required Height-based Locktime data.",
           );
         }
@@ -1563,7 +1707,8 @@ class PsbtInputRequiredHeightBasedLockTime extends PsbtInputData {
         );
       }
     } catch (_) {}
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Required Height-based Locktime data.",
     );
   }
@@ -1573,13 +1718,13 @@ class PsbtInputRequiredHeightBasedLockTime extends PsbtInputData {
     return {"type": type.name, "height": height};
   }
 
-  List<int> sequenceBytes() {
+  BuBytes sequenceBytes() {
     return height.toLeBytes(length: BitcoinOpCodeConst.locktimeLengthInBytes);
   }
 }
 
 abstract class PsbtInputDataSignature extends PsbtInputData {
-  final List<int> signature;
+  final BuBytes signature;
   PsbtInputDataSignature._({
     required List<int> signature,
     required super.type,
@@ -1599,7 +1744,8 @@ class PsbtInputTaprootKeySpendSignature extends PsbtInputDataSignature {
   }) : super._(type: PsbtInputTypes.taprootKeySpentSignature);
   factory PsbtInputTaprootKeySpendSignature(List<int> signature) {
     if (!CryptoSignatureUtils.isValidSchnorrSignature(signature)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Key Spend Signature data.",
       );
     }
@@ -1613,17 +1759,20 @@ class PsbtInputTaprootKeySpendSignature extends PsbtInputDataSignature {
   }
   factory PsbtInputTaprootKeySpendSignature.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.taprootKeySpentSignature.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Key Spend Signature type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Key Spend Signature key data.",
       );
     }
     if (!CryptoSignatureUtils.isValidSchnorrSignature(keypair.value.data)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Key Spend Signature data.",
       );
     }
@@ -1641,8 +1790,8 @@ class PsbtInputTaprootKeySpendSignature extends PsbtInputDataSignature {
 
 class PsbtInputTaprootScriptSpendSignature extends PsbtInputDataSignature {
   /// A 32 byte X-only public key involved in a leaf script concatenated with the 32 byte hash of the leaf it is part of.
-  final List<int> xOnlyPubKey;
-  final List<int> leafHash;
+  final BuBytes xOnlyPubKey;
+  final BuBytes leafHash;
 
   late final String xOnlyPubKeyHex = BytesUtils.toHexString(xOnlyPubKey);
 
@@ -1662,7 +1811,8 @@ class PsbtInputTaprootScriptSpendSignature extends PsbtInputDataSignature {
     if (xOnlyPubKey.length != EcdsaKeysConst.pointCoordByteLen ||
         leafHash.length != QuickCrypto.sha256DigestSize ||
         !CryptoSignatureUtils.isValidSchnorrSignature(signature)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Script Spend Signature data.",
       );
     }
@@ -1683,7 +1833,8 @@ class PsbtInputTaprootScriptSpendSignature extends PsbtInputDataSignature {
     PsbtKeyPair keypair,
   ) {
     if (keypair.key.type != PsbtInputTypes.taprootScriptSpentSignature.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Script Spend Signature type flag",
       );
     }
@@ -1698,7 +1849,8 @@ class PsbtInputTaprootScriptSpendSignature extends PsbtInputDataSignature {
         keyPair: keypair,
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Taproot Script Spend Signature data.",
     );
   }
@@ -1719,7 +1871,7 @@ class PsbtInputTaprootScriptSpendSignature extends PsbtInputDataSignature {
 class PsbtInputTaprootLeafScript extends PsbtInputData {
   /// The control block for this leaf as specified in BIP 341.
   /// The control block contains the merkle tree path to this leaf.
-  final List<int> controllBlock;
+  final BuBytes controllBlock;
 
   /// The script for this leaf as would be provided in the witness stack followed by the single byte leaf version.
   /// Note that the leaves included in this field should be those that the signers of this
@@ -1760,17 +1912,22 @@ class PsbtInputTaprootLeafScript extends PsbtInputData {
         leafVersion: leafVersion,
       );
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Taproot Leaf Script key.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Taproot Leaf Script key.",
+    );
   }
 
   factory PsbtInputTaprootLeafScript.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.taprootLeafScript.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Leaf Script type flag",
       );
     }
     if (keypair.key.extraData == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Leaf Script key data.",
       );
     }
@@ -1787,7 +1944,10 @@ class PsbtInputTaprootLeafScript extends PsbtInputData {
         leafVersion: version,
       );
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Taproot Leaf Script data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Taproot Leaf Script data.",
+    );
   }
 
   @override
@@ -1804,7 +1964,7 @@ class PsbtInputTaprootLeafScript extends PsbtInputData {
 class PsbtInputTaprootKeyBip32DerivationPath extends PsbtInputData {
   /// A 32 byte X-only public key involved in this input. It may be the output key,
   /// the internal key, or a key present in a leaf script.
-  final List<int> xOnlyPubKey;
+  final BuBytes xOnlyPubKey;
 
   /// A compact size unsigned integer representing the number of leaf hashes,
   /// followed by a list of leaf hashes, followed by the 4 byte master key
@@ -1813,8 +1973,8 @@ class PsbtInputTaprootKeyBip32DerivationPath extends PsbtInputData {
   /// Public keys are those needed to spend this output. The leaf hashes are of the leaves which involve this public key.
   /// The internal key does not have leaf hashes, so can be indicated with a hashes len of 0.
   /// Finalizers should remove this field after PSBT_IN_FINAL_SCRIPTWITNESS is constructed.
-  final List<List<int>> leavesHashes;
-  final List<int> fingerprint;
+  final List<BuBytes> leavesHashes;
+  final BuBytes fingerprint;
   final List<Bip32KeyIndex> indexes;
   String get path {
     return Bip32Path(elems: indexes).toString();
@@ -1872,7 +2032,8 @@ class PsbtInputTaprootKeyBip32DerivationPath extends PsbtInputData {
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid Taproot Key BIP 32 Derivation Path data.",
     );
   }
@@ -1880,7 +2041,8 @@ class PsbtInputTaprootKeyBip32DerivationPath extends PsbtInputData {
     PsbtKeyPair keypair,
   ) {
     if (keypair.key.type != PsbtInputTypes.taprootBip32Derivation.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Key BIP 32 Derivation Path type flag",
       );
     }
@@ -1894,11 +2056,11 @@ class PsbtInputTaprootKeyBip32DerivationPath extends PsbtInputData {
       });
       final int fingerprintOffset =
           leavesHashes.length * QuickCrypto.sha256DigestSize;
-      final List<int> fingerprint = data.sublist(
+      final fingerprint = data.sublist(
         fingerprintOffset,
         fingerprintOffset + Bip32KeyDataConst.fingerprintByteLen,
       );
-      final List<int> indexesBytes = data.sublist(
+      final indexesBytes = data.sublist(
         fingerprintOffset + Bip32KeyDataConst.fingerprintByteLen,
       );
       if (indexesBytes.length % Bip32KeyDataConst.keyIndexByteLen == 0) {
@@ -1929,7 +2091,8 @@ class PsbtInputTaprootKeyBip32DerivationPath extends PsbtInputData {
       }
     } catch (_) {}
 
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid Taproot Key BIP 32 Derivation Path data.",
     );
   }
@@ -1938,13 +2101,14 @@ class PsbtInputTaprootKeyBip32DerivationPath extends PsbtInputData {
     required String path,
     required List<List<int>> leavesHashes,
   }) {
+    final derive = masterKey.derivePath(path);
     final indexes = Bip32PathParser.parse(path).elems;
+    final point = Secp256k1Point.fromBytes(derive.publicKey.toPublicKeyBytes());
     return PsbtInputTaprootKeyBip32DerivationPath(
       fingerprint: masterKey.fingerPrint.toBytes(),
       indexes: indexes,
       leavesHashes: leavesHashes,
-      xOnlyPubKey:
-          masterKey.publicKey.point.cast<ProjectiveECCPoint>().toXonly(),
+      xOnlyPubKey: point.toXOnly(),
     );
   }
 
@@ -1964,7 +2128,7 @@ class PsbtInputTaprootKeyBip32DerivationPath extends PsbtInputData {
 class PsbtInputTaprootInternalKey extends PsbtInputData {
   /// The X-only pubkey used as the internal key in this output.
   /// Finalizers should remove this field after PSBT_IN_FINAL_SCRIPTWITNESS is constructed.
-  final List<int> xOnlyPubKey;
+  final BuBytes xOnlyPubKey;
 
   PsbtInputTaprootInternalKey._({
     required List<int> xOnlyPubKey,
@@ -1973,7 +2137,8 @@ class PsbtInputTaprootInternalKey extends PsbtInputData {
        super(type: PsbtInputTypes.taprootInternalKey);
   factory PsbtInputTaprootInternalKey(List<int> xOnlyPubKey) {
     if (xOnlyPubKey.length != QuickCrypto.sha256DigestSize) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Internal Key data.",
       );
     }
@@ -1987,17 +2152,20 @@ class PsbtInputTaprootInternalKey extends PsbtInputData {
   }
   factory PsbtInputTaprootInternalKey.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.taprootInternalKey.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Internal Key type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Internal key key data.",
       );
     }
     if (keypair.value.data.length != QuickCrypto.sha256DigestSize) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Internal Key data.",
       );
     }
@@ -2018,7 +2186,7 @@ class PsbtInputTaprootInternalKey extends PsbtInputData {
 
 class PsbtInputTaprootMerkleRoot extends PsbtInputData {
   /// The 32 byte Merkle root hash. Finalizers should remove this field after PSBT_IN_FINAL_SCRIPTWITNESS is constructed.
-  final List<int> hash;
+  final BuBytes hash;
 
   PsbtInputTaprootMerkleRoot._({
     required List<int> hash,
@@ -2027,7 +2195,8 @@ class PsbtInputTaprootMerkleRoot extends PsbtInputData {
        super(type: PsbtInputTypes.taprootMerkleRoot);
   factory PsbtInputTaprootMerkleRoot(List<int> hash) {
     if (hash.length != QuickCrypto.sha256DigestSize) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Merkle Root data.",
       );
     }
@@ -2041,17 +2210,20 @@ class PsbtInputTaprootMerkleRoot extends PsbtInputData {
   }
   factory PsbtInputTaprootMerkleRoot.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.taprootMerkleRoot.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Merkle Root type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Merkle Root key data.",
       );
     }
     if (keypair.value.data.length != QuickCrypto.sha256DigestSize) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Taproot Merkle Root data.",
       );
     }
@@ -2094,11 +2266,11 @@ class PsbtInputMuSig2ParticipantPublicKeys extends PsbtInputData {
       keyPair: PsbtKeyPair(
         key: PsbtKey(
           PsbtInputTypes.muSig2ParticipantPublicKeys.flag!,
-          extraData: aggregatePubKey.toBytes(mode: PubKeyModes.compressed),
+          extraData: aggregatePubKey.toBytes(mode: CryptoKeyEncoding.base),
         ),
         value: PsbtValue(
           pubKeys
-              .expand((e) => e.toBytes(mode: PubKeyModes.compressed))
+              .expand((e) => e.toBytes(mode: CryptoKeyEncoding.base))
               .toList(),
         ),
       ),
@@ -2108,7 +2280,8 @@ class PsbtInputMuSig2ParticipantPublicKeys extends PsbtInputData {
     PsbtKeyPair keypair,
   ) {
     if (keypair.key.type != PsbtInputTypes.muSig2ParticipantPublicKeys.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT MuSig2 Participant Public Keys type flag",
       );
     }
@@ -2139,7 +2312,8 @@ class PsbtInputMuSig2ParticipantPublicKeys extends PsbtInputData {
         }
       } catch (_) {}
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT MuSig2 Participant Public Keys data",
     );
   }
@@ -2163,10 +2337,10 @@ class PsbtInputMuSig2PublicNonce extends PsbtInputData {
   /// the script and not the aggregate public key that it was derived from, if it was derived from an aggregate key.
   final ECPublic publicKey;
   final ECPublic plainPublicKey;
-  final List<int>? tapleafHash;
+  final BuBytes? tapleafHash;
 
   /// The public nonce produced by the NonceGen algorithm.
-  final List<int> publicNonce;
+  final BuBytes publicNonce;
 
   PsbtInputMuSig2PublicNonce._({
     required this.publicKey,
@@ -2195,8 +2369,8 @@ class PsbtInputMuSig2PublicNonce extends PsbtInputData {
           key: PsbtKey(
             PsbtInputTypes.muSig2PublicNonce.flag!,
             extraData: [
-              ...publicKey.toBytes(mode: PubKeyModes.compressed),
-              ...plainPublicKey.toBytes(mode: PubKeyModes.compressed),
+              ...publicKey.toBytes(mode: CryptoKeyEncoding.base),
+              ...plainPublicKey.toBytes(mode: CryptoKeyEncoding.base),
               ...tapleafHash ?? [],
             ],
           ),
@@ -2204,11 +2378,15 @@ class PsbtInputMuSig2PublicNonce extends PsbtInputData {
         ),
       );
     }
-    throw DartBitcoinPluginException("Invalid PSBT MuSig2 Public Nonce data");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT MuSig2 Public Nonce data",
+    );
   }
   factory PsbtInputMuSig2PublicNonce.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.muSig2PublicNonce.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT MuSig2 Public Nonce type flag",
       );
     }
@@ -2251,7 +2429,10 @@ class PsbtInputMuSig2PublicNonce extends PsbtInputData {
         }
       } catch (_) {}
     }
-    throw DartBitcoinPluginException("Invalid PSBT MuSig2 Public Nonce data");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT MuSig2 Public Nonce data",
+    );
   }
 
   @override
@@ -2276,7 +2457,7 @@ class PsbtInputMuSig2ParticipantPartialSignature
   /// and not the aggregate public key that it was derived from, if it was derived from an aggregate key.
   final ECPublic publicKey;
   final ECPublic plainPublicKey;
-  final List<int>? tapleafHash;
+  final BuBytes? tapleafHash;
 
   PsbtInputMuSig2ParticipantPartialSignature._({
     required this.publicKey,
@@ -2304,8 +2485,8 @@ class PsbtInputMuSig2ParticipantPartialSignature
           key: PsbtKey(
             PsbtInputTypes.muSig2ParticipantPartialSignature.flag!,
             extraData: [
-              ...publicKey.toBytes(mode: PubKeyModes.compressed),
-              ...plainPublicKey.toBytes(mode: PubKeyModes.compressed),
+              ...publicKey.toBytes(mode: CryptoKeyEncoding.base),
+              ...plainPublicKey.toBytes(mode: CryptoKeyEncoding.base),
               ...tapleafHash ?? [],
             ],
           ),
@@ -2313,7 +2494,8 @@ class PsbtInputMuSig2ParticipantPartialSignature
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT MuSig2 Participant Partial Signature data",
     );
   }
@@ -2322,7 +2504,8 @@ class PsbtInputMuSig2ParticipantPartialSignature
   ) {
     if (keypair.key.type !=
         PsbtInputTypes.muSig2ParticipantPartialSignature.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT MuSig2 Participant Partial Signature type flag",
       );
     }
@@ -2361,7 +2544,8 @@ class PsbtInputMuSig2ParticipantPartialSignature
         }
       } catch (_) {}
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT MuSig2 Participant Partial Signature data",
     );
   }
@@ -2380,11 +2564,11 @@ class PsbtInputMuSig2ParticipantPartialSignature
 
 class PsbtInputSilentPaymentInputECDHShare extends PsbtInputData {
   /// The scan key that this ECDH share is for.
-  final List<int> scanKey;
+  final BuBytes scanKey;
 
   /// An ECDH share for a scan key. The ECDH shared is computed with a * B_scan,
   /// where a is the private key of the corresponding prevout public key, and B_scan is the scan key of a recipient.
-  final List<int> share;
+  final BuBytes share;
 
   PsbtInputSilentPaymentInputECDHShare._({
     required List<int> scanKey,
@@ -2411,7 +2595,8 @@ class PsbtInputSilentPaymentInputECDHShare extends PsbtInputData {
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Silent Payment Input ECDH Share data",
     );
   }
@@ -2419,7 +2604,8 @@ class PsbtInputSilentPaymentInputECDHShare extends PsbtInputData {
     PsbtKeyPair keypair,
   ) {
     if (keypair.key.type != PsbtInputTypes.silentPaymentInputECDHShare.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Silent Payment Input ECDH Share type flag",
       );
     }
@@ -2432,7 +2618,8 @@ class PsbtInputSilentPaymentInputECDHShare extends PsbtInputData {
         keyPair: keypair,
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Silent Payment Input ECDH Share type",
     );
   }
@@ -2449,10 +2636,10 @@ class PsbtInputSilentPaymentInputECDHShare extends PsbtInputData {
 
 class PsbtInputSilentPaymentInputDLEQProof extends PsbtInputData {
   /// The scan key that this proof covers.
-  final List<int> scanKey;
+  final BuBytes scanKey;
 
   /// A BIP374 DLEQ proof computed for the matching ECDH share.
-  final List<int> proof;
+  final BuBytes proof;
 
   PsbtInputSilentPaymentInputDLEQProof._({
     required List<int> scanKey,
@@ -2466,7 +2653,7 @@ class PsbtInputSilentPaymentInputDLEQProof extends PsbtInputData {
     required List<int> proof,
   }) {
     if (scanKey.length == EcdsaKeysConst.pubKeyCompressedByteLen &&
-        proof.length == QuickCrypto.sha512DeigestLength) {
+        proof.length == QuickCrypto.sha512DigestLength) {
       return PsbtInputSilentPaymentInputDLEQProof._(
         scanKey: scanKey,
         proof: proof,
@@ -2479,7 +2666,8 @@ class PsbtInputSilentPaymentInputDLEQProof extends PsbtInputData {
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Silent Payment Input DLEQ Proof data",
     );
   }
@@ -2487,20 +2675,22 @@ class PsbtInputSilentPaymentInputDLEQProof extends PsbtInputData {
     PsbtKeyPair keypair,
   ) {
     if (keypair.key.type != PsbtInputTypes.silentPaymentInputDLEQProof.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Silent Payment Input DLEQ Proof type flag",
       );
     }
     if (keypair.key.extraData?.length ==
             EcdsaKeysConst.pubKeyCompressedByteLen &&
-        keypair.value.data.length == QuickCrypto.sha512DeigestLength) {
+        keypair.value.data.length == QuickCrypto.sha512DigestLength) {
       return PsbtInputSilentPaymentInputDLEQProof._(
         scanKey: keypair.key.extraData!,
         proof: keypair.value.data,
         keyPair: keypair,
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Silent Payment Input DLEQ Proof data",
     );
   }
@@ -2517,11 +2707,11 @@ class PsbtInputSilentPaymentInputDLEQProof extends PsbtInputData {
 
 class PsbtInputProprietaryUseType extends PsbtInputData {
   /// Compact size unsigned integer of the length of the identifier, followed by identifier prefix, followed by a compact size unsigned integer subtype, followed by the key data itself.
-  final List<int> identifier;
-  final List<int> subkeydata;
+  final BuBytes identifier;
+  final BuBytes subkeydata;
 
   /// Any value data as defined by the proprietary type user.
-  final List<int> data;
+  final BuBytes data;
 
   PsbtInputProprietaryUseType._({
     required List<int> identifier,
@@ -2538,7 +2728,6 @@ class PsbtInputProprietaryUseType extends PsbtInputData {
     required List<int> data,
   }) {
     final identifierBytes = IntUtils.prependVarint(identifier);
-    final subkeyData = IntUtils.prependVarint(subkeydata);
     return PsbtInputProprietaryUseType._(
       identifier: identifier,
       subkeydata: subkeydata,
@@ -2546,7 +2735,7 @@ class PsbtInputProprietaryUseType extends PsbtInputData {
       keyPair: PsbtKeyPair(
         key: PsbtKey(
           PsbtInputTypes.proprietaryUseType.flag!,
-          extraData: [...identifierBytes, ...subkeyData],
+          extraData: [...identifierBytes, ...subkeydata],
         ),
         value: PsbtValue(data),
       ),
@@ -2554,7 +2743,8 @@ class PsbtInputProprietaryUseType extends PsbtInputData {
   }
   factory PsbtInputProprietaryUseType.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtInputTypes.proprietaryUseType.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Proprietary Use Type type flag",
       );
     }
@@ -2574,7 +2764,10 @@ class PsbtInputProprietaryUseType extends PsbtInputData {
         keyPair: keypair,
       );
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Proprietary Use Type data");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Proprietary Use Type data",
+    );
   }
 
   @override

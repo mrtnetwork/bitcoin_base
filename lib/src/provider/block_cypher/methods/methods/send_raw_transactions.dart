@@ -1,6 +1,7 @@
 import 'package:bitcoin_base/src/provider/models/block_cypher/block_cypher_models.dart';
 import 'package:blockchain_utils/service/models/params.dart';
-import 'package:blockchain_utils/utils/utils.dart';
+import 'package:blockchain_utils/utils/json/json.dart';
+import 'package:blockchain_utils/utils/string/string.dart';
 import 'package:bitcoin_base/src/provider/block_cypher/core/methods.dart';
 import 'package:bitcoin_base/src/provider/block_cypher/core/params.dart';
 
@@ -20,7 +21,7 @@ class BlockCypherRequestSendRawTransaction
   List<int>? get body => StringUtils.encodeJson({"tx": digest});
 
   @override
-  String onResonse(Map<String, dynamic> result) {
+  String onResponse(Map<String, dynamic> result) {
     if (result.hasValue("tx")) {
       return BlockCypherTransaction.fromJson(
         result.valueEnsureAsMap<String, dynamic>("tx"),

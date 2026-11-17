@@ -1,9 +1,10 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/models/network.dart';
+import 'package:bitcoin_base/src/provider/models/multisig_script.dart';
 import 'package:bitcoin_base/src/provider/models/utxo_details.dart';
 import 'package:bitcoin_base/src/transaction_builder/builder.dart';
+import 'package:bitcoin_base/src/transaction_builder/btc_multisig_utils.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// A transaction builder specifically designed for the Bitcoin Cash (BCH) and Bitcoin SV (BSV) networks.
@@ -27,7 +28,7 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   final String? memo;
   final bool enableRBF;
   final bool isFakeTransaction;
-  final List<int> locktime;
+  final BuBytes locktime;
 
   ForkedTransactionBuilder({
     required super.outPuts,
@@ -39,8 +40,8 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
     this.memo,
     this.enableRBF = false,
     this.isFakeTransaction = false,
-    this.locktime = BitcoinOpCodeConst.defaultTxLocktime,
-  }) {
+    List<int> locktime = BitcoinOpCodeConst.defaultTxLocktime,
+  }) : locktime = locktime.asImmutableBytes {
     _validateBuilder();
   }
 
@@ -50,7 +51,8 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
       case BitcoinSVNetwork _:
         break;
       default:
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'invalid network. use ForkedTransactionBuilder for BitcoinCashNetwork and BSVNetwork otherwise use BitcoinTransactionBuilder',
           details: {"network": network.name},
         );
@@ -102,7 +104,7 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
       /// transaction that you've broadcasted to the network.
       /// This feature is useful when you want to speed up a
       /// transaction that is taking longer than expected to get confirmed due to low transaction fees.
-      enableRBF: true,
+      enableRBF: enableRBF,
 
       /// We consider the transaction to be fake so that it doesn't check the amounts
       /// and doesn't generate errors when determining the transaction size.
@@ -139,7 +141,8 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
         case P2shAddressType.p2pkhInP2sh32wt:
           return script;
         default:
-          throw DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.unsupported,
             'unsuported multi-sig type ${utxo.utxo.scriptType} for ${network.conf.coinName.name}',
           );
       }
@@ -161,7 +164,8 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
       case P2shAddressType.p2pkhInP2sh32wt:
         return senderPub.toAddress(mode: utxo.keyType).toScriptPubKey();
       default:
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.unsupported,
           '${utxo.utxo.scriptType} does not sudpport on ${network.conf.coinName.name}',
         );
     }
@@ -181,8 +185,8 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
   /// - tapRootPubKeys: A List of of Script representing taproot public keys for P2TR inputs (ignored for non-P2TR inputs).
   //
   /// Returns:
-  /// - `List<int>`: representing the transaction digest to be used for signing the input.
-  List<int> _generateTransactionDigest({
+  /// - `BuBytes`: representing the transaction digest to be used for signing the input.
+  BuBytes _generateTransactionDigest({
     required Script scriptPubKeys,
     required int input,
     required UtxoWithAddress utox,
@@ -190,13 +194,15 @@ class ForkedTransactionBuilder extends BasedBitcoinTransacationBuilder {
     int sighash =
         BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked,
   }) {
-    return transaction.getTransactionSegwitDigit(
-      txInIndex: input,
-      script: scriptPubKeys,
-      amount: utox.utxo.value,
-      token: utox.utxo.token,
-      sighash: sighash,
-    );
+    return transaction
+        .getTransactionSegwitDigit(
+          txInIndex: input,
+          script: scriptPubKeys,
+          amount: utox.utxo.value,
+          token: utox.utxo.token,
+          sighash: sighash,
+        )
+        .asImmutableBytes;
   }
 
   /// buildP2wshOrP2shScriptSig constructs and returns a script signature (represented as a List of strings)
@@ -249,7 +255,8 @@ that demonstrate the right to spend the bitcoins associated with the correspondi
         final script = senderPub.toRedeemScript(mode: utx.keyType);
         return [signedDigest, script.toHex()];
       default:
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.unsupported,
           'Cannot send from this type of address ${utx.utxo.scriptType}',
         );
     }
@@ -355,8 +362,9 @@ be retrieved by anyone who examines the blockchain's history.
   }) {
     if (isFakeTransaction) return;
     if (sumAmountsWithFee != sumUtxoAmount) {
-      throw DartBitcoinPluginException(
-        'Sum value of utxo not spending',
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        'Sum of UTXO values does not equal outputs plus fee.',
         details: {
           'inputAmount': sumUtxoAmount.toString(),
           'fee': fee.toString(),
@@ -382,7 +390,8 @@ be retrieved by anyone who examines the blockchain's history.
             );
 
         if (amount != i.value) {
-          throw DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.invalidArgument,
             'Sum token value of UTXOs not spending. use BitcoinBurnableOutput if you want to burn tokens.',
             details: {
               'token': i.key,
@@ -411,7 +420,8 @@ be retrieved by anyone who examines the blockchain's history.
                   element.categoryID == token.category,
             );
         if (hasBurnableOutput) continue;
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Some NFTs in the inputs lack the corresponding spending in the outputs. If you intend to burn tokens, consider utilizing the BitcoinBurnableOutput.',
           details: {'category id': token.category},
         );
@@ -456,7 +466,8 @@ be retrieved by anyone who examines the blockchain's history.
           }
         }
         if (sumMultiSigWeight < multiSigAddress.threshold) {
-          throw const DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.invalidState,
             'some multisig signature does not exist',
           );
         }
@@ -468,8 +479,8 @@ be retrieved by anyone who examines the blockchain's history.
     return count;
   }
 
-  @override
-  BtcTransaction buildTransaction(BitcoinSignerCallBack sign) {
+  /// Prepares the transaction and all the data required to sign its inputs.
+  _PreparedTransaction _prepareTransaction() {
     /// build inputs
     final sortedInputs = _buildInputs();
 
@@ -483,10 +494,10 @@ be retrieved by anyone who examines the blockchain's history.
     /// sum of amounts you filled in outputs
     final sumOutputAmounts = _sumOutputAmounts(outputs);
 
-    /// sum of UTXOS amount
+    /// sum of UTXOs amount
     final sumUtxoAmount = utxos.sumOfUtxosValue();
 
-    /// sum of outputs amount + transcation fee
+    /// sum of outputs amount + transaction fee
     final sumAmountsWithFee = (sumOutputAmounts + fee);
 
     _validate(
@@ -503,201 +514,245 @@ be retrieved by anyone who examines the blockchain's history.
       outputs: outputs,
       locktime: locktime,
     );
+
+    return (
+      inputs: inputs,
+      utxos: utxos,
+      outputs: outputs,
+      transaction: transaction,
+    );
+  }
+
+  /// Transaction digest and sighash type of the given input.
+  ({BuBytes digest, int sighash}) _inputDigest({
+    required int index,
+    required UtxoWithAddress utxo,
+    required BtcTransaction transaction,
+  }) {
     const sighash =
         BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked;
 
-    /// Well, now let's do what we want for each input
-    for (var i = 0; i < inputs.length; i++) {
-      final indexUtxo = utxos[i];
+    /// We receive the owner's ScriptPubKey
+    final script = _buildInputScriptPubKeys(utxo);
 
-      /// We receive the owner's ScriptPubKey
-      final script = _buildInputScriptPubKeys(indexUtxo);
+    /// We generate transaction digest for current input
+    final digest = _generateTransactionDigest(
+      scriptPubKeys: script,
+      input: index,
+      utox: utxo,
+      transaction: transaction,
+      sighash: sighash,
+    );
 
-      /// We generate transaction digest for current input
-      final digest = _generateTransactionDigest(
-        scriptPubKeys: script,
-        input: i,
-        utox: indexUtxo,
-        transaction: transaction,
-        sighash: sighash,
+    return (digest: digest, sighash: sighash);
+  }
+
+  /// Signs the given input and returns its signatures.
+  ///
+  /// A multi-signature input is signed by the [multiSigSign] callback, that is
+  /// called once for the input and returns the signature of every signer.
+  /// When it is not provided the legacy behaviour is used and the [sign]
+  /// callback is called once for every signer of the multi-signature address.
+  List<String> _signInput({
+    required int index,
+    required UtxoWithAddress utxo,
+    required BtcTransaction transaction,
+    required BitcoinSignerCallBack sign,
+    BitcoinMultiSigSignerCallBack? multiSigSign,
+  }) {
+    final inputDigest = _inputDigest(
+      index: index,
+      utxo: utxo,
+      transaction: transaction,
+    );
+    final digest = inputDigest.digest;
+    final sighash = inputDigest.sighash;
+
+    /// handle multisig address
+    if (utxo.isMultiSig()) {
+      final multiSigAddress = utxo.multiSigAddress;
+      final signatures =
+          multiSigSign != null
+              ? multiSigSign(
+                digest,
+                utxo,
+                multiSigAddress.signers.map((e) => e.publicKey).toList(),
+                sighash,
+              )
+              : _legacyMultiSigSignatures(
+                digest: digest,
+                utxo: utxo,
+                multiSigAddress: multiSigAddress,
+                sighash: sighash,
+                sign: sign,
+              );
+      return BtcMultisigUtils.buildSignatures(
+        multiSigAddress: multiSigAddress,
+        signatures: signatures,
       );
-
-      /// handle multisig address
-      if (indexUtxo.isMultiSig()) {
-        final multiSigAddress = indexUtxo.multiSigAddress;
-        var sumMultiSigWeight = 0;
-        final mutlsiSigSignatures = <String>[];
-        for (
-          var ownerIndex = 0;
-          ownerIndex < multiSigAddress.signers.length;
-          ownerIndex++
-        ) {
-          /// now we need sign the transaction digest
-          final sig = sign(
-            digest,
-            indexUtxo,
-            multiSigAddress.signers[ownerIndex].publicKey,
-            sighash,
-          );
-          if (sig.isEmpty) continue;
-          for (
-            var weight = 0;
-            weight < multiSigAddress.signers[ownerIndex].weight;
-            weight++
-          ) {
-            if (mutlsiSigSignatures.length >= multiSigAddress.threshold) {
-              break;
-            }
-            mutlsiSigSignatures.add(sig);
-          }
-          sumMultiSigWeight += multiSigAddress.signers[ownerIndex].weight;
-          if (sumMultiSigWeight >= multiSigAddress.threshold) {
-            break;
-          }
-        }
-        if (sumMultiSigWeight < multiSigAddress.threshold) {
-          throw const DartBitcoinPluginException(
-            'some multisig signature does not exist',
-          );
-        }
-
-        _addScripts(
-          input: inputs[i],
-          signatures: mutlsiSigSignatures,
-          utxo: indexUtxo,
-        );
-        continue;
-      }
-
-      /// now we need sign the transaction digest
-      final sig = sign(
-        digest,
-        indexUtxo,
-        indexUtxo.ownerDetails.publicKey!,
-        sighash,
-      );
-      _addScripts(input: inputs[i], signatures: [sig], utxo: indexUtxo);
     }
 
-    return transaction;
+    /// now we need sign the transaction digest
+    return [sign(digest, utxo, utxo.ownerDetails.publicKey!, sighash)];
+  }
+
+  /// Collects the signature of every signer of a multi-signature input using
+  /// the legacy signer, that is called once for each signer of the address.
+  Map<String, String> _legacyMultiSigSignatures({
+    required BuBytes digest,
+    required UtxoWithAddress utxo,
+    required MultiSignatureAddress multiSigAddress,
+    required int sighash,
+    required BitcoinSignerCallBack sign,
+  }) {
+    final signatures = <String, String>{};
+    var sumMultiSigWeight = 0;
+    for (final signer in multiSigAddress.signers) {
+      /// now we need sign the transaction digest
+      final signature = sign(digest, utxo, signer.publicKey, sighash);
+      if (signature.isEmpty) continue;
+      signatures[signer.publicKey] = signature;
+      sumMultiSigWeight += signer.weight;
+      if (sumMultiSigWeight >= multiSigAddress.threshold) {
+        break;
+      }
+    }
+    return signatures;
+  }
+
+  @override
+  BtcTransaction buildTransaction(
+    BitcoinSignerCallBack sign, {
+    BitcoinMultiSigSignerCallBack? multiSigSign,
+  }) {
+    /// prepare the transaction and the data needed to sign its inputs
+    final prepared = _prepareTransaction();
+
+    /// Well, now let's do what we want for each input
+    for (var i = 0; i < prepared.inputs.length; i++) {
+      final utxo = prepared.utxos[i];
+
+      /// now we need sign the transaction digest
+      final signatures = _signInput(
+        index: i,
+        utxo: utxo,
+        transaction: prepared.transaction,
+        sign: sign,
+        multiSigSign: multiSigSign,
+      );
+
+      _addScripts(
+        input: prepared.inputs[i],
+        signatures: signatures,
+        utxo: utxo,
+      );
+    }
+
+    return prepared.transaction;
   }
 
   @override
   Future<BtcTransaction> buildTransactionAsync(
-    BitcoinSignerCallBackAsync sign,
-  ) async {
-    /// build inputs
-    final sortedInputs = _buildInputs();
-
-    final inputs = sortedInputs.$1;
-
-    final utxos = sortedInputs.$2;
-
-    /// build outout
-    final outputs = _buildOutputs();
-
-    /// sum of amounts you filled in outputs
-    final sumOutputAmounts = _sumOutputAmounts(outputs);
-
-    /// sum of UTXOS amount
-    final sumUtxoAmount = utxos.sumOfUtxosValue();
-
-    /// sum of outputs amount + transcation fee
-    final sumAmountsWithFee = (sumOutputAmounts + fee);
-
-    _validate(
-      utxos: utxos,
-      outputs: outputs,
-      sumAmountsWithFee: sumAmountsWithFee,
-      sumUtxoAmount: sumUtxoAmount,
-      sumOutputAmounts: sumOutputAmounts,
-    );
-
-    /// create new transaction with inputs and outputs and isSegwit transaction or not
-    final transaction = BtcTransaction(
-      inputs: inputs,
-      outputs: outputs,
-      locktime: locktime,
-    );
-
-    const sighash =
-        BitcoinOpCodeConst.sighashAll | BitcoinOpCodeConst.sighashForked;
+    BitcoinSignerCallBackAsync sign, {
+    BitcoinMultiSigSignerCallBackAsync? multiSigSign,
+  }) async {
+    /// prepare the transaction and the data needed to sign its inputs
+    final prepared = _prepareTransaction();
 
     /// Well, now let's do what we want for each input
-    for (var i = 0; i < inputs.length; i++) {
-      final indexUtxo = utxos[i];
-
-      /// We receive the owner's ScriptPubKey
-      final script = _buildInputScriptPubKeys(indexUtxo);
-
-      /// We generate transaction digest for current input
-      final digest = _generateTransactionDigest(
-        scriptPubKeys: script,
-        input: i,
-        utox: indexUtxo,
-        transaction: transaction,
-        sighash: sighash,
-      );
-
-      /// handle multisig address
-      if (indexUtxo.isMultiSig()) {
-        final multiSigAddress = indexUtxo.multiSigAddress;
-        var sumMultiSigWeight = 0;
-        final mutlsiSigSignatures = <String>[];
-        for (
-          var ownerIndex = 0;
-          ownerIndex < multiSigAddress.signers.length;
-          ownerIndex++
-        ) {
-          /// now we need sign the transaction digest
-          final sig = await sign(
-            digest,
-            indexUtxo,
-            multiSigAddress.signers[ownerIndex].publicKey,
-            sighash,
-          );
-
-          if (sig.isEmpty) continue;
-          for (
-            var weight = 0;
-            weight < multiSigAddress.signers[ownerIndex].weight;
-            weight++
-          ) {
-            if (mutlsiSigSignatures.length >= multiSigAddress.threshold) {
-              break;
-            }
-            mutlsiSigSignatures.add(sig);
-          }
-
-          sumMultiSigWeight += multiSigAddress.signers[ownerIndex].weight;
-          if (sumMultiSigWeight >= multiSigAddress.threshold) {
-            break;
-          }
-        }
-        if (sumMultiSigWeight < multiSigAddress.threshold) {
-          throw const DartBitcoinPluginException(
-            'some multisig signature does not exist',
-          );
-        }
-
-        _addScripts(
-          input: inputs[i],
-          signatures: mutlsiSigSignatures,
-          utxo: indexUtxo,
-        );
-        continue;
-      }
+    for (var i = 0; i < prepared.inputs.length; i++) {
+      final utxo = prepared.utxos[i];
 
       /// now we need sign the transaction digest
-      final sig = await sign(
-        digest,
-        indexUtxo,
-        indexUtxo.ownerDetails.publicKey!,
-        sighash,
+      final signatures = await _signInputAsync(
+        index: i,
+        utxo: utxo,
+        transaction: prepared.transaction,
+        sign: sign,
+        multiSigSign: multiSigSign,
       );
-      _addScripts(input: inputs[i], signatures: [sig], utxo: indexUtxo);
+
+      _addScripts(
+        input: prepared.inputs[i],
+        signatures: signatures,
+        utxo: utxo,
+      );
     }
-    return transaction;
+
+    return prepared.transaction;
+  }
+
+  /// Signs the given input and returns its signatures.
+  ///
+  /// A multi-signature input is signed by the [multiSigSign] callback, that is
+  /// called once for the input and returns the signature of every signer.
+  /// When it is not provided the legacy behaviour is used and the [sign]
+  /// callback is called once for every signer of the multi-signature address.
+  Future<List<String>> _signInputAsync({
+    required int index,
+    required UtxoWithAddress utxo,
+    required BtcTransaction transaction,
+    required BitcoinSignerCallBackAsync sign,
+    BitcoinMultiSigSignerCallBackAsync? multiSigSign,
+  }) async {
+    final inputDigest = _inputDigest(
+      index: index,
+      utxo: utxo,
+      transaction: transaction,
+    );
+    final digest = inputDigest.digest;
+    final sighash = inputDigest.sighash;
+
+    /// handle multisig address
+    if (utxo.isMultiSig()) {
+      final multiSigAddress = utxo.multiSigAddress;
+      final signatures =
+          multiSigSign != null
+              ? await multiSigSign(
+                digest,
+                utxo,
+                multiSigAddress.signers.map((e) => e.publicKey).toList(),
+                sighash,
+              )
+              : await _legacyMultiSigSignaturesAsync(
+                digest: digest,
+                utxo: utxo,
+                multiSigAddress: multiSigAddress,
+                sighash: sighash,
+                sign: sign,
+              );
+      return BtcMultisigUtils.buildSignatures(
+        multiSigAddress: multiSigAddress,
+        signatures: signatures,
+      );
+    }
+
+    /// now we need sign the transaction digest
+    return [await sign(digest, utxo, utxo.ownerDetails.publicKey!, sighash)];
+  }
+
+  /// Collects the signature of every signer of a multi-signature input using
+  /// the legacy signer, that is called once for each signer of the address.
+  Future<Map<String, String>> _legacyMultiSigSignaturesAsync({
+    required BuBytes digest,
+    required UtxoWithAddress utxo,
+    required MultiSignatureAddress multiSigAddress,
+    required int sighash,
+    required BitcoinSignerCallBackAsync sign,
+  }) async {
+    final signatures = <String, String>{};
+    var sumMultiSigWeight = 0;
+    for (final signer in multiSigAddress.signers) {
+      /// now we need sign the transaction digest
+      final signature = await sign(digest, utxo, signer.publicKey, sighash);
+      if (signature.isEmpty) continue;
+      signatures[signer.publicKey] = signature;
+      sumMultiSigWeight += signer.weight;
+      if (sumMultiSigWeight >= multiSigAddress.threshold) {
+        break;
+      }
+    }
+    return signatures;
   }
 
   void _addScripts({
@@ -713,3 +768,12 @@ be retrieved by anyone who examines the blockchain's history.
     input.scriptSig = Script(script: scriptSig);
   }
 }
+
+/// The transaction and the data required to sign its inputs.
+typedef _PreparedTransaction =
+    ({
+      List<TxInput> inputs,
+      List<UtxoWithAddress> utxos,
+      List<TxOutput> outputs,
+      BtcTransaction transaction,
+    });

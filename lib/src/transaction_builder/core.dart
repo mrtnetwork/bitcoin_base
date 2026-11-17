@@ -18,6 +18,31 @@ typedef BitcoinSignerCallBackAsync =
       int sighash,
     );
 
+/// Signer callback for multi-signature inputs.
+///
+/// Unlike [BitcoinSignerCallBack], this callback is called **once per
+/// multi-signature input** (and not once per signer) and it returns the
+/// signatures of all the signers at once, keyed by the signer's public key.
+///
+/// A signer that is not present in the returned map (or that has an empty
+/// signature) is considered as "not signed".
+typedef BitcoinMultiSigSignerCallBack =
+    Map<String, String> Function(
+      List<int> trDigest,
+      UtxoWithAddress utxo,
+      List<String> publicKeys,
+      int sighash,
+    );
+
+/// Asynchronous version of [BitcoinMultiSigSignerCallBack].
+typedef BitcoinMultiSigSignerCallBackAsync =
+    Future<Map<String, String>> Function(
+      List<int> trDigest,
+      UtxoWithAddress utxo,
+      List<String> publicKeys,
+      int sighash,
+    );
+
 abstract class BasedBitcoinTransacationBuilder {
   final List<BitcoinBaseOutput> outPuts;
   final List<UtxoWithAddress> utxos;
@@ -35,8 +60,31 @@ abstract class BasedBitcoinTransacationBuilder {
   }) : outPuts = outPuts.immutable,
        utxos = utxos.immutable;
 
-  BtcTransaction buildTransaction(BitcoinSignerCallBack sign);
-  Future<BtcTransaction> buildTransactionAsync(BitcoinSignerCallBackAsync sign);
+  /// Builds and signs the transaction.
+  ///
+  /// [sign] is called for each single-signature input.
+  ///
+  /// [multiSigSign] is called once for each multi-signature input and must
+  /// return the signatures of the signers keyed by their public key. When it is
+  /// `null` the legacy behaviour is used and [sign] is called once for each
+  /// signer of the multi-signature address.
+  BtcTransaction buildTransaction(
+    BitcoinSignerCallBack sign, {
+    BitcoinMultiSigSignerCallBack? multiSigSign,
+  });
+
+  /// Builds and signs the transaction asynchronously.
+  ///
+  /// [sign] is called for each single-signature input.
+  ///
+  /// [multiSigSign] is called once for each multi-signature input and must
+  /// return the signatures of the signers keyed by their public key. When it is
+  /// `null` the legacy behaviour is used and [sign] is called once for each
+  /// signer of the multi-signature address.
+  Future<BtcTransaction> buildTransactionAsync(
+    BitcoinSignerCallBackAsync sign, {
+    BitcoinMultiSigSignerCallBackAsync? multiSigSign,
+  });
 
   /// how many signature we need for each publicKey (utxo)
   Map<String, int> getSignatureCount();

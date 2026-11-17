@@ -14,7 +14,7 @@ class BlockCypherRequestLatestBlockHeight
       BlockCypherRequestMethods.latestBlockHeight;
 
   @override
-  int onResonse(Map<String, dynamic> result) {
+  int onResponse(Map<String, dynamic> result) {
     final chainInfo = BlockCypherChainInfo.fromJson(result);
     return chainInfo.height;
   }

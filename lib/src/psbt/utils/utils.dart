@@ -1,7 +1,6 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/provider/models/models.dart';
 import 'package:bitcoin_base/src/psbt/psbt_builder/types/internal_types.dart';
 import 'package:bitcoin_base/src/psbt/types/types/global.dart';
@@ -42,7 +41,8 @@ class PsbtUtils {
     );
     if (noneWitnessUtxo != null) {
       if (input.txIndex >= noneWitnessUtxo.transaction.outputs.length) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "The provided non-Witness UTXO does not contain the given index.",
         );
       }
@@ -84,7 +84,8 @@ class PsbtUtils {
     isP2tr |= internalPublicKey != null;
     if (isSegwit) {
       if (witnessUtxo == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "WitnessUtxo required for spending witness utxos.",
         );
       }
@@ -94,7 +95,8 @@ class PsbtUtils {
       scriptPubKey = witnessUtxo.scriptPubKey;
       if (witnessScript != null) {
         if (isP2tr) {
-          throw DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.unsupported,
             "WitnessScript cannot be used in P2TR UTXOs.",
           );
         }
@@ -104,7 +106,8 @@ class PsbtUtils {
           address = P2shAddress.fromScript(script: address.toScriptPubKey());
         }
         if (address.toScriptPubKey() != scriptPubKey) {
-          throw DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.invalidArgument,
             "ScriptPubKey does not match the one generated from witness script.",
           );
         }
@@ -112,25 +115,31 @@ class PsbtUtils {
         if (!isP2tr) {
           final type = findScriptType(p2shRedeemScript ?? scriptPubKey);
           if (type == ScriptPubKeyType.p2wsh) {
-            throw DartBitcoinPluginException(
+            throw BuError(
+              DefaultErrorType.invalidArgument,
               "Missing witness script for input $inputIndex.",
             );
           }
           if (type != ScriptPubKeyType.p2wpkh) {
             if (p2shRedeemScript != null) {
-              throw DartBitcoinPluginException(
+              throw BuError(
+                DefaultErrorType.invalidAddress,
                 "Invalid Nested P2SH redeem script. ",
                 details: {"script": p2shRedeemScript.toHex()},
               );
             }
-            throw DartBitcoinPluginException(
+            throw BuError(
+              DefaultErrorType.invalidArgument,
               "Invalid witness scriptPubKey. ",
               details: {"script": scriptPubKey.toHex()},
             );
           }
           final redeem = p2shRedeemScript ?? scriptPubKey;
           if (!BitcoinScriptUtils.isP2wpkh(redeem)) {
-            throw DartBitcoinPluginException("Invalid p2wpkh scriptPubKey.");
+            throw BuError(
+              DefaultErrorType.invalidArgument,
+              "Invalid p2wpkh scriptPubKey.",
+            );
           }
           redeemScript =
               P2pkhAddress.fromHash160(
@@ -142,14 +151,18 @@ class PsbtUtils {
         merkleRoot != null ||
         internalPublicKey != null ||
         leavesScripts != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT input: cannot have both legacy and witness fields.",
       );
     }
 
-    /// coinbase input
+    // non-segwit inputs must provide the full previous transaction
     if (!isSegwit && noneWitnessUtxo == null) {
-      throw DartBitcoinPluginException("NonWintessUtxo missing.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "NonWitnessUtxo missing.",
+      );
     }
     if (!isSegwit && p2shRedeemScript != null) {
       redeemScript = p2shRedeemScript;
@@ -160,7 +173,8 @@ class PsbtUtils {
       }
 
       if (address.toScriptPubKey() != scriptPubKey) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "ScriptPubKey does not match the one generated from p2sh redeem script. ${address.toScriptPubKey()}",
         );
       }
@@ -168,7 +182,8 @@ class PsbtUtils {
 
     if (isP2tr) {
       if (merkleRoot != null && leavesScripts == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Witness v1 script-path spending requires leaf scripts.",
         );
       }
@@ -177,12 +192,14 @@ class PsbtUtils {
         merkleRoot: merkleRoot?.hash,
       );
       if (address.toScriptPubKey() != scriptPubKey) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "ScriptPubKey does not match the one generated from the internal key and Merkle root.",
         );
       }
     } else if (isSegwit && (merkleRoot != null || leavesScripts != null)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT input: merkleRoot and leaf scripts must not be provided for Witness v0.",
       );
     }
@@ -259,13 +276,13 @@ class PsbtUtils {
         continue;
       }
       final TxInput input = txInputs[i];
-      final sciptPubKey = getInputScriptPubKey(
+      final scriptPubKey = getInputScriptPubKey(
         psbtInput: psbt.input,
         input: input,
         index: i,
       );
       final amount = getInputAmount(psbt: psbt, input: input, index: i);
-      scriptPubKeys.add(sciptPubKey);
+      scriptPubKeys.add(scriptPubKey);
       amounts.add(amount);
     }
     return PsbtTaprootInputInfo(
@@ -288,12 +305,14 @@ class PsbtUtils {
     required String txId,
   }) {
     if (outIndex >= transaction.outputs.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "The provided non-Witness UTXO does not contain the given index.",
       );
     }
     if (transaction.txId() != StringUtils.strip0x(txId.toLowerCase())) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Transaction ID mismatch. Expected: ${transaction.txId()}, but got: ${StringUtils.strip0x(txId.toLowerCase())}",
       );
     }
@@ -303,7 +322,8 @@ class PsbtUtils {
   static ScriptPubKeyType findScriptType(Script scriptPubKey) {
     final type = BitcoinScriptUtils.findScriptType(scriptPubKey);
     if (type == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Unknown scriptPubKey. Unable to determine script type.",
         details: {"script": scriptPubKey.toHex()},
       );
@@ -311,23 +331,33 @@ class PsbtUtils {
     return type;
   }
 
+  static bool _inputEntriesAreSegwit(List<PsbtInputData> entries) {
+    return entries.any(
+      (e) =>
+          e.type == PsbtInputTypes.witnessUTXO ||
+          e.type == PsbtInputTypes.finalizedWitness ||
+          e.type == PsbtInputTypes.witnessScript,
+    );
+  }
+
+  static bool _inputEntriesAreP2tr(List<PsbtInputData> entries) {
+    return entries.any(
+      (e) =>
+          e.type == PsbtInputTypes.taprootInternalKey ||
+          e.type == PsbtInputTypes.taprootMerkleRoot ||
+          e.type == PsbtInputTypes.taprootBip32Derivation ||
+          e.type == PsbtInputTypes.taprootKeySpentSignature ||
+          e.type == PsbtInputTypes.taprootScriptSpentSignature ||
+          e.type == PsbtInputTypes.taprootLeafScript ||
+          e.type == PsbtInputTypes.muSig2ParticipantPublicKeys ||
+          e.type == PsbtInputTypes.muSig2PublicNonce ||
+          e.type == PsbtInputTypes.muSig2ParticipantPartialSignature,
+    );
+  }
+
   static PsbtTxType getTxType(PsbtInput input) {
-    bool isSegwit = input.entries.any(
-      (e) => e.any(
-        (e) =>
-            e.type == PsbtInputTypes.witnessUTXO ||
-            e.type == PsbtInputTypes.finalizedWitness ||
-            e.type == PsbtInputTypes.witnessScript,
-      ),
-    );
-    bool isP2tr = input.entries.any(
-      (e) => e.any(
-        (e) =>
-            e.type == PsbtInputTypes.taprootInternalKey ||
-            e.type == PsbtInputTypes.taprootMerkleRoot ||
-            e.type == PsbtInputTypes.taprootBip32Derivation,
-      ),
-    );
+    bool isSegwit = input.entries.any(_inputEntriesAreSegwit);
+    bool isP2tr = input.entries.any(_inputEntriesAreP2tr);
     if (isP2tr) return PsbtTxType.witnessV1;
     if (isSegwit) return PsbtTxType.witnessV0;
     return PsbtTxType.legacy;
@@ -339,7 +369,7 @@ class PsbtUtils {
     required Script script,
     PsbtTxType? type,
   }) {
-    return findSciptKeyInfo(
+    return findScriptKeyInfo(
           script: script,
           keyStr: keyStr,
           publicKey: publicKey,
@@ -348,7 +378,7 @@ class PsbtUtils {
         null;
   }
 
-  static PsbtScriptKeyInfo? findSciptKeyInfo({
+  static PsbtScriptKeyInfo? findScriptKeyInfo({
     ECPublic? publicKey,
     String? keyStr,
     required Script script,
@@ -387,7 +417,7 @@ class PsbtUtils {
         );
       }
       if (type == null || !type.isSegwit) {
-        key = publicKey.toHex(mode: PubKeyModes.uncompressed);
+        key = publicKey.toHex(mode: CryptoKeyEncoding.uncompressed);
         index = script.script.indexOf(key);
         if (!index.isNegative) {
           return PsbtScriptKeyInfo(
@@ -396,12 +426,12 @@ class PsbtUtils {
             mode: PsbtScriptKeyMode.uncompressed,
           );
         }
-        key = publicKey.toHash160Hex(mode: PubKeyModes.uncompressed);
+        key = publicKey.toHash160Hex(mode: CryptoKeyEncoding.uncompressed);
         index = script.script.indexOf(key);
         if (!index.isNegative) {
           return PsbtScriptKeyInfo(
             index: index,
-            key: publicKey.toHex(mode: PubKeyModes.uncompressed),
+            key: publicKey.toHex(mode: CryptoKeyEncoding.uncompressed),
             mode: PsbtScriptKeyMode.uncompressed,
           );
         }
@@ -429,7 +459,8 @@ class PsbtUtils {
   }) {
     if (tapleafHash == null) {
       if (tapLeafScripts.length > 1) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Multiple leaf scripts detected in input $index. A leaf hash is required to locate them.",
         );
       }
@@ -438,7 +469,8 @@ class PsbtUtils {
     return tapLeafScripts.firstWhere(
       (e) => BytesUtils.bytesEqual(e.leafScript.hash(), tapleafHash),
       orElse: () {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.notFound,
           "No matching Taproot leaf script found in input $index for the provided tapleaf ${BytesUtils.toHexString(tapleafHash)}.",
         );
       },
@@ -456,7 +488,8 @@ class PsbtUtils {
     );
     if (noneWitnessUtxo != null) {
       if (input.txIndex >= noneWitnessUtxo.transaction.outputs.length) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Invalid input $index. The provided non-Witness UTXO does not contain the given index.",
         );
       }
@@ -470,7 +503,8 @@ class PsbtUtils {
     if (witnessUtxo != null) {
       return witnessUtxo.scriptPubKey;
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Missing scriptPubKey for input at index $index.",
     );
   }
@@ -486,7 +520,8 @@ class PsbtUtils {
     );
     if (noneWitnessUtxo != null) {
       if (input.txIndex >= noneWitnessUtxo.transaction.outputs.length) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Invalid input $index. The provided non-Witness UTXO does not contain the given index.",
         );
       }
@@ -500,7 +535,8 @@ class PsbtUtils {
     if (witnessUtxo != null) {
       return witnessUtxo.amount;
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Missing amount for input at index $index.",
     );
   }
@@ -568,7 +604,8 @@ class PsbtUtils {
       }
     }
     if (signatures.length < threshold) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Missing multisig signatures: Required $threshold, but only ${signatures.length} provided.",
       );
     }
@@ -595,7 +632,7 @@ class PsbtUtils {
       final sigs =
           scriptSignatures.map((e) {
               final inScript =
-                  findSciptKeyInfo(
+                  findScriptKeyInfo(
                     keyStr: e.xOnlyPubKeyHex,
                     script: leafScript.script,
                   )!;
@@ -624,7 +661,8 @@ class PsbtUtils {
       }
     }
     if (someWeight < p2trMultisig.threshold) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Missing P2TR multisig script signatures: Required ${p2trMultisig.threshold}, but only $someWeight provided.",
         details: {"leafScript": leafScript.script.toString()},
       );
@@ -645,19 +683,22 @@ class PsbtUtils {
     Script? scriptSig = finalizeInput.scriptSig;
     if (params.type.isSegwit) {
       if (witness == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "FinalizedScriptWitness required for witness UTXOs.",
         );
       }
       if (params.p2shRedeemScript != null) {
         if (scriptSig == null) {
-          throw DartBitcoinPluginException(
-            "P2SH redeemScript required for P2SH-Segwit UTXOS.",
+          throw BuError(
+            DefaultErrorType.invalidAddress,
+            "P2SH redeemScript required for P2SH-Segwit UTXOs.",
           );
         }
       } else if (scriptSig != null) {
-        throw DartBitcoinPluginException(
-          "FinalizedScriptSig does not required for legacy UTXOS.",
+        throw BuError(
+          DefaultErrorType.invalidArgument,
+          "FinalizedScriptSig is not required for witness UTXOs.",
         );
       }
     } else {
@@ -665,8 +706,9 @@ class PsbtUtils {
         witness ??= TxWitnessInput(stack: []);
       }
       if (scriptSig == null) {
-        throw DartBitcoinPluginException(
-          "FinalizedScriptSig required for legacy UTXOS.",
+        throw BuError(
+          DefaultErrorType.invalidArgument,
+          "FinalizedScriptSig required for legacy UTXOs.",
         );
       }
     }
@@ -687,7 +729,8 @@ class PsbtUtils {
       final scriptPubKey =
           signature.publicKey.toP2wpkhInP2sh().toScriptPubKey();
       if (scriptPubKey != digest.params.scriptPubKey) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Mismatch P2WPKH-P2SH signer scriptPubKey.',
         );
       }
@@ -699,7 +742,7 @@ class PsbtUtils {
       final pubKey =
           signature == null
               ? null
-              : findSciptKeyInfo(
+              : findScriptKeyInfo(
                 publicKey: signature.publicKey,
                 script: currentScript,
               );
@@ -714,7 +757,8 @@ class PsbtUtils {
         ];
       }
       if (signature == null || pubKey == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.notFound,
           "Cannot find current signer key in signature.",
         );
       }
@@ -754,18 +798,20 @@ class PsbtUtils {
     }
     if (BitcoinScriptUtils.isPubKeyOpCheckSig(currentScript)) {
       final signature = digest.getPartialSignature();
-      final pubKey = findSciptKeyInfo(
+      final pubKey = findScriptKeyInfo(
         publicKey: signature.publicKey,
         script: currentScript,
       );
       if (pubKey == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.notFound,
           "Cannot find current signer public key in script.",
         );
       }
       return [pubKey.key, currentScript.toHex()];
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidState,
       "Unable to finalize custom script input at index ${digest.params.index}. Please use the onFinalizeCallback to complete the input finalization. ${currentScript.toHex()}",
     );
   }
@@ -774,6 +820,7 @@ class PsbtUtils {
     PsbtGeneratedTransactionDigest digest,
   ) {
     if (!digest.params.type.isP2tr) return null;
+
     final taprootParams = digest.params.cast<PsbtTaprootInputInfo>();
     final musig = taprootParams.musig2inputInfo;
     final script = digest.leafScript;
@@ -797,7 +844,7 @@ class PsbtUtils {
       return null;
     }
     final tweak = digest.generateTaprootTweak();
-    final musigLib = MuSig2();
+    final musigLib = Musig2Const();
     List<int> signature = musigLib.partialSigAgg(
       signatures: validSignatures.map((e) => e.signature).toList(),
       session: MuSig2Session(
@@ -807,7 +854,7 @@ class PsbtUtils {
         ),
         publicKeys:
             key.pubKeys
-                .map((e) => e.toBytes(mode: PubKeyModes.compressed))
+                .map((e) => e.toBytes(mode: CryptoKeyEncoding.base))
                 .toList(),
         msg: digest.digest,
       ),
@@ -835,7 +882,8 @@ class PsbtUtils {
     PsbtInputTaprootLeafScript? leafScript = digest.leafScript;
 
     if (leafScript == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.notFound,
         "No tapleaf script found to finalize input at index ${digest.params.index}.",
         details: {"scriptPubKey": digest.params.scriptPubKey.toString()},
       );
@@ -884,7 +932,8 @@ class PsbtUtils {
         return [digest.getScriptRipemd160(currentScript), script, controlBlock];
       }
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidState,
       "Unable to finalize custom script input at index ${digest.params.index}. Please use the onFinalizeCallback to complete the input finalization.",
     );
   }
@@ -911,7 +960,7 @@ class PsbtUtils {
       final pk =
           sig == null
               ? null
-              : findSciptKeyInfo(publicKey: sig.publicKey, script: script);
+              : findScriptKeyInfo(publicKey: sig.publicKey, script: script);
       if (fake) {
         return [
           sig?.signatureHex() ?? fakeECDSASignatureBytes,
@@ -923,19 +972,21 @@ class PsbtUtils {
       }
 
       if (pk == null || sig == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Signature public key does not match the scriptPubKey for input ${digest.params.index}.",
         );
       }
       return [sig.signatureHex(), pk.key];
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidState,
       "Unable to finalize custom script input at index ${digest.params.index}. Please use the onFinalizeCallback to complete the input finalization.",
       details: {"scriptPubKey": digest.params.scriptPubKey.toString()},
     );
   }
 
-  static List<int> get fakeFinalizeGlobalIdentifier =>
+  static BuBytes get fakeFinalizeGlobalIdentifier =>
       'fake_finalize'.codeUnits.asImmutableBytes;
 
   static PsbtFinalizeInput finalizeInput({
@@ -1021,7 +1072,8 @@ class PsbtUtils {
 
   static PsbtInputLocktime _toLocktime(int locktime) {
     if (locktime.isNegative || locktime > BinaryOps.maxUint32) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid integer provided as locktime: The locktime value must be a valid unsigned 32-bit integer.",
       );
     }
@@ -1048,7 +1100,8 @@ class PsbtUtils {
     }
     if (height == null && timeLock == null) return null;
     if (timeLock != null && height != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid Psbt input: Cannot mix height-based and time-based locktimes in a PSBT.",
       );
     }
@@ -1058,17 +1111,18 @@ class PsbtUtils {
     );
   }
 
-  static List<int> buildTransactionLocktime({
+  static BuBytes buildTransactionLocktime({
     required List<TxInput> inputs,
     List<int>? locktimeFallBack,
   }) {
     final lock = getCurrentInputslocktime(inputs: inputs);
     if (lock == null) {
-      return locktimeFallBack ?? BitcoinOpCodeConst.defaultTxLocktime;
+      return (locktimeFallBack ?? BitcoinOpCodeConst.defaultTxLocktime)
+          .asImmutableBytes;
     }
-    return lock.timelock.toLeBytes(
-      length: BitcoinOpCodeConst.locktimeLengthInBytes,
-    );
+    return lock.timelock
+        .toLeBytes(length: BitcoinOpCodeConst.locktimeLengthInBytes)
+        .asImmutableBytes;
   }
 
   static int _validateAndGetSigHashType({
@@ -1084,7 +1138,8 @@ class PsbtUtils {
     if (sighashType != null) {
       if (sighash == null) return sighashType;
       if (sighashType != sighash.sighash) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Input is marked with a different sighash type. Please update the input sighash type first.",
         );
       }
@@ -1114,7 +1169,8 @@ class PsbtUtils {
     List<int> digest;
     if (isSighashForked(sighashType)) {
       if (params.type == PsbtTxType.witnessV1) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Invalid sighash type: Forked sighash types are not compatible with witness v1 transactions.",
         );
       }
@@ -1185,51 +1241,57 @@ class PsbtUtils {
     if (currentLocktime.isBlockBased == locktime.isBlockBased) {
       return;
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid Psbt input: Cannot mix height-based and time-based locktimes in a PSBT.",
     );
   }
 
-  static List<int> _validateSchnorrSignature({
+  static BuBytes _validateSchnorrSignature({
     required List<int> signature,
     required int index,
     required int expectedSighash,
   }) {
     if (!CryptoSignatureUtils.isValidSchnorrSignature(signature)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid Schnorr signature at input $index. Signature may be malformed or improperly formatted.",
       );
     }
-    if (signature.length == CryptoSignerConst.schnoorSginatureLength) {
+    if (signature.length == CryptoSignerConst.schnorrSignatureLength) {
       if (expectedSighash == BitcoinOpCodeConst.sighashDefault) {
-        return signature;
+        return signature.asImmutableBytes;
       }
-      return [...signature, expectedSighash];
+      final bytes = BuBytes.empty()..addAll([...signature, expectedSighash]);
+      return bytes.asImmutableBytes;
     }
     if (signature.last != expectedSighash) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Signature mismatch at input $index: Expected sighash $expectedSighash, but got ${signature.last}. The Schnorr signature may be malformed or improperly formatted.",
       );
     }
-    return signature;
+    return signature.asImmutableBytes;
   }
 
-  static List<int> _validateEcdsaSignature({
+  static BuBytes _validateEcdsaSignature({
     required List<int> signature,
     required int index,
     required int expectedSighash,
   }) {
     if (!CryptoSignatureUtils.isValidBitcoinDERSignature(signature)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid DER-encoded signature at input $index. Signature may be malformed or improperly formatted.",
       );
     }
     if (signature.last != expectedSighash) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Signature mismatch at input $index: Expected sighash $expectedSighash, but got ${signature.last}. The DER-encoded signature may be malformed or improperly formatted.",
       );
     }
-    return signature;
+    return signature.asImmutableBytes;
   }
 
   static bool verifyBchSchnorrSignature(
@@ -1247,44 +1309,10 @@ class PsbtUtils {
       operation: "verifyBchSchnorrSignature",
       reason: "Invalid signature bytes length.",
     );
-
-    final BigInt order = Curves.generatorSecp256k1.order!;
-    final List<int> rBytes = signature.sublist(0, 32);
-    final List<int> sBytes = signature.sublist(32, 64);
-
-    final BigInt rX = BigintUtils.fromBytes(rBytes);
-    final BigInt s = BigintUtils.fromBytes(sBytes);
-
-    if (s >= order) {
-      return false;
-    }
-
-    final P = pubKey.point;
-    BigInt e =
-        BigintUtils.fromBytes(
-          QuickCrypto.sha256Hash([
-            ...rBytes,
-            ...pubKey.toBytes(mode: PubKeyModes.compressed),
-            ...digest,
-          ]),
-        ) %
-        order;
-    final sp = Curves.generatorSecp256k1 * s;
-
-    if (P.y.isEven) {
-      e = Curves.generatorSecp256k1.order! - e;
-    }
-    final ProjectiveECCPoint eP = P * e;
-
-    final R = sp + eP;
-    if (R.isZero()) return false;
-    if (R.y.isOdd || R.x != rX) {
-      return false;
-    }
-    return true;
+    return pubKey.verifySchnorrSignature(digest: digest, signature: signature);
   }
 
-  static List<int> validateSignature({
+  static BuBytes validateSignature({
     required List<int> signature,
     required int index,
     required int expectedSighash,
@@ -1305,21 +1333,21 @@ class PsbtUtils {
     );
   }
 
-  static List<int> validateMusigPartialSignature({
+  static BuBytes validateMusigPartialSignature({
     required List<int> signature,
     required int index,
   }) {
-    if (!MuSig2Utils.isValidPartialSignature(signature)) {
-      throw DartBitcoinPluginException(
+    if (!MuSig2UtilsConst.isValidPartialSignature(signature)) {
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid Musig2 Schnorr partial signature at input $index. Signature may be malformed or improperly formatted.",
       );
     }
-    return signature;
+    return signature.asImmutableBytes;
   }
 
   static List<PsbtInputSighashInfo> getAllExistsSighashType(
     PsbtInput psbtInput,
-    PsbtTxType txType,
   ) {
     List<PsbtInputSighashInfo> sighashInfos = [];
     for (int i = 0; i < psbtInput.length; i++) {
@@ -1347,11 +1375,12 @@ class PsbtUtils {
       if (finalizeWitness != null ||
           finalizeScriptSig != null ||
           exitSignatures.isNotEmpty) {
+        final inputIsP2tr = _inputEntriesAreP2tr(psbtInput.entries[i]);
         sighashInfos.add(
           PsbtInputSighashInfo(
             inputIndex: i,
             sighashType:
-                txType.isP2tr
+                inputIsP2tr
                     ? BitcoinOpCodeConst.sighashDefault
                     : BitcoinOpCodeConst.sighashAll,
           ),
@@ -1377,17 +1406,15 @@ class PsbtUtils {
     int? outputIndex,
     bool isUpdate = true,
   }) {
-    final sighashes = getAllExistsSighashType(
-      psbt.input,
-      getTxType(psbt.input),
-    );
+    final sighashes = getAllExistsSighashType(psbt.input);
     for (final i in sighashes) {
       if (!i.canModifyOutput(
         outputIndex: outputIndex ?? -1,
         isUpdate: isUpdate,
         allSigashes: sighashes,
       )) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidState,
           "Unable to modify output${outputIndex == null ? '' : ' $outputIndex'}. A signature with an unmodifiable sighash flag exists, preventing changes.",
         );
       }
@@ -1400,12 +1427,14 @@ class PsbtUtils {
     int? inputsLength,
   }) {
     if (inputIndex >= psbInput.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid input index: $inputIndex. The PSBT contains only ${psbInput.length} inputs.",
       );
     }
     if (inputsLength != null && inputsLength != psbInput.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT: transaction inputs length does not match PSBT inputs length.",
       );
     }
@@ -1417,12 +1446,14 @@ class PsbtUtils {
     List<TxOutput>? outputs,
   }) {
     if (outputIndex >= psbtOutput.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid output index: $outputIndex. The PSBT contains only ${psbtOutput.length} outputs.",
       );
     }
     if (outputs != null && outputs.length != psbtOutput.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT: transaction outputs length does not match PSBT outputs length.",
       );
     }
@@ -1432,14 +1463,12 @@ class PsbtUtils {
     required Psbt psbt,
     int? inputIndex,
   }) {
-    final sighashes = getAllExistsSighashType(
-      psbt.input,
-      getTxType(psbt.input),
-    );
-    if (psbt.input.length == 1) return;
+    final sighashes = getAllExistsSighashType(psbt.input);
+
     for (final i in sighashes) {
       if (!i.canModifyInput(inputIndex ?? -1)) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidState,
           "Unable to modify input${inputIndex == null ? '' : ' $inputIndex'}. A signature with an unmodifiable sighash flag exists, preventing changes.",
         );
       }
@@ -1462,9 +1491,9 @@ class PsbtUtils {
     if (sequenceNumber == BinaryOps.mask32) {
       return PsbtInputSequenceNumber(sequenceNumber);
     } else if (sequenceNumber < BitcoinOpCodeConst.minInputLocktime) {
-      return PsbtInputRequiredTimeBasedLockTime(sequenceNumber);
+      return PsbtInputRequiredHeightBasedLockTime(sequenceNumber);
     }
-    return PsbtInputRequiredHeightBasedLockTime(sequenceNumber);
+    return PsbtInputRequiredTimeBasedLockTime(sequenceNumber);
   }
 
   static void validateAddMusig2PubKeyNonce({
@@ -1479,7 +1508,8 @@ class PsbtUtils {
       txInputs: txInputs,
     );
     if (!info.type.isP2tr) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid input type: MuSig2 requires a Taproot (P2TR) input, but a non-Taproot input was detected.",
       );
     }
@@ -1493,7 +1523,8 @@ class PsbtUtils {
       PsbtInputTypes.muSig2PublicNonce,
     );
     if (aggPubKeys == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Missing MuSig2 participant public keys: PSBT input at index $inputIndex does not contain MuSig2 aggregated public keys.",
       );
     }
@@ -1502,19 +1533,22 @@ class PsbtUtils {
       (e) => e.pubKeys.contains(pubKeyNonce.publicKey),
       orElse:
           () =>
-              throw DartBitcoinPluginException(
+              throw BuError(
+                DefaultErrorType.notFound,
                 "Public key not found: The provided public key is not part of any MuSig2 participant set in the PSBT input at index $inputIndex.",
               ),
     );
     if (taprootParams.isKeyPath && pubKeyNonce.tapleafHash != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Key-path spending does not use a tapleaf hash.",
       );
     }
 
     if (taprootParams.isScriptSpending) {
       if (pubKeyNonce.tapleafHash == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Script-path spending requires a tapleaf hash.",
         );
       }
@@ -1523,7 +1557,8 @@ class PsbtUtils {
             BytesUtils.bytesEqual(e.leafScript.hash(), pubKeyNonce.tapleafHash),
         orElse:
             () =>
-                throw DartBitcoinPluginException(
+                throw BuError(
+                  DefaultErrorType.notFound,
                   "Taproot script not found: No tapleaf script matches the provided tapleaf hash.",
                 ),
       );
@@ -1536,7 +1571,8 @@ class PsbtUtils {
               e.publicKey == pubKeyNonce.publicKey &&
               BytesUtils.bytesEqual(e.tapleafHash, pubKeyNonce.tapleafHash),
         )) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Duplicate nonce detected: A nonce with the same public key and tapleaf hash already exists.",
       );
     }

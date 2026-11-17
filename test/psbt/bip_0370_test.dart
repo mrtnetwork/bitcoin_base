@@ -2,14 +2,22 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
+import '../utils.dart';
 /// https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki
-void main() {
+void bip0370Test() {
   group("BIP-0370", () {
     _invalidTest();
     _test();
   });
 }
 
+void psbtBip0370Test() {
+  BitcoinBaseTestApi.runTest(bip0370Test, "Bip 0370");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(psbtBip0370Test, "Bip 0370");
+}
 void _invalidTest() {
   test(
     "Case: PSBTv2 with PSBT_IN_REQUIRED_HEIGHT_LOCKTIME greater than or equal to 500000000",
@@ -19,7 +27,7 @@ void _invalidTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Required Height-based Locktime data'),
@@ -36,7 +44,7 @@ void _invalidTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Required Time-based Locktime data'),
@@ -51,7 +59,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -67,7 +75,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -83,7 +91,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -99,7 +107,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -115,7 +123,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -131,7 +139,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -147,7 +155,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Output: PSBT_OUT_SCRIPT is not allowed'),
@@ -161,7 +169,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Output: PSBT_OUT_AMOUNT is not allowed'),
@@ -175,7 +183,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -191,7 +199,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -207,7 +215,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Input: PSBT_IN_SEQUENCE is not allowed'),
@@ -221,7 +229,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Input: PSBT_IN_OUTPUT_INDEX is not allowed'),
@@ -235,7 +243,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Input: PSBT_IN_PREVIOUS_TXID is not allowed'),
@@ -249,7 +257,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -265,7 +273,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -281,7 +289,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -297,7 +305,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -313,7 +321,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains(
@@ -329,7 +337,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
 
@@ -437,3 +445,4 @@ void _test() {
     },
   );
 }
+

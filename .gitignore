@@ -28,5 +28,11 @@ migrate_working_dir/
 .dart_tool/
 .packages
 build/
+# Managed Rust checkout for backend builds (see tool/build_backends.dart).
 *.zip
+
+# Built WASM backend outputs (rebuilt by `tool/build_backends.dart --wasm`).
+test/wasm_assets/bu.js
+test/wasm_assets/bu_bg.wasm
+test/wasm_assets/*.d.ts
 /example/test

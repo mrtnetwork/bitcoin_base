@@ -2,9 +2,10 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
+import 'utils.dart';
 ECPrivate getPublicKey({String path = "m/84'/1'/0'/0/1"}) {
   final key = getKey(path: path);
-  return ECPrivate.fromBytes(key.privateKey.raw);
+  return ECPrivate.fromBytes(key.privateKey.toBytes());
 }
 
 Bip32Slip10Secp256k1 getKey({
@@ -19,10 +20,17 @@ Bip32Slip10Secp256k1 getKey({
   return secp.derivePath(path);
 }
 
-void main() {
+void deserializeTest() {
   _decodeTx();
 }
 
+void deserializeTest2() {
+  BitcoinBaseTestApi.runTest(deserializeTest, "Deserialize");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(deserializeTest2, "Deserialize");
+}
 void _decodeTx() {
   test('decode transaction', () {
     const data =
@@ -132,3 +140,4 @@ void _decodeTx() {
     expect(tx.serialize(), data);
   });
 }
+

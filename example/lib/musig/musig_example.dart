@@ -63,17 +63,14 @@ BtcTransaction _spendWithLeafA(
     required List<P2trAddress> existsUtxosScriptPubKeys,
     required List<BigInt> existsUtxosAmounts,
     required TaprootTree treeScript}) {
-  const musig = MuSig2();
   final internalKey = _getInternalPubKey();
   final key1 = _getPrivateKey(path: "m/86'/1'/0'/0/2");
   final key3 = _getPrivateKey(path: "m/86'/1'/0'/0/4");
-  final pk1 = key1.getPublic();
-  final pk3 = key3.getPublic();
-  final musigSigner = musig.aggPublicKeys(
-      keys: [pk1.publicKey.compressed, pk3.publicKey.compressed]);
+  final musigSigner =
+      Musig2PrivateKey.generate([key1.secretKey, key3.secretKey]);
   final tapleafScript1 = TaprootLeaf(
       script: Script(script: [
-    BytesUtils.toHexString(musigSigner.publicKey.toXonly()),
+    BytesUtils.toHexString(musigSigner.publicKey.point.toXOnly()),
     BitcoinOpcode.opCheckSig
   ]));
   final digest = transaction
@@ -84,25 +81,8 @@ BtcTransaction _spendWithLeafA(
               existsUtxosScriptPubKeys.map((e) => e.toScriptPubKey()).toList(),
           amounts: existsUtxosAmounts)
       .asImmutableBytes;
-  final nonce1 = musig.nonceGenerate(
-      publicKey: pk1.toBytes(mode: PubKeyModes.compressed), msg: digest);
-  final nonce3 = musig.nonceGenerate(
-      publicKey: pk3.toBytes(mode: PubKeyModes.compressed), msg: digest);
-  final aggNonce = musig.nonceAgg([nonce1.pubnonce, nonce3.pubnonce]);
-  final session = MuSig2Session(
-      aggnonce: aggNonce,
-      publicKeys: [
-        pk1.toBytes(mode: PubKeyModes.compressed),
-        pk3.toBytes(mode: PubKeyModes.compressed)
-      ],
-      tweaks: [],
-      msg: digest);
-  final sig1 = musig.sign(
-      secnonce: nonce1.secnonce, sk: key1.toBytes(), session: session);
-  final sig3 = musig.sign(
-      secnonce: nonce3.secnonce, sk: key3.toBytes(), session: session);
   final signature =
-      musig.partialSigAgg(signatures: [sig1, sig3], session: session);
+      musigSigner.sign(MuSig2GenerateSessionParams(message: digest));
   final controlBlock = TaprootControlBlock.generate(
       xOnlyOrInternalPubKey: internalKey.toXOnly(),
       leafScript: tapleafScript1,
@@ -110,7 +90,7 @@ BtcTransaction _spendWithLeafA(
 
   return transaction.copyWith(witnesses: [
     TxWitnessInput(stack: [
-      BytesUtils.toHexString(signature),
+      signature.aggSignature.toHex(),
       tapleafScript1.script.toHex(),
       controlBlock.toHex()
     ])
@@ -167,11 +147,12 @@ Bip32Slip10Secp256k1 _deriveKey(
 }
 
 ECPublic _getPubKey({String path = "m/86'/1'/0'/0/1"}) {
-  return ECPublic.fromBytes(_deriveKey(path: path).publicKey.compressed);
+  return ECPublic.fromBytes(
+      _deriveKey(path: path).publicKey.toPublicKeyBytes());
 }
 
 ECPrivate _getPrivateKey({String path = "m/86'/1'/0'/0/1"}) {
-  return ECPrivate.fromBytes(_deriveKey(path: path).privateKey.raw);
+  return ECPrivate.fromBytes(_deriveKey(path: path).privateKey.toBytes());
 }
 
 TaprootBranch _generateScriptTree() {

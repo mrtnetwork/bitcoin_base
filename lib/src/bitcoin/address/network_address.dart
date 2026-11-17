@@ -44,6 +44,7 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
       case BitcoinNetwork.testnet:
       case BitcoinNetwork.testnet4:
       case BitcoinNetwork.signet:
+      case BitcoinNetwork.regtest:
         baseAddress = BitcoinAddress.fromBaseAddress(
           address,
           network: network as BitcoinNetwork,
@@ -68,6 +69,7 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
         );
       case BitcoinCashNetwork.mainnet:
       case BitcoinCashNetwork.testnet:
+      case BitcoinCashNetwork.regtest:
         baseAddress = BitcoinCashAddress.fromBaseAddress(
           address,
           network: network as BitcoinCashNetwork,
@@ -84,7 +86,7 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
           network: network as ElectraProtocolNetwork,
         );
       default:
-        throw DartBitcoinPluginException("Unknown network. ${network.name}");
+        throw BuError(DefaultErrorType.invalidArgument, "Unknown network. ${network.name}");
     }
     return baseAddress.cast();
   }
@@ -105,6 +107,7 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
       case BitcoinNetwork.testnet:
       case BitcoinNetwork.testnet4:
       case BitcoinNetwork.signet:
+      case BitcoinNetwork.regtest:
         baseAddress = BitcoinAddress(
           address,
           network: network as BitcoinNetwork,
@@ -123,6 +126,7 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
         baseAddress = DogeAddress(address, network: network as DogecoinNetwork);
       case BitcoinCashNetwork.mainnet:
       case BitcoinCashNetwork.testnet:
+      case BitcoinCashNetwork.regtest:
         baseAddress = BitcoinCashAddress(
           address,
           network: network as BitcoinCashNetwork,
@@ -136,7 +140,7 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
           network: network as ElectraProtocolNetwork,
         );
       default:
-        throw DartBitcoinPluginException("Unknown network. ${network.name}");
+        throw BuError(DefaultErrorType.invalidArgument, "Unknown network. ${network.name}");
     }
     return baseAddress.cast();
   }
@@ -189,7 +193,7 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
   ];
 
   @override
-  List<int> encodeAsIAddress() {
+  BuBytes encodeAsIAddress() {
     return toCbor().encode();
   }
 
@@ -201,7 +205,10 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
 
   E cast<E extends BitcoinNetworkAddress>() {
     if (this is! E) {
-      throw CastFailedException(value: this);
+      throw BuError(DefaultErrorType.castFailed, 
+        "Invalid Bitcoin network address cast.",
+        details: {'expected': '$E', 'actual': '$runtimeType'},
+      );
     }
     return this as E;
   }
@@ -342,7 +349,7 @@ class BitcoinCashAddress extends BitcoinNetworkAddress<BitcoinCashNetwork> {
       validateNetworkHRP: validateNetworkPrefix,
     );
     if (decodeAddress == null) {
-      throw DartBitcoinPluginException('Invalid ${network.name} address.');
+      throw BuError(DefaultErrorType.invalidAddress, 'Invalid ${network.name} address.');
     }
     return BitcoinCashAddress._(decodeAddress, address, network);
   }

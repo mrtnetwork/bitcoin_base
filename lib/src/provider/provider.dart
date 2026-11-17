@@ -1,3 +1,4 @@
+export 'api/api.dart';
 export 'block_cypher/block_cypher.dart';
 export 'constant/constant.dart';
 export 'electrum/electrum.dart';

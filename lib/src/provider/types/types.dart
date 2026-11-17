@@ -13,7 +13,13 @@ enum BitcoinProviderApi {
   static BitcoinProviderApi fromValue(int? value) {
     return values.firstWhere(
       (e) => e.value == value,
-      orElse: () => throw ItemNotFoundException(),
+      orElse:
+          () =>
+              throw BuError(
+                DefaultErrorType.invalidArgument,
+                "Unknown BitcoinProviderApi value.",
+                details: {"value": "$value"},
+              ),
     );
   }
 

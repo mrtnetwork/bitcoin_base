@@ -1,5 +1,4 @@
 import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/psbt/types/types/global.dart';
 import 'package:bitcoin_base/src/psbt/types/types/inputs.dart';
 import 'package:bitcoin_base/src/psbt/types/types/outputs.dart';
@@ -7,7 +6,7 @@ import 'package:bitcoin_base/src/psbt/reader/byte_reader.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 const List<int> _magic = [0x70, 0x73, 0x62, 0x74];
-const int _seperator = 0x00;
+const int _separator = 0x00;
 
 enum PsbtVersion {
   v0("V0", 0),
@@ -22,23 +21,28 @@ enum PsbtVersion {
 
 class PsbtKey {
   final int type;
-  final List<int>? extraData;
+  final BuBytes? extraData;
 
   PsbtKey(int type, {List<int>? extraData})
     : extraData = extraData?.asImmutableBytes,
       type = type.asU8;
   factory PsbtKey._deserialize(List<int> bytes) {
     if (bytes.isEmpty) {
-      throw DartBitcoinPluginException("Invalid PSBT key bytes length.");
+      throw BuError(
+        DefaultErrorType.invalidLength,
+        "Invalid PSBT key bytes length.",
+      );
     }
     final keyData = bytes.sublist(1);
     return PsbtKey(bytes[0], extraData: keyData.isEmpty ? null : keyData);
   }
 
-  List<int> serialize() {
-    List<int> bytes = [type, ...extraData ?? []];
+  BuBytes serialize() {
+    final bytes = BuBytes.empty()..addAll([type, ...extraData ?? []]);
 
-    return [...IntUtils.encodeVarint(bytes.length), ...bytes];
+    return BuBytes.empty()
+      ..addAll(IntUtils.encodeVarint(bytes.length))
+      ..addAll(bytes);
   }
 
   @override
@@ -57,10 +61,12 @@ class PsbtKey {
 }
 
 class PsbtValue {
-  final List<int> data;
+  final BuBytes data;
   PsbtValue(List<int> data) : data = data.asImmutableBytes;
-  List<int> serialize() {
-    return [...IntUtils.encodeVarint(data.length), ...data];
+  BuBytes serialize() {
+    return BuBytes.empty()
+      ..addAll(IntUtils.encodeVarint(data.length))
+      ..addAll(data);
   }
 
   @override
@@ -90,8 +96,10 @@ class PsbtKeyPair {
     final keyPair = PsbtKeyPair(key: key, value: value);
     return keyPair;
   }
-  List<int> serialize() {
-    return [...key.serialize(), ...value.serialize()];
+  BuBytes serialize() {
+    return BuBytes.empty()
+      ..addAll(key.serialize())
+      ..addAll(value.serialize());
   }
 
   @override
@@ -126,12 +134,14 @@ class Psbt {
   }) {
     final version = global.version;
     if (input.version != version) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Missmatch version between PSBT global and input",
       );
     }
     if (output.version != version) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Missmatch version between PSBT global and output",
       );
     }
@@ -140,7 +150,8 @@ class Psbt {
   factory Psbt.fromHex(String hexBytes) {
     final decode = BytesUtils.tryFromHexString(hexBytes);
     if (decode == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.badHex,
         "Invalid PSBT hex: Decoding failed or malformed input.",
       );
     }
@@ -153,7 +164,8 @@ class Psbt {
       encoding: StringEncoding.base64,
     );
     if (decode == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.badBase64,
         "Invalid PSBT base64: Decoding failed or malformed input.",
       );
     }
@@ -165,11 +177,14 @@ class Psbt {
     try {
       final reader = PsbtByteReader(bytes);
       if (reader.length < 5 || !BytesUtils.bytesEqual(reader.read(4), _magic)) {
-        throw DartBitcoinPluginException("Invalid PSBT magic bytes.");
+        throw BuError(
+          DefaultErrorType.invalidArgument,
+          "Invalid PSBT magic bytes.",
+        );
       }
       reader.skip(1);
       List<PsbtKeyPair> global = [];
-      while (reader.at() != _seperator) {
+      while (reader.at() != _separator) {
         final pair = PsbtKeyPair.deserialize(reader);
         global.add(pair);
       }
@@ -190,7 +205,8 @@ class Psbt {
             (element) => element.key.type == PsbtGlobalTypes.unsignedTx.flag,
             orElse:
                 () =>
-                    throw DartBitcoinPluginException(
+                    throw BuError(
+                      DefaultErrorType.invalidState,
                       "PSBTv0 Global unsigned tx required.",
                     ),
           );
@@ -211,7 +227,8 @@ class Psbt {
             (e) => e.key.type == PsbtGlobalTypes.inputCount.flag,
             orElse:
                 () =>
-                    throw DartBitcoinPluginException(
+                    throw BuError(
+                      DefaultErrorType.invalidArgument,
                       "Invalid PSBT global: Missing required field ${PsbtGlobalTypes.inputCount.psbtName} for PSBT version ${psbtVersion.name}.",
                     ),
           );
@@ -219,7 +236,8 @@ class Psbt {
             (e) => e.key.type == PsbtGlobalTypes.outputCount.flag,
             orElse:
                 () =>
-                    throw DartBitcoinPluginException(
+                    throw BuError(
+                      DefaultErrorType.invalidArgument,
                       "Invalid PSBT global: Missing required field ${PsbtGlobalTypes.outputCount.psbtName} for PSBT version ${psbtVersion.name}.",
                     ),
           );
@@ -232,7 +250,7 @@ class Psbt {
       List<List<PsbtKeyPair>> inputs = [];
       for (int i = 0; i < inputLength; i++) {
         List<PsbtKeyPair> input = [];
-        while (reader.at() != _seperator) {
+        while (reader.at() != _separator) {
           final pair = PsbtKeyPair.deserialize(reader);
           input.add(pair);
         }
@@ -243,7 +261,7 @@ class Psbt {
       List<List<PsbtKeyPair>> outputs = [];
       for (int i = 0; i < outputLength; i++) {
         List<PsbtKeyPair> output = [];
-        while (reader.at() != _seperator) {
+        while (reader.at() != _separator) {
           final pair = PsbtKeyPair.deserialize(reader);
           output.add(pair);
         }
@@ -259,10 +277,11 @@ class Psbt {
           version: psbtVersion,
         ),
       );
-    } on DartBitcoinPluginException {
+    } on BuError {
       rethrow;
     } catch (e) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "PSBT deserialization failed: Unable to parse the PSBT structure.",
         details: {"error": e.toString()},
       );
@@ -286,51 +305,60 @@ class Psbt {
   }
 
   /// Serializes the full PSBT
-  List<int> serialize() {
-    List<int> bytes = [..._magic, 0xff];
+  BuBytes serialize() {
+    final bytes = BuBytes.empty()..addAll([..._magic, 0xff]);
     final globalKeyPairs = global.toKeyPairs();
     final inputKeyPairs = input.toKeyPairs();
     final outputKeyPairs = output.toKeyPairs();
     final globalKeys = globalKeyPairs.map((e) => e.key).toSet();
     if (globalKeys.length != globalKeyPairs.length) {
-      throw DartBitcoinPluginException("Duplicate global entries found.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Duplicate global entries found.",
+      );
     }
     final dupInputs = inputKeyPairs.any(
       (e) => e.map((e) => e.key).toSet().length != e.length,
     );
     if (dupInputs) {
-      throw DartBitcoinPluginException("Duplicate inputs entries found.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Duplicate inputs entries found.",
+      );
     }
     final dupOutputs = outputKeyPairs.any(
       (e) => e.map((e) => e.key).toSet().length != e.length,
     );
     if (dupOutputs) {
-      throw DartBitcoinPluginException("Duplicate output entries found.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Duplicate output entries found.",
+      );
     }
     for (final i in globalKeyPairs) {
       bytes.addAll(i.serialize());
     }
-    bytes.add(_seperator);
+    bytes.add(_separator);
     for (final i in inputKeyPairs) {
       if (i.isEmpty) {
-        bytes.add(_seperator);
+        bytes.add(_separator);
         continue;
       }
       for (final e in i) {
         bytes.addAll(e.serialize());
       }
-      bytes.add(_seperator);
+      bytes.add(_separator);
     }
 
     for (final i in outputKeyPairs) {
       if (i.isEmpty) {
-        bytes.add(_seperator);
+        bytes.add(_separator);
         continue;
       }
       for (final e in i) {
         bytes.addAll(e.serialize());
       }
-      bytes.add(_seperator);
+      bytes.add(_separator);
     }
     return bytes;
   }

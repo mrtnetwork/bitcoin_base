@@ -1,9 +1,7 @@
 import 'dart:typed_data';
 import 'package:bitcoin_base/src/cash_token/cash_token.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
-import 'package:blockchain_utils/helper/extensions/extensions.dart';
-import 'package:blockchain_utils/utils/utils.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 
 /// Represents a transaction output.
@@ -17,7 +15,7 @@ class TxOutput {
       scriptPubKey: Script(script: []),
     );
   }
-  // BitcoinOpCodeConst.negativeSatoshi
+
   const TxOutput._({
     required this.amount,
     required this.scriptPubKey,
@@ -35,7 +33,7 @@ class TxOutput {
         cashToken: cashToken,
       );
     } catch (_) {
-      throw DartBitcoinPluginException("Invalid output amount.");
+      throw BuError(DefaultErrorType.invalidArgument, "Invalid output amount.");
     }
   }
   final CashToken? cashToken;
@@ -51,17 +49,18 @@ class TxOutput {
     );
   }
 
-  List<int> toBytes() {
+  BuBytes toBytes() {
     final amountBytes = amount.toI64LeBytes();
     final scriptBytes = <int>[
       ...cashToken?.toBytes() ?? <int>[],
       ...scriptPubKey.toBytes(),
     ];
-    final data = [
+    final data = BuBytes.empty();
+    data.addAll([
       ...amountBytes,
       ...IntUtils.encodeVarint(scriptBytes.length),
       ...scriptBytes,
-    ];
+    ]);
     return data;
   }
 

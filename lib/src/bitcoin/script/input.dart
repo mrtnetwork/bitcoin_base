@@ -1,10 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
-import 'package:blockchain_utils/crypto/quick_crypto.dart';
-import 'package:blockchain_utils/helper/extensions/extensions.dart';
-import 'package:blockchain_utils/utils/utils.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'script.dart';
 
 /// A transaction input requires a transaction id of a UTXO and the index of that UTXO.
@@ -31,13 +28,15 @@ class TxInput {
   }) {
     if (sequance != null &&
         sequance.length != BitcoinOpCodeConst.sequenceLengthInBytes) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidLength,
         "Invalid sequence length: expected ${BitcoinOpCodeConst.sequenceLengthInBytes}, but got ${sequance.length}.",
       );
     }
     final txBytes = BytesUtils.tryFromHexString(txId);
     if (txBytes == null || txBytes.length != QuickCrypto.sha256DigestSize) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidLength,
         "Invalid transaction ID: Expected ${QuickCrypto.sha256DigestSize} bytes, but received a different length.",
         details: {"transactionID": txId},
       );
@@ -68,7 +67,7 @@ class TxInput {
   final int txIndex;
   final bool coinbase;
   Script scriptSig;
-  List<int> sequence;
+  BuBytes sequence;
 
   /// creates a copy of the object
   TxInput clone() {
@@ -81,12 +80,13 @@ class TxInput {
   }
 
   /// serializes TxInput to bytes
-  List<int> toBytes() {
+  BuBytes toBytes() {
     final txidBytes = BytesUtils.fromHexString(txId).reversed.toList();
     final txoutBytes = txIndex.toU32LeBytes();
     final scriptSigBytes = scriptSig.toBytes();
     final scriptSigLengthVarint = IntUtils.encodeVarint(scriptSigBytes.length);
-    final data = List<int>.from([
+    final data = BuBytes.empty();
+    data.addAll([
       ...txidBytes,
       ...txoutBytes,
       ...scriptSigLengthVarint,
@@ -124,8 +124,8 @@ class TxInput {
     );
   }
 
-  List<int> txIdBytes() {
-    return BytesUtils.fromHexString(txId).reversed.toList();
+  BuBytes txIdBytes() {
+    return BytesUtils.fromHexString(txId).reversed.toList().asImmutableBytes;
   }
 
   int sequenceAsNumber() {

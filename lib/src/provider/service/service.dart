@@ -1,9 +1,9 @@
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:bitcoin_base/src/provider/types/types.dart';
-import 'package:blockchain_utils/service/models/params.dart';
 
 typedef BitcoinServiceResponse = BaseServiceResponse;
 
-/// A mixin defining the service provider contract for interacting with the bitcoin (elctrum) network.
+/// A mixin defining the service provider contract for interacting with the bitcoin (electrum) network.
 mixin BitcoinServiceProvider
     implements
         IServiceProvider<BitcoinRequestDetails, BaseGRPCServiceRequestParams> {
@@ -25,8 +25,9 @@ mixin BitcoinServiceProvider
     request,
     Duration? timeout,
   }) {
-    throw UnsupportedError(
-      "Subscribtion requests are not supported by this service.",
+    throw BuError(
+      DefaultErrorType.unsupported,
+      "Subscription requests are not supported by this service.",
     );
   }
 
@@ -35,7 +36,10 @@ mixin BitcoinServiceProvider
     BaseGRPCServiceRequestParams params, {
     Duration? timeout,
   }) {
-    throw UnsupportedError("gRPC requests are not supported by this service.");
+    throw BuError(
+      DefaultErrorType.unsupported,
+      "gRPC requests are not supported by this service.",
+    );
   }
 
   @override
@@ -43,7 +47,10 @@ mixin BitcoinServiceProvider
     BaseGRPCServiceRequestParams params, {
     Duration? timeout,
   }) {
-    throw UnsupportedError("gRPC requests are not supported by this service.");
+    throw BuError(
+      DefaultErrorType.unsupported,
+      "gRPC requests are not supported by this service.",
+    );
   }
 
   @override
@@ -51,6 +58,9 @@ mixin BitcoinServiceProvider
     BaseGRPCServiceRequestParams params, {
     Duration? timeout,
   }) {
-    throw UnsupportedError("gRPC requests are not supported by this service.");
+    throw BuError(
+      DefaultErrorType.unsupported,
+      "gRPC requests are not supported by this service.",
+    );
   }
 }

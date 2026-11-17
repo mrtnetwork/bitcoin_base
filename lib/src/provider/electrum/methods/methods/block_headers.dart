@@ -31,7 +31,7 @@ class ElectrumRequestBlockHeaders
 
   /// A dictionary
   @override
-  Map<String, dynamic> onResonse(result) {
+  Map<String, dynamic> onResponse(result) {
     return result;
   }
 }

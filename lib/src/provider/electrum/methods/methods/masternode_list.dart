@@ -21,7 +21,7 @@ class ElectrumRequestMasternodeList
 
   /// An array with the masternodes information.
   @override
-  List<String> onResonse(result) {
+  List<String> onResponse(result) {
     return List<String>.from(result);
   }
 }

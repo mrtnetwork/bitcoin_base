@@ -12,7 +12,7 @@ class MempoolRequestLatestBlockHeight extends MempoolRequest<int, String> {
   MempoolRequestMethods get method => MempoolRequestMethods.latestBlockHeight;
 
   @override
-  int onResonse(String result) {
+  int onResponse(String result) {
     return IntUtils.parse(result);
   }
 }

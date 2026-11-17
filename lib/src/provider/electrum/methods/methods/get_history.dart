@@ -23,7 +23,7 @@ class ElectrumRequestScriptHashGetHistory
   ///  with the output of blockchain.scripthash.get_mempool() appended to the list.
   ///  Each confirmed transaction is a dictionary
   @override
-  List<Map<String, dynamic>> onResonse(List<dynamic> result) {
+  List<Map<String, dynamic>> onResponse(List<dynamic> result) {
     return result.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 }

@@ -1,6 +1,5 @@
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
@@ -18,7 +17,8 @@ enum BIP137Mode {
       (e) => e.header == header,
       orElse:
           () =>
-              throw DartBitcoinPluginException(
+              throw BuError(
+                DefaultErrorType.notFound,
                 "No BIP137Mode found for the given header value",
               ),
     );
@@ -27,7 +27,11 @@ enum BIP137Mode {
   final int header;
   static BIP137Mode findMode(int header) {
     if (header < 27 || header > 42) {
-      throw DartBitcoinPluginException("Header byte out of range");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "BIP137 header byte out of range.",
+        details: {'header': '$header', 'expected': '27..42'},
+      );
     }
     if (header >= 39) {
       return BIP137Mode.p2wpkh;
@@ -41,63 +45,69 @@ enum BIP137Mode {
 }
 
 /// Represents an ECDSA private key.
-class ECPrivate {
-  final Bip32PrivateKey prive;
-  const ECPrivate(this.prive);
+class ECPrivate with SecretState {
+  final Secp256k1PrivateKey secretKey;
+  const ECPrivate(this.secretKey);
 
   /// creates an object from hex
   factory ECPrivate.fromHex(String keyHex) {
-    return ECPrivate.fromBytes(BytesUtils.fromHexString(keyHex));
+    final bytes = BytesUtils.fromHexString(keyHex);
+    try {
+      return ECPrivate.fromBytes(bytes);
+    } finally {
+      bytes.forceZero();
+    }
   }
 
   /// creates an object from raw 32 bytes
   factory ECPrivate.fromBytes(List<int> prive) {
-    final key = Bip32PrivateKey.fromBytes(
-      prive,
-      Bip32KeyData(),
-      Bip32Const.mainNetKeyNetVersions,
-      EllipticCurveTypes.secp256k1,
-    );
+    final key = Secp256k1PrivateKey.fromBytes(prive);
     return ECPrivate(key);
   }
 
   /// returns the corresponding ECPublic object
-  ECPublic getPublic() =>
-      ECPublic.fromHex(BytesUtils.toHexString(prive.publicKey.compressed));
+  ECPublic getPublic() => ECPublic(secretKey.publicKey);
 
   /// creates an object from a WIF of WIFC format (string)
   factory ECPrivate.fromWif(String wif, {List<int>? netVersion}) {
     netVersion ??= BitcoinNetwork.mainnet.wifNetVer;
     if (netVersion == null) {
-      throw DartBitcoinPluginException("Missing wif prefix.");
+      throw BuError(DefaultErrorType.invalidArgument, "Missing WIF prefix.");
     }
     final decode = WifDecoder.decode(wif, netVer: netVersion);
-    return ECPrivate.fromBytes(decode.$1);
+    try {
+      return ECPrivate.fromBytes(decode.$1);
+    } finally {
+      decode.$1.zero();
+    }
   }
 
   /// returns as WIFC (compressed) or WIF format (string)
   String toWif({
-    PubKeyModes pubKeyMode = PubKeyModes.compressed,
+    CryptoKeyEncoding pubKeyMode = CryptoKeyEncoding.base,
     BitcoinNetwork network = BitcoinNetwork.mainnet,
   }) {
     final wif = network.wifNetVer;
     if (wif == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidState,
         "Missing network wif prefix.",
         details: {"network": network.name},
       );
     }
-    return WifEncoder.encode(toBytes(), netVer: wif, pubKeyMode: pubKeyMode);
+    return secretKey.takeSecretKey().useValue(
+      (k) => WifEncoder.encode(k, netVer: wif, pubKeyMode: pubKeyMode),
+    );
   }
 
   /// returns the key's raw bytes
-  List<int> toBytes() {
-    return prive.raw;
+  SecretBytes toBytes() {
+    return secretKey.toBytes();
   }
 
   /// returns the key's as hex
   String toHex() {
-    return BytesUtils.toHexString(prive.raw);
+    return secretKey.takeSecretKey().toHex();
   }
 
   /// Signs a message using BIP-137 format for standardized Bitcoin message signing.
@@ -119,16 +129,16 @@ class ECPrivate {
     BIP137Mode mode = BIP137Mode.p2pkhUncompressed,
     List<int> extraEntropy = const [],
   }) {
-    final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    final signature = btcSigner.signMessageConst(
+    final btcSigner = BitcoinKeySigner(secretKey);
+    final signature = btcSigner.signMessage(
       message: message,
       messagePrefix: messagePrefix,
       extraEntropy: extraEntropy,
     );
-    int rId = signature[0] + mode.header;
+    int rId = signature.encoded[0] + mode.header;
     return StringUtils.decode([
       rId,
-      ...signature.sublist(1),
+      ...signature.encoded.sublist(1),
     ], encoding: StringEncoding.base64);
   }
 
@@ -145,13 +155,13 @@ class ECPrivate {
     String messagePrefix = BitcoinSignerUtils.signMessagePrefix,
     List<int> extraEntropy = const [],
   }) {
-    final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    final signature = btcSigner.signMessageConst(
+    final btcSigner = BitcoinKeySigner(secretKey);
+    final signature = btcSigner.signMessage(
       message: message,
       messagePrefix: messagePrefix,
       extraEntropy: extraEntropy,
     );
-    return BytesUtils.toHexString(signature.sublist(1));
+    return BytesUtils.toHexString(signature.signature.toBytes());
   }
 
   /// Signs the given transaction digest using ECDSA (DER-encoded).
@@ -163,11 +173,9 @@ class ECPrivate {
     int? sighash = BitcoinOpCodeConst.sighashAll,
     List<int> extraEntropy = const [],
   }) {
-    final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    List<int> signature = btcSigner.signECDSADerConst(
-      txDigest,
-      extraEntropy: extraEntropy,
-    );
+    final btcSigner = BitcoinKeySigner(secretKey);
+    List<int> signature =
+        btcSigner.signECDSADer(txDigest, extraEntropy: extraEntropy).encoded;
     if (sighash != null) {
       signature = <int>[...signature, sighash];
     }
@@ -187,11 +195,9 @@ class ECPrivate {
     int sighash = BitcoinOpCodeConst.sighashDefault,
     List<int> extraEntropy = const [],
   }) {
-    final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    var signature = btcSigner.signSchnorrConst(
-      txDigest,
-      extraEntropy: extraEntropy,
-    );
+    final btcSigner = BitcoinKeySigner(secretKey);
+    List<int> signature =
+        btcSigner.signSchnorr(txDigest, extraEntropy: extraEntropy).encoded;
     if (sighash != BitcoinOpCodeConst.sighashDefault) {
       signature = <int>[...signature, sighash];
     }
@@ -217,34 +223,40 @@ class ECPrivate {
   }) {
     if (!tweak &&
         (treeScript != null || merkleRoot != null || tapTweakHash != null)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid parameters: 'tweak' must be true when specifying 'treeScript', 'merkleRoot', or 'tapTweakHash'.",
       );
     }
     if (merkleRoot != null && treeScript != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Use either merkleRoot or treeScript to generate merkle, not both.",
       );
     }
     if (tapTweakHash != null && (treeScript != null || merkleRoot != null)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Use either tapTweakHash or (treeScript/merkleRoot), not both.",
       );
     }
-    final btcSigner = BitcoinKeySigner.fromKeyBytes(toBytes());
-    List<int> signature = btcSigner.signBip340Const(
-      digest: txDigest,
-      aux: aux,
-      tapTweakHash:
-          tweak
-              ? tapTweakHash ??
-                  TaprootUtils.calculateTweek(
-                    getPublic().toXOnly(),
-                    treeScript: merkleRoot != null ? null : treeScript,
-                    merkleRoot: merkleRoot,
-                  )
-              : null,
-    );
+    final btcSigner = BitcoinKeySigner(secretKey);
+    List<int> signature =
+        btcSigner
+            .signBip340(
+              digest: txDigest,
+              aux: aux,
+              tapTweakHash:
+                  tweak
+                      ? tapTweakHash ??
+                          TaprootUtils.calculateTweek(
+                            getPublic().toXOnly(),
+                            treeScript: merkleRoot != null ? null : treeScript,
+                            merkleRoot: merkleRoot,
+                          )
+                      : null,
+            )
+            .encoded;
     if (sighash != BitcoinOpCodeConst.sighashDefault) {
       signature = <int>[...signature, sighash];
     }
@@ -252,7 +264,11 @@ class ECPrivate {
   }
 
   static ECPrivate random() {
-    final secret = QuickCrypto.generateRandom();
-    return ECPrivate.fromBytes(secret);
+    return ECPrivate(Secp256k1PrivateKey.random());
+  }
+
+  @override
+  void dispose() {
+    secretKey.dispose();
   }
 }

@@ -1,4 +1,3 @@
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/provider/mempool/core/methods.dart';
 import 'package:bitcoin_base/src/provider/types/types.dart';
 import 'package:bitcoin_base/src/provider/utils/utils.dart';
@@ -132,7 +131,8 @@ abstract class MempoolRequest<RESULT, RESPONSE>
   MempoolRequestDetails buildRequest(int requestID) {
     final pathParams = BitcoinProviderUtils.extractParams(method.url);
     if (pathParams.length != parameters.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid Path Parameters.',
         details: {
           'pathParams': parameters.join(","),

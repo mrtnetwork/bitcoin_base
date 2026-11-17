@@ -26,7 +26,7 @@ class ElectrumRequestBlockHeader extends ElectrumRequest<dynamic, dynamic> {
   /// This provides a proof that the given header is present in the blockchain;
   /// presumably the client has the merkle root hard-coded as a checkpoint.
   @override
-  dynamic onResonse(result) {
+  dynamic onResponse(result) {
     return result;
   }
 }

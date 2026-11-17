@@ -1,4 +1,5 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 
 enum APIType { mempool, blockCypher }
 
@@ -64,7 +65,10 @@ class BtcApiConst {
       }
     }
     if (baseUrl == null) {
-      throw DartBitcoinPluginException('Unsupported network provider api.');
+      throw BuError(DefaultErrorType.unsupported, 
+        'Unsupported network provider API.',
+        details: {'network': network.name},
+      );
     }
     return baseUrl;
   }

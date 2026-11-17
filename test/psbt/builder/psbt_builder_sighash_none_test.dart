@@ -4,6 +4,18 @@ import 'package:test/test.dart';
 
 import 'utxos_vector.dart';
 
+import '../../utils.dart';
+void psbtBuilderSighashNoneTest() {
+  psbtTest1();
+}
+
+void builderPsbtBuilderSighashNoneTest() {
+  BitcoinBaseTestApi.runTest(psbtBuilderSighashNoneTest, "Psbt Builder Sighash None");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(builderPsbtBuilderSighashNoneTest, "Psbt Builder Sighash None");
+}
 void psbtTest1() {
   test("PSBTV0", () {
     _test(PsbtBuilderV0.create());
@@ -53,7 +65,7 @@ void _test(PsbtBuilder builder) {
       ),
     ),
     throwsA(
-      isA<DartBitcoinPluginException>().having(
+      isA<BuError>().having(
         (p0) => p0.message,
         'error message',
         contains('Missing input non-witness UTXOs.'),
@@ -134,3 +146,4 @@ void _partialSignSighashNone(String psbt, List<Map<String, dynamic>> utxoes) {
     "d95bf1d6a34dadcd458368f19c667f588b59b5c2217190433eb4c737575866c3",
   );
 }
+

@@ -77,7 +77,6 @@ class PsbtBuilderV0 extends PsbtBuilder {
   }
 
   void _updateUnsignedTx(BtcTransaction transaction) {
-    // _unsignedTx.copyWith();
     _psbt.global.updateGlobals([PsbtGlobalUnsignedTransaction(transaction)]);
   }
 

@@ -1,6 +1,7 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
+import 'utils.dart';
 /// copied from https://github.com/Electron-Cash/Electron-Cash/blob/master/electroncash/tests/test_token.py
 // # Copyright (c) 2023 Calin Culianu <calin.culianu@gmail.com>
 // #
@@ -190,7 +191,7 @@ final Map<String, Map<String, dynamic>> bitcoinCashAddresses = {
   },
 };
 
-void main() {
+void bitcoinCashAddressTest() {
   test('decode encode address', () {
     for (final i in bitcoinCashAddresses.keys.toList()) {
       final info = Map.from(bitcoinCashAddresses[i]!);
@@ -206,3 +207,12 @@ void main() {
     }
   });
 }
+
+void bitcoinCashAddressTest2() {
+  BitcoinBaseTestApi.runTest(bitcoinCashAddressTest, "Bitcoin Cash Address");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(bitcoinCashAddressTest2, "Bitcoin Cash Address");
+}
+

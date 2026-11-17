@@ -14,7 +14,7 @@ class BlockCypherRequestGetTransaction
   BlockCypherRequestMethods get method => BlockCypherRequestMethods.transaction;
 
   @override
-  BlockCypherTransaction onResonse(Map<String, dynamic> result) {
+  BlockCypherTransaction onResponse(Map<String, dynamic> result) {
     return BlockCypherTransaction.fromJson(result);
   }
 }

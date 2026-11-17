@@ -16,7 +16,7 @@ class ElectrumRequestServerFeatures extends ElectrumRequest<dynamic, dynamic> {
   /// A dictionary of keys and values. Each key represents a feature or service of the server,
   ///  and the value gives additional information.
   @override
-  dynamic onResonse(result) {
+  dynamic onResponse(result) {
     return result;
   }
 }

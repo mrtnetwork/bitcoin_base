@@ -30,7 +30,7 @@ class ElectrumRequestIdFromPos extends ElectrumRequest<dynamic, dynamic> {
 
   /// If merkle is false, the transaction hash as a hexadecimal string. If true, a dictionary
   @override
-  dynamic onResonse(result) {
+  dynamic onResponse(result) {
     return result;
   }
 }

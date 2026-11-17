@@ -4,3 +4,4 @@ export 'mempool/models.dart';
 export 'utxo_details.dart';
 export 'multisig_script.dart';
 export 'electrum/models.dart';
+export 'spender_address.dart';

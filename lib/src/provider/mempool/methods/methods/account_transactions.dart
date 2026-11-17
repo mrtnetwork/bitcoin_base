@@ -15,7 +15,7 @@ class MempoolRequestGetAccountTransactions
   MempoolRequestMethods get method => MempoolRequestMethods.transactions;
 
   @override
-  List<MempoolTransaction> onResonse(List<Map<String, dynamic>> result) {
+  List<MempoolTransaction> onResponse(List<Map<String, dynamic>> result) {
     return result.map((e) => MempoolTransaction.fromJson(e)).toList();
   }
 }

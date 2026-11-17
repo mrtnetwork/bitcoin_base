@@ -22,7 +22,7 @@ class ElectrumRequestMasternodeAnnounceBroadcast
 
   /// true if the message was broadcasted successfully otherwise false.
   @override
-  bool onResonse(result) {
+  bool onResponse(result) {
     return result;
   }
 }

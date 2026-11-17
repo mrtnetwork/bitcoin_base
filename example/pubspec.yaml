@@ -39,7 +39,9 @@ dependencies:
     path: ../
   # blockchain_utils:
   #   path: ../../blockchain_utils
-  blockchain_utils: ^7.0.0
+  blockchain_utils:
+    git:
+      url: https://github.com/mrtnetwork/blockchain_utils
   http: ^1.2.0
 
 dev_dependencies:

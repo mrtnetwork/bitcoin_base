@@ -31,7 +31,7 @@ class ElectrumRequestScriptHashListUnspent
   /// Mempool transactions paying to the address are included at the end of the list in an undefined order.
   /// Any output that is spent in the mempool does not appear.
   @override
-  List<ElectrumUtxo> onResonse(result) {
+  List<ElectrumUtxo> onResponse(result) {
     final utxos = result.map((e) => ElectrumUtxo.fromJson(e)).toList();
     return utxos;
   }

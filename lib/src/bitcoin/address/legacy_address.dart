@@ -6,7 +6,7 @@ abstract class LegacyAddress
   /// Represents a Bitcoin address
   ///
   /// [addressProgram] the addressProgram string representation of the address; hash160 represents
-  /// two consequtive hashes of the public key or the redeam script or SHA256 for BCH(P2SH), first
+  /// two consecutive hashes of the public key or the redeem script or SHA256 for BCH(P2SH), first
   /// a SHA-256 and then an RIPEMD-160
   LegacyAddress.fromHash160(String addrHash, BitcoinAddressType addressType)
     : _addressProgram = BitcoinAddressUtils.validateAddressProgram(
@@ -17,13 +17,13 @@ abstract class LegacyAddress
     required String address,
     required BasedUtxoNetwork network,
   }) {
-    final decode = BitcoinAddressUtils.decodeLagacyAddressWithNetworkAndType(
+    final decode = BitcoinAddressUtils.decodeLegacyAddressWithNetworkAndType(
       address: address,
       type: type,
       network: network,
     );
     if (decode == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidAddress, 
         'Invalid ${network.conf.coinName} address',
       );
     }
@@ -38,7 +38,7 @@ abstract class LegacyAddress
   @override
   String get addressProgram {
     if (type == PubKeyAddressType.p2pk) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.unsupported, 
         "addressProgram not supported by p2pk address.",
       );
     }
@@ -76,7 +76,7 @@ class P2shAddress extends LegacyAddress {
     P2shAddressType addressType = P2shAddressType.p2pkInP2sh32,
   }) {
     if (addressType.hashLength != 32) {
-      throw DartBitcoinPluginException("Invalid P2sh 32 address type.");
+      throw BuError(DefaultErrorType.invalidAddress, "Invalid P2sh 32 address type.");
     }
     return P2shAddress.fromHash160(
       addrHash: BytesUtils.toHexString(
@@ -106,7 +106,7 @@ class P2shAddress extends LegacyAddress {
   @override
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.unsupported, 
         'network does not support ${type.name} address.',
       );
     }
@@ -174,7 +174,7 @@ class P2pkAddress extends LegacyAddress {
   factory P2pkAddress({required String publicKey}) {
     final toBytes = BytesUtils.fromHexString(publicKey);
     if (!Secp256k1PublicKey.isValidBytes(toBytes)) {
-      throw const DartBitcoinPluginException('Invalid Public key.');
+      throw BuError(DefaultErrorType.badPublicKey, 'Invalid Public key.');
     }
     return P2pkAddress._(StringUtils.strip0x(publicKey.toLowerCase()));
   }

@@ -21,7 +21,7 @@ class ElectrumRequestBroadCastTransaction
 
   /// The transaction hash as a hexadecimal string.
   @override
-  String onResonse(result) {
+  String onResponse(result) {
     return result;
   }
 }

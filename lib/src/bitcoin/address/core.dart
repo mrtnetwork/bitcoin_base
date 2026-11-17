@@ -6,7 +6,7 @@ sealed class BitcoinAddressType {
     return values.firstWhere(
       (element) => element.name == name,
       orElse:
-          () => throw DartBitcoinPluginException('Unknown address type. $name'),
+          () => throw BuError(DefaultErrorType.invalidAddress, 'Unknown address type. $name'),
     );
   }
 
@@ -14,7 +14,7 @@ sealed class BitcoinAddressType {
     return values.firstWhere(
       (element) => element.id == tag,
       orElse:
-          () => throw DartBitcoinPluginException('Unknown address type. $tag'),
+          () => throw BuError(DefaultErrorType.invalidAddress, 'Unknown address type. $tag'),
     );
   }
 
@@ -36,6 +36,8 @@ sealed class BitcoinAddressType {
   bool get withToken;
   int get id;
   abstract final String name;
+
+  List<CryptoKeyEncoding> get supportedKeyEncoding;
 }
 
 abstract class BitcoinBaseAddress with Equality, CborTagSerializable {
@@ -63,7 +65,8 @@ abstract class BitcoinBaseAddress with Equality, CborTagSerializable {
       SegwitAddressType.p2tr => P2trAddress.fromProgram(
         program: addressProgram,
       ),
-      _ => throw DartBitcoinPluginException("Unsuported bitcoin address type."),
+      _ =>
+        throw BuError(DefaultErrorType.unsupported, "Unsupported bitcoin address type."),
     };
   }
   factory BitcoinBaseAddress.deserializeIAddress({
@@ -80,8 +83,6 @@ abstract class BitcoinBaseAddress with Equality, CborTagSerializable {
       addressProgram: BytesUtils.toHexString(values.rawValueAt(1)),
     );
   }
-
-  /// deserializeIAddress
 
   BitcoinAddressType get type;
   String toAddress(BasedUtxoNetwork network);
@@ -129,6 +130,9 @@ enum PubKeyAddressType implements BitcoinAddressType {
 
   @override
   bool get withToken => false;
+
+  @override
+  List<CryptoKeyEncoding> get supportedKeyEncoding => CryptoKeyEncoding.values;
 }
 
 enum P2pkhAddressType implements BitcoinAddressType {
@@ -160,6 +164,9 @@ enum P2pkhAddressType implements BitcoinAddressType {
 
   @override
   bool get withToken => this == p2pkhwt;
+
+  @override
+  List<CryptoKeyEncoding> get supportedKeyEncoding => CryptoKeyEncoding.values;
 }
 
 enum P2shAddressType implements BitcoinAddressType {
@@ -177,7 +184,8 @@ enum P2shAddressType implements BitcoinAddressType {
   /// specify BCH NETWORK for now!
   /// Pay-to-Script-Hash-32
   p2pkhInP2sh32('P2SH32/P2PKH', BitcoinAddressUtils.scriptHashLenght, false, 8),
-  //// Pay-to-Script-Hash-32
+
+  /// Pay-to-Script-Hash-32
   p2pkInP2sh32('P2SH32/P2PK', BitcoinAddressUtils.scriptHashLenght, false, 9),
 
   /// Pay-to-Script-Hash-32-with-token
@@ -235,6 +243,13 @@ enum P2shAddressType implements BitcoinAddressType {
 
   @override
   bool get supportBip137 => this == p2wpkhInP2sh;
+
+  @override
+  List<CryptoKeyEncoding> get supportedKeyEncoding => switch (this) {
+    P2shAddressType.p2wpkhInP2sh ||
+    P2shAddressType.p2wshInP2sh => [CryptoKeyEncoding.base],
+    _ => CryptoKeyEncoding.values,
+  };
 }
 
 enum SegwitAddressType implements BitcoinAddressType {
@@ -274,12 +289,18 @@ enum SegwitAddressType implements BitcoinAddressType {
 
   @override
   bool get withToken => false;
+
+  @override
+  List<CryptoKeyEncoding> get supportedKeyEncoding => [CryptoKeyEncoding.base];
 }
 
 extension ExtBitcoinAddressTypeCasting on BitcoinAddressType {
   T cast<T extends BitcoinAddressType>() {
     if (this is! T) {
-      throw CastFailedException<T>(value: this);
+      throw BuError(DefaultErrorType.castFailed, 
+        "Invalid Bitcoin address type cast.",
+        details: {'expected': '$T', 'actual': '$runtimeType'},
+      );
     }
     return this as T;
   }

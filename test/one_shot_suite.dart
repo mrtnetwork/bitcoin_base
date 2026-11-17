@@ -1,0 +1,58 @@
+import 'utils.dart';
+import 'bcs_test.dart' as f0;
+import 'bip68_test.dart' as f1;
+import 'bitcoin_cash_address_test.dart' as f2;
+import 'bitcoin_cash_token_encoding_test.dart' as f3;
+import 'deserialize_test.dart' as f4;
+import 'encode_decode_transaction_test.dart' as f5;
+import 'encoding_request_params_test.dart' as f6;
+import 'exception_test.dart' as f7;
+import 'i_address_test.dart' as f8;
+import 'keys_test.dart' as f9;
+import 'network_identifiers_test.dart' as f10;
+import 'p2kh_tr_test.dart' as f11;
+import 'p2sh_test.dart' as f12;
+import 'p2tr_test.dart' as f13;
+import 'p2wpkh_test.dart' as f14;
+import 'p2wsh_test.dart' as f15;
+import 'transaction_builder_locktime_test.dart' as f16;
+import 'transaction_builder_multisig_test.dart' as f17;
+import 'bcmr/bcmr_test.dart' as f18;
+import 'psbt/bip_0174_test.dart' as f19;
+import 'psbt/bip_0370_test.dart' as f20;
+import 'psbt/bip_0371_test.dart' as f21;
+import 'psbt/bip_0373_test.dart' as f22;
+import 'psbt/builder/psbt_builder_sighash_none_test.dart' as f23;
+import 'psbt/builder/psbt_test.dart' as f24;
+import 'backend_identity_test.dart' as f25;
+
+Future<void> runOneShotSuite() async {
+  BitcoinBaseTestApi.runTest(() {
+    f25.backendIdentityTest();
+    f0.bcsTest2();
+    f1.bip68Test2();
+    f2.bitcoinCashAddressTest2();
+    f3.bitcoinCashTokenEncodingTest2();
+    f4.deserializeTest2();
+    f5.encodeDecodeTransactionTest2();
+    f6.encodingRequestParamsTest2();
+    f7.exceptionTest2();
+    f8.iAddressTest2();
+    f9.keysTest2();
+    f10.networkIdentifiersTest2();
+    f11.p2khTrTest2();
+    f12.p2shTest2();
+    f13.p2trTest2();
+    f14.p2wpkhTest2();
+    f15.p2wshTest2();
+    f16.transactionBuilderLocktimeTest2();
+    f17.multiSigTransactionBuilderTest2();
+    f18.bcmrBcmrTest();
+    f19.psbtBip0174Test();
+    f20.psbtBip0370Test();
+    f21.psbtBip0371Test();
+    f22.psbtBip0373Test();
+    f23.builderPsbtBuilderSighashNoneTest();
+    f24.builderPsbtTest();
+  }, "all tests");
+}

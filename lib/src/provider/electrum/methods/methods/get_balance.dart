@@ -22,7 +22,7 @@ class ElectrumRequestGetScriptHashBalance
   /// A dictionary with keys confirmed and unconfirmed.
   /// The value of each is the appropriate balance in minimum coin units (satoshis).
   @override
-  Map<String, dynamic> onResonse(Map<String, dynamic> result) {
+  Map<String, dynamic> onResponse(Map<String, dynamic> result) {
     return result;
   }
 }

@@ -1,5 +1,8 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
+
+import 'utils.dart';
 
 Map<Script, int> findAllLeafIndexes(List<dynamic> treeScripts) {
   int index = 0; // Tracks current leaf index
@@ -13,7 +16,8 @@ Map<Script, int> findAllLeafIndexes(List<dynamic> treeScripts) {
         traverse(level[0]); // Left branch
         traverse(level[1]); // Right branch
       } else {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          BitcoinErrorType.plugin,
           "Invalid Merkle branch: A list must have at most 2 branches.",
         );
       }
@@ -27,7 +31,7 @@ Map<Script, int> findAllLeafIndexes(List<dynamic> treeScripts) {
   return leafIndexes;
 }
 
-void main() {
+void p2trTest() {
   group('TestCreateP2trWithSingleTapScript', () {
     late ECPrivate toPriv1;
     late ECPublic toPub1;
@@ -88,9 +92,9 @@ void main() {
       );
       scriptPubKey2 = fromAddress2.toScriptPubKey();
       signedTx2 =
-          '0200000000010166fa733b552a229823b72571c3d91349ae90354926ff45e67257c6c4739d4c3d0000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50140f1776ddef90a87b646a45ad4821b8dd33e01c5036cbe071a2e1e609ae0c0963685cb8749001944dbe686662dd7c95178c85c4f59c685b646ab27e34df766b7b100000000';
+          '0200000000010166fa733b552a229823b72571c3d91349ae90354926ff45e67257c6c4739d4c3d0000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50140dff6c2256f49fd03b03c0ede86e6ba5ae64c84217438f24752e5493c097983a8358b31cc821f84c63f0cbc39dae2885e669e7cfe370696dcde27bf99e712fdad00000000';
       signedTx3 =
-          '0200000000010166fa733b552a229823b72571c3d91349ae90354926ff45e67257c6c4739d4c3d0000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50340bf0a391574b56651923abdb256731059008a08b5a3406cd81ce10ef5e7f936c6b9f7915ec1054e2a480e4552fa177aed868dc8b28c6263476871b21584690ef8222013f523102815e9fbbe132ffb8329b0fef5a9e4836d216dce1824633287b0abc6ac21c01036a7ed8d24eac9057e114f22342ebf20c16d37f0d25cfd2c900bf401ec09c900000000';
+          '0200000000010166fa733b552a229823b72571c3d91349ae90354926ff45e67257c6c4739d4c3d0000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd503407dac0f9685e8392e29a74302beeec1a38fd0731380d96136e0a1d02d492593ed0c229031def4d6cb235213d60f631c48aa944c44a86bd56be8778aa7794bbaf3222013f523102815e9fbbe132ffb8329b0fef5a9e4836d216dce1824633287b0abc6ac21c01036a7ed8d24eac9057e114f22342ebf20c16d37f0d25cfd2c900bf401ec09c900000000';
       // Initialize your variables here if needed
     });
 
@@ -110,6 +114,7 @@ void main() {
     test('spend_key_path2', () {
       var tx = BtcTransaction(inputs: [txIn2], outputs: [txOut2]);
 
+      /// 0daa628bcc77bb9d38f0e25aa8870effe1d3174dac80ef6e1019bf3b9c6738db
       const signHash = BitcoinOpCodeConst.sighashDefault;
       final txDigit = tx.getTransactionTaprootDigset(
         txIndex: 0,
@@ -121,6 +126,7 @@ void main() {
         txDigit,
         treeScript: TaprootLeaf(script: trScriptP2pk1),
         sighash: signHash,
+        aux: List<int>.filled(32, 0),
       );
       tx = tx.copyWith(
         witnesses: [
@@ -145,7 +151,12 @@ void main() {
         digit,
         sighash: BitcoinOpCodeConst.sighashDefault,
         tweak: false,
+        aux: List<int>.filled(32, 0),
       );
+
+      /// 54f96916a9e7a61f13ada084becd595afb3e04f2bdd546fd85a05a45f840ad57
+      /// rust bc3de52a2732b119af0c3cb855274c7ee6ba0cd4325582d2f49b904de18e1a0e2053cfce94d72792277034a76859b904848e33ed50ebf31e20ebd3a586252be6
+      /// dart bf0a391574b56651923abdb256731059008a08b5a3406cd81ce10ef5e7f936c6b9f7915ec1054e2a480e4552fa177aed868dc8b28c6263476871b21584690ef8
       final controlBlock = TaprootControlBlock.generate(
         xOnlyOrInternalPubKey: fromPub2.toXOnly(),
         scriptTree: TaprootLeaf(script: trScriptP2pk1),
@@ -214,7 +225,7 @@ void main() {
     late final scriptPubkey = fromAddress.toScriptPubKey();
     late final allUtxosScriptpubkeys = [scriptPubkey];
     const signedTx3 =
-        '020000000001014dc1c5b54477a18c962d5e065e69a42bd7e9244b74ea2c29f105b0b75dc88e800000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50340ab89d20fee5557e57b7cf85840721ef28d68e91fd162b2d520e553b71d604388ea7c4b2fcc4d946d5d3be3c12ef2d129ffb92594bc1f42cdaec8280d0c83ecc2222013f523102815e9fbbe132ffb8329b0fef5a9e4836d216dce1824633287b0abc6ac41c01036a7ed8d24eac9057e114f22342ebf20c16d37f0d25cfd2c900bf401ec09c9682f0e85d59cb20fd0e4503c035d609f127c786136f276d475e8321ec9e77e6c00000000';
+        '020000000001014dc1c5b54477a18c962d5e065e69a42bd7e9244b74ea2c29f105b0b75dc88e800000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50340dd418618603b959843a91cd6f13f52ce5992db134712b08ae54fc85fcf445726149f6d352cddc43c34ec7ed8a7c099039b06922c2ad37b01696cba4325bc02f7222013f523102815e9fbbe132ffb8329b0fef5a9e4836d216dce1824633287b0abc6ac41c01036a7ed8d24eac9057e114f22342ebf20c16d37f0d25cfd2c900bf401ec09c9682f0e85d59cb20fd0e4503c035d609f127c786136f276d475e8321ec9e77e6c00000000';
 
     // 1-spend taproot from first script path (A) of two (A,B)
     test('test_spend_script_path_A_from_AB', () {
@@ -227,7 +238,9 @@ void main() {
         tapleafScript: TaprootLeaf(script: trScriptP2pkA),
       );
 
-      final sign = privkeyTrScriptA.signBip340(txDigit, tweak: false);
+      final sign = privkeyTrScriptA.signBip340(txDigit, tweak: false,
+        aux: List<int>.filled(32, 0),
+      );
       final controlBlock = TaprootControlBlock.generate(
         xOnlyOrInternalPubKey: fromPub.toXOnly(),
         scriptTree: TaprootBranch(
@@ -326,7 +339,7 @@ void main() {
     final allUtxosScriptPubkeys = [scriptPubkey];
 
     const signedTx =
-        '02000000000101d387dafa20087c38044f3cbc2e93e1e0141e64265d304d0d44b233f3d0018a9b0000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50340644e392f5fd88d812bad30e73ff9900cdcf7f260ecbc862819542fd4683fa9879546613be4e2fc762203e45715df1a42c65497a63edce5f1dfe5caea5170273f2220e808f1396f12a253cf00efdf841e01c8376b616fb785c39595285c30f2817e71ac61c01036a7ed8d24eac9057e114f22342ebf20c16d37f0d25cfd2c900bf401ec09c9ed9f1b2b0090138e31e11a31c1aea790928b7ce89112a706e5caa703ff7e0ab928109f92c2781611bb5de791137cbd40a5482a4a23fd0ffe50ee4de9d5790dd100000000';
+        '02000000000101d387dafa20087c38044f3cbc2e93e1e0141e64265d304d0d44b233f3d0018a9b0000000000ffffffff01b80b000000000000225120d4213cd57207f22a9e905302007b99b84491534729bd5f4065bdcb42ed10fcd50340eecf48c6e3ccd3f2cead3ab5829652c6e4ed0ba7af0e7ca5ba3fc1733f34d5297bd75459da88b7189418576dbc379898e225ffa20d84037328a59db2e6df6cf82220e808f1396f12a253cf00efdf841e01c8376b616fb785c39595285c30f2817e71ac61c01036a7ed8d24eac9057e114f22342ebf20c16d37f0d25cfd2c900bf401ec09c9ed9f1b2b0090138e31e11a31c1aea790928b7ce89112a706e5caa703ff7e0ab928109f92c2781611bb5de791137cbd40a5482a4a23fd0ffe50ee4de9d5790dd100000000';
 
     test('test_spend_script_path_A_from_AB', () {
       var tx = BtcTransaction(inputs: [txIn], outputs: [txOut]);
@@ -336,7 +349,9 @@ void main() {
         tapleafScript: TaprootLeaf(script: trScriptP2pkB),
         amounts: allAmounts.map((e) => e).toList(),
       );
-      final sig = privkeyTrScriptB.signBip340(digit, tweak: false);
+      final sig = privkeyTrScriptB.signBip340(digit, tweak: false,
+        aux: List<int>.filled(32, 0),
+      );
       final controlBlock = TaprootControlBlock.generate(
         xOnlyOrInternalPubKey: fromPub.toXOnly(),
         scriptTree: TaprootBranch(
@@ -366,3 +381,12 @@ void main() {
   });
   return;
 }
+
+void p2trTest2() {
+  BitcoinBaseTestApi.runTest(p2trTest, "P2tr");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(p2trTest2, "P2tr");
+}
+

@@ -14,7 +14,7 @@ class ElectrumRequestGetMerkle
   /// The transaction hash as a hexadecimal string.
   final String transactionHash;
 
-  /// he height at which it was confirmed.
+  /// The height at which it was confirmed.
   final int height;
 
   /// blockchain.transaction.get_merkle
@@ -27,7 +27,7 @@ class ElectrumRequestGetMerkle
   }
 
   @override
-  ElectrumGetMerkleResponse onResonse(result) {
+  ElectrumGetMerkleResponse onResponse(result) {
     return ElectrumGetMerkleResponse.fromJson(result);
   }
 }

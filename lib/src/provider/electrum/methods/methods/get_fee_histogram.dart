@@ -19,7 +19,7 @@ class ElectrumRequestGetFeeHistogram
   /// fee uses sat/vbyte as unit, and must be a non-negative integer or float.
   /// vsize uses vbyte as unit, and must be a non-negative integer.
   @override
-  List<List<double>> onResonse(result) {
+  List<List<double>> onResponse(result) {
     return result
         .map((e) => (e as List).map((e) => (e as num).toDouble()).toList())
         .toList();

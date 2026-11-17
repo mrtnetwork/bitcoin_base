@@ -915,7 +915,7 @@ class Registry {
   /// (losing claimable value if the receivers of their transactions don't
   /// acknowledge transfers on both chains). When a registry trusted by the
   /// wallet notes the split in it's `chains` map, the wallet can represent the
-  /// split in the user interface using the the latest [ChainSnapshot] for
+  /// split in the user interface using the latest [ChainSnapshot] for
   /// each chain and splitting coins prior to spending (by introducing post-split
   /// coins in each transaction).
   ///

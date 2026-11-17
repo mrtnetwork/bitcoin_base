@@ -1,7 +1,7 @@
 import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
 import 'package:bitcoin_base/src/provider/electrum/core/methods.dart';
 import 'package:bitcoin_base/src/provider/electrum/core/params.dart';
-import 'package:blockchain_utils/utils/binary/utils.dart';
+import 'package:blockchain_utils/utils/binary/src/utils.dart';
 
 /// Return a raw transaction.
 /// https://electrumx-spesmilo.readthedocs.io/en/latest/protocol-methods.html
@@ -22,7 +22,7 @@ class ElectrumRequestGetRawTransaction
   }
 
   @override
-  BtcTransaction onResonse(String result) {
+  BtcTransaction onResponse(String result) {
     final txBytes = BytesUtils.fromHexString(result);
     return BtcTransaction.deserialize(txBytes);
   }

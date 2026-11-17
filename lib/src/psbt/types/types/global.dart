@@ -3,7 +3,6 @@ import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/script/transaction.dart';
 import 'package:bitcoin_base/src/psbt/types/types/psbt.dart';
 import 'dart:typed_data';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// PSBT GLOBAL TYPES
@@ -85,24 +84,26 @@ class PsbtGlobal {
 
   /// Constructs a [PsbtGlobal] instance with a given version and global entries.
   ///
-  /// Throws a [DartBitcoinPluginException] if any of the following conditions are met:
+  /// Throws a [BuError] if any of the following conditions are met:
   /// - Duplicate entries are found.
   /// - A global entry is not allowed for the specified PSBT version.
-  /// - A required global entry is missing for the PSBT version
+  /// - A required global entry is missing for the PSBT version.
   factory PsbtGlobal({
     List<PsbtGlobalData> entries = const [],
     required PsbtVersion version,
   }) {
     final keys = entries.map((e) => e.keyPair.key).toList();
     if (keys.toSet().length != keys.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Global: Duplicate entry detected.",
       );
     }
     for (final i in entries) {
       if (i.type.allowedVersion == null) continue;
       if (version != i.type.allowedVersion) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.unsupported,
           "Invalid PSBT Global: ${i.type.psbtName} is not allowed in PSBT version ${version.name}.",
         );
       }
@@ -117,7 +118,8 @@ class PsbtGlobal {
         (e) => e.type == i,
         orElse:
             () =>
-                throw DartBitcoinPluginException(
+                throw BuError(
+                  DefaultErrorType.invalidArgument,
                   "Invalid PSBT global: Missing required field ${i.psbtName} for PSBT version ${version.name}.",
                 ),
       );
@@ -148,14 +150,16 @@ class PsbtGlobal {
   void _itemsAllowed(List<PsbtGlobalData> items) {
     final keys = items.map((e) => e.keyPair.key).toSet();
     if (keys.length != items.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Global: Duplicate entry detected.",
       );
     }
     for (final i in items) {
       if (i.type.allowedVersion == null) continue;
       if (version != i.type.allowedVersion) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.unsupported,
           "Invalid PSBT Global: ${i.type.psbtName} is not allowed in PSBT version ${version.name}.",
         );
       }
@@ -178,7 +182,8 @@ class PsbtGlobal {
     final data = _entries.where((e) => e.type == type);
     if (data.isEmpty) return null;
     if (data.length != 1) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Multiple globals with type ${type.psbtName} found. Use 'getGlobals' to retrieve data for multiple globals",
       );
     }
@@ -233,7 +238,8 @@ abstract class PsbtGlobalData {
   }
   T cast<T extends PsbtGlobalData>() {
     if (this is! T) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.castFailed,
         "Invalid cast: expected ${T.runtimeType}, but found $runtimeType.",
         details: {"expected": "$T", "type": runtimeType.toString()},
       );
@@ -268,12 +274,14 @@ class PsbtGlobalUnsignedTransaction extends PsbtGlobalData {
   }
   factory PsbtGlobalUnsignedTransaction.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtGlobalTypes.unsignedTx.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Unsigned Transaction type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Unsigned Transaction key data.",
       );
     }
@@ -290,7 +298,10 @@ class PsbtGlobalUnsignedTransaction extends PsbtGlobalData {
         );
       }
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Unsigned Transaction data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Unsigned Transaction data.",
+    );
   }
 
   @override
@@ -304,14 +315,14 @@ class PsbtGlobalExtendedPublicKey extends PsbtGlobalData {
   /// Extended public keys are those that can be used to derive public keys used in the
   /// inputs and outputs of this transaction. It should be the public key at the highest
   /// hardened derivation index so that the unhardened child keys used in the transaction can be derived.
-  final List<int> xPub;
+  final BuBytes xPub;
 
   /// The master key fingerprint as defined by BIP 32 concatenated
   /// with the derivation path of the public key. The derivation path
   /// is represented as 32-bit little endian unsigned integer indexes
   /// concatenated with each other. The number of 32 bit unsigned integer
   /// indexes must match the depth provided in the extended public key.
-  final List<int> fingerprint;
+  final BuBytes fingerprint;
   final List<Bip32KeyIndex> indexes;
   PsbtGlobalExtendedPublicKey._({
     required List<int> xPub,
@@ -346,17 +357,21 @@ class PsbtGlobalExtendedPublicKey extends PsbtGlobalData {
         }(),
       );
     }
-    throw DartBitcoinPluginException("Invalid PSBT Extended Public Key data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Extended Public Key data.",
+    );
   }
   factory PsbtGlobalExtendedPublicKey.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtGlobalTypes.xpub.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Extended Public Key type flag",
       );
     }
 
     try {
-      final List<int> fingerPrint = keypair.value.data.sublist(
+      final fingerPrint = keypair.value.data.sublist(
         0,
         Bip32KeyDataConst.fingerprintByteLen,
       );
@@ -380,7 +395,10 @@ class PsbtGlobalExtendedPublicKey extends PsbtGlobalData {
         indexes: bip32Indexes,
       );
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Extended Public Key data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Extended Public Key data.",
+    );
   }
 
   @override
@@ -417,12 +435,14 @@ class PsbtGlobalTransactionVersion extends PsbtGlobalData {
   }
   factory PsbtGlobalTransactionVersion.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtGlobalTypes.version.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Transaction Version type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Transaction Version key data.",
       );
     }
@@ -439,10 +459,13 @@ class PsbtGlobalTransactionVersion extends PsbtGlobalData {
       } catch (_) {}
     }
 
-    throw DartBitcoinPluginException("Invalid PSBT Transaction Version data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Transaction Version data.",
+    );
   }
 
-  List<int> versionBytes() {
+  BuBytes versionBytes() {
     return version.toLeBytes(length: BitcoinOpCodeConst.versionLengthInBytes);
   }
 
@@ -473,12 +496,14 @@ class PsbtGlobalFallbackLocktime extends PsbtGlobalData {
   }
   factory PsbtGlobalFallbackLocktime.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtGlobalTypes.fallBackLockTime.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Fallback Locktime type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Fallback Locktime key data.",
       );
     }
@@ -495,10 +520,13 @@ class PsbtGlobalFallbackLocktime extends PsbtGlobalData {
       } catch (_) {}
     }
 
-    throw DartBitcoinPluginException("Invalid PSBT Fallback Locktime data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Fallback Locktime data.",
+    );
   }
 
-  List<int> locktimeBytes() {
+  BuBytes locktimeBytes() {
     return locktime.toLeBytes(length: BitcoinOpCodeConst.locktimeLengthInBytes);
   }
 
@@ -525,16 +553,25 @@ class PsbtGlobalInputCount extends PsbtGlobalData {
   }
   factory PsbtGlobalInputCount.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtGlobalTypes.inputCount.flag) {
-      throw DartBitcoinPluginException("Invalid PSBT Input Count type flag");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Input Count type flag",
+      );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException("Invalid PSBT Input Count key data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Input Count key data.",
+      );
     }
     try {
       final int inputCount = IntUtils.decodeVarint(keypair.value.data).$1;
       return PsbtGlobalInputCount._(count: inputCount, keyPair: keypair);
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Input Count data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Input Count data.",
+    );
   }
 
   @override
@@ -560,16 +597,25 @@ class PsbtGlobalOutputCount extends PsbtGlobalData {
   }
   factory PsbtGlobalOutputCount.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtGlobalTypes.outputCount.flag) {
-      throw DartBitcoinPluginException("Invalid PSBT Output Count type flag");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Output Count type flag",
+      );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException("Invalid PSBT Output Count key data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Output Count key data.",
+      );
     }
     try {
       final int outputCount = IntUtils.decodeVarint(keypair.value.data).$1;
       return PsbtGlobalOutputCount._(count: outputCount, keyPair: keypair);
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Output Count data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Output Count data.",
+    );
   }
 
   @override
@@ -604,12 +650,14 @@ class PsbtGlobalTransactionModifiableFlags extends PsbtGlobalData {
     PsbtKeyPair keypair,
   ) {
     if (keypair.key.type != PsbtGlobalTypes.txModifiable.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Transaction Modifiable Flags type flag",
       );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Transaction Modifiable Flags key data.",
       );
     }
@@ -619,7 +667,8 @@ class PsbtGlobalTransactionModifiableFlags extends PsbtGlobalData {
         keyPair: keypair,
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Transaction Modifiable Flags data.",
     );
   }
@@ -632,11 +681,11 @@ class PsbtGlobalTransactionModifiableFlags extends PsbtGlobalData {
 
 class PsbtGlobalSilentPaymentGlobalECDHShare extends PsbtGlobalData {
   /// The scan key that this ECDH share is for.
-  final List<int> scanKey;
+  final BuBytes scanKey;
 
   /// An ECDH share for a scan key. The ECDH shared is computed with a * B_scan,
   /// where a is the sum of all private keys of all eligible inputs, and B_scan is the scan key of a recipient.
-  final List<int> share;
+  final BuBytes share;
 
   PsbtGlobalSilentPaymentGlobalECDHShare._({
     required List<int> scanKey,
@@ -660,7 +709,8 @@ class PsbtGlobalSilentPaymentGlobalECDHShare extends PsbtGlobalData {
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Silent Payment Global ECDH Share data",
     );
   }
@@ -668,7 +718,8 @@ class PsbtGlobalSilentPaymentGlobalECDHShare extends PsbtGlobalData {
     PsbtKeyPair keypair,
   ) {
     if (keypair.key.type != PsbtGlobalTypes.spEcdhShare.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Silent Payment Global ECDH Share type flag",
       );
     }
@@ -681,7 +732,8 @@ class PsbtGlobalSilentPaymentGlobalECDHShare extends PsbtGlobalData {
         keyPair: keypair,
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Silent Payment Global ECDH Share data.",
     );
   }
@@ -698,10 +750,10 @@ class PsbtGlobalSilentPaymentGlobalECDHShare extends PsbtGlobalData {
 
 class PsbtGlobalSilentPaymentGlobalDLEQProof extends PsbtGlobalData {
   /// The scan key that this proof covers.
-  final List<int> scanKey;
+  final BuBytes scanKey;
 
   /// A BIP374 DLEQ proof computed for the matching ECDH share.
-  final List<int> proof;
+  final BuBytes proof;
 
   PsbtGlobalSilentPaymentGlobalDLEQProof._({
     required List<int> scanKey,
@@ -715,7 +767,7 @@ class PsbtGlobalSilentPaymentGlobalDLEQProof extends PsbtGlobalData {
     required List<int> proof,
   }) {
     if (scanKey.length == EcdsaKeysConst.pubKeyCompressedByteLen &&
-        proof.length == QuickCrypto.sha512DeigestLength) {
+        proof.length == QuickCrypto.sha512DigestLength) {
       return PsbtGlobalSilentPaymentGlobalDLEQProof._(
         scanKey: scanKey,
         proof: proof,
@@ -725,7 +777,8 @@ class PsbtGlobalSilentPaymentGlobalDLEQProof extends PsbtGlobalData {
         ),
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Silent Payment Global DLEQ Proof data",
     );
   }
@@ -733,20 +786,22 @@ class PsbtGlobalSilentPaymentGlobalDLEQProof extends PsbtGlobalData {
     PsbtKeyPair keypair,
   ) {
     if (keypair.key.type != PsbtGlobalTypes.spDLEQ.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Silent Payment Global DLEQ Proof type flag",
       );
     }
     if (keypair.key.extraData?.length ==
             EcdsaKeysConst.pubKeyCompressedByteLen &&
-        keypair.value.data.length == QuickCrypto.sha512DeigestLength) {
+        keypair.value.data.length == QuickCrypto.sha512DigestLength) {
       return PsbtGlobalSilentPaymentGlobalDLEQProof._(
         scanKey: keypair.key.extraData ?? [],
         proof: keypair.value.data,
         keyPair: keypair,
       );
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid PSBT Silent Payment Global DLEQ Proof data.",
     );
   }
@@ -783,10 +838,16 @@ class PsbtGlobalPSBTVersionNumber extends PsbtGlobalData {
     : super(type: PsbtGlobalTypes.psbtVersion);
   factory PsbtGlobalPSBTVersionNumber.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtGlobalTypes.psbtVersion.flag) {
-      throw DartBitcoinPluginException("Invalid PSBT Version Number type flag");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Version Number type flag",
+      );
     }
     if (keypair.key.extraData != null) {
-      throw DartBitcoinPluginException("Invalid PSBT Version Number key data.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid PSBT Version Number key data.",
+      );
     }
     try {
       if (keypair.value.data.length ==
@@ -800,17 +861,21 @@ class PsbtGlobalPSBTVersionNumber extends PsbtGlobalData {
             (e) => e.version == version,
             orElse:
                 () =>
-                    throw DartBitcoinPluginException(
+                    throw BuError(
+                      DefaultErrorType.unsupported,
                       "Unsported PSBT Version $version",
                     ),
           ),
           keyPair: keypair,
         );
       }
-    } on DartBitcoinPluginException {
+    } on BuError {
       rethrow;
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Version Number data.");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Version Number data.",
+    );
   }
 
   @override
@@ -822,11 +887,11 @@ class PsbtGlobalPSBTVersionNumber extends PsbtGlobalData {
 class PsbtGlobalProprietaryUseType extends PsbtGlobalData {
   /// Compact size unsigned integer of the length of the identifier, followed by identifier prefix,
   /// followed by a compact size unsigned integer subtype, followed by the key data itself.
-  final List<int> identifier;
-  final List<int> subkeydata;
+  final BuBytes identifier;
+  final BuBytes subkeydata;
 
   /// Any value data as defined by the proprietary type user.
-  final List<int> data;
+  final BuBytes data;
 
   PsbtGlobalProprietaryUseType._({
     required List<int> identifier,
@@ -849,10 +914,7 @@ class PsbtGlobalProprietaryUseType extends PsbtGlobalData {
       keyPair: PsbtKeyPair(
         key: PsbtKey(
           PsbtGlobalTypes.proprietary.flag!,
-          extraData: [
-            ...IntUtils.prependVarint(identifier),
-            ...IntUtils.prependVarint(subkeydata),
-          ],
+          extraData: [...IntUtils.prependVarint(identifier), ...subkeydata],
         ),
         value: PsbtValue(data),
       ),
@@ -861,7 +923,8 @@ class PsbtGlobalProprietaryUseType extends PsbtGlobalData {
 
   factory PsbtGlobalProprietaryUseType.deserialize(PsbtKeyPair keypair) {
     if (keypair.key.type != PsbtGlobalTypes.proprietary.flag) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT Proprietary Use Type type flag",
       );
     }
@@ -881,7 +944,10 @@ class PsbtGlobalProprietaryUseType extends PsbtGlobalData {
         keyPair: keypair,
       );
     } catch (_) {}
-    throw DartBitcoinPluginException("Invalid PSBT Proprietary Use Type data");
+    throw BuError(
+      DefaultErrorType.invalidArgument,
+      "Invalid PSBT Proprietary Use Type data",
+    );
   }
 
   @override

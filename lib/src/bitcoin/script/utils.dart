@@ -1,7 +1,6 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/provider/models/models.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
@@ -271,7 +270,7 @@ class BitcoinScriptUtils {
 
   static int? decodeOpN(String opcode) {
     if (!opcode.startsWith("OP_")) return null;
-    int n = int.tryParse(opcode.replaceFirst("OP_", '')) ?? -1;
+    int n = IntUtils.tryParse(opcode.replaceFirst("OP_", '')) ?? -1;
     if (n < 0 || n > 16) return null;
     return n;
   }
@@ -390,7 +389,7 @@ class BitcoinScriptUtils {
       address = P2trAddress.fromProgram(program: script.script[1]);
     }
     if (address == null || address.toScriptPubKey() != script) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         "Unknown scriptPubKey: Unable to generate a valid address.",
       );
     }
@@ -417,7 +416,7 @@ class BitcoinScriptUtils {
       final lengthBytes = dataBytes.length.toU32LeBytes();
       return [BitcoinOpCodeConst.opPushData4, ...lengthBytes, ...dataBytes];
     } else {
-      throw const DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidLength, 
         'Data too large. Cannot push into script',
       );
     }
@@ -425,7 +424,7 @@ class BitcoinScriptUtils {
 
   static List<int> pushInteger(int integer) {
     if (integer < 0) {
-      throw const DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'Integer is currently required to be positive.',
       );
     }

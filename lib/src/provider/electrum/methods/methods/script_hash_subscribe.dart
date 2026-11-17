@@ -7,7 +7,7 @@ class ElectrumRequestScriptHashSubscribe
     extends ElectrumRequest<String?, String?> {
   ElectrumRequestScriptHashSubscribe({required this.scriptHash});
 
-  /// /// The script hash as a hexadecimal string (BitcoinBaseAddress.pubKeyHash())
+  /// The script hash as a hexadecimal string (BitcoinBaseAddress.pubKeyHash())
   final String scriptHash;
 
   /// blockchain.scripthash.subscribe

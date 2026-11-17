@@ -1,10 +1,7 @@
 import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
 import 'package:bitcoin_base/src/cash_token/cash_token.dart';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
-import 'package:blockchain_utils/helper/helper.dart';
-import 'package:blockchain_utils/utils/utils.dart';
-import 'package:blockchain_utils/crypto/quick_crypto.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'input.dart';
 import 'output.dart';
 import 'script.dart';
@@ -37,12 +34,14 @@ class BtcTransaction {
     List<int> version = BitcoinOpCodeConst.defaultTxVersion,
   }) {
     if (locktime.length != BitcoinOpCodeConst.locktimeLengthInBytes) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidLength,
         "Invalid locktime length: expected ${BitcoinOpCodeConst.locktimeLengthInBytes}, but got ${locktime.length}.",
       );
     }
     if (version.length != BitcoinOpCodeConst.versionLengthInBytes) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidLength,
         "Invalid version length: expected ${BitcoinOpCodeConst.versionLengthInBytes}, but got ${version.length}.",
       );
     }
@@ -56,8 +55,8 @@ class BtcTransaction {
   }
   final List<TxInput> inputs;
   final List<TxOutput> outputs;
-  final List<int> locktime;
-  final List<int> version;
+  final BuBytes locktime;
+  final BuBytes version;
   final List<TxWitnessInput> witnesses;
 
   BtcTransaction copyWith({
@@ -87,7 +86,7 @@ class BtcTransaction {
     );
   }
 
-  /// Instantiates a Transaction from serialized raw hexadacimal data (classmethod)
+  /// Instantiates a Transaction from serialized raw hexadecimal data (classmethod)
   static BtcTransaction deserialize(
     List<int> txBytes, {
     bool allowWitness = true,
@@ -158,7 +157,8 @@ class BtcTransaction {
         locktime: locktime,
       );
     } catch (e) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Transaction deserialization failed.",
         details: {"error": e.toString()},
       );
@@ -170,7 +170,7 @@ class BtcTransaction {
   /// [txInIndex] The index of the input that we wish to sign
   /// [script] The scriptPubKey of the UTXO that we want to spend
   /// [sighash] The type of the signature hash to be created
-  List<int> getTransactionDigest({
+  BuBytes getTransactionDigest({
     required int txInIndex,
     required Script script,
     int sighash = BitcoinOpCodeConst.sighashAll,
@@ -184,12 +184,14 @@ class BtcTransaction {
       tx = tx.copyWith(outputs: []);
       for (int i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
-          tx.inputs[i].sequence = BitcoinOpCodeConst.emptyTxSequence;
+          tx.inputs[i].sequence =
+              BitcoinOpCodeConst.emptyTxSequence.asImmutableBytes;
         }
       }
     } else if ((sighash & 0x1f) == BitcoinOpCodeConst.sighashSingle) {
       if (txInIndex >= tx.outputs.length) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "SIGHASH_SINGLE error: Input index $txInIndex is greater than or equal to the number of outputs (${tx.outputs.length}). This input cannot be signed.",
         );
       }
@@ -201,7 +203,8 @@ class BtcTransaction {
       tx = tx.copyWith(outputs: [...outputs, tx.outputs[txInIndex]]);
       for (int i = 0; i < tx.inputs.length; i++) {
         if (i != txInIndex) {
-          tx.inputs[i].sequence = BitcoinOpCodeConst.emptyTxSequence;
+          tx.inputs[i].sequence =
+              BitcoinOpCodeConst.emptyTxSequence.asImmutableBytes;
         }
       }
     }
@@ -215,31 +218,31 @@ class BtcTransaction {
   }
 
   /// Serializes Transaction to bytes
-  List<int> toBytes({bool allowWitness = true}) {
-    final data = DynamicByteTracker();
-    data.add(version);
+  BuBytes toBytes({bool allowWitness = true}) {
+    final data = BuBytes.empty();
+    data.addAll(version);
     if (allowWitness && witnesses.isNotEmpty) {
-      data.add([0x00, 0x01]);
+      data.addAll([0x00, 0x01]);
     }
     final txInCountBytes = IntUtils.encodeVarint(inputs.length);
     final txOutCountBytes = IntUtils.encodeVarint(outputs.length);
 
-    data.add(txInCountBytes);
+    data.addAll(txInCountBytes);
     for (final txIn in inputs) {
-      data.add(txIn.toBytes());
+      data.addAll(txIn.toBytes());
     }
 
-    data.add(txOutCountBytes);
+    data.addAll(txOutCountBytes);
     for (final txOut in outputs) {
-      data.add(txOut.toBytes());
+      data.addAll(txOut.toBytes());
     }
     if (allowWitness && witnesses.isNotEmpty) {
       for (final wit in witnesses) {
-        data.add(wit.toBytes());
+        data.addAll(wit.toBytes());
       }
     }
-    data.add(locktime);
-    return data.toBytes();
+    data.addAll(locktime);
+    return data;
   }
 
   /// returns the transaction input's segwit digest that is to be signed according to sighash.
@@ -248,7 +251,7 @@ class BtcTransaction {
   /// [script] The scriptCode (template) that corresponds to the segwit, transaction output type that we want to spend.
   /// [amount] The amount of the UTXO to spend is included in the signature for segwit (in satoshis).
   /// [sighash] The type of the signature hash to be created.
-  List<int> getTransactionSegwitDigit({
+  BuBytes getTransactionSegwitDigit({
     required int txInIndex,
     required Script script,
     int sighash = BitcoinOpCodeConst.sighashAll,
@@ -261,7 +264,7 @@ class BtcTransaction {
     List<int> hashOutputs = List<int>.filled(32, 0);
     final basicSigHashType = sighash & 0x1F;
     final anyoneCanPay =
-        (sighash & 0xF0) == BitcoinOpCodeConst.sighashAnyoneCanPay;
+        (sighash & BitcoinOpCodeConst.sighashAnyoneCanPay) != 0;
     final signAll =
         (basicSigHashType != BitcoinOpCodeConst.sighashSingle) &&
         (basicSigHashType != BitcoinOpCodeConst.sighashNone);
@@ -303,36 +306,38 @@ class BtcTransaction {
       hashOutputs = QuickCrypto.sha256DoubleHash(hashOutputs);
     }
 
-    final txForSigning = DynamicByteTracker();
-    txForSigning.add(version);
-    txForSigning.add(hashPrevouts);
-    txForSigning.add(hashSequence);
+    final txForSigning = BuBytes.empty();
+    txForSigning.addAll(version);
+    txForSigning.addAll(hashPrevouts);
+    txForSigning.addAll(hashSequence);
     final txIn = inputs[txInIndex];
 
     final txidBytes = BytesUtils.fromHexString(txIn.txId).reversed.toList();
-    txForSigning.add([...txidBytes, ...txIn.txIndex.toU32LeBytes()]);
+    txForSigning.addAll([...txidBytes, ...txIn.txIndex.toU32LeBytes()]);
     if (token != null) {
-      txForSigning.add(token.toBytes());
+      txForSigning.addAll(token.toBytes());
     }
     final varintBytes = IntUtils.prependVarint(script.toBytes());
 
-    txForSigning.add(varintBytes);
+    txForSigning.addAll(varintBytes);
     final packedAmount = amount.toI64LeBytes();
-    txForSigning.add(packedAmount);
-    txForSigning.add(txIn.sequence);
-    txForSigning.add(hashOutputs);
-    txForSigning.add(locktime);
-    txForSigning.add(sighash.toU32LeBytes());
-    return QuickCrypto.sha256DoubleHash(txForSigning.toBytes());
+    txForSigning.addAll(packedAmount);
+    txForSigning.addAll(txIn.sequence);
+    txForSigning.addAll(hashOutputs);
+    txForSigning.addAll(locktime);
+    txForSigning.addAll(sighash.toU32LeBytes());
+    return QuickCrypto.sha256DoubleHash(txForSigning);
   }
 
   /// Returns the segwit v1 (taproot) transaction's digest for signing.
   ///
   /// [txIndex] The index of the input that we wish to sign
-  /// [scriptPubKeys] he scriptPubkeys that correspond to all the inputs/UTXOs
-  /// [amounts] The amounts that correspond to all the inputs/UTXOs
+  /// [scriptPubKeys] The scriptPubkeys for ALL inputs/UTXOs in input order
+  /// (BIP-341 commits to every input; a single-input list is only valid for a
+  /// single-input transaction, or with SIGHASH_ANYONECANPAY covering [txIndex]).
+  /// [amounts] The amounts for ALL inputs/UTXOs in input order (same rule).
   /// [sighash] The type of the signature hash to be created
-  List<int> getTransactionTaprootDigset({
+  BuBytes getTransactionTaprootDigset({
     required int txIndex,
     required List<Script> scriptPubKeys,
     required List<BigInt> amounts,
@@ -345,11 +350,35 @@ class BtcTransaction {
     final sighashSingle = (sighash & 0x03) == BitcoinOpCodeConst.sighashSingle;
     final anyoneCanPay =
         (sighash & 0x80) == BitcoinOpCodeConst.sighashAnyoneCanPay;
-    final txForSign = DynamicByteTracker();
-    txForSign.add([0]);
-    txForSign.add([sighash]);
-    txForSign.add(version);
-    txForSign.add(locktime);
+    if (txIndex < 0 || txIndex >= newTx.inputs.length) {
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Taproot digest: txIndex $txIndex out of range for ${newTx.inputs.length} input(s).",
+      );
+    }
+    if (!anyoneCanPay &&
+        (scriptPubKeys.length != newTx.inputs.length ||
+            amounts.length != newTx.inputs.length)) {
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Taproot digest: scriptPubKeys (${scriptPubKeys.length}) and amounts (${amounts.length}) "
+        "must cover ALL ${newTx.inputs.length} inputs (BIP-341 sha_amounts/sha_scriptpubkeys). "
+        "Pass the full per-transaction lists, not the single input being signed.",
+      );
+    }
+    if (anyoneCanPay &&
+        (scriptPubKeys.length <= txIndex || amounts.length <= txIndex)) {
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Taproot digest: with SIGHASH_ANYONECANPAY, scriptPubKeys (${scriptPubKeys.length}) and "
+        "amounts (${amounts.length}) must at least cover txIndex $txIndex.",
+      );
+    }
+    final txForSign = BuBytes.empty();
+    txForSign.addAll([0]);
+    txForSign.addAll([sighash]);
+    txForSign.addAll(version);
+    txForSign.addAll(locktime);
     List<int> hashPrevouts = [];
     List<int> hashAmounts = [];
     List<int> hashScriptPubkeys = [];
@@ -365,27 +394,27 @@ class BtcTransaction {
         ];
       }
       hashPrevouts = QuickCrypto.sha256Hash(hashPrevouts);
-      txForSign.add(hashPrevouts);
+      txForSign.addAll(hashPrevouts);
 
       for (final i in amounts) {
         final bytes = i.toI64LeBytes();
         hashAmounts = [...hashAmounts, ...bytes];
       }
       hashAmounts = QuickCrypto.sha256Hash(hashAmounts);
-      txForSign.add(hashAmounts);
+      txForSign.addAll(hashAmounts);
 
       for (final s in scriptPubKeys) {
         final scriptBytes = IntUtils.prependVarint(s.toBytes());
         hashScriptPubkeys = [...hashScriptPubkeys, ...scriptBytes];
       }
       hashScriptPubkeys = QuickCrypto.sha256Hash(hashScriptPubkeys);
-      txForSign.add(hashScriptPubkeys);
+      txForSign.addAll(hashScriptPubkeys);
 
       for (final txIn in newTx.inputs) {
         hashSequences = [...hashSequences, ...txIn.sequence];
       }
       hashSequences = QuickCrypto.sha256Hash(hashSequences);
-      txForSign.add(hashSequences);
+      txForSign.addAll(hashSequences);
     }
     if (!(sighashNone || sighashSingle)) {
       for (final txOut in newTx.outputs) {
@@ -396,59 +425,57 @@ class BtcTransaction {
         hashOutputs = [...hashOutputs, ...packedAmount, ...scriptBytes];
       }
       hashOutputs = QuickCrypto.sha256Hash(hashOutputs);
-      txForSign.add(hashOutputs);
+      txForSign.addAll(hashOutputs);
     }
 
     int spendType = tapleafScript == null ? 0 : 2;
     if (annex != null) {
       spendType += 1;
     }
-    txForSign.add([spendType]);
+    txForSign.addAll([spendType]);
 
     if (anyoneCanPay) {
       final txin = newTx.inputs[txIndex];
       final txidBytes = BytesUtils.fromHexString(txin.txId).reversed.toList();
       final result = [...txidBytes, ...txin.txIndex.toU32LeBytes()];
-      txForSign.add(result);
-      txForSign.add(amounts[txIndex].toI64LeBytes());
+      txForSign.addAll(result);
+      txForSign.addAll(amounts[txIndex].toI64LeBytes());
       final scriptBytes = IntUtils.prependVarint(
         scriptPubKeys[txIndex].toBytes(),
       );
-      txForSign.add(scriptBytes);
-      txForSign.add(txin.sequence);
+      txForSign.addAll(scriptBytes);
+      txForSign.addAll(txin.sequence);
     } else {
       final indexBytes = txIndex.toU32LeBytes();
-      txForSign.add(indexBytes);
+      txForSign.addAll(indexBytes);
     }
     if (annex != null) {
       final annexBytes = IntUtils.prependVarint(annex);
-      txForSign.add(QuickCrypto.sha256Hash(annexBytes));
+      txForSign.addAll(QuickCrypto.sha256Hash(annexBytes));
     }
 
-    ///
     if (sighashSingle && txIndex < newTx.outputs.length) {
       final txOut = newTx.outputs[txIndex];
       final packedAmount = txOut.amount.toI64LeBytes();
       final scriptBytes = IntUtils.prependVarint(txOut.scriptPubKey.toBytes());
       final hashOut = [...packedAmount, ...scriptBytes];
-      txForSign.add(QuickCrypto.sha256Hash(hashOut));
+      txForSign.addAll(QuickCrypto.sha256Hash(hashOut));
     }
     if (tapleafScript != null) {
-      txForSign.add(tapleafScript.hash());
-      txForSign.add([0]);
-      txForSign.add(List<int>.filled(4, BinaryOps.mask8));
+      txForSign.addAll(tapleafScript.hash());
+      txForSign.addAll([0]);
+      txForSign.addAll(List<int>.filled(4, BinaryOps.mask8));
     }
-    final bytes = txForSign.toBytes();
-    return TaprootUtils.tapSigTaggedHash(bytes);
+    return TaprootUtils.tapSigTaggedHash(txForSign).asImmutableBytes;
   }
 
-  /// converts result of to_bytes to hexadecimal string
+  /// Converts the result of [toBytes] to a hexadecimal string.
   String toHex({bool allowWitness = true}) {
     final bytes = toBytes(allowWitness: allowWitness);
     return BytesUtils.toHexString(bytes);
   }
 
-  /// converts result of to_bytes to hexadecimal string
+  /// Converts the result of [toBytes] to a hexadecimal string.
   String serialize() {
     return toHex();
   }
@@ -469,7 +496,8 @@ class BtcTransaction {
         witnesses.map((e) => e.toBytes()).expand((e) => e).toList();
     witSize = data.length;
     final size = getSize() - (markerSize + witSize);
-    final vSize = size + (markerSize + witSize) / 4;
+
+    final vSize = size + witSize / 4;
     return vSize.ceil();
   }
 

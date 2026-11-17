@@ -6,8 +6,9 @@ import 'decentralized_application.dart';
 import 'fungible_token.dart';
 import 'payouts_or_dividends.dart';
 
+import '../utils.dart';
 /// https://github.com/bitjson/chip-bcmr/tree/master/examples
-void main() {
+void bcmrTest() {
   test('pcmr test', () {
     final registry = Registry.fromJson(payoutsOrDividends);
     expect(json.encode(registry.toJson()), json.encode(payoutsOrDividends));
@@ -22,3 +23,12 @@ void main() {
     );
   });
 }
+
+void bcmrBcmrTest() {
+  BitcoinBaseTestApi.runTest(bcmrTest, "Bcmr");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(bcmrBcmrTest, "Bcmr");
+}
+

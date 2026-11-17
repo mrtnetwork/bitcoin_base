@@ -1,12 +1,12 @@
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 class PsbtByteReader {
-  final List<int> bytes;
-  PsbtByteReader(List<int> bytes) : bytes = bytes.immutable;
+  final BuBytes bytes;
+  PsbtByteReader(List<int> bytes) : bytes = bytes.asImmutableBytes;
   int _offset = 0;
   int get offset => _offset;
   int get length => bytes.length;
-  List<int> read(int length) {
+  BuBytes read(int length) {
     final bytes = this.bytes.sublist(_offset, _offset + length);
     _offset += length;
     return bytes;

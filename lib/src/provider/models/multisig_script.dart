@@ -3,7 +3,6 @@ import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/models/network.dart';
 import 'package:bitcoin_base/src/utils/btc_utils.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
@@ -12,7 +11,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 /// signers in a multi-signature scheme. A multi-signature signer typically includes
 /// information about their public key and weight within the scheme.
 class MultiSignatureSigner {
-  MultiSignatureSigner._(this.publicKey, this.weight, this.keyType);
+  MultiSignatureSigner.unsafe(this.publicKey, this.weight, this.keyType);
 
   /// PublicKey returns the public key associated with the signer.
   final String publicKey;
@@ -31,7 +30,7 @@ class MultiSignatureSigner {
   }) {
     final pubkeyMode = BtcUtils.determinatePubKeyModeHex(publicKey);
 
-    return MultiSignatureSigner._(
+    return MultiSignatureSigner.unsafe(
       ECPublic.fromHex(publicKey).toHex(mode: pubkeyMode),
       weight,
       pubkeyMode,
@@ -58,21 +57,20 @@ class MultiSignatureAddress {
   /// with this address.
   final int threshold;
 
-  // /// Address represents the Bitcoin address associated with this multi-signature configuration.
-  // final BitcoinAddress address;
-
   /// ScriptDetails provides details about the multi-signature script used in transactions,
   /// including "OP_M", compressed public keys, "OP_N", and "OP_CHECKMULTISIG."
   final Script multiSigScript;
 
   BitcoinBaseAddress toP2wshAddress({required BasedUtxoNetwork network}) {
     if (network is! LitecoinNetwork && network is! BitcoinNetwork) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.unsupported,
         '${network.conf.coinName.name} Bitcoin forks that do not support Segwit. use toP2shAddress',
       );
     }
     if (!canSelectSegwit) {
-      throw const DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.badPublicKey,
         "One of the signer's accounts used an uncompressed public key.",
       );
     }
@@ -91,7 +89,8 @@ class MultiSignatureAddress {
     P2shAddressType addressType = P2shAddressType.p2pkhInP2sh,
   }) {
     if (!legacySupportP2shTypes.contains(addressType)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidAddress,
         "invalid p2sh type please use one of them ${legacySupportP2shTypes.map((e) => "$e").join(", ")}",
       );
     }
@@ -122,7 +121,8 @@ class MultiSignatureAddress {
       case P2shAddressType.p2pkhInP2sh32wt:
         return toP2shAddress(addressType: addressType as P2shAddressType);
       default:
-        throw const DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidAddress,
           'invalid multisig address type. use of of them [BitcoinAddressType.p2wsh, BitcoinAddressType.p2wshInP2sh, BitcoinAddressType.p2pkhInP2sh]',
         );
     }
@@ -148,17 +148,20 @@ class MultiSignatureAddress {
       (sum, signer) => sum + signer.weight,
     );
     if (threshold > 16 || threshold < 1) {
-      throw const DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'The threshold should be between 1 and 16',
       );
     }
     if (sumWeight > 16) {
-      throw const DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'The total weight of the owners should not exceed 16',
       );
     }
     if (sumWeight < threshold) {
-      throw const DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'The total weight of the signatories should reach the threshold',
       );
     }
@@ -222,17 +225,20 @@ class P2trMultiSignatureAddress {
       (sum, signer) => sum + signer.weight,
     );
     if (threshold > 15 || threshold < 1) {
-      throw const DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'The threshold should be between 1 and 15',
       );
     }
     if (sumWeight > 15) {
-      throw const DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'The total weight of the owners should not exceed 15',
       );
     }
     if (sumWeight < threshold) {
-      throw const DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'The total weight of the signatories should reach the threshold',
       );
     }

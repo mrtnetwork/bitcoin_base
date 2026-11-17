@@ -1,11 +1,9 @@
 import 'dart:typed_data';
-
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/constants/constants.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/types/types.dart';
 import 'package:bitcoin_base/src/crypto/keypair/ec_public.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 class TaprootUtils {
@@ -63,20 +61,21 @@ class TaprootUtils {
     return null;
   }
 
-  static ProjectiveECCPoint tweakPublicKey(
+  static Secp256k1Point tweakPublicKey(
     List<int> pubKey, {
     TaprootTree? treeScript,
     List<int>? merkleRoot,
   }) {
     if (merkleRoot != null && merkleRoot.length != 32) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidLength,
         "Invalid Merkle root: must be exactly 32 bytes.",
         details: {"length": merkleRoot.length.toString()},
       );
     }
     List<int>? xKey = pubKey.clone();
-    if (xKey.length == EcdsaKeysConst.pubKeyCompressedByteLen) {
-      xKey = xKey.sublist(1);
+    if (xKey.length != EcdsaKeysConst.pointCoordByteLen) {
+      xKey = Secp256k1Point.fromBytes(xKey).toXOnly();
     }
     final tweak = calculateTweek(
       xKey,
@@ -92,12 +91,14 @@ class TaprootUtils {
     List<int>? merkleRoot,
   }) {
     if (treeScript != null && merkleRoot != null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Provide either a Merkle root or script trees to generate one, but not both.",
       );
     }
     if (xKey.length != 32) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidLength,
         "Invalid XOnlyKey length.",
         details: {"excpected": "32", "length": xKey.length.toString()},
       );
@@ -109,14 +110,13 @@ class TaprootUtils {
     return tweek;
   }
 
-  static ProjectiveECCPoint tweakInternalKey(
+  static Secp256k1Point tweakInternalKey(
     List<int> internalPubKey,
     List<int> leafHash,
   ) {
-    final x = BigintUtils.fromBytes(internalPubKey);
-    final n = Curves.generatorSecp256k1 * BigintUtils.fromBytes(leafHash);
-    final outPoint = P2TRUtils.liftX(x) + n;
-    return outPoint as ProjectiveECCPoint;
+    final n = Secp256k1Point.generator_ * Secp256k1Fr.fromBytes(leafHash);
+    final outPoint = P2TRUtils.liftX(internalPubKey) + n;
+    return outPoint;
   }
 
   static List<TaprootLeaf> extractLeafs(TaprootTree treeScript) {
@@ -146,13 +146,6 @@ class TaprootUtils {
         List<int> left = leavesHashes[i];
         List<int> right =
             (i + 1 < leavesHashes.length) ? leavesHashes[i + 1] : left;
-
-        // // Ensure lexicographic order before hashing
-        // if (Uint8List.fromList(left).compareTo(Uint8List.fromList(right)) > 0) {
-        //   Uint8List temp = left;
-        //   left = right;
-        //   right = temp;
-        // }
 
         // Compute TapBranch(A, B) = TaggedHash("TapBranch", A || B)
         Uint8List parent = Uint8List.fromList(tapbranchTaggedHash(left, right));
@@ -197,13 +190,16 @@ class TaprootUtils {
         return ECPublic.fromBytes(xOnlyOrInternalPubKey).toXOnly();
       } catch (_) {}
     }
-    throw DartBitcoinPluginException("Invalid xOnly or Public key.");
+    throw BuError(
+      DefaultErrorType.badPublicKey,
+      "Invalid xOnly or Public key.",
+    );
   }
 
   static String toXonlyHex(String xOnlyKey) {
     final bytes = BytesUtils.tryFromHexString(xOnlyKey);
     if (bytes == null || bytes.length != EcdsaKeysConst.pointCoordByteLen) {
-      throw DartBitcoinPluginException("Invalid xOnly key.");
+      throw BuError(DefaultErrorType.invalidArgument, "Invalid xOnly key.");
     }
     return StringUtils.strip0x(xOnlyKey.toLowerCase());
   }

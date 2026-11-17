@@ -21,7 +21,6 @@
 // SOFTWARE.
 
 import 'dart:typed_data';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// The CashTokenCapability class represents different capabilities associated with a Cash Token.
@@ -63,24 +62,24 @@ class CashTokenCapability {
     minting,
   ];
 
-  /// correct capality from bitfield
+  /// Returns the correct capability from bitfield
   static CashTokenCapability fromBitfield(int bitfield) {
     try {
       final intCapability = _getCapability(bitfield);
       return values.firstWhere((element) => element.value == intCapability);
     } on StateError {
-      throw const DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'Invalid CashToken NFT Capability',
       );
     }
   }
 
-  /// correct capality from name
+  /// Returns the correct capability from name
   static CashTokenCapability fromName(String name) {
     try {
       return values.firstWhere((element) => element.name == name);
     } on StateError {
-      throw const DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'Invalid CashToken NFT Capability Name',
       );
     }
@@ -123,7 +122,6 @@ class CashTokenUtils {
     var capabilityInt = 0;
     if (hasNFT) {
       if (capability != null) {
-        // throw const MessageException("Capability is necessary for NFTs.");
         capabilityInt = capability.value;
       }
     }
@@ -273,7 +271,7 @@ class CashToken {
   final BigInt amount;
 
   /// The commitment contents of the NFT held in this output (0 to 40 bytes). This field is omitted if no NFT is present.
-  final List<int> commitment;
+  final BuBytes commitment;
   final int bitfield;
 
   CashToken._({
@@ -289,39 +287,42 @@ class CashToken {
     required int bitfield,
   }) {
     if (!CashTokenUtils.isValidBitfield(bitfield)) {
-      throw const DartBitcoinPluginException('Invalid bitfield');
+      throw BuError(DefaultErrorType.invalidArgument, 
+        'Invalid bitfield.',
+        details: {'bitfield': '$bitfield'},
+      );
     }
     if (CashTokenUtils.hasAmount(bitfield) && amount == null) {
-      throw const DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'Invalid cash token: the bitfield indicates an amount, but the amount is null.',
       );
     }
     if (amount != null) {
       if (amount < BigInt.zero || amount > CashTokenUtils.maxTokenAmount) {
-        throw const DartBitcoinPluginException(
-          'Invalid amount. Amount must be between zero and 99.',
+        throw BuError(DefaultErrorType.invalidArgument, 
+          'Invalid amount. Amount must be between zero and ${CashTokenUtils.maxTokenAmount}.',
         );
       }
     }
     if (!StringUtils.isHexBytes(category)) {
-      throw const DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.badHex, 
         'Invalid category hexadecimal bytes.',
       );
     }
     final toBytes = BytesUtils.fromHexString(category);
     if (toBytes.length != CashTokenUtils.idBytesLength) {
-      throw const DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidLength, 
         'Invalid category. The category should consist of 32 bytes.',
       );
     }
     if (CashTokenUtils.hasCommitmentLength(bitfield) &&
         (commitment == null || commitment.isEmpty)) {
-      throw const DartBitcoinPluginException(
-        'Invalid cash token: the bitfield indicates an commitment, but the commitment is null or empty.',
+      throw BuError(DefaultErrorType.invalidArgument, 
+        'Invalid cash token: the bitfield indicates a commitment, but the commitment is null or empty.',
       );
     }
     return CashToken._(
-      category: StringUtils.strip0x(category.toLowerCase()),
+      category: StringUtils.normalizeHex(category),
       amount: amount ?? BigInt.zero,
       commitment: commitment ?? const [],
       bitfield: bitfield,
@@ -362,7 +363,10 @@ class CashToken {
         amount < BigInt.zero ||
         amount > CashTokenUtils.maxTokenAmount ||
         CashTokenUtils.hasCommitmentLength(bitfield) && commitment.isEmpty) {
-      throw const DartBitcoinPluginException('Invalid cash token');
+      throw BuError(DefaultErrorType.invalidArgument, 
+        'Invalid cash token.',
+        details: {'bitfield': '$bitfield', 'amount': '$amount'},
+      );
     }
     return (
       CashToken(
@@ -378,23 +382,23 @@ class CashToken {
   /// Converts the [CashToken] instance into a byte representation following the Cash Token serialization format.
   ///
   /// Returns a list of integers representing the serialized byte representation of the [CashToken].
-  List<int> toBytes() {
-    final bytes = DynamicByteTracker();
-    bytes.add([CashTokenUtils.cashTokenPrefix]);
-    bytes.add(BytesUtils.fromHexString(category).reversed.toList());
-    bytes.add([bitfield]);
+  BuBytes toBytes() {
+    final bytes = BuBytes.empty();
+    bytes.addAll([CashTokenUtils.cashTokenPrefix]);
+    bytes.addAll(BytesUtils.fromHexString(category).reversed.toList());
+    bytes.addAll([bitfield]);
     if (hasCommitment) {
       final commitmentLengthBytes = CashTokenUtils._encodeVarintBigInt(
         BigInt.from(commitment.length),
       );
-      bytes.add(commitmentLengthBytes);
-      bytes.add(commitment);
+      bytes.addAll(commitmentLengthBytes);
+      bytes.addAll(commitment);
     }
     if (hasAmount) {
       final commitmentLengthBytes = CashTokenUtils._encodeVarintBigInt(amount);
-      bytes.add(commitmentLengthBytes);
+      bytes.addAll(commitmentLengthBytes);
     }
-    return bytes.toBytes();
+    return bytes;
   }
 
   String toHex() {

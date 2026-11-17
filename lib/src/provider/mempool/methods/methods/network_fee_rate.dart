@@ -13,7 +13,7 @@ class MempoolRequestGetNetworkFeeRate
   MempoolRequestMethods get method => MempoolRequestMethods.feeRecommended;
 
   @override
-  BitcoinFeeRate onResonse(Map<String, dynamic> result) {
+  BitcoinFeeRate onResponse(Map<String, dynamic> result) {
     return BitcoinFeeRate.fromMempool(result);
   }
 }

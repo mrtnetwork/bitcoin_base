@@ -44,11 +44,11 @@ void psbtTest7() {
       expect(key.path, "m/86'/1'/0'/0/1034");
       final privateKey = key.toKeyDerivation().derive(getMasterKey(path: null));
       expect(
-        privateKey.privateKey.toHex(),
+        privateKey.privateKey.toBytes().toHex(),
         "39d9f93498ab9c5e833b6e22493be2aaa8d4daabb141afac801fccbf1298cd05",
       );
-      expect(privateKey.fingerPrint.toBytes(), key.fingerprint);
-      expect(privateKey.publicKey.compressed, key.publicKey);
+      expect(getMasterKey(path: null).fingerPrint.toBytes(), key.fingerprint);
+      expect(privateKey.publicKey.toPublicKeyBytes(), key.publicKey);
       final totalAmount = BigInt.from(500000);
       final receipt1 = _getReceipt();
       final receipt2 = _getReceipt2();
@@ -97,7 +97,7 @@ void psbtTest7() {
         },
         index: 0,
       );
-    }, throwsA(isA<DartBitcoinPluginException>()));
+    }, throwsA(isA<BuError>()));
     expect(
       () {
         final clone = PsbtBuilder.fromBase64(builder.toBase64());
@@ -137,7 +137,7 @@ void _addP2shAddress(PsbtBuilder builder) {
         scriptPubKey: p2shSigner.toScriptPubKey(),
       ),
     ),
-    throwsA(isA<DartBitcoinPluginException>()),
+    throwsA(isA<BuError>()),
   );
 
   /// invalid p2sh redeemscript;
@@ -162,7 +162,7 @@ void _addP2shAddress(PsbtBuilder builder) {
         scriptPubKey: p2shSigner.toScriptPubKey(),
       ),
     ),
-    throwsA(isA<DartBitcoinPluginException>()),
+    throwsA(isA<BuError>()),
   );
   newBuilder.addInput(
     PsbtTransactionInput.legacy(
@@ -208,7 +208,7 @@ void _addP2shAddress(PsbtBuilder builder) {
         },
         index: 1,
       ),
-      throwsA(isA<DartBitcoinPluginException>()),
+      throwsA(isA<BuError>()),
     );
     final p2shSigner = ECPrivate.fromHex(
       "33053373fe566dc4f77941a449c20dfa356221dfadec5e3d507c58279e0e1991",
@@ -253,7 +253,7 @@ void _addP2shAddress(PsbtBuilder builder) {
           address: _getReceipt3(),
         ),
       );
-    }, throwsA(isA<DartBitcoinPluginException>()));
+    }, throwsA(isA<BuError>()));
 
     /// success add wit sighash none
     int successAddAfterSighashNone() {
@@ -289,7 +289,7 @@ void _addP2shAddress(PsbtBuilder builder) {
         },
         index: 1,
       ),
-      throwsA(isA<DartBitcoinPluginException>()),
+      throwsA(isA<BuError>()),
     );
     final p2shSigner = ECPrivate.fromHex(
       "33053373fe566dc4f77941a449c20dfa356221dfadec5e3d507c58279e0e1991",
@@ -325,7 +325,7 @@ ECPrivate getPrivateKeyFromMasterKey({
   String? path = "m/86'/1'/0'/0/1",
 }) {
   final bip = getMasterKey(key: key, path: path);
-  return ECPrivate.fromBytes(bip.privateKey.raw);
+  return ECPrivate.fromBytes(bip.privateKey.toBytes());
 }
 
 ECPublic getPublicKeyFromMasterKey({
@@ -338,18 +338,18 @@ ECPublic getPublicKeyFromMasterKey({
 
 BitcoinBaseAddress _getReceipt() {
   final acc = getMasterKey(path: "m/86'/1'/0'/0/1022");
-  final pk = ECPublic.fromBytes(acc.publicKey.compressed);
+  final pk = ECPublic.fromBytes(acc.publicKey.toPublicKeyBytes());
   return pk.toP2wpkhInP2sh();
 }
 
 BitcoinBaseAddress _getReceipt2() {
   final acc = getMasterKey(path: "m/86'/1'/0'/0/1025");
-  final pk = ECPublic.fromBytes(acc.publicKey.compressed);
+  final pk = ECPublic.fromBytes(acc.publicKey.toPublicKeyBytes());
   return pk.toP2wshInP2sh();
 }
 
 BitcoinBaseAddress _getReceipt3() {
   final acc = getMasterKey(path: "m/86'/1'/0'/0/1026");
-  final pk = ECPublic.fromBytes(acc.publicKey.compressed);
+  final pk = ECPublic.fromBytes(acc.publicKey.toPublicKeyBytes());
   return pk.toAddress();
 }

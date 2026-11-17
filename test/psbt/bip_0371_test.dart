@@ -1,13 +1,23 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:blockchain_utils/utils/utils.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
+import '../utils.dart';
+
 /// https://github.com/bitcoin/bips/blob/master/bip-0371.mediawiki
-void main() {
+void bip0371Test() {
   group("BIP-0371", () {
     _testInvalid();
     _test();
   });
+}
+
+void psbtBip0371Test() {
+  BitcoinBaseTestApi.runTest(bip0371Test, "Bip 0371");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(psbtBip0371Test, "Bip 0371");
 }
 
 void _test() {
@@ -87,7 +97,7 @@ void _testInvalid() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Taproot Leaf Script'),
@@ -104,7 +114,7 @@ void _testInvalid() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Taproot Leaf Script'),
@@ -119,7 +129,7 @@ void _testInvalid() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Taproot Script Spend Signature'),
@@ -135,7 +145,7 @@ void _testInvalid() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Taproot Script Spend Signature'),
@@ -152,7 +162,7 @@ void _testInvalid() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Taproot Internal Key'),
@@ -169,7 +179,7 @@ void _testInvalid() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid Taproot Key BIP 32 Derivation Path'),
@@ -184,7 +194,7 @@ void _testInvalid() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Taproot Key Spend Signature'),
@@ -198,7 +208,7 @@ void _testInvalid() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Taproot Key Spend Signature'),
@@ -214,7 +224,7 @@ void _testInvalid() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Taproot Internal Key'),

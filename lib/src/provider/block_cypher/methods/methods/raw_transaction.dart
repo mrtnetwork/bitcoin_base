@@ -17,7 +17,7 @@ class BlockCypherRequestGetRawTransaction
       BlockCypherRequestMethods.rawTransaction;
 
   @override
-  BtcTransaction onResonse(Map<String, dynamic> result) {
+  BtcTransaction onResponse(Map<String, dynamic> result) {
     return BtcTransaction.deserialize(
       BytesUtils.fromHexString(result.valueAs("hex")),
     );

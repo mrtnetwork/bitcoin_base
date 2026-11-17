@@ -1,7 +1,8 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
-void main() {
+import 'utils.dart';
+void iAddressTest() {
   test("IAddress encoding", () {
     {
       final network = BitcoinNetwork.testnet;
@@ -206,3 +207,12 @@ void main() {
     }
   });
 }
+
+void iAddressTest2() {
+  BitcoinBaseTestApi.runTest(iAddressTest, "I Address");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(iAddressTest2, "I Address");
+}
+

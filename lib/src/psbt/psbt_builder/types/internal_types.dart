@@ -2,7 +2,6 @@ import 'package:bitcoin_base/src/bitcoin/address/address.dart';
 import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/taproot.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/psbt/psbt.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
@@ -28,7 +27,8 @@ abstract class PsbtInputInfo {
   });
   T cast<T extends PsbtInputInfo>() {
     if (this is! T) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.castFailed,
         "Invalid cast: expected ${T.runtimeType}, but found $runtimeType.",
       );
     }
@@ -48,7 +48,6 @@ class PsbtNonTaprootInputInfo extends PsbtInputInfo {
     required super.witnessScript,
     required super.type,
     required super.address,
-    // required super.existsSignatures,
   });
   factory PsbtNonTaprootInputInfo.legacy({
     required Script? p2shRedeemScript,
@@ -57,7 +56,6 @@ class PsbtNonTaprootInputInfo extends PsbtInputInfo {
     required Script scriptPubKey,
     required BigInt amount,
     required BitcoinBaseAddress address,
-    // required List<PsbtInputSignatures> existsSignatures,
   }) {
     return PsbtNonTaprootInputInfo._(
       p2shRedeemScript: p2shRedeemScript,
@@ -76,7 +74,6 @@ class PsbtNonTaprootInputInfo extends PsbtInputInfo {
     required Script scriptPubKey,
     required BigInt amount,
     required BitcoinBaseAddress address,
-    // required List<PsbtInputSignatures> existsSignatures,
     Script? p2shRedeemScript,
     Script? witnessScript,
   }) {
@@ -125,7 +122,7 @@ class PsbtTaprootInputInfo extends PsbtInputInfo {
 }
 
 class PsbtGeneratedTransactionDigest {
-  final List<int> digest;
+  final BuBytes digest;
   final PsbtInputTaprootLeafScript? leafScript;
   final int sighashType;
   final PsbtInputInfo params;
@@ -188,22 +185,24 @@ class PsbtGeneratedTransactionDigest {
       publicKey: signature.signerPublicKey.toBytes(
         mode:
             pubkey!.mode == PsbtScriptKeyMode.compressed
-                ? PubKeyModes.compressed
-                : PubKeyModes.uncompressed,
+                ? CryptoKeyEncoding.base
+                : CryptoKeyEncoding.uncompressed,
       ),
     );
   }
 
   PsbtInputMuSig2PublicNonce _getMusigSignerNonce(SignInputResponse signature) {
     if (!params.type.isP2tr) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.unsupported,
         "MuSig2 Public Nonce Only Work with taproot input.",
       );
     }
     final taprootParams = params.cast<PsbtTaprootInputInfo>();
     final musig = taprootParams.musig2inputInfo;
     if (musig == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Missing MuSig2 participant public keys: PSBT input at index ${params.index} does not contain MuSig2 aggregated public keys.",
       );
     }
@@ -214,13 +213,14 @@ class PsbtGeneratedTransactionDigest {
     );
   }
 
-  List<int>? generateTaprootTweak() {
+  BuBytes? generateTaprootTweak() {
     final taprootParams = params.cast<PsbtTaprootInputInfo>();
-    List<int>? tweak;
+    BuBytes? tweak;
     if (leafScript == null) {
-      tweak = TaprootUtils.calculateTweek(
-        taprootParams.internalPublicKey.xOnlyPubKey,
-      );
+      tweak =
+          TaprootUtils.calculateTweek(
+            taprootParams.internalPublicKey.xOnlyPubKey,
+          ).asImmutableBytes;
     }
     return tweak;
   }
@@ -238,7 +238,8 @@ class PsbtGeneratedTransactionDigest {
       if (signer is PsbtBtcMusig2Signer) {
         final musig = taprootParams.musig2inputInfo;
         if (musig == null) {
-          throw DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.invalidArgument,
             "Missing MuSig2 participant public keys: PSBT input at index ${params.index} does not contain MuSig2 aggregated public keys.",
           );
         }
@@ -273,7 +274,8 @@ class PsbtGeneratedTransactionDigest {
       final taprootParams = params.cast<PsbtTaprootInputInfo>();
       final musig = taprootParams.musig2inputInfo;
       if (musig == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Missing MuSig2 participant public keys: PSBT input at index ${params.index}.",
         );
       }
@@ -281,13 +283,14 @@ class PsbtGeneratedTransactionDigest {
     }
     if (params.isScriptSpending) {
       final script = leafScript?.script ?? params.redeemScript;
-      final pubKey = PsbtUtils.findSciptKeyInfo(
+      final pubKey = PsbtUtils.findScriptKeyInfo(
         publicKey: publicKey,
         script: script,
         type: params.type,
       );
       if (pubKey == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Signer public key does not match the scriptPubKey for input ${params.index}.",
         );
       }
@@ -299,20 +302,22 @@ class PsbtGeneratedTransactionDigest {
           publicKey.toXOnly(),
           taprootParam.internalPublicKey.xOnlyPubKey,
         )) {
-          throw DartBitcoinPluginException(
+          throw BuError(
+            DefaultErrorType.invalidArgument,
             "Signer public key does not match the internalPublicKey for input ${params.index}.",
           );
         }
         return null;
       }
       final script = params.scriptPubKey;
-      final pubKey = PsbtUtils.findSciptKeyInfo(
+      final pubKey = PsbtUtils.findScriptKeyInfo(
         publicKey: publicKey,
         script: script,
         type: params.type,
       );
       if (pubKey == null) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Signer public key does not match the scriptPubKey for input ${params.index}.",
         );
       }
@@ -341,7 +346,8 @@ class PsbtGeneratedTransactionDigest {
         }).toList();
 
     if (partialSigs.isEmpty) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "No valid signature found for input ${params.index}.",
       );
     }
@@ -385,7 +391,8 @@ class PsbtGeneratedTransactionDigest {
             )
             .toList();
     if (partialSigs.isEmpty) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "No signature found for input ${params.index}.",
         details: {"scriptPubKey": params.scriptPubKey.toString()},
       );
@@ -425,7 +432,8 @@ class PsbtGeneratedTransactionDigest {
             )
             .toList();
     if (partialSigs == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "No valid signature found for input ${params.index}.",
         details: {"scriptPubKey": params.scriptPubKey.toString()},
       );
@@ -435,7 +443,8 @@ class PsbtGeneratedTransactionDigest {
 
   String getScriptSha256(Script script) {
     if (!BitcoinScriptUtils.isSha256(script)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "The provided script does not match the expected SHA-256 script type.",
       );
     }
@@ -444,7 +453,8 @@ class PsbtGeneratedTransactionDigest {
         .getInputs<PsbtInputSha256>(params.index, PsbtInputTypes.sha256)
         ?.firstWhereNullable((e) => BytesUtils.bytesEqual(e.hash, hashBytes));
     if (hashesh == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.notFound,
         "Failed to find matching input for the provided hash.",
         details: {"scriptPubKey": params.scriptPubKey.toString()},
       );
@@ -454,7 +464,8 @@ class PsbtGeneratedTransactionDigest {
 
   String getScriptHash256(Script script) {
     if (!BitcoinScriptUtils.isHash256(script)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "The provided script does not match the expected HASH256 script type.",
       );
     }
@@ -463,7 +474,8 @@ class PsbtGeneratedTransactionDigest {
         .getInputs<PsbtInputHash256>(params.index, PsbtInputTypes.hash256)
         ?.firstWhereNullable((e) => BytesUtils.bytesEqual(e.hash, hashBytes));
     if (hashesh == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.notFound,
         "Failed to find matching input for the provided hash.",
         details: {"scriptPubKey": params.scriptPubKey.toString()},
       );
@@ -473,7 +485,8 @@ class PsbtGeneratedTransactionDigest {
 
   String getScriptHash160(Script script) {
     if (!BitcoinScriptUtils.isHash160(script)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "The provided script does not match the expected HASH160 script type.",
       );
     }
@@ -482,7 +495,8 @@ class PsbtGeneratedTransactionDigest {
         .getInputs<PsbtInputHash160>(params.index, PsbtInputTypes.hash160)
         ?.firstWhereNullable((e) => BytesUtils.bytesEqual(e.hash, hashBytes));
     if (hashesh == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.notFound,
         "Failed to find matching input for the provided hash.",
         details: {"scriptPubKey": params.scriptPubKey.toString()},
       );
@@ -492,7 +506,8 @@ class PsbtGeneratedTransactionDigest {
 
   String getScriptRipemd160(Script script) {
     if (!BitcoinScriptUtils.isRipemd160(script)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "The provided script does not match the expected RIPEMD160 script type.",
       );
     }
@@ -501,7 +516,8 @@ class PsbtGeneratedTransactionDigest {
         .getInputs<PsbtInputRipemd160>(params.index, PsbtInputTypes.ripemd160)
         ?.firstWhereNullable((e) => BytesUtils.bytesEqual(e.hash, hashBytes));
     if (hashesh == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.notFound,
         "Failed to find matching input for the provided hash.",
         details: {"scriptPubKey": params.scriptPubKey.toString()},
       );
@@ -515,13 +531,14 @@ class PsbtGeneratedTransactionDigest {
   }) {
     try {
       final tweak = generateTaprootTweak();
-      return BitcoinSignatureVerifier.verifyBip340SignatureUsingXOnly(
+      final verify = BitcoinSignatureVerifier.verifyBip340SignatureUsingXOnly(
         xOnly: xOnly,
         digest: digest,
-        signature: signature,
+        signature: signature.sublist(0, CryptoSignerConst.ecdsaSignatureLength),
         tapTweakHash: tweak,
       );
-    } catch (_) {
+      return verify;
+    } catch (e) {
       return false;
     }
   }
@@ -548,7 +565,8 @@ class PsbtGeneratedTransactionDigest {
     );
 
     if (signature == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "No valid signature found for input ${params.index} type P2TR key-path.",
       );
     }
@@ -586,7 +604,8 @@ enum PsbtScriptKeyMode {
         return uncompressed;
       }
     }
-    throw DartBitcoinPluginException(
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       "Invalid key format: '$key'. Expected a valid hex string of length "
       "${EcdsaKeysConst.pointCoordByteLen}, ${EcdsaKeysConst.pubKeyCompressedByteLen}, "
       "or ${EcdsaKeysConst.pubKeyUncompressedByteLen}.",
@@ -686,7 +705,7 @@ class PsbtMusig2InputInfo {
     );
   }
 
-  List<int> generateAggNonce({
+  BuBytes generateAggNonce({
     required List<int> xOnly,
     required ECPublic aggPublicKey,
     TaprootLeaf? leafScript,
@@ -695,7 +714,8 @@ class PsbtMusig2InputInfo {
       (e) => e.aggregatePubKey == aggPublicKey,
       orElse:
           () =>
-              throw DartBitcoinPluginException(
+              throw BuError(
+                DefaultErrorType.notFound,
                 "MuSig2 participant public keys not found: No matching aggregate public key and participant set found.",
               ),
     );
@@ -712,11 +732,14 @@ class PsbtMusig2InputInfo {
       validNonces.add(nonce);
     }
     if (validNonces.length != aggKey.pubKeys.length) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Unable to create aggregate nonce: The number of available nonces (${validNonces.length}) does not match the number of MuSig2 participant public keys (${aggKey.pubKeys.length}).",
       );
     }
-    return MuSig2().nonceAgg(nonces.map((e) => e.publicNonce).toList());
+    return Musig2Const()
+        .nonceAgg(nonces.map((e) => e.publicNonce).toList())
+        .asImmutableBytes;
   }
 
   PsbtInputMuSig2PublicNonce getMusigSignerNonce({

@@ -2,7 +2,7 @@ library;
 
 export 'src/bitcoin/bitcoin.dart';
 
-export 'src/exception/exception.dart';
+export 'src/error/bitcoin_error.dart';
 
 export 'src/crypto/crypto.dart';
 

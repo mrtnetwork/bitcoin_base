@@ -153,7 +153,7 @@ void main() async {
         privateKeys: [_getSigner11().privateKey],
         p2shRedeemScript: _getSigner11()
             .signerPublicKey
-            .toRedeemScript(mode: PubKeyModes.uncompressed)),
+            .toRedeemScript(mode: CryptoKeyEncoding.uncompressed)),
     PsbtUtxoRequest(
         address: btcAddress8, privateKeys: [_getSigner12().privateKey]),
   ]);
@@ -263,27 +263,27 @@ void main() async {
 
 PsbtDefaultSigner _getSigner() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1022");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 PsbtDefaultSigner _getSigner11() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1033");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 PsbtDefaultSigner _getSigner12() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1034");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 PsbtDefaultSigner _getSigner6() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/0");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 PsbtDefaultSigner _getSigner2() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1025");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 BitcoinBaseAddress _getBtcAddress2() {
@@ -315,19 +315,19 @@ BitcoinBaseAddress _getBtcAddress6() {
 
 BitcoinBaseAddress _getReceipt() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1022");
-  final pk = ECPublic.fromBytes(acc.publicKey.compressed);
+  final pk = ECPublic.fromBytes(acc.publicKey.toPublicKeyBytes());
   return pk.toP2wpkhInP2sh();
 }
 
 BitcoinBaseAddress _getReceipt2() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1025");
-  final pk = ECPublic.fromBytes(acc.publicKey.compressed);
+  final pk = ECPublic.fromBytes(acc.publicKey.toPublicKeyBytes());
   return pk.toP2wshInP2sh();
 }
 
 PsbtDefaultSigner _getSigner3() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1025");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 BitcoinBaseAddress _getBtcAddress3() {
@@ -337,12 +337,12 @@ BitcoinBaseAddress _getBtcAddress3() {
 
 PsbtDefaultSigner _getSigner4() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1022");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 PsbtDefaultSigner _getSigner5() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1025");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 BitcoinBaseAddress _getBtcAddress5() {
@@ -379,7 +379,7 @@ BitcoinBaseAddress _getBtcAddress12() {
 
 PsbtDefaultSigner _getTapScriptSigner() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1022");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 MultiSignatureAddress _mSigOnlyWitness() {
@@ -402,10 +402,12 @@ MultiSignatureAddress _multisig() {
   final m = MultiSignatureAddress(threshold: 4, signers: [
     MultiSignatureSigner(publicKey: s1.signerPublicKey.toHex(), weight: 1),
     MultiSignatureSigner(
-        publicKey: s2.signerPublicKey.toHex(mode: PubKeyModes.uncompressed),
+        publicKey:
+            s2.signerPublicKey.toHex(mode: CryptoKeyEncoding.uncompressed),
         weight: 1),
     MultiSignatureSigner(
-        publicKey: s3.signerPublicKey.toHex(mode: PubKeyModes.uncompressed),
+        publicKey:
+            s3.signerPublicKey.toHex(mode: CryptoKeyEncoding.uncompressed),
         weight: 2),
   ]);
 
@@ -419,10 +421,12 @@ MultiSignatureAddress _multisig2() {
   final m = MultiSignatureAddress(threshold: 2, signers: [
     MultiSignatureSigner(publicKey: s1.signerPublicKey.toHex(), weight: 1),
     MultiSignatureSigner(
-        publicKey: s2.signerPublicKey.toHex(mode: PubKeyModes.uncompressed),
+        publicKey:
+            s2.signerPublicKey.toHex(mode: CryptoKeyEncoding.uncompressed),
         weight: 1),
     MultiSignatureSigner(
-        publicKey: s3.signerPublicKey.toHex(mode: PubKeyModes.uncompressed),
+        publicKey:
+            s3.signerPublicKey.toHex(mode: CryptoKeyEncoding.uncompressed),
         weight: 1),
   ]);
 
@@ -443,27 +447,27 @@ BitcoinBaseAddress _getBtcAddress11() {
 
 PsbtDefaultSigner _getSigner30() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1025");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 PsbtDefaultSigner _getTapScriptSigner6() {
   final acc = _deriveKey(path: "m/86'/1'/0'/1/80");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 PsbtDefaultSigner _getSigner33() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0'/1025");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 PsbtDefaultSigner _getSigner31() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1022");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 PsbtDefaultSigner _getSigner32() {
   final acc = _deriveKey(path: "m/86'/1'/0'/0/1025");
-  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.raw));
+  return PsbtDefaultSigner(ECPrivate.fromBytes(acc.privateKey.toBytes()));
 }
 
 TaprootLeaf _getLeafScript13() {

@@ -21,7 +21,7 @@ class ElectrumRequestScriptHashGetMempool
 
   /// A list of mempool transactions in arbitrary order. Each mempool transaction is a dictionary
   @override
-  List<Map<String, dynamic>> onResonse(List<dynamic> result) {
+  List<Map<String, dynamic>> onResponse(List<dynamic> result) {
     return result.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 }

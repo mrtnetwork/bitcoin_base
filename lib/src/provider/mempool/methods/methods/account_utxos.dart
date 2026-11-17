@@ -18,7 +18,7 @@ class MempoolRequestGetAccountUtxos
   MempoolRequestMethods get method => MempoolRequestMethods.addressUtxos;
 
   @override
-  List<UtxoWithAddress> onResonse(List<Map<String, dynamic>> result) {
+  List<UtxoWithAddress> onResponse(List<Map<String, dynamic>> result) {
     final utxos = result.map((e) => MempolUtxo.fromJson(e)).toList();
     return utxos.toUtxoWithOwnerList(owner);
   }

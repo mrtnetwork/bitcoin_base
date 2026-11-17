@@ -1,7 +1,7 @@
 import 'package:bitcoin_base/src/provider/mempool/core/methods.dart';
 import 'package:bitcoin_base/src/provider/mempool/core/params.dart';
 import 'package:blockchain_utils/service/models/params.dart';
-import 'package:blockchain_utils/utils/utils.dart';
+import 'package:blockchain_utils/utils/string/string.dart';
 
 class MempoolRequestSendRawTransaction extends MempoolRequest<String, String> {
   final String digest;

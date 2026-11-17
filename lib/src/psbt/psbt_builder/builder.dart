@@ -1,6 +1,5 @@
 export 'types/types.dart';
 import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/psbt/types/types/global.dart';
 import 'package:bitcoin_base/src/psbt/types/types/inputs.dart';
 import 'package:bitcoin_base/src/psbt/types/types/outputs.dart';

@@ -1,20 +1,20 @@
 import 'package:bitcoin_base/src/bitcoin/script/scripts.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/utils/utils.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// Abstract class representing a Taproot tree structure (leaf or branch).
 abstract class TaprootTree {
   const TaprootTree();
-  List<int> hash();
+  BuBytes hash();
   String toHex() {
     return BytesUtils.toHexString(hash());
   }
 
   T cast<T extends TaprootTree>() {
     if (this is! T) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.castFailed,
         "Invalid cast: expected ${T.runtimeType}, but found $runtimeType.",
         details: {"expected": "$T", "type": runtimeType.toString()},
       );
@@ -35,7 +35,7 @@ abstract class TaprootTree {
 class TaprootLeaf extends TaprootTree {
   final Script script;
   final int leafVersion;
-  final List<int> _hash;
+  final BuBytes _hash;
 
   factory TaprootLeaf.fromJson(Map<String, dynamic> json) {
     return TaprootLeaf(
@@ -57,7 +57,7 @@ class TaprootLeaf extends TaprootTree {
   }
 
   @override
-  List<int> hash() {
+  BuBytes hash() {
     return _hash.clone();
   }
 
@@ -76,7 +76,7 @@ class TaprootLeaf extends TaprootTree {
 
 /// Represents an internal node (Merkle branch) in the Taproot tree.
 class TaprootBranch extends TaprootTree {
-  final List<int> _branch;
+  final BuBytes _branch;
   final TaprootTree a;
   final TaprootTree b;
 
@@ -103,7 +103,7 @@ class TaprootBranch extends TaprootTree {
   }
 
   @override
-  List<int> hash() {
+  BuBytes hash() {
     return _branch.clone();
   }
 
@@ -136,12 +136,14 @@ class TaprootControlBlock {
     if (merklePath != null &&
         merklePath.isNotEmpty &&
         (merklePath.length % QuickCrypto.sha256DigestSize != 0)) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidLength,
         "Invalid Merkle path: Length (${merklePath.length}) is not a multiple of ${QuickCrypto.sha256DigestSize} bytes.",
       );
     }
     if (xOnly.length != EcdsaKeysConst.pointCoordByteLen) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidLength,
         "Invalid x-only public key length: Expected ${EcdsaKeysConst.pointCoordByteLen} bytes, got ${xOnly.length} bytes.",
       );
     }
@@ -151,6 +153,14 @@ class TaprootControlBlock {
       leafVersion: leafVersion,
     );
   }
+
+  /// Builds the control block for spending [leafScript] inside [scriptTree].
+  ///
+  /// Pass the WHOLE tree as [scriptTree] (a [TaprootBranch] for multi-leaf
+  /// trees); [leafScript] selects which leaf is spent. The Merkle proof is
+  /// derived by walking [scriptTree], so passing only the leaf as the tree
+  /// works solely for single-leaf trees. For that degenerate case prefer
+  /// [generateSingleLeaf].
   factory TaprootControlBlock.generate({
     required List<int> xOnlyOrInternalPubKey,
     required TaprootLeaf leafScript,
@@ -161,8 +171,11 @@ class TaprootControlBlock {
       leafScript: leafScript,
     );
     if (proof == null) {
-      throw DartBitcoinPluginException(
-        "Leaf script not found in the provided Taproot script tree.",
+      throw BuError(
+        DefaultErrorType.notFound,
+        "Leaf script not found in the provided Taproot script tree. "
+        "Pass the whole tree as scriptTree (TaprootBranch for multi-leaf trees), "
+        "not the leaf alone; for a single-leaf tree use generateSingleLeaf.",
       );
     }
     List<int> xOnly;
@@ -172,7 +185,8 @@ class TaprootControlBlock {
       try {
         xOnly = ECPublic.fromBytes(xOnlyOrInternalPubKey).toXOnly();
       } catch (_) {
-        throw DartBitcoinPluginException(
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           "Invalid xOnlyOrInternalPubKey: It must be a valid x-only or secp256k1 public key.",
         );
       }
@@ -188,13 +202,31 @@ class TaprootControlBlock {
     );
   }
 
+  /// Convenience for single-leaf trees: the leaf is both the spent script and
+  /// the whole tree (empty Merkle path).
+  ///
+  factory TaprootControlBlock.generateSingleLeaf({
+    required List<int> xOnlyOrInternalPubKey,
+    required TaprootLeaf leafScript,
+  }) {
+    return TaprootControlBlock.generate(
+      xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
+      leafScript: leafScript,
+      scriptTree: leafScript,
+    );
+  }
+
   factory TaprootControlBlock.deserialize(List<int> bytes) {
     if (bytes.length < EcdsaKeysConst.pubKeyCompressedByteLen) {
-      throw DartBitcoinPluginException("Invalid control block bytes length.");
+      throw BuError(
+        DefaultErrorType.invalidArgument,
+        "Invalid control block bytes length.",
+      );
     }
     final path = bytes.sublist(EcdsaKeysConst.pubKeyCompressedByteLen);
     if (path.length % QuickCrypto.sha256DigestSize != 0) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid control block: too short (must be at least 33 bytes, got ${bytes.length})",
       );
     }
@@ -205,12 +237,14 @@ class TaprootControlBlock {
     );
   }
 
-  final List<int> xOnly;
-  final List<int> merklePath;
+  final BuBytes xOnly;
+  final BuBytes merklePath;
   final int leafVersion;
 
-  List<int> toBytes() {
-    return [leafVersion, ...xOnly, ...merklePath];
+  BuBytes toBytes() {
+    final data = BuBytes.empty();
+    data.addAll([leafVersion, ...xOnly, ...merklePath]);
+    return data;
   }
 
   String toHex() {
@@ -233,6 +267,20 @@ class TapLeafMerkleProof {
         xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
         leafScript: leafScript,
         scriptTree: scriptTree,
+      ),
+    );
+  }
+
+  /// Single-leaf shortcut mirroring [TaprootControlBlock.generateSingleLeaf].
+  factory TapLeafMerkleProof.generateSingleLeaf({
+    required List<int> xOnlyOrInternalPubKey,
+    required TaprootLeaf leafScript,
+  }) {
+    return TapLeafMerkleProof(
+      script: leafScript,
+      controlBlock: TaprootControlBlock.generateSingleLeaf(
+        xOnlyOrInternalPubKey: xOnlyOrInternalPubKey,
+        leafScript: leafScript,
       ),
     );
   }

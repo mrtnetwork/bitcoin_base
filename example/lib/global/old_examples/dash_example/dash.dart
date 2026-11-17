@@ -41,7 +41,8 @@ void _spendFromTwoP2shAndOneP2PKH() async {
   final childKey1 = bip32.childKey(Bip32KeyIndex(1));
 
   /// Convert child key public keys to ECPublic objects
-  final childKey1PublicKey = ECPublic.fromBytes(childKey1.publicKey.compressed);
+  final childKey1PublicKey =
+      ECPublic.fromBytes(childKey1.publicKey.toPublicKeyBytes());
 
   /// Define another private key from wif
   final ECPrivate examplePrivateKey = ECPrivate.fromWif(
@@ -162,10 +163,12 @@ void _spendP2SH() async {
   final childKey1 = bip32.childKey(Bip32KeyIndex(1));
 
   /// Convert child key private keys to ECPrivate objects
-  final childKey1PrivateKey = ECPrivate.fromBytes(childKey1.privateKey.raw);
+  final childKey1PrivateKey =
+      ECPrivate.fromBytes(childKey1.privateKey.toBytes());
 
   /// Convert child key public keys to ECPublic objects
-  final childKey1PublicKey = ECPublic.fromBytes(childKey1.publicKey.compressed);
+  final childKey1PublicKey =
+      ECPublic.fromBytes(childKey1.publicKey.toPublicKeyBytes());
 
   /// Calculate the change value for the transaction
   final change = _changeValue(

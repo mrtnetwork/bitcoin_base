@@ -14,7 +14,7 @@ class ElectrumRequestDonationAddress extends ElectrumRequest<String, String> {
   }
 
   @override
-  String onResonse(result) {
+  String onResponse(result) {
     return result;
   }
 }

@@ -1,8 +1,10 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:blockchain_utils/utils/binary/utils.dart';
+import 'package:blockchain_utils/utils/binary/src/utils.dart';
 import 'package:test/test.dart';
 
-void main() {
+import 'utils.dart';
+
+void encodeDecodeTransactionTest() {
   test('test1', () {
     final tx = BtcTransaction(
       inputs: [
@@ -97,3 +99,15 @@ void main() {
     expect(decode.toHex(), encodedTr);
   });
 }
+
+void encodeDecodeTransactionTest2() {
+  BitcoinBaseTestApi.runTest(
+    encodeDecodeTransactionTest,
+    "Encode Decode Transaction",
+  );
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(encodeDecodeTransactionTest2, "Encode Decode Transaction");
+}
+

@@ -18,7 +18,7 @@ class BitcoinAddressUtils {
   ///
   /// [address]: The legacy Bitcoin address to be decoded.
   /// Returns a tuple with script bytes and version if decoding is successful, otherwise null.
-  static (List<int>, List<int>)? decodeLagacyAddress({
+  static (List<int>, List<int>)? decodeLegacyAddress({
     required String address,
   }) {
     try {
@@ -67,7 +67,7 @@ class BitcoinAddressUtils {
   /// [networks]: The network parameters to determine the address type.
   /// Returns a [LegacyAddress] instance representing the converted legacy address, or null if conversion is not successful.
   static LegacyAddress? toLegacy(String address, BasedUtxoNetwork networks) {
-    final decode = decodeLagacyAddress(address: address);
+    final decode = decodeLegacyAddress(address: address);
     if (decode == null) {
       return null;
     }
@@ -88,7 +88,7 @@ class BitcoinAddressUtils {
   /// [version]: The specified witness version for the SegWit address.
   /// Returns a hexadecimal representation of the witness program.
   ///
-  /// Throws a [MessageException] if the witness version does not match the specified version.
+  /// Throws a [BuError] if the witness version does not match the specified version.
   static String toSegwitProgramWithVersionAndNetwork({
     required String address,
     required BasedUtxoNetwork network,
@@ -97,7 +97,10 @@ class BitcoinAddressUtils {
     final convert = SegwitBech32Decoder.decode(network.p2wpkhHrp, address);
     final witnessVersion = convert.$1;
     if (witnessVersion != version) {
-      throw const DartBitcoinPluginException('Invalid segwit version');
+      throw BuError(DefaultErrorType.invalidAddress, 
+        'Invalid SegWit version.',
+        details: {'expected': '$version', 'actual': '$witnessVersion'},
+      );
     }
     return BytesUtils.toHexString(convert.$2);
   }
@@ -141,7 +144,7 @@ class BitcoinAddressUtils {
   ///
   /// Returns the validated Bitcoin base address if it belongs to a supported type for the given network.
   ///
-  /// Throws a [DartBitcoinPluginException] if the address type is not supported by the specified network.
+  /// Throws a [BuError] if the address type is not supported by the specified network.
   static BitcoinBaseAddress validateAddress(
     BitcoinBaseAddress address,
     BasedUtxoNetwork network,
@@ -149,7 +152,7 @@ class BitcoinAddressUtils {
     if (network.supportedAddress.contains(address.type)) {
       return address;
     }
-    throw DartBitcoinPluginException(
+    throw BuError(DefaultErrorType.unsupported, 
       '${network.name} does not support ${address.type.name} address',
     );
   }
@@ -162,7 +165,7 @@ class BitcoinAddressUtils {
   ///
   /// Returns a BitcoinBaseAddress instance representing the decoded address.
   ///
-  /// Throws a [DartBitcoinPluginException] if the address is invalid or not supported by the network.
+  /// Throws a [BuError] if the address is invalid or not supported by the network.
   static BitcoinBaseAddress decodeAddress(
     String address,
     BasedUtxoNetwork network,
@@ -173,7 +176,7 @@ class BitcoinAddressUtils {
     }
     baseAddress ??= toLegacy(address, network);
     if (baseAddress == null) {
-      throw const DartBitcoinPluginException('Invalid Bitcoin address.');
+      throw BuError(DefaultErrorType.invalidAddress, 'Invalid Bitcoin address.');
     }
     return validateAddress(baseAddress, network);
   }
@@ -185,7 +188,7 @@ class BitcoinAddressUtils {
   ///
   /// Returns the validated hash160 value if its length matches the expected length for the specified address type.
   ///
-  /// Throws a [MessageException] if the hash160 value is invalid or has an incorrect length.
+  /// Throws a [BuError] if the hash160 value is invalid or has an incorrect length.
   static String validateAddressProgram(
     String hash160,
     BitcoinAddressType addressType,
@@ -196,7 +199,7 @@ class BitcoinAddressUtils {
         return StringUtils.strip0x(hash160.toLowerCase());
       }
     } catch (_) {}
-    throw const DartBitcoinPluginException(
+    throw BuError(DefaultErrorType.invalidAddressBytes, 
       'Invalid Bitcoin address program length (program length should be 32 or 20 bytes)',
     );
   }
@@ -300,14 +303,14 @@ class BitcoinAddressUtils {
   ///
   /// Returns the address program in hexadecimal format if successful, or null if decoding or validation fails.
   ///
-  /// Throws a [MessageException] if the specified network does not support the given address type.
-  static String? decodeLagacyAddressWithNetworkAndType({
+  /// Throws a [BuError] if the specified network does not support the given address type.
+  static String? decodeLegacyAddressWithNetworkAndType({
     required String address,
     required BitcoinAddressType type,
     required BasedUtxoNetwork network,
   }) {
     if (!network.supportedAddress.contains(type)) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.unsupported, 
         '${network.name} does not support ${type.name} address type',
       );
     }
@@ -320,7 +323,7 @@ class BitcoinAddressUtils {
       }
       return null;
     }
-    final decode = BitcoinAddressUtils.decodeLagacyAddress(address: address);
+    final decode = BitcoinAddressUtils.decodeLegacyAddress(address: address);
     if (decode == null) return null;
     final version = decode.$2;
     final addrBytes = decode.$1;
@@ -369,7 +372,7 @@ class BitcoinAddressUtils {
   }) {
     final hrp = network.p2wpkhHrp;
     if (hrp == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidState, 
         "Missing network hrp config.",
         details: {"network": network.name},
       );
@@ -392,7 +395,7 @@ class BitcoinAddressUtils {
   }) {
     final hrp = network.networkHRP;
     if (hrp == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidState, 
         "Missing network hrp.",
         details: {"network": network.name},
       );
@@ -404,7 +407,7 @@ class BitcoinAddressUtils {
       secriptLength: programBytes.length,
     );
     if (netVersion == null) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidState, 
         "Missing network address prefix.",
         details: {"network": network.name},
       );
@@ -464,7 +467,7 @@ class BitcoinAddressUtils {
         type: type,
       );
     }
-    var programBytes = BytesUtils.fromHexString(addressProgram);
+    List<int> programBytes = BytesUtils.fromHexString(addressProgram);
     switch (type) {
       case P2shAddressType.p2wpkhInP2sh:
       case P2shAddressType.p2wshInP2sh:
@@ -472,7 +475,7 @@ class BitcoinAddressUtils {
       case P2shAddressType.p2pkInP2sh:
         final netVersion = network.p2shNetVer;
         if (netVersion == null) {
-          throw DartBitcoinPluginException(
+          throw BuError(DefaultErrorType.invalidState, 
             "Missing network p2sh prefix config.",
             details: {"network": network.name},
           );
@@ -484,7 +487,7 @@ class BitcoinAddressUtils {
       case PubKeyAddressType.p2pk:
         final netVersion = network.p2pkhNetVer;
         if (netVersion == null) {
-          throw DartBitcoinPluginException(
+          throw BuError(DefaultErrorType.invalidState, 
             "Missing network p2pkh prefix config.",
             details: {"network": network.name},
           );
@@ -494,7 +497,7 @@ class BitcoinAddressUtils {
       default:
     }
 
-    return Base58Encoder.checkEncode(programBytes);
+    return Base58Encoder.encodeWithChecksum(programBytes);
   }
 
   /// Converts a public key in hexadecimal format to its corresponding RIPEMD-160 hash (hash160).

@@ -26,7 +26,7 @@ class ElectrumRequestGetVerboseTransaction
   /// If verbose is true:
   /// The result is a coin-specific dictionary – whatever the coin daemon returns when asked for a verbose form of the raw transaction.
   @override
-  ElectrumVerbosTxResponse onResonse(result) {
+  ElectrumVerbosTxResponse onResponse(result) {
     return ElectrumVerbosTxResponse.fromJson(result);
   }
 }

@@ -1,4 +1,3 @@
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 class Bip68Const {
@@ -10,7 +9,8 @@ class Bip68Const {
 class Bip68Sequence {
   static int encodeBlocks(int blocks, {bool disable = false}) {
     if (blocks.isNegative || blocks > BinaryOps.mask16) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid BIP68 block value: $blocks. "
         "Block-based relative locktime must be between 0 and 65535.",
       );
@@ -30,14 +30,16 @@ class Bip68Sequence {
   static int encodeTime(int seconds, {bool disable = false}) {
     int units = (seconds / 512).floor();
     if (seconds < 0) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid BIP68 time value: $seconds. "
         "Relative locktime cannot be negative.",
       );
     }
 
     if (units > Bip68Const.valueMask) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid BIP68 time value: $seconds seconds. "
         "Maximum allowed is ${Bip68Const.valueMask * 512} seconds "
         "(65535 units of 512 seconds).",
@@ -68,7 +70,8 @@ class Bip68Decoded {
   final int? blocks;
   factory Bip68Decoded.fromSequence(int sequence) {
     if (sequence < 0 || sequence > BinaryOps.mask32) {
-      throw DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid sequence value: $sequence. "
         "Sequence must be a valid unsigned 32-bit integer.",
       );

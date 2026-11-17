@@ -1,5 +1,4 @@
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 /// Helps setting up appropriate sequence. Used to provide the sequence to transaction inputs and to scripts.
@@ -15,7 +14,7 @@ class Sequence {
   }) {
     if (seqType == BitcoinOpCodeConst.typeRelativeTimelock &&
         (value < 1 || value > BinaryOps.mask16)) {
-      throw const DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'Sequence should be between 1 and 65535',
       );
     }
@@ -25,13 +24,13 @@ class Sequence {
   final bool isTypeBlock;
 
   /// Serializes the relative sequence as required in a transaction
-  List<int> forInputSequence() {
+  BuBytes forInputSequence() {
     if (seqType == BitcoinOpCodeConst.typeAbsoluteTimelock) {
-      return List<int>.from(BitcoinOpCodeConst.absoluteTimelockSequence);
+      return BitcoinOpCodeConst.absoluteTimelockSequence.asImmutableBytes;
     }
 
     if (seqType == BitcoinOpCodeConst.typeReplaceByFee) {
-      return List<int>.from(BitcoinOpCodeConst.replaceByFeeSequence);
+      return BitcoinOpCodeConst.replaceByFeeSequence.asImmutableBytes;
     }
     if (seqType == BitcoinOpCodeConst.typeRelativeTimelock) {
       int seq = 0;
@@ -42,21 +41,24 @@ class Sequence {
       return seq.toU32LeBytes();
     }
 
-    throw const DartBitcoinPluginException('Invalid seqType');
+    throw BuError(DefaultErrorType.invalidArgument, 
+      'Invalid sequence type.',
+      details: {'seqType': '$seqType'},
+    );
   }
 
   /// Returns the appropriate integer for a script; e.g. for relative timelocks
   int forScript() {
     if (seqType == BitcoinOpCodeConst.typeReplaceByFee) {
-      throw const DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.invalidArgument, 
         'RBF is not to be included in a script.',
       );
     }
-    var scriptIntiger = value;
+    var scriptInteger = value;
     if (seqType == BitcoinOpCodeConst.typeRelativeTimelock && !isTypeBlock) {
-      scriptIntiger |= 1 << 22;
+      scriptInteger |= 1 << 22;
     }
-    return scriptIntiger;
+    return scriptInteger;
   }
 
   @override

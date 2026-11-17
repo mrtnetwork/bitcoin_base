@@ -28,7 +28,7 @@ class BlockCypherRequestGetAccountUtxos
       BlockCypherRequestMethods.addressUtxos;
 
   @override
-  List<UtxoWithAddress> onResonse(Map<String, dynamic> result) {
+  List<UtxoWithAddress> onResponse(Map<String, dynamic> result) {
     final utxos = BlockCypherUtxo.fromJson(result);
     return utxos.toUtxoWithOwner(owner);
   }

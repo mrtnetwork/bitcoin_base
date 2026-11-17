@@ -20,8 +20,8 @@ abstract class PsbtBtcMusig2Signer
 }
 
 abstract class PsbtSignInputDigest {
-  final List<int> digest;
-  final List<int>? tweak;
+  final BuBytes digest;
+  final BuBytes? tweak;
   PsbtSignInputDigest({required List<int> digest, required List<int>? tweak})
     : digest = digest.asImmutableBytes,
       tweak = tweak?.asImmutableBytes;
@@ -39,7 +39,7 @@ class PsbtSigningInputDigest extends PsbtSignInputDigest {
 }
 
 class PsbtMusig2SigningInputDigest extends PsbtSignInputDigest {
-  final List<int> aggNonce;
+  final BuBytes aggNonce;
   PsbtMusig2SigningInputDigest({
     required super.digest,
     required List<int> aggNonce,
@@ -64,7 +64,7 @@ class SignInputResponse extends PsbtSigningResponse {
 }
 
 abstract class PsbtSigningResponse {
-  final List<int> signature;
+  final BuBytes signature;
   final ECPublic signerPublicKey;
   PsbtSigningResponse({
     required List<int> signature,
@@ -75,7 +75,10 @@ abstract class PsbtSigningResponse {
 class PsbtDefaultSigner
     implements PsbtBtcSigner<SignInputResponse, PsbtSigningInputDigest> {
   final ECPrivate privateKey;
-  PsbtDefaultSigner(this.privateKey);
+
+  final List<int>? aux;
+  PsbtDefaultSigner(this.privateKey, {List<int>? aux})
+    : aux = aux?.asImmutableBytes;
 
   @override
   late final ECPublic signerPublicKey = privateKey.getPublic();
@@ -89,6 +92,7 @@ class PsbtDefaultSigner
             digest.digest,
             tapTweakHash: digest.tweak,
             tweak: digest.tweak != null,
+            aux: aux,
           ),
         ),
         signerPublicKey: signerPublicKey,
@@ -119,14 +123,12 @@ class PsbtMusig2DefaultSigner implements PsbtBtcMusig2Signer {
   @override
   final List<ECPublic> publicKeys;
   final MuSig2Nonce nonce;
-  final Musig2Const lib;
 
   PsbtMusig2DefaultSigner({
     required this.privateKey,
     required this.aggPublicKey,
     required this.publicKeys,
     required this.nonce,
-    this.lib = const Musig2Const(),
   });
 
   @override
@@ -138,12 +140,12 @@ class PsbtMusig2DefaultSigner implements PsbtBtcMusig2Signer {
       aggnonce: digest.aggNonce,
       publicKeys:
           publicKeys
-              .map((e) => e.toBytes(mode: PubKeyModes.compressed))
+              .map((e) => e.toBytes(mode: CryptoKeyEncoding.base))
               .toList(),
       msg: digest.digest,
       tweaks: [if (digest.tweak != null) MuSig2Tweak(tweak: digest.tweak!)],
     );
-    final signature = lib.sign(
+    final signature = blockchainUtils.api.muSig2.sign(
       secnonce: nonce.secnonce,
       sk: privateKey.toBytes(),
       session: session,

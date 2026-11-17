@@ -13,7 +13,7 @@ Bip32Slip10Secp256k1 _deriveKey(
 
 ECPrivate _getPrivateKey({String path = "m/86'/1'/0'/0/1"}) {
   final key = _deriveKey(path: path);
-  return ECPrivate.fromBytes(key.privateKey.raw);
+  return ECPrivate.fromBytes(key.privateKey.toBytes());
 }
 
 void main() async {

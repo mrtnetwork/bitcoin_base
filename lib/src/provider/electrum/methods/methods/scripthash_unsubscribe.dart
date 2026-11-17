@@ -22,7 +22,7 @@ class ElectrumRequestScriptHashUnSubscribe extends ElectrumRequest<bool, bool> {
   /// otherwise False. Note that False might be returned even
   /// for something subscribed to earlier, because the server can drop subscriptions in rare circumstances.
   @override
-  bool onResonse(result) {
+  bool onResponse(result) {
     return result;
   }
 }

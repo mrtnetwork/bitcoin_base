@@ -27,13 +27,13 @@ void main() async {
   final sp5 = bip32.derivePath("m/44'/0'/0'/0/0/4");
   final sp6 = bip32.derivePath("m/44'/0'/0'/0/0/4");
   // access to private key `ECPrivate`
-  final private1 = ECPrivate.fromBytes(sp1.privateKey.raw);
-  final private2 = ECPrivate.fromBytes(sp1.privateKey.raw);
-  final private3 = ECPrivate.fromBytes(sp1.privateKey.raw);
-  final private4 = ECPrivate.fromBytes(sp1.privateKey.raw);
+  final private1 = ECPrivate.fromBytes(sp1.privateKey.toBytes());
+  final private2 = ECPrivate.fromBytes(sp1.privateKey.toBytes());
+  final private3 = ECPrivate.fromBytes(sp1.privateKey.toBytes());
+  final private4 = ECPrivate.fromBytes(sp1.privateKey.toBytes());
 
-  final private5 = ECPrivate.fromBytes(sp1.privateKey.raw);
-  final private6 = ECPrivate.fromBytes(sp1.privateKey.raw);
+  final private5 = ECPrivate.fromBytes(sp1.privateKey.toBytes());
+  final private6 = ECPrivate.fromBytes(sp1.privateKey.toBytes());
   // access to public key `ECPublic`
   final public1 = private1.getPublic();
   final public2 = private2.getPublic();

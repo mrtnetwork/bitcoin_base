@@ -30,7 +30,7 @@ class ElectrumRequestGetTransaction extends ElectrumRequest<dynamic, dynamic> {
   /// If verbose is true:
   /// The result is a coin-specific dictionary – whatever the coin daemon returns when asked for a verbose form of the raw transaction.
   @override
-  dynamic onResonse(result) {
+  dynamic onResponse(result) {
     return result;
   }
 }

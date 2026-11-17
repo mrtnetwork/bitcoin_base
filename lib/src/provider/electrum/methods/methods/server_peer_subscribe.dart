@@ -16,7 +16,7 @@ class ElectrumRequestServerPeersSubscribe
 
   /// An array of peer servers, each returned as a 3-element array
   @override
-  List<dynamic> onResonse(result) {
+  List<dynamic> onResponse(result) {
     return result;
   }
 }

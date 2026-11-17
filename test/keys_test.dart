@@ -2,7 +2,9 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
-void main() {
+import 'utils.dart';
+
+void keysTest() {
   group('TestPrivateKeys', () {
     const keyWifc = 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn';
     const keyWif = '5HpHagT65TZzG1PH3CSu63k8DbpvD8s5ip4nEB3kEsreAnchuDf';
@@ -48,7 +50,7 @@ void main() {
       );
 
       expect(p.toBytes(), keyBytes);
-      expect(p.toWif(pubKeyMode: PubKeyModes.uncompressed), keyWif);
+      expect(p.toWif(pubKeyMode: CryptoKeyEncoding.uncompressed), keyWif);
     });
   });
 
@@ -182,13 +184,15 @@ void main() {
     });
 
     test('sign/verify bip137 p2pkh uncompressed', () {
+      /// HEiQ7kHfGqlxHSOcUftzR4gChjupJbuIIJCiY3LryQ9SXwPeRoBtJYkrNd/rgU7RP9jX6i2IaGGYMLt9bW+/bbI=
       final signature = priv.signBip137(StringUtils.encode(message));
-
       expect(
         pub.verifyBip137Address(
           message: StringUtils.encode(message),
           signature: signature,
-          address: priv.getPublic().toAddress(mode: PubKeyModes.uncompressed),
+          address: priv.getPublic().toAddress(
+            mode: CryptoKeyEncoding.uncompressed,
+          ),
         ),
         true,
       );
@@ -204,7 +208,7 @@ void main() {
         pub.verifyBip137Address(
           message: StringUtils.encode(message),
           signature: signature,
-          address: priv.getPublic().toAddress(mode: PubKeyModes.compressed),
+          address: priv.getPublic().toAddress(mode: CryptoKeyEncoding.base),
         ),
         true,
       );
@@ -379,3 +383,12 @@ void main() {
     });
   });
 }
+
+void keysTest2() {
+  BitcoinBaseTestApi.runTest(keysTest, "Keys");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(keysTest2, "Keys");
+}
+

@@ -1,15 +1,24 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:blockchain_utils/utils/binary/utils.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
+import '../utils.dart';
+
 /// https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki
-void main() {
+void bip0174Test() {
   group("BIP-174", () {
     _invalidTest();
     _test();
   });
 }
 
+void psbtBip0174Test() {
+  BitcoinBaseTestApi.runTest(bip0174Test, "Bip 0174");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(psbtBip0174Test, "Bip 0174");
+}
 void _invalidTest() {
   test(
     "Case: PSBT with unsigned tx serialized with witness serialization format",
@@ -19,7 +28,7 @@ void _invalidTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Unsigned Transaction data.'),
@@ -34,7 +43,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Witness Script key data.'),
@@ -48,7 +57,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Redeem Script key data.'),
@@ -62,7 +71,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT sighash type key data.'),
@@ -78,7 +87,7 @@ void _invalidTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT bip32 derivation public key'),
@@ -93,7 +102,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Finalized scriptWitness key data'),
@@ -107,7 +116,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Finalized scriptSig key data'),
@@ -121,7 +130,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Non-Witness UTXO key data'),
@@ -137,7 +146,7 @@ void _invalidTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid BIP 32 Derivation Path indexes'),
@@ -152,7 +161,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Witness Script key data'),
@@ -166,7 +175,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Redeem Script key data'),
@@ -182,7 +191,7 @@ void _invalidTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Partial Signature data'),
@@ -197,7 +206,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Witness UTXO key data'),
@@ -211,7 +220,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Unsigned Transaction key data'),
@@ -225,7 +234,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT Input: Duplicate entry detected'),
@@ -241,7 +250,7 @@ void _invalidTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('PSBTv0 Global unsigned tx required'),
@@ -258,7 +267,7 @@ void _invalidTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT Unsigned Transaction data'),
@@ -273,7 +282,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('PSBT deserialization failed'),
@@ -287,7 +296,7 @@ void _invalidTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT magic'),
@@ -382,3 +391,4 @@ void _test() {
     expect(psbt.toHex(), psbtData);
   });
 }
+

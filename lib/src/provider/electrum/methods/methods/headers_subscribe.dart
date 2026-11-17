@@ -17,7 +17,7 @@ class ElectrumRequestHeaderSubscribe
 
   /// The header of the current block chain tip.
   @override
-  ElectrumHeaderSubscribeResponse onResonse(result) {
+  ElectrumHeaderSubscribeResponse onResponse(result) {
     return ElectrumHeaderSubscribeResponse.fromJson(result);
   }
 }

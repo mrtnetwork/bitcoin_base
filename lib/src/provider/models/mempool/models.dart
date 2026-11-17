@@ -208,7 +208,7 @@ extension ExtMempoolUtxo on List<MempolUtxo> {
               value: e.value,
               vout: e.vout,
               scriptType: owner.address.type,
-              blockHeight: 1,
+              blockHeight: e.status.blockHeight ?? 0,
             ),
             ownerDetails: owner,
           ),

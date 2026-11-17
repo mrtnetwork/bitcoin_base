@@ -1,7 +1,8 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
-void main() {
+import 'utils.dart';
+void p2khTrTest() {
   group('P2KH', () {
     final txin = TxInput(
       txId: 'fb48f4e23bf6ddf606714141ac78c3e921c8c0bebeb7c8abb2c799e9ff96ce6c',
@@ -285,3 +286,12 @@ void main() {
     });
   });
 }
+
+void p2khTrTest2() {
+  BitcoinBaseTestApi.runTest(p2khTrTest, "P2kh Tr");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(p2khTrTest2, "P2kh Tr");
+}
+

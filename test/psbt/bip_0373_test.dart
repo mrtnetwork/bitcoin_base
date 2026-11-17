@@ -1,14 +1,23 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
+import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
+import '../utils.dart';
 // https://github.com/bitcoin/bips/blob/master/bip-0373.mediawiki
-void main() {
+void bip0373Test() {
   group("BIP-0373", () {
     _test();
     _invalodTest();
   });
 }
 
+void psbtBip0373Test() {
+  BitcoinBaseTestApi.runTest(bip0373Test, "Bip 0373");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(psbtBip0373Test, "Bip 0373");
+}
 void _invalodTest() {
   test("Case: PSBT with invalid partial sig valuedata length", () {
     final String psbtData =
@@ -16,7 +25,7 @@ void _invalodTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT MuSig2 Participant Partial Signature data'),
@@ -30,7 +39,7 @@ void _invalodTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT MuSig2 Participant Partial Signature data'),
@@ -44,7 +53,7 @@ void _invalodTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT MuSig2 Participant Partial Signature data'),
@@ -58,7 +67,7 @@ void _invalodTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT MuSig2 Public Nonce data'),
@@ -74,7 +83,7 @@ void _invalodTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT MuSig2 Public Nonce data'),
@@ -89,7 +98,7 @@ void _invalodTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT MuSig2 Public Nonce data'),
@@ -103,7 +112,7 @@ void _invalodTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT MuSig2 Participant Public Keys data'),
@@ -119,7 +128,7 @@ void _invalodTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT MuSig2 Participant Public Keys data'),
@@ -134,7 +143,7 @@ void _invalodTest() {
     expect(
       () => Psbt.fromHex(psbtData),
       throwsA(
-        isA<DartBitcoinPluginException>().having(
+        isA<BuError>().having(
           (p) => p.message,
           'error message',
           contains('Invalid PSBT MuSig2 Participant Public Keys data'),
@@ -150,7 +159,7 @@ void _invalodTest() {
       expect(
         () => Psbt.fromHex(psbtData),
         throwsA(
-          isA<DartBitcoinPluginException>().having(
+          isA<BuError>().having(
             (p) => p.message,
             'error message',
             contains('Invalid PSBT MuSig2 Participant Public Keys data'),
@@ -275,3 +284,4 @@ void _test() {
     },
   );
 }
+

@@ -1,5 +1,4 @@
 import 'package:bitcoin_base/src/bitcoin/address/address.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 
 class MessagePrefixes {
@@ -15,7 +14,7 @@ class MessagePrefixes {
 }
 
 /// Abstract class representing a base for UTXO-based cryptocurrency networks.
-abstract class BasedUtxoNetwork {
+sealed class BasedUtxoNetwork {
   /// List of version bytes for Wallet Import Format (WIF).
   abstract final List<int>? wifNetVer;
 
@@ -53,7 +52,8 @@ abstract class BasedUtxoNetwork {
       (element) => element.name == name,
       orElse:
           () =>
-              throw DartBitcoinPluginException(
+              throw BuError(
+                DefaultErrorType.notFound,
                 "No matching network found for the given name.",
               ),
     );
@@ -64,7 +64,8 @@ abstract class BasedUtxoNetwork {
       (element) => element.tag == tag,
       orElse:
           () =>
-              throw DartBitcoinPluginException(
+              throw BuError(
+                DefaultErrorType.notFound,
                 "No matching network found for the given tag.",
               ),
     );
@@ -156,7 +157,10 @@ enum BitcoinNetwork implements BasedUtxoNetwork {
   testnet4('bitcoinTestnet4', CoinsConf.bitcoinTestNet, 'bitcoin:testnet4', 4),
 
   /// Signet configuration with associated `CoinConf`.
-  signet('bitcoinSignet', CoinsConf.bitcoinTestNet, 'bitcoin:signet', 5);
+  signet('bitcoinSignet', CoinsConf.bitcoinTestNet, 'bitcoin:signet', 5),
+
+  /// Regtest configuration with associated `CoinConf`.
+  regtest('bitcoinRegtest', CoinsConf.bitcoinRegtest, 'bitcoin:regtest', 20);
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
   @override
@@ -206,20 +210,26 @@ enum BitcoinNetwork implements BasedUtxoNetwork {
 
   @override
   List<BipCoins> get coins {
-    if (isMainnet) {
-      return [
+    return switch (this) {
+      BitcoinNetwork.mainnet => [
         Bip44Coins.bitcoin,
         Bip49Coins.bitcoin,
         Bip84Coins.bitcoin,
         Bip86Coins.bitcoin,
-      ];
-    }
-    return [
-      Bip44Coins.bitcoinTestnet,
-      Bip49Coins.bitcoinTestnet,
-      Bip84Coins.bitcoinTestnet,
-      Bip86Coins.bitcoinTestnet,
-    ];
+      ],
+      BitcoinNetwork.regtest => [
+        Bip44Coins.bitcoinRegtest,
+        Bip49Coins.bitcoinRegtest,
+        Bip84Coins.bitcoinRegtest,
+        Bip86Coins.bitcoinRegtest,
+      ],
+      _ => [
+        Bip44Coins.bitcoinTestnet,
+        Bip49Coins.bitcoinTestnet,
+        Bip84Coins.bitcoinTestnet,
+        Bip86Coins.bitcoinTestnet,
+      ],
+    };
   }
 
   @override
@@ -426,6 +436,14 @@ enum BitcoinCashNetwork implements BasedUtxoNetwork {
     CoinsConf.bitcoinCashTestNet,
     'bitcoincash:testnet',
     13,
+  ),
+
+  /// Regtest configuration with associated `CoinConf`.
+  regtest(
+    'bitcoinCashRegtest',
+    CoinsConf.bitcoinCashRegtest,
+    'bitcoincash:regtest',
+    21,
   );
 
   /// Overrides the `conf` property from `BasedUtxoNetwork` with the associated `CoinConf`.
@@ -492,6 +510,9 @@ enum BitcoinCashNetwork implements BasedUtxoNetwork {
   @override
   List<BipCoins> get coins {
     if (isMainnet) return [Bip44Coins.bitcoinCash, Bip49Coins.bitcoinCash];
+    if (this == BitcoinCashNetwork.regtest) {
+      return [Bip44Coins.bitcoinCashRegtest, Bip49Coins.bitcoinCashRegtest];
+    }
     return [Bip44Coins.bitcoinCashTestnet, Bip49Coins.bitcoinCashTestnet];
   }
 

@@ -23,7 +23,7 @@ class BlockCypherRequestGetAccountTransactions
       BlockCypherRequestMethods.transactions;
 
   @override
-  List<BlockCypherTransaction> onResonse(dynamic result) {
+  List<BlockCypherTransaction> onResponse(dynamic result) {
     assert(result is List || result is Map, "unexpected blockcypher response");
     if (result is List) {
       return result.map((e) => BlockCypherTransaction.fromJson(e)).toList();

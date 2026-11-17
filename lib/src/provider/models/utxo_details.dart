@@ -1,7 +1,6 @@
 import 'package:bitcoin_base/src/bitcoin/bitcoin.dart';
 import 'package:bitcoin_base/src/cash_token/cash_token.dart';
 import 'package:bitcoin_base/src/crypto/crypto.dart';
-import 'package:bitcoin_base/src/exception/exception.dart';
 import 'package:bitcoin_base/src/provider/models/models.dart';
 import 'package:bitcoin_base/src/serialization/identifier.dart';
 import 'package:bitcoin_base/src/utils/btc_utils.dart';
@@ -68,18 +67,20 @@ class UtxoWithAddress {
       keyType:
           ownerDetails.publicKey != null && !utxo.isSegwit
               ? BtcUtils.determinatePubKeyModeHex(ownerDetails.publicKey!)
-              : PublicKeyType.compressed,
+              : PublicKeyType.base,
     );
   }
 
   ECPublic public() {
     if (isMultiSig()) {
-      throw const DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidState,
         'Cannot access public key in multi-signature address',
       );
     }
     if (ownerDetails.publicKey == null) {
-      throw const DartBitcoinPluginException(
+      throw BuError(
+        DefaultErrorType.invalidState,
         'Cannot access public key in watch only address; use UtxoAddressDetails constractor instead `UtxoAddressDetails.watchOnly`',
       );
     }
@@ -95,7 +96,8 @@ class UtxoWithAddress {
   MultiSignatureAddress get multiSigAddress =>
       isMultiSig()
           ? ownerDetails._multiSigAddress!
-          : throw const DartBitcoinPluginException(
+          : throw BuError(
+            DefaultErrorType.invalidState,
             'The address is not associated with a multi-signature setup',
           );
 }
@@ -134,7 +136,6 @@ class BitcoinOutput implements BitcoinSpendableBaseOutput {
   /// Value is a pointer to a BigInt representing the amount of bitcoins sent to the recipient.
   @override
   final BigInt value;
-  // final CashToken? token;
   BitcoinOutput({required this.address, required this.value});
 
   @override
@@ -214,7 +215,10 @@ class BitcoinBurnableOutput extends BitcoinBaseOutput {
 
   @override
   TxOutput get toOutput =>
-      throw DartBitcoinPluginException("Unsupported method.");
+      throw BuError(
+        DefaultErrorType.unsupported,
+        "BitcoinBurnableOutput.toOutput is not supported.",
+      );
 }
 
 /// BitcoinUtxo represents an unspent transaction output (UTXO) on the Bitcoin blockchain.
@@ -287,7 +291,10 @@ class BitcoinUtxo with CborTagSerializable, PartialEquality {
         final data = CashToken.deserialize(e.value);
         final token = data.$1;
         if (token == null) {
-          throw DartBitcoinPluginException("Invalid cashtoken bytes.");
+          throw BuError(
+            DefaultErrorType.invalidArgument,
+            "Invalid CashToken bytes.",
+          );
         }
         return token;
       }),

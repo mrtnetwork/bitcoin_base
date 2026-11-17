@@ -1,7 +1,8 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
-void main() {
+import 'utils.dart';
+void p2wshTest() {
   group('P2WSH', () {
     final sk1 = ECPrivate.fromWif(
       'cTALNpTpRbbxTCJ2A5Vq88UxT44w1PE2cYqiB3n4hRvzyCev1Wwo',
@@ -152,3 +153,12 @@ void main() {
     });
   });
 }
+
+void p2wshTest2() {
+  BitcoinBaseTestApi.runTest(p2wshTest, "P2wsh");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(p2wshTest2, "P2wsh");
+}
+

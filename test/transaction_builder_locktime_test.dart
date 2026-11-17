@@ -1,7 +1,8 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
-void main() {
+import 'utils.dart';
+void transactionBuilderLocktimeTest() {
   group('BitcoinTransactionBuilder locktime', () {
     test('defaults to defaultTxLocktime', () {
       final b = BitcoinTransactionBuilder(
@@ -50,3 +51,12 @@ void main() {
     });
   });
 }
+
+void transactionBuilderLocktimeTest2() {
+  BitcoinBaseTestApi.runTest(transactionBuilderLocktimeTest, "Transaction Builder Locktime");
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(transactionBuilderLocktimeTest2, "Transaction Builder Locktime");
+}
+

@@ -1,3 +1,13 @@
+## 8.0.0
+- Cryptography now routes through the `blockchain_utils` dual backend (pure Dart default, optional Rust FFI/WASM); see the `blockchain_utils` README.
+- Added DKLs23 `t`-of-`n` threshold ECDSA signing (ECDSA outputs only — do not use for Taproot/P2TR, which requires BIP-340 Schnorr).
+
+## 7.4.0
+
+- Add the `multiSigSign` parameter to `buildTransaction` and `buildTransactionAsync` of `BitcoinTransactionBuilder` and `ForkedTransactionBuilder`. It signs a multi-signature input with a single call, returning the signature of all the signers at once.
+- Fix the multi-signature signing of `BitcoinTransactionBuilder.buildTransactionAsync` that threw an exception for a weighted multi-signature address.
+- Refactor the transaction builders, the sync and the async flows now share the same logic.
+
 ## 7.3.0
 - Update dependencies.
 

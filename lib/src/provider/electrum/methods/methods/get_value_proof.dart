@@ -29,7 +29,7 @@ class ElectrumRequestGetValueProof
   /// from the most recent update back to either the registration transaction or a
   /// checkpointed transaction (whichever is later).
   @override
-  Map<String, dynamic> onResonse(result) {
+  Map<String, dynamic> onResponse(result) {
     return Map<String, dynamic>.from(result);
   }
 }

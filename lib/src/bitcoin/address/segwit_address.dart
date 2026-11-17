@@ -9,7 +9,7 @@ abstract class SegwitAddress
     required this.segwitVersion,
   }) {
     if (!network.supportedAddress.contains(type)) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.unsupported, 
         'network does not support ${type.name} address',
       );
     }
@@ -40,7 +40,7 @@ abstract class SegwitAddress
   @override
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
-      throw DartBitcoinPluginException(
+      throw BuError(DefaultErrorType.unsupported, 
         'network does not support ${type.name} address',
       );
     }
@@ -109,7 +109,7 @@ class P2trAddress extends SegwitAddress {
              internalKey,
              treeScript: treeScript,
              merkleRoot: merkleRoot,
-           ).toXonly(),
+           ).toXOnly(),
          ),
          segwitVersion: BitcoinAddressUtils.segwitV1,
          addresType: SegwitAddressType.p2tr,

@@ -22,7 +22,7 @@ class ElectrumRequestAddPeer extends ElectrumRequest<bool, bool> {
   /// A boolean indicating whether the request was tentatively accepted
   /// The requesting server will appear in server.peers.subscribe() when further sanity checks complete successfully.
   @override
-  bool onResonse(result) {
+  bool onResponse(result) {
     return result;
   }
 }

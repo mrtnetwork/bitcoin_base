@@ -14,7 +14,7 @@ class BlockCypherRequestGetBlockHashByHeight
   BlockCypherRequestMethods get method => BlockCypherRequestMethods.blockHeight;
 
   @override
-  String onResonse(Map<String, dynamic> result) {
+  String onResponse(Map<String, dynamic> result) {
     return result.valueAs("hash");
   }
 }

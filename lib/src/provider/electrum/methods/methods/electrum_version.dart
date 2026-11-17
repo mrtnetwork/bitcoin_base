@@ -27,7 +27,7 @@ class ElectrumRequestVersion
 
   /// identifying the server and the protocol version that will be used for future communication.
   @override
-  List<String> onResonse(result) {
+  List<String> onResponse(result) {
     return List<String>.from(result);
   }
 }

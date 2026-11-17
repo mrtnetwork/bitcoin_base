@@ -2,6 +2,8 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
+import 'utils.dart';
+
 final List<Map<String, dynamic>> _validTestVector = [
   {
     'prefix':
@@ -763,11 +765,11 @@ final List<Map<String, dynamic>> _validTestVector = [
     },
   },
 ];
-void main() {
+void bitcoinCashTokenEncodingTest() {
   test('cash token encoding', () {
     for (var c = 0; c < _validTestVector.length; c++) {
       final i = _validTestVector[c];
-      final appendBytes = QuickCrypto.generateRandom(c * 2);
+      final appendBytes = QuickCrypto.generateRandom(length: c * 2);
       final tokenBytes = BytesUtils.fromHexString(i['prefix']!);
       final combine = <int>[...tokenBytes, ...appendBytes];
       final decode = CashToken.deserialize(combine);
@@ -786,3 +788,15 @@ void main() {
     }
   });
 }
+
+void bitcoinCashTokenEncodingTest2() {
+  BitcoinBaseTestApi.runTest(
+    bitcoinCashTokenEncodingTest,
+    "Bitcoin Cash Token Encoding",
+  );
+}
+
+void main() {
+  BitcoinBaseTestApi.runTest(bitcoinCashTokenEncodingTest2, "Bitcoin Cash Token Encoding");
+}
+
