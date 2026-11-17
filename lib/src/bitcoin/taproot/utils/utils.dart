@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:bitcoin_base/src/bitcoin/script/op_code/constant.dart';
 import 'package:bitcoin_base/src/bitcoin/script/script.dart';
 import 'package:bitcoin_base/src/bitcoin/taproot/constants/constants.dart';
@@ -146,10 +145,7 @@ class TaprootUtils {
         List<int> left = leavesHashes[i];
         List<int> right =
             (i + 1 < leavesHashes.length) ? leavesHashes[i + 1] : left;
-
-        // Compute TapBranch(A, B) = TaggedHash("TapBranch", A || B)
-        Uint8List parent = Uint8List.fromList(tapbranchTaggedHash(left, right));
-        newLevel.add(parent);
+        newLevel.add(tapbranchTaggedHash(left, right));
       }
 
       leavesHashes = newLevel; // Move to the next level
