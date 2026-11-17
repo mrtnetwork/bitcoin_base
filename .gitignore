@@ -36,3 +36,5 @@ test/wasm_assets/bu.js
 test/wasm_assets/bu_bg.wasm
 test/wasm_assets/*.d.ts
 /example/test
+
+.vscode

@@ -104,7 +104,7 @@ jobs:
         run: dart test test/one_shot_test.dart --timeout=5m
 
   dart-web:
-    name: Dart backend (browser)
+    name: Dart backend (browser, dart2js)
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -132,12 +132,49 @@ jobs:
             > /tmp/chrome-nosandbox.sh
           chmod +x /tmp/chrome-nosandbox.sh
 
-      - name: Run browser tests (pure Dart)
+      - name: Run browser tests (pure Dart, dart2js)
         working-directory: bitcoin_base
         env:
           CHROME_EXECUTABLE: /tmp/chrome-nosandbox.sh
         run: >
           dart test -p chrome test/one_shot_browser_dart_test.dart
+          --timeout=20m
+
+  dart-web-wasm:
+    name: Dart backend (browser, dart2wasm)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout bitcoin_base
+        uses: actions/checkout@v4
+        with:
+          path: bitcoin_base
+
+      - name: Checkout blockchain_utils (path dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: mrtnetwork/blockchain_utils
+          path: blockchain_utils
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Install dependencies
+        working-directory: bitcoin_base
+        run: dart pub get --no-example
+
+      - name: Chrome wrapper (no-sandbox)
+        run: |
+          printf '#!/bin/sh\nexec /usr/bin/google-chrome --no-sandbox "$@"\n' \
+            > /tmp/chrome-nosandbox.sh
+          chmod +x /tmp/chrome-nosandbox.sh
+
+      - name: Run browser tests (pure Dart, dart2wasm)
+        working-directory: bitcoin_base
+        env:
+          CHROME_EXECUTABLE: /tmp/chrome-nosandbox.sh
+        run: >
+          dart test -p chrome -c dart2wasm test/one_shot_browser_dart_test.dart
           --timeout=20m
 
   wasm-web:
