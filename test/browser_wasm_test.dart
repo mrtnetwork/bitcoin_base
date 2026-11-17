@@ -24,7 +24,7 @@ void browserWasmTest() {
       );
     });
     test('p2pkh address roundtrip', () {
-      const addr = '1BgGZ9tcN4rm9KBzDn7K6reg2sXy7accw9';
+      const addr = '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa';
       final parsed = P2pkhAddress.fromAddress(
         address: addr,
         network: BitcoinNetwork.mainnet,
