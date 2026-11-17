@@ -14,6 +14,10 @@ Dart by default, optional Rust backend (FFI on native, WASM on web). When set
 through Rust. Rust core:
 [mrtnetwork/blockchain-utils](https://github.com/mrtnetwork/blockchain-utils).
 
+## Breaking changes
+
+- **All legacy exception classes removed — every error is `BuError`.** Failures throw `BuError` with a `BitcoinErrorType` taxonomy value (`domain: 'bitcoin'`). Update `catch` clauses and `on` filters to `BuError`.
+
 ## Supported networks
 
 | Network | Address types |
@@ -84,3 +88,28 @@ Contributions are welcome! Please follow these guidelines:
 ## Feature requests and bugs
 
 Please file feature requests and bugs in the issue tracker.
+
+## Support
+
+<details>
+<summary><b>Support This Project — Click to show wallets</b></summary>
+
+<br>
+
+If this project helped you, consider supporting:
+
+| Network | Address |
+|---------|---------|
+| ETH / EVM | `0xDdEDf30f96E6e2674Fab476bfC36201074081bcC` |
+| TRON / TRC20 | `TDfY8zN3sobm2agzCmzzTYj7r4xxeVtcDL` |
+| SOL | `BeV1GsY9W7hNBRqQasnq9LjFJPCwkqVghuNH7Yq7vp3d` |
+| ADA | `addr1q83pedgpuka83q7rmfk2x3mepeq53x7fgucptye93d0sr9rj08fhhkk3ymxa59ydsrtg5ky5fe437ncw2mp7cnplsc0qwj0lzv` |
+| SUI | `0xaaba244910f612f37d2cc090f9c78235753925c2ade5e2b1e79dc5d18ef4aa59` |
+| APTOS | `0xfbdf4caecade57dafb08f633e2f4ef1518644b396b11f39026a0571ae6691b70` |
+| TON | `UQCXNPerK6BKJng7h-Ph6Up4d6GlAFdXUrEL-5Fc9zAYhdFO` |
+| BTC | `bc1q92fvc5jm4k8e5wegzmhzdv72gwe43sgfnuspgzfmj7llkd8xhmusgd44qf` |
+| STELLAR | `GAMSM5WVDFDLEEG7W3D64AJGN75IX7PVXXOT7WIX4NKT4SS2ERF4N2XN` |
+
+Thank you!
+
+</details>

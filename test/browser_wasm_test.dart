@@ -37,4 +37,3 @@ void browserWasmTest() {
 void main() {
   BitcoinBaseTestApi.runTest(browserWasmTest, "Browser Wasm");
 }
-

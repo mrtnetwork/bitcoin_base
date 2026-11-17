@@ -16,10 +16,11 @@ void backendIdentityTest() {
     expect(
       native,
       requested != BuTestBackend.dart,
-      reason: requested == BuTestBackend.dart
-          ? 'BU_BACKEND resolves to pure Dart, but a native backend is active.'
-          : 'BU_BACKEND resolves to $requested, but no native backend is '
-              'active. The suite would silently run on pure Dart.',
+      reason:
+          requested == BuTestBackend.dart
+              ? 'BU_BACKEND resolves to pure Dart, but a native backend is active.'
+              : 'BU_BACKEND resolves to $requested, but no native backend is '
+                  'active. The suite would silently run on pure Dart.',
     );
   });
 }

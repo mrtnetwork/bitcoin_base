@@ -247,7 +247,8 @@ Future<void> main() async {
 
   /// ---- 3. 2-of-3 quorum, P2PKH -------------------------------------------
   {
-    final quorum = buildQuorum(network: network, label: '2of3pkh', threshold: 2);
+    final quorum =
+        buildQuorum(network: network, label: '2of3pkh', threshold: 2);
     final address = quorum.addresses['P2PKH']!;
     print('quorum:           ${quorum.describe}');
     print('group key:        ${quorum.groupKey.toBytes.toHex()}');

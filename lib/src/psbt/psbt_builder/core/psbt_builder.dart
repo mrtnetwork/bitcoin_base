@@ -265,7 +265,8 @@ abstract class PsbtBuilderImpl {
     if (inputs.any(
       (e) => e.txId == input.txInput.txId && e.txIndex == input.txInput.txIndex,
     )) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Duplicate input detected: Transaction ID (${input.txInput.txId}), Output Index (${input.txInput.txIndex})"
         "Each input in a transaction must be unique.",
       );
@@ -287,7 +288,8 @@ abstract class PsbtBuilder extends PsbtBuilderImpl
       PsbtVersion.v2 => PsbtBuilderV2._(psbt),
     };
     if (builder is! PSBTBUILDER) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         "Failed to initialize PSBT builder. Type mismatch: Expected PsbtBuilder<$PSBTBUILDER>, but got ${builder.runtimeType}.",
       );
     }
@@ -309,7 +311,8 @@ abstract class PsbtBuilder extends PsbtBuilderImpl
       encoding: StringEncoding.base64,
     );
     if (decode == null) {
-      throw BuError(DefaultErrorType.badBase64, 
+      throw BuError(
+        DefaultErrorType.badBase64,
         "Invalid PSBT base64: Decoding failed or malformed input.",
       );
     }
@@ -326,7 +329,8 @@ abstract class PsbtBuilder extends PsbtBuilderImpl
   static PSBTBUILDER fromHex<PSBTBUILDER extends PsbtBuilder>(String psbtHex) {
     final decode = BytesUtils.tryFromHexString(psbtHex);
     if (decode == null) {
-      throw BuError(DefaultErrorType.badHex, 
+      throw BuError(
+        DefaultErrorType.badHex,
         "Invalid PSBT Hex: Decoding failed or malformed input.",
       );
     }
@@ -354,13 +358,15 @@ abstract class PsbtBuilder extends PsbtBuilderImpl
           break;
       }
     } catch (e) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT: Failed to deserialize.",
         details: {"error": e.toString()},
       );
     }
     if (builder is! PSBTBUILDER) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         "Failed to initialize PSBT builder. Type mismatch: Expected PsbtBuilder<$PSBTBUILDER>, but got ${builder.runtimeType}.",
       );
     }

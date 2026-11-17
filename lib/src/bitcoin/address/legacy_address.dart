@@ -23,7 +23,8 @@ abstract class LegacyAddress
       network: network,
     );
     if (decode == null) {
-      throw BuError(DefaultErrorType.invalidAddress, 
+      throw BuError(
+        DefaultErrorType.invalidAddress,
         'Invalid ${network.conf.coinName} address',
       );
     }
@@ -38,7 +39,8 @@ abstract class LegacyAddress
   @override
   String get addressProgram {
     if (type == PubKeyAddressType.p2pk) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         "addressProgram not supported by p2pk address.",
       );
     }
@@ -76,7 +78,10 @@ class P2shAddress extends LegacyAddress {
     P2shAddressType addressType = P2shAddressType.p2pkInP2sh32,
   }) {
     if (addressType.hashLength != 32) {
-      throw BuError(DefaultErrorType.invalidAddress, "Invalid P2sh 32 address type.");
+      throw BuError(
+        DefaultErrorType.invalidAddress,
+        "Invalid P2sh 32 address type.",
+      );
     }
     return P2shAddress.fromHash160(
       addrHash: BytesUtils.toHexString(
@@ -106,7 +111,8 @@ class P2shAddress extends LegacyAddress {
   @override
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         'network does not support ${type.name} address.',
       );
     }

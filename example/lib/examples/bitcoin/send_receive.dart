@@ -34,6 +34,7 @@ Future<void> main() async {
     senderAddress,
     throwaway: mining.throwaway,
   );
+
   /// Spend only the largest UTXO so the transaction stays small.
   final utxos = [largestUtxo(spendable)];
   print('sender funded: ${formatCoins(utxos.sumOfUtxosValue())} BTC');

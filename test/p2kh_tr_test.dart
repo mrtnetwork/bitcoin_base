@@ -2,6 +2,7 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
+
 void p2khTrTest() {
   group('P2KH', () {
     final txin = TxInput(
@@ -294,4 +295,3 @@ void p2khTrTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(p2khTrTest2, "P2kh Tr");
 }
-

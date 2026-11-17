@@ -97,7 +97,8 @@ class BitcoinAddressUtils {
     final convert = SegwitBech32Decoder.decode(network.p2wpkhHrp, address);
     final witnessVersion = convert.$1;
     if (witnessVersion != version) {
-      throw BuError(DefaultErrorType.invalidAddress, 
+      throw BuError(
+        DefaultErrorType.invalidAddress,
         'Invalid SegWit version.',
         details: {'expected': '$version', 'actual': '$witnessVersion'},
       );
@@ -152,7 +153,8 @@ class BitcoinAddressUtils {
     if (network.supportedAddress.contains(address.type)) {
       return address;
     }
-    throw BuError(DefaultErrorType.unsupported, 
+    throw BuError(
+      DefaultErrorType.unsupported,
       '${network.name} does not support ${address.type.name} address',
     );
   }
@@ -176,7 +178,10 @@ class BitcoinAddressUtils {
     }
     baseAddress ??= toLegacy(address, network);
     if (baseAddress == null) {
-      throw BuError(DefaultErrorType.invalidAddress, 'Invalid Bitcoin address.');
+      throw BuError(
+        DefaultErrorType.invalidAddress,
+        'Invalid Bitcoin address.',
+      );
     }
     return validateAddress(baseAddress, network);
   }
@@ -199,7 +204,8 @@ class BitcoinAddressUtils {
         return StringUtils.strip0x(hash160.toLowerCase());
       }
     } catch (_) {}
-    throw BuError(DefaultErrorType.invalidAddressBytes, 
+    throw BuError(
+      DefaultErrorType.invalidAddressBytes,
       'Invalid Bitcoin address program length (program length should be 32 or 20 bytes)',
     );
   }
@@ -310,7 +316,8 @@ class BitcoinAddressUtils {
     required BasedUtxoNetwork network,
   }) {
     if (!network.supportedAddress.contains(type)) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         '${network.name} does not support ${type.name} address type',
       );
     }
@@ -372,7 +379,8 @@ class BitcoinAddressUtils {
   }) {
     final hrp = network.p2wpkhHrp;
     if (hrp == null) {
-      throw BuError(DefaultErrorType.invalidState, 
+      throw BuError(
+        DefaultErrorType.invalidState,
         "Missing network hrp config.",
         details: {"network": network.name},
       );
@@ -395,7 +403,8 @@ class BitcoinAddressUtils {
   }) {
     final hrp = network.networkHRP;
     if (hrp == null) {
-      throw BuError(DefaultErrorType.invalidState, 
+      throw BuError(
+        DefaultErrorType.invalidState,
         "Missing network hrp.",
         details: {"network": network.name},
       );
@@ -407,7 +416,8 @@ class BitcoinAddressUtils {
       secriptLength: programBytes.length,
     );
     if (netVersion == null) {
-      throw BuError(DefaultErrorType.invalidState, 
+      throw BuError(
+        DefaultErrorType.invalidState,
         "Missing network address prefix.",
         details: {"network": network.name},
       );
@@ -475,7 +485,8 @@ class BitcoinAddressUtils {
       case P2shAddressType.p2pkInP2sh:
         final netVersion = network.p2shNetVer;
         if (netVersion == null) {
-          throw BuError(DefaultErrorType.invalidState, 
+          throw BuError(
+            DefaultErrorType.invalidState,
             "Missing network p2sh prefix config.",
             details: {"network": network.name},
           );
@@ -487,7 +498,8 @@ class BitcoinAddressUtils {
       case PubKeyAddressType.p2pk:
         final netVersion = network.p2pkhNetVer;
         if (netVersion == null) {
-          throw BuError(DefaultErrorType.invalidState, 
+          throw BuError(
+            DefaultErrorType.invalidState,
             "Missing network p2pkh prefix config.",
             details: {"network": network.name},
           );

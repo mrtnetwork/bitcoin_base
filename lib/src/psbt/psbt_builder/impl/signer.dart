@@ -3,7 +3,8 @@ part of 'package:bitcoin_base/src/psbt/psbt_builder/builder.dart';
 mixin PsbtSignerImpl on PsbtBuilderImpl {
   void _checkFinalizeInput(int index) {
     if (PsbtUtils.finalized(index: index, input: _psbt.input)) {
-      throw BuError(DefaultErrorType.invalidState, 
+      throw BuError(
+        DefaultErrorType.invalidState,
         "Input at index $index is already finalized and cannot be modified.",
       );
     }

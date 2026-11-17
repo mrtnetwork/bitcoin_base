@@ -797,6 +797,8 @@ void bitcoinCashTokenEncodingTest2() {
 }
 
 void main() {
-  BitcoinBaseTestApi.runTest(bitcoinCashTokenEncodingTest2, "Bitcoin Cash Token Encoding");
+  BitcoinBaseTestApi.runTest(
+    bitcoinCashTokenEncodingTest2,
+    "Bitcoin Cash Token Encoding",
+  );
 }
-

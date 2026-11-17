@@ -139,25 +139,25 @@ class RegtestNode {
   final List<String> extraCliArgs;
 
   static RegtestNode get bitcoin => RegtestNode(
-    name: 'bitcoin',
-    cliPath: _nodeEnv('BITCOIN_CLI_PATH'),
-    dataDir: _nodeEnv('BITCOIN_DATA_DIR'),
-    electrumHost: '127.0.0.1',
-    electrumPort: 60401,
-    extraCliArgs: [
-      '-rpcport=19443',
-      '-rpcuser=btcregtest',
-      '-rpcpassword=82eaf231843b7a867171462dae10f67a623f93b2cc7cce5b',
-    ],
-  );
+        name: 'bitcoin',
+        cliPath: _nodeEnv('BITCOIN_CLI_PATH'),
+        dataDir: _nodeEnv('BITCOIN_DATA_DIR'),
+        electrumHost: '127.0.0.1',
+        electrumPort: 60401,
+        extraCliArgs: [
+          '-rpcport=19443',
+          '-rpcuser=btcregtest',
+          '-rpcpassword=82eaf231843b7a867171462dae10f67a623f93b2cc7cce5b',
+        ],
+      );
 
   static RegtestNode get bitcoinCash => RegtestNode(
-    name: 'bitcoin_cash',
-    cliPath: _nodeEnv('BITCOIN_CASH_CLI_PATH'),
-    dataDir: _nodeEnv('BITCOIN_CASH_DATA_DIR'),
-    electrumHost: '127.0.0.1',
-    electrumPort: 50001,
-  );
+        name: 'bitcoin_cash',
+        cliPath: _nodeEnv('BITCOIN_CASH_CLI_PATH'),
+        dataDir: _nodeEnv('BITCOIN_CASH_DATA_DIR'),
+        electrumHost: '127.0.0.1',
+        electrumPort: 50001,
+      );
 
   Future<String> _rpc(List<String> args) async {
     final result = await Process.run(cliPath, [
@@ -322,7 +322,8 @@ Future<BigInt> balanceOf(
     ElectrumRequestGetScriptHashBalance(scriptHash: address.pubKeyHash()),
   );
   final confirmed = BigintUtils.tryParse(result['confirmed']) ?? BigInt.zero;
-  final unconfirmed = BigintUtils.tryParse(result['unconfirmed']) ?? BigInt.zero;
+  final unconfirmed =
+      BigintUtils.tryParse(result['unconfirmed']) ?? BigInt.zero;
   return confirmed + unconfirmed;
 }
 
@@ -387,9 +388,8 @@ Future<List<UtxoWithAddress>> waitForSpendableUtxos(
 }) async {
   final deadline = DateTime.now().add(timeout);
   while (true) {
-    final tip = node == null
-        ? await currentTip(provider)
-        : await node.blockCount();
+    final tip =
+        node == null ? await currentTip(provider) : await node.blockCount();
     final utxos = await readUtxos(
       provider,
       wallet,
@@ -444,8 +444,8 @@ Future<String> broadcastAndConfirm(
 /// separate address for blocks that confirm the examples' own transactions.
 class Mining {
   Mining(BasedUtxoNetwork network, {int seed = 200})
-    : throwaway = LocalWallet(index: seed, network: network).p2pkh.address,
-      confirm = LocalWallet(index: seed + 1, network: network).p2pkh.address;
+      : throwaway = LocalWallet(index: seed, network: network).p2pkh.address,
+        confirm = LocalWallet(index: seed + 1, network: network).p2pkh.address;
 
   final String throwaway;
   final String confirm;

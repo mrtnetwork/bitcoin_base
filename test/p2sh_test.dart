@@ -2,6 +2,7 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
+
 void p2shTest() {
   group('P2Sh', () {
     final fromAddr = P2pkhAddress.fromAddress(
@@ -127,4 +128,3 @@ void p2shTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(p2shTest2, "P2sh");
 }
-

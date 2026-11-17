@@ -389,7 +389,8 @@ class BitcoinScriptUtils {
       address = P2trAddress.fromProgram(program: script.script[1]);
     }
     if (address == null || address.toScriptPubKey() != script) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Unknown scriptPubKey: Unable to generate a valid address.",
       );
     }
@@ -416,7 +417,8 @@ class BitcoinScriptUtils {
       final lengthBytes = dataBytes.length.toU32LeBytes();
       return [BitcoinOpCodeConst.opPushData4, ...lengthBytes, ...dataBytes];
     } else {
-      throw BuError(DefaultErrorType.invalidLength, 
+      throw BuError(
+        DefaultErrorType.invalidLength,
         'Data too large. Cannot push into script',
       );
     }
@@ -424,7 +426,8 @@ class BitcoinScriptUtils {
 
   static List<int> pushInteger(int integer) {
     if (integer < 0) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Integer is currently required to be positive.',
       );
     }

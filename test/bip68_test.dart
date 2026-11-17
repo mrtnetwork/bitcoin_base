@@ -9,4 +9,3 @@ void bip68Test2() {
 void main() {
   BitcoinBaseTestApi.runTest(bip68Test2, "Bip68");
 }
-

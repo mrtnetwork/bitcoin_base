@@ -1,8 +1,8 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
 import '../utils.dart';
+
 // https://github.com/bitcoin/bips/blob/master/bip-0373.mediawiki
 void bip0373Test() {
   group("BIP-0373", () {
@@ -18,6 +18,7 @@ void psbtBip0373Test() {
 void main() {
   BitcoinBaseTestApi.runTest(psbtBip0373Test, "Bip 0373");
 }
+
 void _invalodTest() {
   test("Case: PSBT with invalid partial sig valuedata length", () {
     final String psbtData =
@@ -284,4 +285,3 @@ void _test() {
     },
   );
 }
-

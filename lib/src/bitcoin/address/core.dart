@@ -6,7 +6,11 @@ sealed class BitcoinAddressType {
     return values.firstWhere(
       (element) => element.name == name,
       orElse:
-          () => throw BuError(DefaultErrorType.invalidAddress, 'Unknown address type. $name'),
+          () =>
+              throw BuError(
+                DefaultErrorType.invalidAddress,
+                'Unknown address type. $name',
+              ),
     );
   }
 
@@ -14,7 +18,11 @@ sealed class BitcoinAddressType {
     return values.firstWhere(
       (element) => element.id == tag,
       orElse:
-          () => throw BuError(DefaultErrorType.invalidAddress, 'Unknown address type. $tag'),
+          () =>
+              throw BuError(
+                DefaultErrorType.invalidAddress,
+                'Unknown address type. $tag',
+              ),
     );
   }
 
@@ -66,7 +74,10 @@ abstract class BitcoinBaseAddress with Equality, CborTagSerializable {
         program: addressProgram,
       ),
       _ =>
-        throw BuError(DefaultErrorType.unsupported, "Unsupported bitcoin address type."),
+        throw BuError(
+          DefaultErrorType.unsupported,
+          "Unsupported bitcoin address type.",
+        ),
     };
   }
   factory BitcoinBaseAddress.deserializeIAddress({
@@ -297,7 +308,8 @@ enum SegwitAddressType implements BitcoinAddressType {
 extension ExtBitcoinAddressTypeCasting on BitcoinAddressType {
   T cast<T extends BitcoinAddressType>() {
     if (this is! T) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         "Invalid Bitcoin address type cast.",
         details: {'expected': '$T', 'actual': '$runtimeType'},
       );

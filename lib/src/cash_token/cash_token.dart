@@ -68,7 +68,8 @@ class CashTokenCapability {
       final intCapability = _getCapability(bitfield);
       return values.firstWhere((element) => element.value == intCapability);
     } on StateError {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid CashToken NFT Capability',
       );
     }
@@ -79,7 +80,8 @@ class CashTokenCapability {
     try {
       return values.firstWhere((element) => element.name == name);
     } on StateError {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid CashToken NFT Capability Name',
       );
     }
@@ -287,37 +289,43 @@ class CashToken {
     required int bitfield,
   }) {
     if (!CashTokenUtils.isValidBitfield(bitfield)) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid bitfield.',
         details: {'bitfield': '$bitfield'},
       );
     }
     if (CashTokenUtils.hasAmount(bitfield) && amount == null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid cash token: the bitfield indicates an amount, but the amount is null.',
       );
     }
     if (amount != null) {
       if (amount < BigInt.zero || amount > CashTokenUtils.maxTokenAmount) {
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid amount. Amount must be between zero and ${CashTokenUtils.maxTokenAmount}.',
         );
       }
     }
     if (!StringUtils.isHexBytes(category)) {
-      throw BuError(DefaultErrorType.badHex, 
+      throw BuError(
+        DefaultErrorType.badHex,
         'Invalid category hexadecimal bytes.',
       );
     }
     final toBytes = BytesUtils.fromHexString(category);
     if (toBytes.length != CashTokenUtils.idBytesLength) {
-      throw BuError(DefaultErrorType.invalidLength, 
+      throw BuError(
+        DefaultErrorType.invalidLength,
         'Invalid category. The category should consist of 32 bytes.',
       );
     }
     if (CashTokenUtils.hasCommitmentLength(bitfield) &&
         (commitment == null || commitment.isEmpty)) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid cash token: the bitfield indicates a commitment, but the commitment is null or empty.',
       );
     }
@@ -363,7 +371,8 @@ class CashToken {
         amount < BigInt.zero ||
         amount > CashTokenUtils.maxTokenAmount ||
         CashTokenUtils.hasCommitmentLength(bitfield) && commitment.isEmpty) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid cash token.',
         details: {'bitfield': '$bitfield', 'amount': '$amount'},
       );

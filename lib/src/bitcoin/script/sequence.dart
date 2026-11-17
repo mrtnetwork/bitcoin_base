@@ -14,7 +14,8 @@ class Sequence {
   }) {
     if (seqType == BitcoinOpCodeConst.typeRelativeTimelock &&
         (value < 1 || value > BinaryOps.mask16)) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Sequence should be between 1 and 65535',
       );
     }
@@ -41,7 +42,8 @@ class Sequence {
       return seq.toU32LeBytes();
     }
 
-    throw BuError(DefaultErrorType.invalidArgument, 
+    throw BuError(
+      DefaultErrorType.invalidArgument,
       'Invalid sequence type.',
       details: {'seqType': '$seqType'},
     );
@@ -50,7 +52,8 @@ class Sequence {
   /// Returns the appropriate integer for a script; e.g. for relative timelocks
   int forScript() {
     if (seqType == BitcoinOpCodeConst.typeReplaceByFee) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'RBF is not to be included in a script.',
       );
     }

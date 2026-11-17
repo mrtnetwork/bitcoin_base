@@ -32,8 +32,7 @@ Future<void> main() async {
   final receiver = LocalWallet(index: 31, network: network);
 
   final fund = wallet.addressFor(P2pkhAddressType.p2pkh);
-  final receiverTokenAddress =
-      receiver.addressFor(P2pkhAddressType.p2pkhwt);
+  final receiverTokenAddress = receiver.addressFor(P2pkhAddressType.p2pkhwt);
 
   print('Bitcoin Cash regtest: CashToken NFT');
   print('  electrum: ${service.url}');
@@ -65,11 +64,13 @@ Future<void> main() async {
     fee: exampleFee,
     network: network,
     utxos: utxos,
+
     /// Keep the genesis output at index 0.
     outputOrdering: BitcoinOrdering.none,
   ).buildTransaction((digest, utxo, publicKey, sighash) {
     return wallet.privateKey.signECDSA(digest, sighash: sighash);
   });
+
   /// The category id is the txid whose output 0 gets spent by the mint.
   final category = await broadcastAndConfirm(
     provider,
@@ -93,6 +94,7 @@ Future<void> main() async {
   final commitment = 'regtest nft'.codeUnits;
   final nftToken = CashToken(
     category: category,
+
     /// An NFT carries no amount.
     commitment: commitment,
     bitfield: CashTokenUtils.buildBitfield(
@@ -120,6 +122,7 @@ Future<void> main() async {
     fee: exampleFee,
     network: network,
     utxos: mintUtxos,
+
     /// Keep the token output at index 0.
     outputOrdering: BitcoinOrdering.none,
   ).buildTransaction((digest, utxo, publicKey, sighash) {
@@ -188,7 +191,8 @@ Future<void> main() async {
     receiver,
     receiverTokenAddress,
     true,
-  )).where(
+  ))
+      .where(
     (utxo) =>
         utxo.utxo.token != null &&
         utxo.utxo.token!.category == category &&

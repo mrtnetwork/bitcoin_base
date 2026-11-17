@@ -2,6 +2,7 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
+
 void p2wshTest() {
   group('P2WSH', () {
     final sk1 = ECPrivate.fromWif(
@@ -161,4 +162,3 @@ void p2wshTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(p2wshTest2, "P2wsh");
 }
-

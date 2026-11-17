@@ -37,11 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   bitcoin_base: 
     path: ../
-  # blockchain_utils:
-  #   path: ../../blockchain_utils
-  blockchain_utils:
-    git:
-      url: https://github.com/mrtnetwork/blockchain_utils
+  blockchain_utils: ^8.0.1
   http: ^1.2.0
 
 dev_dependencies:

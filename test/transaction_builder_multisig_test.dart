@@ -73,6 +73,7 @@ BitcoinSignerCallBack _legacySigner(
         return key.signECDSA(digest, sighash: sighash);
       }
     }
+
     /// the signer does not have the private key of this public key
     return '';
   };
@@ -89,6 +90,7 @@ BitcoinSignerCallBackAsync _legacySignerAsync(
         return key.signECDSA(digest, sighash: sighash);
       }
     }
+
     /// the signer does not have the private key of this public key
     return '';
   };
@@ -200,6 +202,7 @@ void multiSigTransactionBuilderTest() {
 
       /// the legacy signer is called once for every signer
       expect(legacyCalls.length, 2);
+
       /// the multi-signature signer is called once for the whole input
       expect(multiSigCalls.length, 1);
       expect(
@@ -208,51 +211,51 @@ void multiSigTransactionBuilderTest() {
       );
     });
 
-    test('the multi-signature signer is called once for every input (async)', () async {
-      const network = BitcoinNetwork.testnet;
-      final multiSigAddress = _multiSigAddress(
-        threshold: 2,
-        weights: [1, 1, 1],
-      );
-      final address = multiSigAddress.toP2wshAddress(network: network);
-      final utxos = [
-        _multiSigUtxo(multiSigAddress: multiSigAddress, address: address),
-      ];
-      final builder = BitcoinTransactionBuilder(
-        utxos: utxos,
-        outPuts: [
-          BitcoinOutput(
-            address: _key1.getPublic().toAddress(),
-            value: BigInt.from(90000),
+    test(
+      'the multi-signature signer is called once for every input (async)',
+      () async {
+        const network = BitcoinNetwork.testnet;
+        final multiSigAddress = _multiSigAddress(
+          threshold: 2,
+          weights: [1, 1, 1],
+        );
+        final address = multiSigAddress.toP2wshAddress(network: network);
+        final utxos = [
+          _multiSigUtxo(multiSigAddress: multiSigAddress, address: address),
+        ];
+        final builder = BitcoinTransactionBuilder(
+          utxos: utxos,
+          outPuts: [
+            BitcoinOutput(
+              address: _key1.getPublic().toAddress(),
+              value: BigInt.from(90000),
+            ),
+          ],
+          fee: BigInt.from(10000),
+          network: network,
+        );
+
+        final legacyCalls = <String>[];
+        final multiSigCalls = <List<String>>[];
+        await builder.buildTransactionAsync(
+          _legacySignerAsync(_keys, calledPublicKeys: legacyCalls),
+        );
+        await builder.buildTransactionAsync(
+          _legacySignerAsync(_keys),
+          multiSigSign: _multiSigSignerAsync(
+            _keys,
+            calledPublicKeys: multiSigCalls,
           ),
-        ],
-        fee: BigInt.from(10000),
-        network: network,
-      );
+        );
 
-      final legacyCalls = <String>[];
-      final multiSigCalls = <List<String>>[];
-      await builder.buildTransactionAsync(
-        _legacySignerAsync(_keys, calledPublicKeys: legacyCalls),
-      );
-      await builder.buildTransactionAsync(
-        _legacySignerAsync(_keys),
-        multiSigSign: _multiSigSignerAsync(
-          _keys,
-          calledPublicKeys: multiSigCalls,
-        ),
-      );
-
-      expect(legacyCalls.length, 2);
-      expect(multiSigCalls.length, 1);
-    });
+        expect(legacyCalls.length, 2);
+        expect(multiSigCalls.length, 1);
+      },
+    );
 
     test('weighted multi-signature address (sync and async)', () async {
       const network = BitcoinNetwork.testnet;
-      final multiSigAddress = _multiSigAddress(
-        threshold: 2,
-        weights: [1, 3],
-      );
+      final multiSigAddress = _multiSigAddress(threshold: 2, weights: [1, 3]);
       final address = multiSigAddress.toP2wshAddress(network: network);
       final utxos = [
         _multiSigUtxo(multiSigAddress: multiSigAddress, address: address),
@@ -269,9 +272,7 @@ void multiSigTransactionBuilderTest() {
         network: network,
       );
 
-      final legacyTransaction = builder.buildTransaction(
-        _legacySigner(_keys),
-      );
+      final legacyTransaction = builder.buildTransaction(_legacySigner(_keys));
       final asyncTransaction = await builder.buildTransactionAsync(
         _legacySignerAsync(_keys),
       );
@@ -516,4 +517,3 @@ void main() {
     "Multi-signature Transaction Builder",
   );
 }
-

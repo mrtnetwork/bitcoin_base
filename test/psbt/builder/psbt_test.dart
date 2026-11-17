@@ -22,4 +22,3 @@ void builderPsbtTest() {
 void main() {
   BitcoinBaseTestApi.runTest(builderPsbtTest, "Psbt");
 }
-

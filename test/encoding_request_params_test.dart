@@ -3,6 +3,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
+
 void encodingRequestParamsTest() {
   test('encoding provider params', () {
     final param = MempoolRequestGetBlockHashByHeight(1);
@@ -52,10 +53,15 @@ void encodingRequestParamsTest() {
 }
 
 void encodingRequestParamsTest2() {
-  BitcoinBaseTestApi.runTest(encodingRequestParamsTest, "Encoding Request Params");
+  BitcoinBaseTestApi.runTest(
+    encodingRequestParamsTest,
+    "Encoding Request Params",
+  );
 }
 
 void main() {
-  BitcoinBaseTestApi.runTest(encodingRequestParamsTest2, "Encoding Request Params");
+  BitcoinBaseTestApi.runTest(
+    encodingRequestParamsTest2,
+    "Encoding Request Params",
+  );
 }
-

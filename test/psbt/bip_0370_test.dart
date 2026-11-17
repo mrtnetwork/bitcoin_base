@@ -3,6 +3,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
 import '../utils.dart';
+
 /// https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki
 void bip0370Test() {
   group("BIP-0370", () {
@@ -18,6 +19,7 @@ void psbtBip0370Test() {
 void main() {
   BitcoinBaseTestApi.runTest(psbtBip0370Test, "Bip 0370");
 }
+
 void _invalidTest() {
   test(
     "Case: PSBTv2 with PSBT_IN_REQUIRED_HEIGHT_LOCKTIME greater than or equal to 500000000",
@@ -445,4 +447,3 @@ void _test() {
     },
   );
 }
-

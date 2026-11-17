@@ -21,3 +21,20 @@ export 'src/transaction_builder/builder.dart';
 export 'src/psbt/psbt.dart';
 
 export 'src/serialization/identifier.dart';
+export 'package:blockchain_utils/blockchain_utils.dart'
+    show
+        BuSerializableHash,
+        BuBytes,
+        BuAead,
+        SecretBytes,
+        SecretState,
+        BuHashApi,
+        BuError,
+        BuErrorType,
+        DefaultErrorType,
+        BuMoneroApi,
+        BuMoneroScanAccount,
+        BuMoneroScanOutput,
+        BuMoneroUnlockMatch,
+        BuConfig,
+        BuBuildFeature;

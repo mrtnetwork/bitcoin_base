@@ -77,6 +77,7 @@ Future<void> main() async {
   final provider = BitcoinProvider(service);
   final wallet = LocalWallet(index: 0, network: network);
   final receiver = LocalWallet(index: 1, network: network);
+
   /// Fan-out change goes here so the funded types start from a clean slate.
   final change = LocalWallet(index: 90, network: network).p2pkh;
 
@@ -110,6 +111,7 @@ Future<void> main() async {
     fund,
     throwaway: mining.throwaway,
   );
+
   /// Spend only the largest UTXO: the address has change from previous runs and
   /// sweeping all of it would make the transaction need a much larger fee.
   final fundUtxos = [largestUtxo(spendable)];
@@ -133,6 +135,7 @@ Future<void> main() async {
     fee: exampleFee,
     network: network,
     utxos: fundUtxos,
+
     /// Keep output order stable so the dust lands on predictable indexes.
     outputOrdering: BitcoinOrdering.none,
   ).buildTransaction((digest, utxo, publicKey, sighash) {
@@ -166,6 +169,7 @@ Future<void> main() async {
       node: node,
       requiredConfirmations: 1,
     );
+
     /// Spend only the dust this run created, so the example stays small and
     /// repeatable even when the address already holds older change.
     final utxos = [

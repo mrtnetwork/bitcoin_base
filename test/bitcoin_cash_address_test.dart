@@ -2,6 +2,7 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
+
 /// copied from https://github.com/Electron-Cash/Electron-Cash/blob/master/electroncash/tests/test_token.py
 // # Copyright (c) 2023 Calin Culianu <calin.culianu@gmail.com>
 // #
@@ -215,4 +216,3 @@ void bitcoinCashAddressTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(bitcoinCashAddressTest2, "Bitcoin Cash Address");
 }
-

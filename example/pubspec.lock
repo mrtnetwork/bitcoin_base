@@ -15,25 +15,23 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "7.4.0"
+    version: "8.0.0"
   blockchain_utils:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: b59f4cf5190df729910b5037168de41efe43447c
-      url: "https://github.com/mrtnetwork/blockchain_utils"
-    source: git
-    version: "8.0.0"
+      name: blockchain_utils
+      sha256: "8a8b648551ae03a12cfa24e732325d9ccceb80450485b9a10b79d67a066f6688"
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.0.1"
   blockchain_utils_connector:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: ffc44d44b200627174d04eade11a16b240fd7627
-      url: "https://github.com/mrtnetwork/blockchain_utils_connector"
-    source: git
-    version: "0.1.0"
+      name: blockchain_utils_connector
+      sha256: "3003d1fbf0bba7252bbfb1afcf10bd9fd733243a6ee867a4661438d54a2c08d5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   boolean_selector:
     dependency: transitive
     description:

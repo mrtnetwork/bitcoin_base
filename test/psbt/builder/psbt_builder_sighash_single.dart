@@ -8,7 +8,6 @@ import 'utxos_vector.dart';
 /// per call, so exact-hex goldens below need deterministic signing.
 final List<int> _zeroAux = List<int>.filled(32, 0);
 
-
 void psbtTest2() {
   test("PSBT", () {
     _test(PsbtBuilderV0.create());
@@ -71,7 +70,8 @@ void _test(PsbtBuilder builder) {
               .map((e) => ECPrivate.fromHex(e))
               .toList();
       return PsbtSignerResponse(
-        signers: signers.map((e) => PsbtDefaultSigner(e, aux: _zeroAux)).toList(),
+        signers:
+            signers.map((e) => PsbtDefaultSigner(e, aux: _zeroAux)).toList(),
         sighash: BitcoinOpCodeConst.sighashSingle,
         tapleafHash: BytesUtils.tryFromHexString(utxo[0]["select_leaf"]),
       );
@@ -96,7 +96,8 @@ void _test(PsbtBuilder builder) {
       /// taproot script-path with multiple tapleaf script exists
       /// in this case should we pass correct tapleaf.
       return PsbtSignerResponse(
-        signers: signers.map((e) => PsbtDefaultSigner(e, aux: _zeroAux)).toList(),
+        signers:
+            signers.map((e) => PsbtDefaultSigner(e, aux: _zeroAux)).toList(),
         sighash: BitcoinOpCodeConst.sighashSingle,
         tapleafHash: BytesUtils.tryFromHexString(utxo[0]["select_leaf"]),
       );
@@ -121,7 +122,8 @@ void _test(PsbtBuilder builder) {
       /// taproot script-path with multiple tapleaf script exists
       /// in this case should we pass correct tapleaf.
       return PsbtSignerResponse(
-        signers: signers.map((e) => PsbtDefaultSigner(e, aux: _zeroAux)).toList(),
+        signers:
+            signers.map((e) => PsbtDefaultSigner(e, aux: _zeroAux)).toList(),
         sighash: BitcoinOpCodeConst.sighashSingle,
         tapleafHash: BytesUtils.tryFromHexString(utxo[1]["select_leaf"]),
       );

@@ -99,6 +99,7 @@ Future<void> main() async {
       parsed,
       throwaway: mining.throwaway,
     );
+
     /// Spend only the largest UTXO so the transaction stays small.
     final utxos = [largestUtxo(spendable)];
     print('2-of-2 funded:        '
@@ -144,6 +145,7 @@ Future<void> main() async {
       parsed,
       throwaway: mining.throwaway,
     );
+
     /// Spend only the largest UTXO so the transaction stays small.
     final utxos = [largestUtxo(spendable)];
     print('3-of-3 funded:        '
@@ -218,6 +220,7 @@ Future<void> main() async {
       parsed,
       throwaway: mining.throwaway,
     );
+
     /// Spend only the largest UTXO so the transaction stays small.
     final utxos = [largestUtxo(spendable)];
     print('2-of-3 funded:        '

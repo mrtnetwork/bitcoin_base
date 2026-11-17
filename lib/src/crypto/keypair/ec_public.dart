@@ -14,7 +14,8 @@ class ECPublic {
 
   factory ECPublic.fromBip32(Bip32PublicKey publicKey) {
     if (publicKey.type != CryptoKeyType.secp256k1) {
-      throw BuError(DefaultErrorType.badPublicKey, 
+      throw BuError(
+        DefaultErrorType.badPublicKey,
         'invalid public key curve for bitcoin',
       );
     }
@@ -184,7 +185,8 @@ class ECPublic {
       SegwitAddressType.p2wpkh => toSegwitAddress().toScriptPubKey(),
       SegwitAddressType.p2wsh => toP2wshScript(),
       SegwitAddressType.p2tr =>
-        throw BuError(DefaultErrorType.unsupported, 
+        throw BuError(
+          DefaultErrorType.unsupported,
           "P2TR is not supported for native witness script. Use toTaprootAddress().toScriptPubKey().",
         ),
     };
@@ -197,7 +199,8 @@ class ECPublic {
     PublicKeyType mode = PublicKeyType.base,
   }) {
     if (!type.supportedKeyEncoding.contains(mode)) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         "${type.name} does not support ${mode.name} public key encoding.",
       );
     }
@@ -222,7 +225,8 @@ class ECPublic {
     required CryptoKeyEncoding encoding,
   }) {
     if (!addressType.supportedKeyEncoding.contains(encoding)) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         "${addressType.name} does not support ${encoding.name} encoding.",
       );
     }
@@ -266,7 +270,11 @@ class ECPublic {
         toP2wshAddress(),
       SegwitAddressType.p2tr when encoding == CryptoKeyEncoding.base =>
         toTaprootAddress(),
-      _ => throw BuError(DefaultErrorType.unsupported, "Unsupported address type."),
+      _ =>
+        throw BuError(
+          DefaultErrorType.unsupported,
+          "Unsupported address type.",
+        ),
     };
   }
 
@@ -276,7 +284,8 @@ class ECPublic {
     required BasedUtxoNetwork network,
   }) {
     if (!network.supportedAddress.contains(addressType)) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         "${network.name} does not support ${addressType.name} address.",
       );
     }
@@ -477,17 +486,20 @@ class ECPublic {
   }) {
     if (!tweak &&
         (treeScript != null || merkleRoot != null || tapTweakHash != null)) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid parameters: 'tweak' must be true when specifying 'treeScript', 'merkleRoot', or 'tapTweakHash'.",
       );
     }
     if (merkleRoot != null && treeScript != null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Use either merkleRoot or treeScript to generate merkle, not both.",
       );
     }
     if (tapTweakHash != null && (treeScript != null || merkleRoot != null)) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Use either tapTweakHash or (treeScript/merkleRoot), not both.",
       );
     }

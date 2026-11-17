@@ -1,5 +1,4 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
@@ -238,7 +237,9 @@ void p2trTest() {
         tapleafScript: TaprootLeaf(script: trScriptP2pkA),
       );
 
-      final sign = privkeyTrScriptA.signBip340(txDigit, tweak: false,
+      final sign = privkeyTrScriptA.signBip340(
+        txDigit,
+        tweak: false,
         aux: List<int>.filled(32, 0),
       );
       final controlBlock = TaprootControlBlock.generate(
@@ -349,7 +350,9 @@ void p2trTest() {
         tapleafScript: TaprootLeaf(script: trScriptP2pkB),
         amounts: allAmounts.map((e) => e).toList(),
       );
-      final sig = privkeyTrScriptB.signBip340(digit, tweak: false,
+      final sig = privkeyTrScriptB.signBip340(
+        digit,
+        tweak: false,
         aux: List<int>.filled(32, 0),
       );
       final controlBlock = TaprootControlBlock.generate(
@@ -389,4 +392,3 @@ void p2trTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(p2trTest2, "P2tr");
 }
-

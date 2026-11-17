@@ -53,7 +53,8 @@ class PsbtBuilderV2 extends PsbtBuilder {
       return BitcoinOpCodeConst.defaultTxSequence;
     }
     if (locktime != null && heightNumber != null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Invalid PSBT input $index: Only one locktime field (PSBT_IN_REQUIRED_TIME_LOCKTIME or PSBT_IN_REQUIRED_HEIGHT_LOCKTIME) can be set.",
       );
     }
@@ -72,7 +73,8 @@ class PsbtBuilderV2 extends PsbtBuilder {
             )) {
           return sequenceBytes;
         }
-        throw BuError(DefaultErrorType.invalidArgument, 
+        throw BuError(
+          DefaultErrorType.invalidArgument,
           'Invalid PSBT input: Locktime is set, but sequence is 0xFFFFFFFF (disable locktime).',
         );
       }
@@ -98,12 +100,14 @@ class PsbtBuilderV2 extends PsbtBuilder {
       PsbtInputTypes.spentOutputIndex,
     );
     if (txId == null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid Psbt input $index: Missing required field: previous tx id (PSBT_IN_PREVIOUS_TXID)',
       );
     }
     if (txIndex == null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid Psbt input $index: Missing required field: spent output index (PSBT_IN_OUTPUT_INDEX)',
       );
     }
@@ -160,12 +164,14 @@ class PsbtBuilderV2 extends PsbtBuilder {
       PsbtOutputTypes.script,
     );
     if (amount == null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid Psbt output $index: Missing required field: amount (PSBT_OUT_AMOUNT)',
       );
     }
     if (script == null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid Psbt output $index: Missing required field: output script (PSBT_OUT_SCRIPT)',
       );
     }
@@ -186,7 +192,8 @@ class PsbtBuilderV2 extends PsbtBuilder {
       PsbtGlobalTypes.fallBackLockTime,
     );
     if (txVersion == null) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         'Invalid Psbt global: Missing required field: Transaction Version (PSBT_GLOBAL_TX_VERSION)',
       );
     }
@@ -211,7 +218,8 @@ class PsbtBuilderV2 extends PsbtBuilder {
   TxOutput txOutput(int index) {
     final txOutputs = this.txOutputs();
     if (index >= txOutputs.length) {
-      throw BuError(DefaultErrorType.invalidArgument, 
+      throw BuError(
+        DefaultErrorType.invalidArgument,
         "Index out of bounds: PSBT output index exceeds transaction outputs.",
       );
     }

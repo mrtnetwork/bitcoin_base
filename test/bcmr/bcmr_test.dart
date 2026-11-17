@@ -7,6 +7,7 @@ import 'fungible_token.dart';
 import 'payouts_or_dividends.dart';
 
 import '../utils.dart';
+
 /// https://github.com/bitjson/chip-bcmr/tree/master/examples
 void bcmrTest() {
   test('pcmr test', () {
@@ -31,4 +32,3 @@ void bcmrBcmrTest() {
 void main() {
   BitcoinBaseTestApi.runTest(bcmrBcmrTest, "Bcmr");
 }
-

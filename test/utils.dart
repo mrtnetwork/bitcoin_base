@@ -178,7 +178,6 @@ class BitcoinBaseTestApi {
     _inited = true;
   }
 
-
   /// Browser entry point: loads the WASM glue/module from [config] (defaults
   /// `wasm_assets/bu.js` + auto-located `bu_bg.wasm`, served by `dart test`
   /// from `test/wasm_assets/`) and selects the Rust backend. Web only.

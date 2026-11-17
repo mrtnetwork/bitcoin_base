@@ -27,8 +27,7 @@ Future<void> main() async {
   final receiver = LocalWallet(index: 21, network: network);
 
   final fund = wallet.addressFor(P2pkhAddressType.p2pkh);
-  final receiverTokenAddress =
-      receiver.addressFor(P2pkhAddressType.p2pkhwt);
+  final receiverTokenAddress = receiver.addressFor(P2pkhAddressType.p2pkhwt);
 
   print('Bitcoin Cash regtest: CashToken FT');
   print('  electrum: ${service.url}');
@@ -58,6 +57,7 @@ Future<void> main() async {
     fee: exampleFee,
     network: network,
     utxos: utxos,
+
     /// Keep the genesis output at index 0.
     outputOrdering: BitcoinOrdering.none,
   ).buildTransaction((digest, utxo, publicKey, sighash) {
@@ -121,11 +121,9 @@ Future<void> main() async {
   );
   print('mint tx:           $mintId');
 
-  final tokenUtxo = (await readUtxos(provider, wallet, fund, true))
-      .firstWhere(
-        (utxo) =>
-            utxo.utxo.token != null && utxo.utxo.token!.category == category,
-      );
+  final tokenUtxo = (await readUtxos(provider, wallet, fund, true)).firstWhere(
+    (utxo) => utxo.utxo.token != null && utxo.utxo.token!.category == category,
+  );
 
   /// Sum the sender's balance of the new category; older categories are ignored.
   final mintedTotal = _tokenBalance(
@@ -153,6 +151,7 @@ Future<void> main() async {
         value: tokenDust,
         token: token.copyWith(amount: sendAmount),
       ),
+
       /// The remaining 900 TDT back to the sender.
       BitcoinTokenOutput(
         utxoHash: tokenUtxo.utxo.txHash,
@@ -162,9 +161,7 @@ Future<void> main() async {
       ),
       BitcoinOutput(
         address: fund.baseAddress,
-        value: allUtxos.sumOfUtxosValue() -
-            tokenDust * BigInt.two -
-            exampleFee,
+        value: allUtxos.sumOfUtxosValue() - tokenDust * BigInt.two - exampleFee,
       ),
     ],
     fee: exampleFee,

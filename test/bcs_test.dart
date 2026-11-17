@@ -9,4 +9,3 @@ void bcsTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(bcsTest2, "Bcs");
 }
-

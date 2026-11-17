@@ -2,6 +2,7 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
+
 void networkIdentifiersTest() {
   test("network identifier", () {
     final id = BasedUtxoNetwork.values;
@@ -24,4 +25,3 @@ void networkIdentifiersTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(networkIdentifiersTest2, "Network Identifiers");
 }
-

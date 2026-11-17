@@ -3,6 +3,7 @@ import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
+
 ECPrivate getPublicKey({String path = "m/84'/1'/0'/0/1"}) {
   final key = getKey(path: path);
   return ECPrivate.fromBytes(key.privateKey.toBytes());
@@ -31,6 +32,7 @@ void deserializeTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(deserializeTest2, "Deserialize");
 }
+
 void _decodeTx() {
   test('decode transaction', () {
     const data =
@@ -140,4 +142,3 @@ void _decodeTx() {
     expect(tx.serialize(), data);
   });
 }
-

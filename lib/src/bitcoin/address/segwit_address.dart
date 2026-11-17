@@ -9,7 +9,8 @@ abstract class SegwitAddress
     required this.segwitVersion,
   }) {
     if (!network.supportedAddress.contains(type)) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         'network does not support ${type.name} address',
       );
     }
@@ -40,7 +41,8 @@ abstract class SegwitAddress
   @override
   String toAddress(BasedUtxoNetwork network) {
     if (!network.supportedAddress.contains(type)) {
-      throw BuError(DefaultErrorType.unsupported, 
+      throw BuError(
+        DefaultErrorType.unsupported,
         'network does not support ${type.name} address',
       );
     }

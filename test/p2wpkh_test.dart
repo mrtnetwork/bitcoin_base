@@ -2,6 +2,7 @@ import 'package:bitcoin_base/bitcoin_base.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
+
 void p2wpkhTest() {
   group('P2WPKH', () {
     final sk = ECPrivate.fromWif(
@@ -368,4 +369,3 @@ void p2wpkhTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(p2wpkhTest2, "P2wpkh");
 }
-

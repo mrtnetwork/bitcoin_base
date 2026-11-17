@@ -86,7 +86,10 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
           network: network as ElectraProtocolNetwork,
         );
       default:
-        throw BuError(DefaultErrorType.invalidArgument, "Unknown network. ${network.name}");
+        throw BuError(
+          DefaultErrorType.invalidArgument,
+          "Unknown network. ${network.name}",
+        );
     }
     return baseAddress.cast();
   }
@@ -140,7 +143,10 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
           network: network as ElectraProtocolNetwork,
         );
       default:
-        throw BuError(DefaultErrorType.invalidArgument, "Unknown network. ${network.name}");
+        throw BuError(
+          DefaultErrorType.invalidArgument,
+          "Unknown network. ${network.name}",
+        );
     }
     return baseAddress.cast();
   }
@@ -205,7 +211,8 @@ abstract class BitcoinNetworkAddress<T extends BasedUtxoNetwork>
 
   E cast<E extends BitcoinNetworkAddress>() {
     if (this is! E) {
-      throw BuError(DefaultErrorType.castFailed, 
+      throw BuError(
+        DefaultErrorType.castFailed,
         "Invalid Bitcoin network address cast.",
         details: {'expected': '$E', 'actual': '$runtimeType'},
       );
@@ -349,7 +356,10 @@ class BitcoinCashAddress extends BitcoinNetworkAddress<BitcoinCashNetwork> {
       validateNetworkHRP: validateNetworkPrefix,
     );
     if (decodeAddress == null) {
-      throw BuError(DefaultErrorType.invalidAddress, 'Invalid ${network.name} address.');
+      throw BuError(
+        DefaultErrorType.invalidAddress,
+        'Invalid ${network.name} address.',
+      );
     }
     return BitcoinCashAddress._(decodeAddress, address, network);
   }

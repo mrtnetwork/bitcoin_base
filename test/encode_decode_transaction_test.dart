@@ -108,6 +108,8 @@ void encodeDecodeTransactionTest2() {
 }
 
 void main() {
-  BitcoinBaseTestApi.runTest(encodeDecodeTransactionTest2, "Encode Decode Transaction");
+  BitcoinBaseTestApi.runTest(
+    encodeDecodeTransactionTest2,
+    "Encode Decode Transaction",
+  );
 }
-

@@ -391,4 +391,3 @@ void keysTest2() {
 void main() {
   BitcoinBaseTestApi.runTest(keysTest2, "Keys");
 }
-

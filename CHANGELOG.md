@@ -1,4 +1,5 @@
 ## 8.0.0
+- BREAKING: all legacy exception classes removed; every error is now `BuError` with a `BitcoinErrorType` taxonomy value.
 - Cryptography now routes through the `blockchain_utils` dual backend (pure Dart default, optional Rust FFI/WASM); see the `blockchain_utils` README.
 - Added DKLs23 `t`-of-`n` threshold ECDSA signing (ECDSA outputs only — do not use for Taproot/P2TR, which requires BIP-340 Schnorr).
 

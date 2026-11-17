@@ -19,6 +19,7 @@ void psbtBip0174Test() {
 void main() {
   BitcoinBaseTestApi.runTest(psbtBip0174Test, "Bip 0174");
 }
+
 void _invalidTest() {
   test(
     "Case: PSBT with unsigned tx serialized with witness serialization format",
@@ -391,4 +392,3 @@ void _test() {
     expect(psbt.toHex(), psbtData);
   });
 }
-

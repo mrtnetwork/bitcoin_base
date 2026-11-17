@@ -44,10 +44,7 @@ void addressCoverageTest() {
           }
           for (final pub in [compG, uncompG]) {
             // uncompressed input key can still request either encoding.
-            final base = pub.generateAddress(
-              addressType: type,
-              encoding: enc,
-            );
+            final base = pub.generateAddress(addressType: type, encoding: enc);
             expect(base.type, type, reason: 'type echo for ${type.name}');
             expect(base.toScriptPubKey().toBytes(), isNotEmpty);
             expect(base.pubKeyHash(), isNotEmpty);
@@ -56,19 +53,13 @@ void addressCoverageTest() {
               // P2PK has no hash program: addressProgram throws by design and
               // the identity lives in `publicKey`.
               expect(base.publicKey, isNotEmpty);
-              expect(
-                () => base.addressProgram,
-                throwsA(isA<BuError>()),
-              );
+              expect(() => base.addressProgram, throwsA(isA<BuError>()));
               final decoded = BitcoinBaseAddress.fromProgram(
                 addressProgram: base.publicKey,
                 type: type,
               );
               expect(decoded, isA<P2pkAddress>());
-              expect(
-                (decoded as P2pkAddress).publicKey,
-                base.publicKey,
-              );
+              expect((decoded as P2pkAddress).publicKey, base.publicKey);
               continue;
             }
             expect(base.addressProgram, isNotEmpty);
@@ -111,10 +102,7 @@ void addressCoverageTest() {
         }
         for (final type in network.supportedAddress) {
           final enc = type.supportedKeyEncoding.first;
-          final base = compG.generateAddress(
-            addressType: type,
-            encoding: enc,
-          );
+          final base = compG.generateAddress(addressType: type, encoding: enc);
           final netAddr = compG.generateNetworkAddress(
             addressType: type,
             encoding: enc,
@@ -261,6 +249,7 @@ P2shAddressType _expectedParsedP2sh(
 void addressCoverageTest2() {
   BitcoinBaseTestApi.runTest(addressCoverageTest, 'Address coverage');
 }
+
 void main() {
   BitcoinBaseTestApi.runTest(addressCoverageTest2, 'Address coverage');
 }

@@ -1,5 +1,4 @@
 import 'package:bitcoin_base/bitcoin_base.dart';
-import 'package:blockchain_utils/blockchain_utils.dart';
 import 'package:test/test.dart';
 import 'psbt_update_output.dart';
 import 'utxos_vector2.dart';
@@ -127,10 +126,7 @@ void psbtTest4() {
       sighash: BitcoinOpCodeConst.sighashAll,
     );
 
-    expect(
-      () => builder.removeInput(0),
-      throwsA(isA<BuError>()),
-    );
+    expect(() => builder.removeInput(0), throwsA(isA<BuError>()));
     builder = PsbtBuilderV0.create();
     expect(builder.txInputs().length, 0);
     expect(builder.txOutputs().length, 0);

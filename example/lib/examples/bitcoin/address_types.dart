@@ -12,6 +12,7 @@ Future<void> main() async {
   final provider = BitcoinProvider(service);
   final wallet = LocalWallet(index: 0, network: network);
   final receiver = LocalWallet(index: 1, network: network);
+
   /// Fan-out change goes here so the funded types start from a clean slate.
   final change = LocalWallet(index: 90, network: network).p2pkh;
 
@@ -36,6 +37,7 @@ Future<void> main() async {
     fund,
     throwaway: mining.throwaway,
   );
+
   /// Spend only the largest UTXO: the address has change from previous runs and
   /// sweeping all of it would make the transaction need a much larger fee.
   final fundUtxos = [largestUtxo(spendable)];
@@ -48,7 +50,8 @@ Future<void> main() async {
   final fanOut = BitcoinTransactionBuilder(
     outPuts: [
       for (final type in types)
-        BitcoinOutput(address: wallet.addressFor(type).baseAddress, value: dust),
+        BitcoinOutput(
+            address: wallet.addressFor(type).baseAddress, value: dust),
       BitcoinOutput(
         address: change.baseAddress,
         value: fundUtxos.sumOfUtxosValue() -
@@ -75,6 +78,7 @@ Future<void> main() async {
   print('spending from each type (received is the delta):');
   for (final type in types) {
     final address = wallet.addressFor(type);
+
     /// The fan-out output is not a coinbase, so one confirmation is enough.
     final spendable = await waitForSpendableUtxos(
       provider,
@@ -83,6 +87,7 @@ Future<void> main() async {
       node: node,
       requiredConfirmations: 1,
     );
+
     /// Spend only the dust this run created, so the example stays small and
     /// repeatable even when the address already holds older change.
     final utxos = [
@@ -112,8 +117,7 @@ Future<void> main() async {
       spend,
       mining.confirm,
     );
-    final delta =
-        await balanceOf(provider, receiverAddress) - before;
+    final delta = await balanceOf(provider, receiverAddress) - before;
     print(
       '  ${type.name.padRight(14)} $txId  received ${formatCoins(delta)}',
     );
